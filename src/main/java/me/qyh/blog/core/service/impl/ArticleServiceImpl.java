@@ -54,7 +54,6 @@ import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.Tag;
 import me.qyh.blog.core.event.ArticleCreateEvent;
 import me.qyh.blog.core.event.ArticleDelEvent;
-import me.qyh.blog.core.event.ArticleIndexRebuildEvent;
 import me.qyh.blog.core.event.ArticlePublishEvent;
 import me.qyh.blog.core.event.ArticleUpdateEvent;
 import me.qyh.blog.core.event.LockDelEvent;
@@ -226,7 +225,7 @@ public class ArticleServiceImpl
 			}
 
 			if (rebuildIndexWhenTagChange) {
-				applicationEventPublisher.publishEvent(new ArticleIndexRebuildEvent(this));
+				articleIndexer.rebuildIndex();
 			} else {
 				articleIndexer.deleteDocument(article.getId());
 				if (article.isPublished()) {
@@ -288,7 +287,7 @@ public class ArticleServiceImpl
 
 		Transactions.afterCommit(() -> {
 			if (rebuildIndexWhenTagChange) {
-				applicationEventPublisher.publishEvent(new ArticleIndexRebuildEvent(this));
+				articleIndexer.rebuildIndex();
 			} else {
 				if (article.isPublished()) {
 					articleIndexer.addOrUpdateDocument(article.getId());
@@ -757,10 +756,11 @@ public class ArticleServiceImpl
 			synchronized (this) {
 				Transactions.executeInTransaction(transactionManager, status -> {
 					Integer id = article.getId();
-					articleDao.updateHits(id, articleDao.selectHits(id) + 1);
-
+					int hits = articleDao.selectHits(id) + 1;
+					articleDao.updateHits(id, hits);
+					
 					Transactions.afterCommit(() -> {
-						articleIndexer.addOrUpdateDocument(id);
+						articleIndexer.updateHits(Map.of(id, hits));
 					});
 				});
 			}

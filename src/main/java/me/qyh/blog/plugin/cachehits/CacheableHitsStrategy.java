@@ -154,13 +154,12 @@ abstract class CacheableHitsStrategy<E extends BaseEntity> implements HitsStrate
 	private final class IPBasedHitsHandler implements HitsHandler<E> {
 		private final Map<String, Boolean> ips = new ConcurrentHashMap<>();
 		private final LongAdder adder;
-		private final int maxIps;
-		private final AtomicInteger counter = new AtomicInteger(0);
+		private final AtomicInteger ipNums;
 
 		private IPBasedHitsHandler(int init, int maxIps) {
 			adder = new LongAdder();
 			adder.add(init);
-			this.maxIps = maxIps;
+			this.ipNums = new AtomicInteger(maxIps);
 		}
 
 		@Override
@@ -168,10 +167,10 @@ abstract class CacheableHitsStrategy<E extends BaseEntity> implements HitsStrate
 			String ip = Environment.getIP();
 			if (ip != null && ips.putIfAbsent(ip, Boolean.TRUE) == null) {
 				adder.increment();
-				if (counter.incrementAndGet() >= maxIps) {
+				if (ipNums.decrementAndGet() <= 0) {
 					Integer id = e.getId();
 					if (flushMap.remove(id) != null) {
-						doFlush(List.of(new HitsWrapper(id, hitsMap.get(id))), false);
+						doFlush(List.of(new HitsWrapper(id, hitsMap.remove(id))), false);
 					}
 				}
 			}
@@ -195,7 +194,7 @@ abstract class CacheableHitsStrategy<E extends BaseEntity> implements HitsStrate
 				Integer key = entry.getKey();
 
 				if (flushMap.remove(key) != null) {
-					wrappers.add(new HitsWrapper(key, hitsMap.get(key)));
+					wrappers.add(new HitsWrapper(key, hitsMap.remove(key)));
 				}
 			}
 			doFlush(wrappers, contextClose);

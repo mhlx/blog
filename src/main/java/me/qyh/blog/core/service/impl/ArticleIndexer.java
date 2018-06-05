@@ -93,7 +93,6 @@ import me.qyh.blog.core.entity.Article.ArticleFrom;
 import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.Tag;
-import me.qyh.blog.core.event.ArticleIndexRebuildEvent;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.Markdown2Html;
@@ -174,8 +173,6 @@ public abstract class ArticleIndexer implements InitializingBean {
 	static {
 		FileUtils.forceMkdir(INDEX_DIR);
 	}
-
-	private long gen;
 
 	private final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MICROSECONDS,
 			new LinkedBlockingQueue<>()) {
@@ -302,7 +299,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 			articleDao.selectByIds(List.of(ids)).stream().filter(Article::isPublished).forEach(art -> {
 				try {
 					doDeleteDocument(art.getId());
-					gen = oriWriter.addDocument(buildDocument(art));
+					oriWriter.addDocument(buildDocument(art));
 				} catch (IOException e) {
 					throw new SystemException(e.getMessage(), e);
 				}
@@ -328,16 +325,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 
 	private void doDeleteDocument(Integer id) throws IOException {
 		Term term = new Term(ID, id.toString());
-		gen = oriWriter.deleteDocuments(term);
-	}
-
-	protected void waitForGen() {
-		try {
-			reopenThread.waitForGeneration(gen);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new SystemException(e.getMessage(), e);
-		}
+		oriWriter.deleteDocuments(term);
 	}
 
 	/**
@@ -350,7 +338,6 @@ public abstract class ArticleIndexer implements InitializingBean {
 	public PageResult<Article> query(ArticleQueryParam param) {
 		IndexSearcher searcher = null;
 		try {
-			// waitForGen();
 			searcher = searcherManager.acquire();
 			Sort sort = buildSort(param);
 
@@ -576,18 +563,35 @@ public abstract class ArticleIndexer implements InitializingBean {
 	}
 
 	/**
+	 * 更新文章点击数
+	 * 
+	 * @since 6.5
+	 * @param hitsMap
+	 *            key文章ID value文章<b>当前</b>点击数
+	 */
+	public synchronized void updateHits(Map<Integer, Integer> hitsMap) {
+		executor.submit(() -> {
+			for (Map.Entry<Integer, Integer> it : hitsMap.entrySet()) {
+				Term term = new Term(ID, it.getKey().toString());
+				oriWriter.updateNumericDocValue(term, HITS, it.getValue());
+			}
+			return null;
+		});
+	}
+
+	/**
 	 * 重建索引
 	 * 
 	 * @throws IOException
 	 * 
 	 */
 	public synchronized void rebuildIndex() {
-		try {
-			gen = oriWriter.deleteAll();
-		} catch (IOException e) {
-			throw new SystemException(e.getMessage(), e);
-		}
 		executor.submit(() -> {
+			try {
+				oriWriter.deleteAll();
+			} catch (IOException e) {
+				throw new SystemException(e.getMessage(), e);
+			}
 			long start = System.currentTimeMillis();
 			Transactions.executeInReadOnlyTransaction(platformTransactionManager, status -> {
 				int offset = 0;
@@ -600,7 +604,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 						documents.add(buildDocument(article));
 					}
 					try {
-						gen = oriWriter.addDocuments(documents);
+						oriWriter.addDocuments(documents);
 					} catch (IOException e) {
 						throw new SystemException(e.getMessage(), e);
 					}
@@ -612,16 +616,6 @@ public abstract class ArticleIndexer implements InitializingBean {
 			LOGGER.debug("重建索引花费了：" + (System.currentTimeMillis() - start) + "ms");
 			return null;
 		});
-	}
-
-	/**
-	 * 应该只有在transaction完成之后才会被触发
-	 * 
-	 * @param event
-	 */
-	@EventListener
-	public void handleArticleIndexRebuildEvent(ArticleIndexRebuildEvent event) {
-		rebuildIndex();
 	}
 
 	protected abstract void doRemoveTags(String... tags);

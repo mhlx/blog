@@ -1,7 +1,5 @@
 package me.qyh.blog.plugin.cachehits;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.ExecutorType;
@@ -41,16 +39,7 @@ class ArticleCacheableHitsStrategy extends CacheableHitsStrategy<Article> {
 	protected void doFlush(Map<Integer, Integer> hitsMap, boolean contextClose) {
 		if (!contextClose) {
 			Transactions.afterCommit(() -> {
-				int num = 0;
-				List<Integer> ids = new ArrayList<>();
-				for (Integer id : hitsMap.keySet()) {
-					ids.add(id);
-					if (++num % flushNum == 0) {
-						articleIndexer.addOrUpdateDocument(ids.toArray(new Integer[ids.size()]));
-						ids.clear();
-					}
-				}
-				articleIndexer.addOrUpdateDocument(ids.toArray(new Integer[ids.size()]));
+				articleIndexer.updateHits(hitsMap);
 			});
 		}
 

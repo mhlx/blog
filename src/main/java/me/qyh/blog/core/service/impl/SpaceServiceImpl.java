@@ -37,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.dao.SpaceDao;
 import me.qyh.blog.core.entity.Space;
-import me.qyh.blog.core.event.ArticleIndexRebuildEvent;
 import me.qyh.blog.core.event.LockDelEvent;
 import me.qyh.blog.core.event.SpaceCreateEvent;
 import me.qyh.blog.core.event.SpaceDelEvent;
@@ -55,6 +54,8 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 	private SpaceDao spaceDao;
 	@Autowired
 	private LockManager lockManager;
+	@Autowired
+	private ArticleIndexer articleIndexer;
 
 	private List<Space> cache = new CopyOnWriteArrayList<>();
 
@@ -129,11 +130,11 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 				}
 				return replace;
 			});
+			articleIndexer.rebuildIndex();
 		});
 
 		this.applicationEventPublisher.publishEvent(new SpaceUpdateEvent(this, db, space));
 
-		Transactions.afterCommit(() -> applicationEventPublisher.publishEvent(new ArticleIndexRebuildEvent(this)));
 		return space;
 	}
 
@@ -155,8 +156,8 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 
 		Transactions.afterCommit(() -> {
 			cache.removeIf(remove -> remove.getId().equals(id));
+			articleIndexer.rebuildIndex();
 		});
-		Transactions.afterCommit(() -> applicationEventPublisher.publishEvent(new ArticleIndexRebuildEvent(this)));
 	}
 
 	@Override

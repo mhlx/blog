@@ -19,8 +19,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +29,6 @@ import me.qyh.blog.core.dao.ArticleTagDao;
 import me.qyh.blog.core.dao.TagDao;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.Tag;
-import me.qyh.blog.core.event.ArticleIndexRebuildEvent;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.service.TagService;
 import me.qyh.blog.core.vo.PageResult;
@@ -40,7 +37,7 @@ import me.qyh.blog.core.vo.TagQueryParam;
 import me.qyh.blog.core.vo.TagStatistics;
 
 @Service
-public class TagServiceImpl implements TagService, ApplicationEventPublisherAware {
+public class TagServiceImpl implements TagService {
 
 	@Autowired
 	private TagDao tagDao;
@@ -50,7 +47,6 @@ public class TagServiceImpl implements TagService, ApplicationEventPublisherAwar
 	private ConfigServer configSerivce;
 	@Autowired
 	private ArticleIndexer articleIndexer;
-	private ApplicationEventPublisher applicationEventPublisher;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -87,7 +83,7 @@ public class TagServiceImpl implements TagService, ApplicationEventPublisherAwar
 		Transactions.afterCommit(() -> {
 			articleIndexer.removeTags(db.getName());
 			articleIndexer.addTags(tag.getName());
-			applicationEventPublisher.publishEvent(new ArticleIndexRebuildEvent(this));
+			articleIndexer.rebuildIndex();
 		});
 
 		return tag;
@@ -106,10 +102,10 @@ public class TagServiceImpl implements TagService, ApplicationEventPublisherAwar
 
 		Transactions.afterCommit(() -> {
 			articleIndexer.removeTags(db.getName());
-			applicationEventPublisher.publishEvent(new ArticleIndexRebuildEvent(this));
+			articleIndexer.rebuildIndex();
 		});
 	}
-	
+
 	@Override
 	@Transactional(readOnly = true)
 	public TagDetailStatistics queryTagDetailStatistics(Space space) {
@@ -120,20 +116,14 @@ public class TagServiceImpl implements TagService, ApplicationEventPublisherAwar
 		}
 		return tagDetailStatistics;
 	}
-	
+
 	@Override
 	@Transactional(readOnly = true)
 	public TagStatistics queryTagStatistics() {
 		TagStatistics tagStatistics = new TagStatistics();
 		boolean queryPrivate = Environment.isLogin();
-		tagStatistics
-				.setArticleTagCount(articleTagDao.selectTagsCount(Environment.getSpace(), queryPrivate));
+		tagStatistics.setArticleTagCount(articleTagDao.selectTagsCount(Environment.getSpace(), queryPrivate));
 		return tagStatistics;
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 }
