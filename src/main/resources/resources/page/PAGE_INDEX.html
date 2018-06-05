@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<title th:text="${space == null ? '主页' : space.name}"></title>
+</head>
+<body>
+	<fragment name="顶部导航" />
+	<div class="container">
+		<div class="row">
+			<transaction:begin />
+			<data name="articleTags" />
+			<data name="articleStatistics" />
+			<data name="newsStatistics" />
+			<data name="commentStatistics" />
+			<transaction:end />
+			<div class="col-lg-8 col-md-8  col-sm-8 text" id="pjax-articles">
+				<fragment name="文章列表" />
+			</div>
+
+			<div class="col-lg-4 col-md-4 col-sm-4 text hidden-xs">
+				<fragment name="标签集" />
+				<fragment name="文章统计" />
+				<fragment name="动态统计" />
+				<fragment name="评论统计" />
+			</div>
+		</div>
+	</div>
+
+	<fragment name="底部" />
+	<div th:replace="base/foot_source">&nbsp;</div>
+	<script th:src="@{/static/js/jquery.pjax.js}"></script>
+	<script>
+		$(function() {
+			if ($.support.pjax) {
+				$(document).on('pjax:beforeSend',
+						function(event, xhr, options) {
+							xhr.setRequestHeader('X-Fragment', encodeURI('文章列表'));
+						});
+				$(document).pjax('#pjax-articles ul a', '#pjax-articles')
+			}
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<redirect url="/" th:if="${error == null}" />
+<redirect th:url="${error.url == null ? urls.url + '/login' :  urls.url + '/login?goto='+error.url}" th:if="${error.code == 403}" />
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<title th:text="${error == null ? '200' : error.code}"></title>
+</head>
+<body>
+	<fragment name="顶部导航" />
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3 text">
+				<div th:if="${error != null}" th:remove="tag">
+					<div class="alert alert-info" th:if="${error.code == 200}"
+						th:text="${messages.getMessage(error.message)}">&nbsp;</div>
+					<div class="alert alert-danger" th:if="${error.code == 500}"
+						th:text="${messages.getMessage(error.message)}">&nbsp;</div>
+					<div class="alert alert-warning"
+						th:if="${error.code > 200 && error.code < 500}"
+						th:text="${messages.getMessage(error.message)}">&nbsp;</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<fragment name="底部" />
+	<div th:replace="base/foot_source">&nbsp;</div>
+</body>
+</html>

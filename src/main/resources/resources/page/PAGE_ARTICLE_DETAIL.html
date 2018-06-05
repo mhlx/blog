@@ -1,0 +1,86 @@
+<transaction:begin />
+<data name="article" th:idOrAlias="${idOrAlias}" />
+<data name="articleNav" ref-article="article" />
+<transaction:end />
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<meta name="description" th:content="${article.summary}" />
+<meta name="keywords" th:content="${article.tagStr}" />
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<link th:href="@{/static/css/markdown.css}" rel="stylesheet"
+	th:if="${article.editor.name() == 'MD'}">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<title th:text="${article.title}">文章详情</title>
+</head>
+<body>
+	<fragment name="顶部导航" />
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-8  col-sm-8 text">
+				<fragment name="文章详情"></fragment>
+				<fragment name="上一篇下一篇"></fragment>
+				<div th:if="${article.allowComment}">
+					<a href="javascript:void(0)" data-cmt>评论这篇文章</a>
+				</div>
+				<div id="comments-container" style="margin-top: 10px"></div>
+			</div>
+		</div>
+	</div>
+	<input type="hidden" id="urlPrefix" th:value="${urls.currentUrl}" />
+	<fragment name="底部" />
+	<div th:replace="base/foot_source">&nbsp;</div>
+	<script th:inline="javascript">
+			$.post([[${urls.currentUrl}]] + "/article/hit/"
+					+ [[${article.id}]], {}, function(data) {
+			})
+        var config = {
+            isLogin: [[${user != null}]],
+            gravatarPrefix: [[${gravatars.getUrl('')}]]
+        };
+    </script>
+	<script th:inline="javascript">
+     	var c = $("#comments-container");
+     	var _config = {
+         	 pageSize:10,
+             page:1,
+             moduleId:[[${article.id}]],
+             moduleType:'article',
+             asc:true,
+             container:c,
+             allowComment:[[${article.allowComment}]],
+             afterLoad:function(page){
+               if(page.totalRow>0){
+                  c.show();
+                  c.prepend('<hr>');
+               }else{
+               	  c.hide();
+               }
+             }
+         }
+     </script>
+	<script th:src="@{/static/plugin/comment/js/new_comment.js}"></script>
+	<script>
+    	$(function(){
+    		cmt.renderComment(_config);
+    		$('[data-cmt]').click(function(){
+    	        	cmt.doComment(_config.moduleId,_config.moduleType,function(){
+    	             cmt.renderComment(_config);
+    	            });
+    	        });
+    	})
+    </script>
+</body>
+</html>

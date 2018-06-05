@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<link th:href="@{/static/bootstrap/css/bootstrap.min.css}"
+	rel="stylesheet">
+<link rel="stylesheet" th:href="@{/static/css/sb-admin-2.css}">
+<link th:href="@{/static/codemirror/lib/codemirror.css}"
+	rel="stylesheet">
+<link th:href="@{/static/codemirror/addon/hint/show-hint.css}"
+	rel="stylesheet">
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<style type="text/css">
+.table-borderless tbody tr td, .table-borderless tbody tr th,
+	.table-borderless thead tr th {
+	border: none;
+}
+
+.cm-tab {
+	background: none !important;
+}
+</style>
+<title>自定义挂件管理</title>
+</head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('tpl-fragment')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row" style="margin-bottom: 10px">
+				<div class="col-md-12">
+					<a class="btn btn-default" th:href="@{/mgr/template/fragment/new}">新建挂件</a>
+					<button class="btn btn-default" data-toggle="modal"
+						data-target="#queryModal">查询</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+				<div class="alert alert-danger" th:unless="${error == null}"
+						th:text="${messages.getMessage(error)}"></div>
+					<form style="display: none"
+						th:action="@{/mgr/template/fragment/index}" id="pageForm">
+						<input type="hidden" th:value="${page.currentPage}"
+							name="currentPage" /> <input type="hidden"
+							th:value="${page.param.name}" th:if="${page.param.name != null}"
+							name="name" /> <input type="hidden"
+							th:value="${page.param.global}"
+							th:if="${page.param.global != null}" name="global"
+							id="pageFormGlobal" /> <input type="hidden"
+							th:value="${page.param.callable}"
+							th:if="${page.param.callable != null}" name="callable"
+							id="pageFormCallable" /> <input type="hidden"
+							th:if="${page.param.space != null}" name="space.id"
+							th:value="${page.param.space.id}" id="pageFormSpaceId" />
+					</form>
+					<div class="alert alert-info" th:if="${#lists.isEmpty(page.datas)}">当前没有任何自定义挂件</div>
+					<div th:unless="${#lists.isEmpty(page.datas)}">
+						<div class="table-responsive">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>挂件名</th>
+										<th>描述</th>
+										<th>创建日期</th>
+										<th>空间</th>
+										<th>全局</th>
+										<th>可外部调用</th>
+										<th>操作</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="fragment : ${page.datas}">
+										<td><a href="###" th:title="${fragment.name}"
+											data-toggle="tooltip"
+											th:text="${#strings.length(fragment.name) > 20  ? #strings.substring(fragment.name,0,20)+'...' : fragment.name}"></a></td>
+										<td><a href="###" th:title="${fragment.description}"
+											data-toggle="tooltip"
+											th:text="${#strings.length(fragment.description) > 20  ? #strings.substring(fragment.description,0,20)+'...' : fragment.description}"></a></td>
+										<td
+											th:text="${#dates.format(fragment.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+										<td><span th:if="${fragment.space != null}"
+											th:text="${fragment.space.name}"></span></td>
+										<td th:text="${fragment.global ? '是' : '否'}"></td>
+										<td th:text="${fragment.callable ? '是' : '否'}"></td>
+										<td><a href="###" style="margin-right: 10px"
+											data-action="remove" th:data-id="${fragment.id}"><span
+												class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+											<a
+											th:href="@{/mgr/template/fragment/update?id=}+${fragment.id}" style="margin-right: 10px"><span
+												class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+											<a href="###" th:data-id="${fragment.id}"
+											style="margin-right: 10px" data-action="save-history"
+											title="备份"><span class="glyphicon glyphicon-upload"
+												aria-hidden="true"></span></a> <a href="###"
+											th:data-id="${fragment.id}" style="margin-right: 10px"
+											data-action="load-history" title="查看历史备份"><span
+												class="glyphicon glyphicon-download" aria-hidden="true"></span></a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div th:if="${page.totalPage > 1}">
+						<ul class="pagination">
+							<li
+								th:each="i : ${#numbers.sequence(page.listbegin, page.listend-1)}">
+								<a th:text="${i}" th:data-page="${i}" href="###"></a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="modal " id="queryModal" tabindex="-1" role="dialog"
+		aria-labelledby="queryModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="queryModalLabel">查询</h4>
+				</div>
+				<div class="modal-body">
+					<div class="container-fluid">
+						<form>
+							<div class="form-group">
+								<div class="checkbox">
+									<label> <input type="checkbox"
+										id="query-space-checkbox"> 查询空间
+									</label>
+								</div>
+								<select class="form-control" id="space" style="display: none">
+									<option value="">主空间</option>
+									<option th:each="space : ${spaces}" th:value="${space.id}"
+										th:text="${space.name}"></option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>名称</label> <input type="text" class="form-control"
+									id="query-name" name="name"
+									th:attr="value=${page.param.name != null ? page.param.name : null}"
+									placeholder="名称">
+							</div>
+							<div class="form-group">
+								<div class="checkbox">
+									<label><input type="checkbox" id="query-global" />只查询全局
+									</label>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="checkbox">
+									<label><input type="checkbox" id="query-callable" />只查询外部调用
+									</label>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="query-btn">查询</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="modal " id="historyModal" tabindex="-1" role="dialog"
+		aria-labelledby="queryModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">历史模板</h4>
+				</div>
+				<div class="modal-body">
+					<div class="container-fluid">
+						<div id="history-tip"></div>
+						<div class="table-responsive" id="historyTableContainer">
+							
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script th:src="@{/static/js/mgr/fragment.js}"></script>
+</body>
+</html>

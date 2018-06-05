@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.file.dao.CommonFileDao">
+
+	<resultMap type="CommonFile" id="CommonFileDetail">
+		<id column="cf_id" property="id"/>
+		<result column="file_extension" property="extension"/>
+		<result column="file_size" property="size"/>
+		<result column="file_store" property="store"/>
+		<result column="file_originalname" property="originalFilename"/>
+		<result column="file_width" property="width"/>
+		<result column="file_height" property="height"/>
+	</resultMap>
+
+	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO blog_common_file(file_extension,file_size,file_store,file_originalname,file_width,file_height)
+		VALUES(#{extension},#{size},#{store},#{originalFilename},#{width},#{height})
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM blog_common_file WHERE id = #{id}
+	</delete>
+
+</mapper>

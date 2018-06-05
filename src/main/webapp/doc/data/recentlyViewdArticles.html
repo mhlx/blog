@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="recentlyViewdArticles.html">最近被访问文章标签</a></li>
+					</ol>
+
+					<h2>最近被访问文章标签</h2>
+					<h3>默认dataName</h3>
+					<p>recentlyViewdArticles</p>
+					<h3>可接受的标签属性</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>num</td>
+									<td>int</td>
+									<td>否</td>
+									<td>10</td>
+									<td>最多返回数量</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h3>结果返回</h3>
+					<p>如果存在，返回List&lt;RecentlyViewedArticle&gt;，否则返回一个空集合</p>
+					<p>
+						RecentlyViewedArticle可访问属性和<a href="article.html">文章详情标签</a>基本一致， <b>但无法获取文章评论数、文章概要以及文章内容，可以通过ip(String)属性来获取访问文章的ip，通过time(LocalDateTime)属性来获取访问时间，ip和time属性都不会为null</b>
+					</p>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+	});
+</script>
+</html>

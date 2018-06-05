@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="article.html">文章详情标签</a></li>
+					</ol>
+					<h2>文章详情标签</h2>
+					<h3>默认dataName</h3>
+					<p>article</p>
+					<h3>可接受的标签属性</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>idOrAlias</td>
+									<td>string</td>
+									<td>是</td>
+									<td></td>
+									<td>文章id或者别名</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h3>结果返回</h3>
+					<p>
+						<b>如果没有查询到文章，将会抛出一个LogicException异常并且会被重定向至ErrorPage(errorCode=200)页面，在页面上，可以通过
+							&#36;{messages.getMessage(error)}来显示错误信息</b>,否则，返回一个Article对象
+					</p>
+					<p>Article可访问属性如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>文章ID</td>
+								</tr>
+								<tr>
+									<td>pubDate</td>
+									<td>java.sql.Timestamp</td>
+									<td>否</td>
+									<td>文章发布日期</td>
+								</tr>
+								<tr>
+									<td>lastModifyDate</td>
+									<td>java.sql.Timestamp</td>
+									<td>是</td>
+									<td>文章最后修改日期</td>
+								</tr>
+								<tr>
+									<td>title</td>
+									<td>String</td>
+									<td>否</td>
+									<td>文章标题</td>
+								</tr>
+								<tr>
+									<td>summary</td>
+									<td>String</td>
+									<td>否</td>
+									<td>文章摘要</td>
+								</tr>
+								<tr>
+									<td>content</td>
+									<td>String</td>
+									<td>否</td>
+									<td>文章内容</td>
+								</tr>
+								<tr>
+									<td>isPrivate</td>
+									<td>Boolean</td>
+									<td>否</td>
+									<td>是否是私人文章</td>
+								</tr>
+								<tr>
+									<td>hits</td>
+									<td>int</td>
+									<td>否</td>
+									<td>文章点击数</td>
+								</tr>
+								<tr>
+									<td>comments</td>
+									<td>int</td>
+									<td>否</td>
+									<td>文章评论数</td>
+								</tr>
+								<tr>
+									<td>level</td>
+									<td>Integer</td>
+									<td>是</td>
+									<td>文章置顶级别，如果没有设置，则为null</td>
+								</tr>
+								<tr>
+									<td>editor</td>
+									<td>enum</td>
+									<td>否</td>
+									<td>文章编辑器类型HTML(富文本),MD(markdown)</td>
+								</tr>
+								<tr>
+									<td>from</td>
+									<td>enum</td>
+									<td>否</td>
+									<td>文章来源ORIGINAL(原创),COPIED(转载)</td>
+								</tr>
+								<tr>
+									<td>space</td>
+									<td>Space</td>
+									<td>否</td>
+									<td>空间，<a data-toggle="modal" data-target="#spaceModal"
+										href="###">查看可供访问属性</a></td>
+								</tr>
+								<tr>
+									<td>lockId</td>
+									<td>String</td>
+									<td>是</td>
+									<td>锁ID，如果文章没有被锁保护，则为null</td>
+								</tr>
+								<tr>
+									<td>alias</td>
+									<td>String</td>
+									<td>是</td>
+									<td>文章别名，如果没有设置，则为null</td>
+								</tr>
+								<tr>
+									<td>tags</td>
+									<td>Set&lt;Tag&gt;</td>
+									<td>否</td>
+									<td>文章标签，如果没有标签，则为空集合，<a data-toggle="modal"
+										data-target="#tagModal" href="###">查看标签可供访问属性</a></td>
+								</tr>
+								<tr>
+									<td>allowComment</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>是否允许评论</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p>Article可调用的方法如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>方法名</th>
+									<th class="col-md-3">接收参数</th>
+									<th>返回结果</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>isPrivate</td>
+									<td></td>
+									<td>boolean</td>
+									<td>判断文章是否是私有的，如果空间是私有的，那么文章始终是私有的</td>
+								</tr>
+								<tr>
+									<td>getTagStr</td>
+									<td></td>
+									<td>boolean</td>
+									<td>将文章的标签转化为字符串,用','号拼接，如果没有标签，返回空字符串</td>
+								</tr>
+								<tr>
+									<td>hasLock</td>
+									<td></td>
+									<td>boolean</td>
+									<td>判断文章是否被锁保护，如果空间被锁保护，那么文章始终被锁保护</td>
+								</tr>
+								<tr>
+									<td>hasTag</td>
+									<td>string</td>
+									<td>boolean</td>
+									<td>判断文章是否拥有指定标签<b>忽略标签大小写</b></td>
+								</tr>
+								<tr>
+									<td>getTag</td>
+									<td>string</td>
+									<td>Optional&lt;Tag&gt;</td>
+									<td>获取文章某个标签，返回结果必须用Optional.isPresent()来判断是否存在，<a
+										data-toggle="modal" data-target="#tagModal" href="###">查看标签可供访问属性</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>默认配合模板</h3>
+					<pre class="prettyprint lang-html">&lt;h3 th:text=&quot;&#36;{article.title}&quot;&gt;&lt;/h3&gt;
+
+&lt;div style=&quot;margin-bottom: 20px&quot;&gt;
+	&lt;div id=&quot;article-content&quot;
+		th:attr=&quot;class=&#36;{article.editor.name() == &#x27;MD&#x27; ? &#x27;markdown-body&#x27; : null}&quot;&gt;
+		&lt;div th:utext=&quot;&#36;{article.content}&quot;&gt;&lt;/div&gt;
+	&lt;/div&gt;
+	&lt;div class=&quot;clearfix&quot;&gt;&amp;nbsp;&lt;/div&gt;
+&lt;/div&gt;
+					</pre>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="spaceModal" tabindex="-1" role="dialog"
+		aria-labelledby="spaceModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="spaceModalLabel">空间属性</h4>
+				</div>
+				<div class="modal-body">
+
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>空间ID</td>
+								</tr>
+								<tr>
+									<td>alias</td>
+									<td>String</td>
+									<td>否</td>
+									<td>空间别名</td>
+								</tr>
+								<tr>
+									<td>name</td>
+									<td>String</td>
+									<td>否</td>
+									<td>空间名称</td>
+								</tr>
+								<tr>
+									<td>isPrivate</td>
+									<td>Boolean</td>
+									<td>否</td>
+									<td>是否是私人空间</td>
+								</tr>
+								<tr>
+									<td>lockId</td>
+									<td>String</td>
+									<td>是</td>
+									<td>锁ID，如果空间没有被锁保护，则为null</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="tagModal" tabindex="-1" role="dialog"
+		aria-labelledby="tagModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="tagModalLabel">空间属性</h4>
+				</div>
+				<div class="modal-body">
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>name</td>
+									<td>String</td>
+									<td>否</td>
+									<td>标签名</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+	});
+</script>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="mgr/base/head :: head('未审核评论')"></head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('uncheckComment')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="alert alert-danger" th:unless="${error == null}"
+						th:text="${messages.getMessage(error)}"></div>
+					<form style="display: none" th:action="@{/mgr/comment/uncheck}"
+						id="pageForm">
+						<input type="hidden" th:value="${page.currentPage}"
+							name="currentPage" /> <input type="hidden"
+							th:value="${page.pageSize}" name="pageSize" />
+					</form>
+
+					<div>
+						<div class="alert alert-info"
+							th:if="${#lists.isEmpty(page.datas)}" style="margin-top: 10px">当前没有任何未审核评论</div>
+						<div th:unless="${#lists.isEmpty(page.datas)}">
+							<div th:each="comment : ${page.datas}">
+								<small th:switch="${comment.commentModule.module}"
+									th:with="obj=${comment.commentModule.object}"> <span
+									th:case="'article'" th:remove="tag">来自于文章[ <a
+										th:attr="href=${obj == null ? null : urls.getUrl(obj)}"
+										th:target="_blank" th:text="${obj == null ? '未知' :obj.title}"></a>]
+								</span> <span th:case="'userpage'" th:remove="tag">来自于页面[ <a
+										th:attr="href=${obj == null ? null : urls.getUrl(obj)}"
+										th:target="_blank" th:text="${obj == null ? '未知' :obj.name}"></a>]
+										</span><span th:case="'news'" th:remove="tag">来自于短博客[ <a
+											th:attr="href=${obj == null ? null : urls.getUrl(obj)}"
+											th:text="${obj == null ? '未知' :times.format(obj.write,'yyyy-MM-dd HH:mm')}"></a>]
+									</span> 的评论
+								</small>
+								<div class="media">
+									<div class="media-left">
+										<a
+											th:attr="target=${comment.website == null ? null : '_blank'},href=${comment.website == null ? null : comment.website},rel=${(comment.admin || comment.website == null) ? null : 'external nofollow'}">
+											<img class="media-object" style="width:32px;height:32px"
+												th:src="${gravatars.getOptionalUrl(comment.gravatar).orElse('/static/img/guest.png')}">
+										</a>
+									</div>
+									<div class="media-body">
+										<h4 class="media-heading" th:text="${comment.nickname}"></h4>
+										<p th:utext="${comment.content}"></p>
+										<p>
+										<a href="###" th:if="${!comment.ban}" th:data-ban-id="${comment.id}"
+												style="margin-right: 10px"><span
+												class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a>
+											<a href="###" th:data-remove-id="${comment.id}"
+												style="margin-right: 10px"><span
+												class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+											<a href="###" th:data-check-id="${comment.id}"><span
+												class="glyphicon glyphicon-ok" aria-hidden="true"></span></a>
+
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div th:if="${page.totalPage > 1}">
+							<ul class="pagination">
+								<li
+									th:each="i : ${#numbers.sequence(page.listbegin, page.listend-1)}">
+									<a th:text="${i}" th:data-page="${i}" href="###"></a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script type="text/javascript">
+		$(function() {
+			$("[data-page]").click(function() {
+				var page = $(this).attr('data-page');
+				$("#pageForm").find('input[name=currentPage]').val(page);
+				$("#pageForm").submit();
+			});
+			$("[data-check-id]").click(function() {
+				var id = $(this).attr('data-check-id');
+				bootbox.confirm("确定要审核通过吗？", function(result) {
+					if (result) {
+						$.ajax({
+							type : "post",
+							url : rootPath + "/mgr/comment/check?id=" + id,
+							data : {
+								id : id
+							},
+							xhrFields : {
+								withCredentials : true
+							},
+							crossDomain : true,
+							success : function(data) {
+								if (data.success) {
+									window.location.reload();
+								} else {
+									bootbox.alert(data.msg);
+								}
+							},
+							complete : function() {
+							}
+						});
+					}
+				});
+			});
+			$("[data-remove-id]").click(function() {
+				var id = $(this).attr('data-remove-id');
+				bootbox.confirm("确定要删除吗？", function(result) {
+					if (result) {
+						$.ajax({
+							type : "post",
+							url : rootPath + "/mgr/comment/delete?id=" + id,
+							data : {
+								id : id
+							},
+							xhrFields : {
+								withCredentials : true
+							},
+							crossDomain : true,
+							success : function(data) {
+								if (data.success) {
+									window.location.reload();
+								} else {
+									bootbox.alert(data.msg);
+								}
+							},
+							complete : function() {
+							}
+						});
+					}
+				});
+			});
+			$("[data-ban-id]").click(function() {
+				var id = $(this).attr('data-ban-id');
+				bootbox.confirm("确定要禁止该IP吗？", function(result) {
+					if (result) {
+						$.ajax({
+							type : "post",
+							url : rootPath + "/mgr/comment/ban?id=" + id,
+							data : {
+								id : id
+							},
+							xhrFields : {
+								withCredentials : true
+							},
+							crossDomain : true,
+							success : function(data) {
+								if (data.success) {
+									window.location.reload();
+								} else {
+									bootbox.alert(data.msg);
+								}
+							},
+							complete : function() {
+							}
+						});
+					}
+				});
+			})
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<title>页面渲染异常</title>
+</head>
+<body>
+	<nav th:replace="base/nav"></nav>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				<h1 style="text-align: center; font-size: 48px">页面渲染异常</h1>
+			</div>
+			<div class="col-md-8 col-md-offset-2" th:if="${description != null}">
+				<div th:unless="${#lists.isEmpty(description.templateErrorInfos)}"
+					class="table-responsive">
+					<table class="table">
+						<tr>
+							<th>模板名</th>
+							<th>行号</th>
+							<th>列号</th>
+						</tr>
+						<tr th:each="info : ${description.templateErrorInfos}">
+							<td th:text="${info.templateName}"></td>
+							<td th:text="${info.line}"></td>
+							<td th:text="${info.col}"></td>
+						</tr>
+					</table>
+				</div>
+				<p th:if="${description.expression != null}">
+					表达式:<span th:text="${description.expression}"></span>
+				</p>
+
+				<h3 th:if="${description.stackTrace != null}">Stack Trace</h3>
+				<pre th:if="${description.stackTrace != null}"
+					th:text="${description.stackTrace}"></pre>
+
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="base/foot">&nbsp;</div>
+	<div th:replace="base/foot_source">&nbsp;</div>
+</body>
+</html>

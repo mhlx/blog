@@ -1,0 +1,9 @@
+<h3 th:text="${article.title}"></h3>
+
+<div style="margin-bottom: 20px">
+	<div id="article-content"
+		th:attr="class=${article.editor.name() == 'MD' ? 'markdown-body' : null}">
+		<div th:utext="${article.content}"></div>
+	</div>
+	<div class="clearfix">&nbsp;</div>
+</div>

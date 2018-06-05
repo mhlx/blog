@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="comments.html">评论标签</a></li>
+					</ol>
+
+					<h2>评论标签</h2>
+					<h3>默认dataName</h3>
+					<p>commentPage</p>
+					<h3>可接受的标签属性</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>moduleType</td>
+									<td>USERPAGE|ARTICLE|NEWS</td>
+									<td>是</td>
+									<td></td>
+									<td>模块类型</td>
+								</tr>
+								<tr>
+									<td>moduleId</td>
+									<td>Integer</td>
+									<td>是</td>
+									<td></td>
+									<td>模块ID</td>
+								</tr>
+								<tr>
+									<td>currentPage</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>0</td>
+									<td>当前页码</td>
+								</tr>
+								<tr>
+									<td>pageSize</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>10</td>
+									<td>分页数目，不会超过设置的最大分页数目</td>
+								</tr>
+								<tr>
+									<td>mode</td>
+									<td>LIST|TREE</td>
+									<td>否</td>
+									<td>LIST</td>
+									<td>展现方式(列表|嵌套)</td>
+								</tr>
+								<tr>
+									<td>asc</td>
+									<td>Boolean</td>
+									<td>否</td>
+									<td>true</td>
+									<td>如果为true，评论按照时间从小到大排序，否则逆向排序</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h3>结果返回</h3>
+					<p>
+						无论是否查询到结果，都将会返回一个不为null的CommentPageResult对象，该对象继承自PageResult&lt;Comment&gt;，基础可访问属性请见<a
+							href="../appendix.html#pageresult-pros" target="_blank">PageResult默认属性</a>，除此之外，
+						它还有一个commentConfig属性，<a data-toggle="modal"
+							data-target="#configModal" href="###">查看commentConfig可供访问的属性</a>
+					</p>
+					<p>根据CommentMode的不同，Comment的parent可供访问属性也不同，但都有以下的基本可访问属性</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>评论ID</td>
+								</tr>
+								<tr>
+									<td>content</td>
+									<td>String</td>
+									<td>否</td>
+									<td>评论内容(HTML格式)</td>
+								</tr>
+								<tr>
+									<td>commentModule</td>
+									<td>CommentModule</td>
+									<td>否</td>
+									<td>评论模块， <a data-toggle="modal"
+										data-target="#commentModuleModal" href="###">查看可供访问属性</a></td>
+								</tr>
+								<tr>
+									<td>commentDate</td>
+									<td>Timestamp</td>
+									<td>否</td>
+									<td>评论日期</td>
+								</tr>
+								<tr>
+									<td>status</td>
+									<td>enum</td>
+									<td>否</td>
+									<td>评论状态，NORMAL(正常)|CHECK(审核)</td>
+								</tr>
+								<tr>
+									<td>nickname</td>
+									<td>String</td>
+									<td>否</td>
+									<td>评论人昵称</td>
+								</tr>
+								<tr>
+									<td>email</td>
+									<td>String</td>
+									<td>是</td>
+									<td>评论人邮箱</td>
+								</tr>
+								<tr>
+									<td>ip</td>
+									<td>String</td>
+									<td>否</td>
+									<td>评论人ip</td>
+								</tr>
+								<tr>
+									<td>admin</td>
+									<td>Boolean</td>
+									<td>否</td>
+									<td>是否是管理员评论</td>
+								</tr>
+								<tr>
+									<td>gravatar</td>
+									<td>String</td>
+									<td>是</td>
+									<td>评论人头像，该值为邮箱的md5值，如果评论人没有输入邮箱，那么这个值为null</td>
+								</tr>
+								<tr>
+									<td>website</td>
+									<td>String</td>
+									<td>是</td>
+									<td>评论人的站点地址</td>
+								</tr>
+								<tr>
+									<td>editor</td>
+									<td>enum</td>
+									<td>否</td>
+									<td>评论编辑器，MD(markdown)|HTML(富文本)，改编辑器只用于标记评论时的编辑方式，实际输出已经被转为html文本</td>
+								</tr>
+								<tr>
+									<td>url</td>
+									<td>String</td>
+									<td>否</td>
+									<td>CommentModule的实际地址</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p>当CommentMode为TREE的时候，Comment的parent可访问属性如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>评论ID</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<p>当CommentMode为LIST的时候，Comment的parent可访问属性如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>评论ID</td>
+								</tr>
+								<tr>
+									<td>commentModule</td>
+									<td>CommentModule</td>
+									<td>否</td>
+									<td>评论模块， <a data-toggle="modal"
+										data-target="#commentModuleModal" href="###">查看可供访问属性</a></td>
+								</tr>
+								<tr>
+									<td>nickname</td>
+									<td>String</td>
+									<td>否</td>
+									<td>评论人昵称</td>
+								</tr>
+								<tr>
+									<td>email</td>
+									<td>String</td>
+									<td>是</td>
+									<td>评论人邮箱</td>
+								</tr>
+								<tr>
+									<td>ip</td>
+									<td>String</td>
+									<td>否</td>
+									<td>评论人ip</td>
+								</tr>
+								<tr>
+									<td>admin</td>
+									<td>Boolean</td>
+									<td>否</td>
+									<td>是否是管理员评论</td>
+								</tr>
+								<tr>
+									<td>gravatar</td>
+									<td>String</td>
+									<td>是</td>
+									<td>评论人头像，该值为邮箱的md5值，如果评论人没有输入邮箱，那么这个值为null</td>
+								</tr>
+								<tr>
+									<td>url</td>
+									<td>String</td>
+									<td>否</td>
+									<td>CommentModule的实际地址</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="configModal" tabindex="-1" role="dialog"
+		aria-labelledby="configModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="configModalLabel">CommentConfig属性</h4>
+				</div>
+				<div class="modal-body">
+
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>editor</td>
+									<td>enum</td>
+									<td>否</td>
+									<td>评论编辑器，可能值为HTML(富文本)和MD(markdown)</td>
+								</tr>
+								<tr>
+									<td>check</td>
+									<td>Boolean</td>
+									<td>否</td>
+									<td>是否审核评论</td>
+								</tr>
+								<tr>
+									<td>pageSize</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>评论每页展示数量</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="modal fade" id="commentModuleModal" tabindex="-1"
+		role="dialog" aria-labelledby="commentModuleModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="commentModuleModalLabel">CommentModule属性</h4>
+				</div>
+				<div class="modal-body">
+
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>模块ID</td>
+								</tr>
+								<tr>
+									<td>type</td>
+									<td>enum</td>
+									<td>否</td>
+									<td>模块类型，USERPAGE|ARTICLE</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+	});
+</script>
+</html>

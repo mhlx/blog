@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="articleNav.html">上一篇下一篇标签</a></li>
+					</ol>
+
+					<h2>上一篇下一篇标签</h2>
+					<h3>默认dataName</h3>
+					<p>articleNav</p>
+					<h3>可接受的标签属性</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>idOrAlias</td>
+									<td>string</td>
+									<td>是</td>
+									<td></td>
+									<td>文章id或者别名</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h3>结果返回</h3>
+					<p>如果文章上一篇下一篇都不存在，那么返回null，否则返回一个ArticleNav对象</p>
+					<p>ArticleNav可访问属性如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>previous</td>
+									<td>Article</td>
+									<td>是</td>
+									<td>文章，<a data-toggle="modal" data-target="#articleModal"
+										href="###">查看文章可供访问属性</a></td>
+								</tr>
+								<tr>
+									<td>next</td>
+									<td>Article</td>
+									<td>是</td>
+									<td>文章，<a data-toggle="modal" data-target="#articleModal"
+										href="###">查看文章可供访问属性</a></td>
+								</tr>
+								<tr>
+									<td colspan="4"><i>previous和next不可能同时为null</i></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>默认配合模板</h3>
+					<pre class="prettyprint lang-html">&lt;div th:if=&quot;&#36;{articleNav != null }&quot; class=&quot;alert alert-info&quot;&gt;
+	&lt;p th:if=&quot;&#36;{articleNav.previous != null}&quot;&gt;上一篇:&lt;a th:href=&quot;&#36;{urls.getUrl(articleNav.previous)}&quot; th:text=&quot;&#36;{articleNav.previous.title}&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+	&lt;p th:if=&quot;&#36;{articleNav.next != null}&quot;&gt;下一篇:&lt;a th:href=&quot;&#36;{urls.getUrl(articleNav.next)}&quot; th:text=&quot;&#36;{articleNav.next.title}&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+					</pre>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="articleModal" tabindex="-1" role="dialog"
+		aria-labelledby="articleModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="articleModalLabel">文章属性</h4>
+				</div>
+				<div class="modal-body">
+
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>文章ID</td>
+								</tr>
+								<tr>
+									<td>alias</td>
+									<td>String</td>
+									<td>是</td>
+									<td>文章别名</td>
+								</tr>
+								<tr>
+									<td>title</td>
+									<td>String</td>
+									<td>否</td>
+									<td>文章标题</td>
+								</tr>
+								<tr>
+									<td>space</td>
+									<td>Space</td>
+									<td>否</td>
+									<td>空间，<a href="###" id="spaceModalLink">查看空间可访问属性</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="modal" id="spaceModal" tabindex="-1" role="dialog"
+		aria-labelledby="spaceModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="spaceModalLabel">空间属性</h4>
+				</div>
+				<div class="modal-body">
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>空间ID</td>
+								</tr>
+								<tr>
+									<td>alias</td>
+									<td>String</td>
+									<td>否</td>
+									<td>空间别名</td>
+								</tr>
+								<tr>
+									<td>name</td>
+									<td>String</td>
+									<td>否</td>
+									<td>空间名</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+
+		$("#spaceModalLink").click(function() {
+			$("#articleModal").modal('hide');
+			$("#spaceModal").modal('show');
+		})
+	});
+</script>
+</html>

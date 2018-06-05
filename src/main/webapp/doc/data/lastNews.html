@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="lastNews.html">最近动态标签</a></li>
+					</ol>
+
+					<h2>最近动态标签</h2>
+					<h3>默认dataName</h3>
+					<p>lastNews</p>
+					<h3>可接受的标签属性</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>limit</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>10</td>
+									<td>最近动态条数，最多返回20条</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h3>结果返回</h3>
+					<p>返回一个不为null的List&lt;News&gt;，News可访问的属性请见<a href="newsPage.html#news-pro">这里</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+	});
+</script>
+</html>

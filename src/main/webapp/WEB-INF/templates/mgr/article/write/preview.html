@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<style>
+body {
+	margin: 0;
+	padding: 0;
+}
+
+.selected {
+	background-color: #eeeeee;
+}
+</style>
+</head>
+<body>
+	<button id="css-btn">设置css</button>
+	<div id="css-area" style="display: none">
+		<div>
+			<div>
+				<label style="display: block">preview样式</label> <input
+					style="width: 50%" type="text" id="css-preview-text">
+			</div>
+			<label style="display: block">css文件位置</label>
+			<textarea placeholder="以回车分隔" style="width: 50%" rows="8"
+				id="css-link-text"></textarea>
+		</div>
+		<div>
+			<label style="display: block">style样式</label>
+			<textarea style="width: 50%" rows="8" id="css-style-text"></textarea>
+		</div>
+		<button id="do-css">确定</button>
+	</div>
+	<!-- preview content  by /resources/fragment/article.html-->
+	<div id="article-content">
+		<div id="preview"></div>
+	</div>
+	<div class="clearfix">&nbsp;</div>
+	<input type="hidden" id="basePath" th:value="@{/}" />
+
+
+	<script type="text/javascript" th:src="@{/static/jquery/jquery.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/bootstrap/js/bootstrap.min.js}"></script>
+	<script type="text/javascript" th:src="@{/static/prettify/prettify.js}"></script>
+
+	<script type="text/javascript">
+	var basePath = $("#basePath").val();
+	
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	if (token != null && header != null && token != "" && header != "") {
+		$(document).ajaxSend(function(e, xhr, options) {
+			xhr.setRequestHeader(header, token);
+		});
+	}
+	
+	$(document).ready(function(){
+		$("#preview").on("click","a",function(e){
+		    e.preventDefault();
+		}); 
+		$("#css-btn").click(function(){
+			$("#css-area").toggle();
+		})
+		$("#do-css").click(function(){
+			setStyle(getStyle());
+			$("#css-area").toggle();
+			
+
+			var space = $('#space', parent.document).val();
+			var key = "article-editor-styles-space-"+space;
+			
+			$.ajax({
+				type : "post",
+				url : basePath+'mgr/extra/put',
+				async:false,
+	            contentType:"application/json",
+				data : JSON.stringify({"key":key,"value":JSON.stringify(getStyle())}),
+				success : function(data){
+				}
+			});
+		});
+		
+		$('#space', parent.document).change(function(e){
+			var key = "article-editor-styles-space-"+$(this).val();
+			$.ajax({
+				type : "get",
+				url : basePath+'mgr/extra/get/'+key,
+				async:false,
+		        contentType:"application/json",
+				data : {},
+				success : function(data){
+					if(data.success){
+						var style = $.parseJSON(data.data);
+						setStyle(style);
+					} else {
+						var parent = window.parent;
+						var mode = $('#editorMode', parent.document).val();
+						if(mode == 'MD'){
+							$("#css-preview-text").val('markdown-body');
+						}
+						$("#css-link-text").val(basePath+'static/bootstrap/css/bootstrap.min.css'+'\n'+basePath+'static/prettify/prettify.css');
+						setStyle(getStyle());
+						setStyle(getStyle());
+					}
+				}
+			});
+		})
+	});
+	
+	var space = $("#space",parent.document).val();
+	var key = "article-editor-styles-space-"+space;
+	$.ajax({
+		type : "get",
+		url : basePath+'mgr/extra/get/'+key,
+		async:false,
+        contentType:"application/json",
+		data : {},
+		success : function(data){
+			if(data.success){
+				var style = $.parseJSON(data.data);
+				setStyle(style);
+			} else {
+				var parent = window.parent;
+				var mode = $('#editorMode', parent.document).val();
+				if(mode == 'MD'){
+					$("#css-preview-text").val('markdown-body');
+				}
+				$("#css-link-text").val(basePath+'static/bootstrap/css/bootstrap.min.css'+'\n'+basePath+'static/prettify/prettify.css');
+				setStyle(getStyle());
+			}
+		}
+	});
+	
+	setInterval(function(){
+		var p = false;
+		$("pre").each(function(){
+			var me = $(this);
+			if(me.hasClass('prettyprint prettyprinted'))
+				return true;
+			if(me.find('code').length == 0)
+				 return true;
+			else{
+				p = true;
+				me.addClass("prettyprint");
+			}
+		});
+		if(p)
+			prettyPrint();
+	},500);
+	
+	function getStyle(){
+		return {"csses":$("#css-link-text").val(),"styles":$("#css-style-text").val(),"preview":$.trim($("#css-preview-text").val())};
+	}
+	
+	function setStyle(style){
+		//清除所有样式
+		$("head").find('link[type="text/css"]').remove();
+		$("head").find('style').remove();
+		var csses = style.csses.split('\n');
+		if(csses.length > 0){
+			for(var i=0;i<csses.length;i++){
+				var css = $.trim(csses[i]);
+				$("head").append($("<link rel='stylesheet' href='"+css+"' type='text/css' media='screen' />"));
+			}
+		}
+		$("#css-link-text").val(style.csses);
+		if($.trim(style.styles) != ""){
+			$('head').append('<style>'+style.styles+'</style>')
+		}
+		$("#css-style-text").val(style.styles);
+		if(style.preview != "" ){
+			$("#article-content").removeClass();
+			$("#article-content").addClass(style.preview);
+		}
+		$("#css-preview-text").val(style.preview);
+	}
+	</script>
+</body>
+</html>

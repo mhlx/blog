@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/sb-admin-2.css">
+<link href="../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../static/js/html5shiv.min.js"></script>
+      <script src="../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<h3>1.插件结构</h3>
+					<h4>逻辑代码</h4>
+					<div>
+						插件的所有的逻辑代码都要处于
+						<code>me.qyh.blog.plugin.{pluginName}</code>
+						包下
+					</div>
+					<h4>页面</h4>
+					<p>插件额外的页面都应处于 WEB-INF/templates/plugin/{pluginName} 文件夹下</p>
+
+					<h4>静态资源</h4>
+					<p>插件额外的静态资源都应处于 webapp/static/plugin/{pluginName} 文件夹下</p>
+
+					<h3>2.PluginHandler</h3>
+					<p>
+						<code>PluginHandler</code>
+						实现于
+						<code>me.qyh.blog.core.plugin.PluginHandler</code>
+						，<b>必须拥有一个无参构造器用于创建</b> ，<b>一个插件只能拥有一个PluginHandler</b>，该类必须要处于
+						<code>me.qyh.blog.plugin.{pluginName}</code>
+						包下，名称一般为
+						<code>${pluginName}PluginHandler</code>
+						，PluginHandler方法如下：
+					</p>
+					<div class="table-responsive">
+						<table class="table">
+							<tr>
+								<td>boolean enable()</td>
+								<td>插件是否可用，<b>只会在服务启动时通过这个方法判断插件是否可用，如果不可用，则不会再执行该插件任何方法</b>，这个方法会最先被调用
+								</td>
+							</tr>
+							<tr>
+								<td>void configureMybatis(MybatisConfigurer configurer)</td>
+								<td>用于向mybatis中添加dao、mapper文件以及typeAlias。其中dao添加形式为添加dao的所在包的全路径，mapper添加形式为添加mapper.xml文件的具体资源对象(<code>Resource</code>),typeAlias
+									的添加形式为添加一个文本资源对象(<code>Resource</code>),文件内容中每行都代表着一个别名，例如 <pre>me.qyh.blog.plugin.comment.entity.Comment
+me.qyh.blog.plugin.comment.entity.Comment$CommentStatus
+me.qyh.blog.plugin.comment.entity.CommentModule</pre>
+									对应的别名分别为Comment、CommentStatus和CommentModule，如果需要别的别名，可以在类上加@Alias标记，具体请见
+									<code>org.apache.ibatis.type.TypeAliasRegistry#registerAlias(Class&lt;?&gt;
+										type)</code>
+								<p>
+								<b>这个方法会在enable之后，initialize之前调用！！</b>
+								</p>
+								</td>
+							</tr>
+							<tr>
+								<td>void initialize(ConfigurableApplicationContext
+									applicationContext)</td>
+								<td>在<b>根ApplicationContext</b>初始化前调用
+								</td>
+							</tr>
+							<tr>
+								<td>void init(ApplicationContext applicationContext)</td>
+								<td>当<b>根ApplicationContext</b>初始化完成之后调用
+								</td>
+							</tr>
+							<tr>
+								<td>void initializeChild(ConfigurableApplicationContext
+									applicationContext)</td>
+								<td>在<b>子ApplicationContext</b>初始化前调用
+								</td>
+							</tr>
+							<tr>
+								<td>void initChild(ApplicationContext applicationContext)</td>
+								<td>当<b>子ApplicationContext</b>初始化完成之后调用
+								</td>
+							</tr>
+							<tr>
+								<td>void addDataTagProcessor(DataTagProcessorRegistry
+									registry)</td>
+								<td>添加DataTagProcessor，用于页面的调用</td>
+							</tr>
+							<tr>
+								<td>void addTemplate(TemplateRegistry registry)</td>
+								<td>添加<b>系统模板</b>，如果存在对应路径的系统模板，将会替换该系统模板，但是无法替换用户模板 <br>添加<b>全局模板片段</b>，如果存在对应名称的模板片段，将会替换该模板片段，但是无法替换用户自定义模板片段
+								</td>
+							</tr>
+							<tr>
+								<td>void addRequestHandlerMapping(RequestMappingRegistry
+									registry);</td>
+								<td>添加RequestHandlerMapping，主要用于逻辑处理之后的注册，如果不需要逻辑处理，那么应该首先通过
+									<code>me.qyh.blog.plugin.{pluginName}.controller</code>注册controller来处理
+								</td>
+							</tr>
+							<tr>
+								<td>void addMenu(MenuRegistry registry)</td>
+								<td>添加管理台左侧导航的菜单链接，<b>虽然Menu为树结构，但是最多支持2层菜单</b></td>
+							</tr>
+							<tr>
+								<td>void addExceptionHandler(ExceptionHandlerRegistry
+									registry)</td>
+								<td>添加自定义的异常处理器，<b>优先级低于系统的异常处理器，并且只能处理checked异常</b></td>
+							</tr>
+							<tr>
+								<td>void
+									addArticleContentHandler(ArticleContentHandlerRegistry
+									registry)</td>
+								<td>添加文章内容处理器</td>
+							</tr>
+							<tr>
+								<td>void addFileStore(FileStoreRegistry registry)</td>
+								<td>添加额外的文件存储</td>
+							</tr>
+							<tr>
+								<td>void addTemplateInterceptor(TemplateInterceptorRegistry
+									registry)</td>
+								<td>添加模板拦截器</td>
+							</tr>
+							<tr>
+								<td>void
+									addHandlerInterceptorRegistry(HandlerInterceptorRegistry
+									registry)</td>
+								<td>添加拦截器,<b>优先级低于系统自带的拦截器</b></td>
+							</tr>
+							<tr>
+								<td>void addLockProvider(LockProviderRegistry registry)</td>
+								<td>添加锁提供器</td>
+							</tr>
+							<tr>
+								<td>default void
+									addSuccessfulLoginHandler(SuccessfulLoginHandlerRegistry
+									registry)</td>
+								<td>添加登录成功后的处理器</td>
+							</tr>
+							<tr>
+								<td>default void addLogoutHandler(LogoutHandlerRegistry
+									registry)</td>
+								<td>添加注销后的处理器</td>
+							</tr>
+						</table>
+					</div>
+					<h3>3.PluginBuilder</h3>
+					<p>
+						通过
+						<code>PluginBuilder#builder</code>
+						方法可以打包制作好的插件
+					</p>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("nav.html");
+	});
+</script>
+</html>

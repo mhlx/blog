@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.file.dao.BlogFileDao">
+
+	<resultMap type="BlogFile" id="BlogFileDetail">
+		<id column="id" property="id"/>
+		<result column="file_type" property="type" typeHandler="EnumOrdinalTypeHandler"/>
+		<result column="file_createDate" property="createDate"/>
+		<result column="file_lft" property="lft"/>
+		<result column="file_rgt" property="rgt"/>
+		<result column="file_path" property="path"/>
+		<association property="parent" javaType="BlogFile">
+			<result column="file_parent" property="id"/>
+		</association>
+		<association property="cf" javaType="CommonFile" resultMap="me.qyh.blog.file.dao.CommonFileDao.CommonFileDetail"/>
+	</resultMap>
+	
+	<resultMap type="BlogFileCount" id="BlogFileCountDetail">
+		<id column="file_type" property="type" typeHandler="EnumOrdinalTypeHandler"/>
+		<result column="file_count" property="count"/>
+	</resultMap>
+	
+	<resultMap type="me.qyh.blog.file.vo.FileCountBean" id="FileCountBeanDetail">
+		<id column="file_store" property="fileStore"/>
+		<association property="fileCount" javaType="me.qyh.blog.file.vo.FileCount">
+			<result column="fileCount" property="fileCount"/>
+			<result column="totalSize" property="totalSize"/>
+		</association>
+	</resultMap>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		INSERT INTO blog_file(file_parent,file_type,file_createDate,common_file,file_lft,file_rgt,file_path)
+		VALUES(#{parent.id},#{type,javaType=BlogFileType,typeHandler=EnumOrdinalTypeHandler},#{createDate},#{cf.id},#{lft},#{rgt},#{path})
+	</insert>
+	
+	<select id="selectByParentAndPath" resultMap="BlogFileDetail">
+		SELECT 
+			id,
+			file_type,
+			file_createDate,
+			file_lft,
+			file_rgt,
+			file_parent,
+			file_path
+		FROM blog_file 
+			WHERE file_parent = #{parent.id} 
+			AND file_path = #{path}
+	</select>
+	
+	<select id="selectById" resultMap="BlogFileDetail">
+		SELECT 
+			bf.id,
+			file_type,
+			file_createDate,
+			file_lft,
+			file_rgt,
+			file_parent ,
+			bcf.id AS cf_id,
+			file_extension,
+			file_size,
+			file_store,
+			file_originalname,
+			file_width,
+			file_height,
+			file_path
+		FROM 
+			blog_file  bf
+		LEFT OUTER JOIN 
+			blog_common_file bcf
+		ON
+			bcf.id = bf.common_file
+		WHERE 
+			bf.id = #{id}
+	</select>
+	
+	<select id="selectPath" resultMap="BlogFileDetail">
+		SELECT 
+			parent.id,
+			parent.file_type,
+			parent.file_createDate,
+			parent.file_lft,
+			parent.file_rgt,
+			parent.file_parent,
+			parent.file_path
+		FROM 
+			blog_file AS parent
+		WHERE 
+			file_lft <![CDATA[ <= ]]> #{lft}
+			AND file_rgt >= #{rgt}
+	</select>
+	
+	<select id="selectSubBlogFileCount" resultMap="BlogFileCountDetail">
+		SELECT 
+			file_type,
+			COUNT(id) AS file_count
+		FROM 
+			blog_file 
+		WHERE 
+			file_lft > #{lft} AND file_rgt <![CDATA[ < ]]> #{rgt}
+		GROUP BY 
+			file_type 
+	</select>
+	
+	<select id="selectSubBlogFileSize" resultType="long">
+		SELECT 
+			COALESCE(SUM(file_size),0) 
+		FROM 
+			blog_file bf 
+		LEFT OUTER JOIN 
+			blog_common_file bcf 
+		ON 
+			bf.`common_file` = bcf.`id`
+		WHERE 
+			file_lft > #{lft} AND file_rgt <![CDATA[ < ]]> #{rgt}
+	</select>
+	
+	<select id="selectCount" resultType="int">
+		SELECT 
+			COUNT(bf.id)
+		FROM 
+			blog_file  bf
+		LEFT OUTER JOIN 
+			blog_common_file bcf
+		ON
+			bcf.id = bf.common_file
+		WHERE
+			<choose>
+				<when test="querySubDir">
+					file_lft > #{parentFile.lft} AND file_rgt <![CDATA[ < ]]> #{parentFile.rgt}
+				</when>
+				<otherwise>
+					file_parent = #{parentFile.id}
+				</otherwise>
+			</choose>
+			<if test="name != null and name != ''">
+				AND file_path LIKE CONCAT('%', #{name},'%')
+			</if>
+			<if test="type != null">
+				AND file_type = #{type,javaType=BlogFileType,typeHandler=EnumOrdinalTypeHandler}
+			</if>
+			<if test="extensions != null and !extensions.isEmpty()">
+				AND LOWER(file_extension) IN
+				<foreach collection="extensions" item="ext" open="(" close=")" separator=",">
+					LOWER(#{ext})
+				</foreach>
+			</if>
+	</select>
+	
+	<select id="selectPage" resultMap="BlogFileDetail">
+		SELECT 
+			bf.id,
+			file_type,
+			file_createDate,
+			file_lft,
+			file_rgt,
+			file_parent ,
+			bcf.id AS cf_id,
+			file_extension,
+			file_size,
+			file_store,
+			file_originalname,
+			file_width,
+			file_height,
+			file_path
+		FROM 
+			blog_file  bf
+		LEFT OUTER JOIN 
+			blog_common_file bcf
+		ON
+			bcf.id = bf.common_file
+		WHERE
+			<choose>
+				<when test="querySubDir">
+					file_lft > #{parentFile.lft} AND file_rgt <![CDATA[ < ]]> #{parentFile.rgt}
+				</when>
+				<otherwise>
+					file_parent = #{parentFile.id}
+				</otherwise>
+			</choose>
+			<if test="name != null and name != ''">
+				AND file_path LIKE CONCAT('%', #{name},'%')
+			</if>
+			<if test="type != null">
+				AND file_type = #{type,javaType=BlogFileType,typeHandler=EnumOrdinalTypeHandler}
+			</if>
+			<if test="extensions != null and !extensions.isEmpty()">
+				AND LOWER(file_extension) IN
+				<foreach collection="extensions" item="ext" open="(" close=")" separator=",">
+					LOWER(#{ext})
+				</foreach>
+			</if>
+		ORDER BY file_createDate DESC,id DESC
+		<if test="!ignorePaging">
+		LIMIT #{offset},#{pageSize}
+		</if>
+	</select>
+	
+	<select id="selectRoot" resultMap="BlogFileDetail">
+		SELECT 
+			bf.id,
+			file_lft,
+			file_rgt
+		FROM 
+			blog_file  bf
+		WHERE 
+			file_parent IS NULL
+	</select>
+	
+	<update id="update">
+		UPDATE blog_file 
+		<set>
+			<if test="path != null">
+				file_path = #{path},
+			</if>
+			file_parent = #{parent.id}
+		</set>
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM blog_file 
+		WHERE 
+		file_lft BETWEEN #{lft} AND #{rgt}
+	</delete>
+	
+	<delete id="deleteCommonFile">
+		DELETE FROM blog_common_file
+		WHERE id IN
+		(SELECT common_file FROM blog_file bf WHERE file_lft >= #{lft} AND file_rgt <![CDATA[ <= ]]> #{rgt})
+	</delete>
+	
+	<select id="selectChildren" resultMap="BlogFileDetail">
+		SELECT 
+			bf.id,
+			file_type,
+			file_createDate,
+			file_lft,
+			file_rgt,
+			file_parent ,
+			bcf.id AS cf_id,
+			file_extension,
+			file_size,
+			file_store,
+			file_originalname,
+			file_width,
+			file_height,
+			file_path
+		FROM 
+			blog_file  bf
+		LEFT OUTER JOIN 
+			blog_common_file bcf
+		ON
+			bcf.id = bf.common_file
+		WHERE 
+			bf.file_lft >= #{lft}
+			AND bf.file_rgt <![CDATA[ <= ]]> #{rgt}
+	</select>
+	
+	<delete id="deleteUnassociateCommonFile">
+		DELETE FROM blog_common_file  WHERE id NOT IN(SELECT common_file FROM blog_file bf WHERE bf.`common_file` IS NOT NULL )
+	</delete>
+	
+	
+	<select id="selectFileCount" resultMap="FileCountBeanDetail">
+		SELECT COUNT(*) AS fileCount,SUM(file_size) AS totalSize,file_store 
+		FROM blog_file bf LEFT OUTER JOIN blog_common_file bcf ON bf.`common_file` = bcf.`id` 
+		WHERE file_type = 1 GROUP BY file_store
+	</select>
+	
+	
+	<update id="updateLftWhenAddChild">
+        UPDATE blog_file SET file_rgt = file_rgt + 2 WHERE file_rgt > #{lft};
+	</update>
+	
+	<update id="updateRgtWhenAddChild">
+        UPDATE blog_file SET file_lft = file_lft + 2 WHERE file_lft > #{lft};
+	</update>
+	
+	
+	<update id="updateRgtWhenDelete">
+		UPDATE blog_file SET file_rgt = file_rgt - #{width} WHERE file_rgt > #{rgt};
+	</update>
+	
+	<update id="updateLftWhenDelete">
+		UPDATE blog_file SET file_lft = file_lft - #{width} WHERE file_lft > #{rgt};
+	</update>
+
+</mapper>

@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="mgr/base/head :: head('博客管理')"></head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('article')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="alert alert-danger" th:unless="${error == null}"
+						th:text="${messages.getMessage(error)}"></div>
+					<form style="display: none" th:action="@{/mgr/article/index}"
+						id="pageForm">
+						<input type="hidden" th:value="${page.currentPage}"
+							name="currentPage" /><input type="hidden"
+							th:if="${page.param.tag != null}" th:value="${page.param.tag}"
+							name="tag" /> <input type="hidden"
+							th:value="${page.param.query}" name="query" /> <input
+							type="hidden" th:value="${page.param.status.name()}"
+							name="status" /> <input type="hidden" value="false"
+							name="highlight" /> <input type="hidden"
+							th:value="${page.param.space.id}" name="space.id"
+							th:if="${page.param.space != null}" /> <input type="hidden"
+							name="space.id" th:if="${page.param.space == null}" />
+					</form>
+					<div>
+
+						<!-- Nav tabs -->
+						<ul class="nav nav-tabs" role="tablist">
+							<li role="presentation"
+								th:class="${page.param.status.name() == 'PUBLISHED' ? 'active' : ''}"><a
+								href="#articleContainer" aria-controls="articleContainer"
+								role="tab" data-toggle="tab" th:data-status="PUBLISHED">已发表的文章</a></li>
+							<li role="presentation"
+								th:class="${page.param.status.name() == 'SCHEDULED' ? 'active' : ''}"><a
+								href="#articleContainer" aria-controls="articleContainer"
+								role="tab" data-toggle="tab" th:data-status="SCHEDULED">待发表的文章</a></li>
+							<li role="presentation"
+								th:class="${page.param.status.name() == 'DRAFT' ? 'active' : ''}"><a
+								href="#articleContainer" aria-controls="articleContainer"
+								role="tab" data-toggle="tab" th:data-status="DRAFT">草稿</a></li>
+							<li role="presentation"
+								th:class="${page.param.status.name() == 'DELETED' ? 'active' : ''}"><a
+								href="#articleContainer" aria-controls="articleContainer"
+								role="tab" data-toggle="tab" th:data-status="DELETED">回收站</a></li>
+							<li><a href="###" data-toggle="tab">写博客</a></li>
+						</ul>
+
+						<!-- Tab panes -->
+						<div class="tab-content">
+							<div role="tabpanel" class="tab-pane active"
+								id="articleContainer" style="margin-top: 10px">
+								<form class="form-inline"
+									th:if="${page.param.status.name() == 'PUBLISHED'}">
+									<div class="form-group">
+										<select class="form-control" id="search-space">
+											<option value=""
+												th:attr="selected=${(page.param.space == null || !page.param.space.hasId()) ? null : 'selected'}">全部</option>
+											<option
+												th:attr="selected=${(page.param.space != null && page.param.space.hasId() && page.param.space.id == space.id) ? 'selected' : null}"
+												th:each="space : ${spaces}" th:value="${space.id}"
+												th:text="${space.name}"></option>
+										</select>
+									</div>
+									<div class="form-group">
+										<div class="input-group">
+											<input type="text" id="search-input" class="form-control"
+												placeholder="查询" aria-describedby="basic-addon2"
+												th:value="${page.param.query}"> <span
+												class="input-group-addon" id="basic-addon2"><a
+												href="###" id="search-btn"><span
+													class="glyphicon glyphicon-search" aria-hidden="true"></span></a></span>
+										</div>
+									</div>
+								</form>
+
+								<div class="alert alert-info"
+									th:if="${#lists.isEmpty(page.datas)}" style="margin-top: 10px">当前没有任何博客</div>
+								<div th:unless="${#lists.isEmpty(page.datas)}">
+									<div class="table-responsive ">
+										<table class="table table-striped">
+											<thead>
+												<tr>
+													<th>标题</th>
+													<th>标签</th>
+													<th th:if="${page.param.status.name() != 'DRAFT'}">发布日期</th>
+													<th th:if="${page.param.status.name() != 'DRAFT'}">优先级</th>
+													<th th:if="${page.param.status.name() == 'PUBLISHED'}">点击量</th>
+													<th>来源</th>
+													<th>操作</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr th:each="article : ${page.datas}">
+													<td><span th:if="${article.hasLock()}"> <span
+															class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+													</span> <span th:if="${article.isPrivate}"><span
+															class="glyphicon glyphicon-eye-close" aria-hidden="true"
+															title="私人"></span></span> <a href="###"
+														th:title="${article.title}" data-toggle="tooltip"
+														th:utext="${#strings.length(article.title) > 10  ? #strings.substring(article.title,0,10)+'...' : article.title}"></a></td>
+													<td><a href="###" th:title="${article.tagStr}"
+														data-toggle="tooltip"
+														th:text="${#strings.length(article.tagStr) > 10  ? #strings.substring(article.tagStr,0,10)+'...' : article.tagStr}"></a></td>
+													<td th:if="${page.param.status.name() != 'DRAFT'}"
+														th:text="${#dates.format(article.pubDate, 'yyyy-MM-dd HH:mm')}"></td>
+													<td th:if="${page.param.status.name() != 'DRAFT'}"
+														th:text="${article.level}"></td>
+													<td th:if="${page.param.status.name() == 'PUBLISHED'}"
+														th:text="${article.hits}"></td>
+													<td th:text="${messages.getMessage(article.from.message)}"></td>
+													<td><a href="###" data-action="recover"
+														th:data-id="${article.id}" title="恢复"
+														th:if="${page.param.status.name() == 'DELETED'}"><span
+															class="glyphicon glyphicon-repeat" aria-hidden="true"></span></a>
+														<a style="margin-left: 10px" href="###"
+														data-action="delete" th:data-id="${article.id}" title="删除"
+														th:if="${page.param.status.name() == 'DELETED' || page.param.status.name() == 'DRAFT'}"><span
+															class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+														<a style="margin-left: 10px" href="###"
+														data-action="logicDelete" th:data-id="${article.id}"
+														title="删除"
+														th:if="${page.param.status.name() != 'DELETED' && page.param.status.name() != 'DRAFT'}"><span
+															class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+														<a data-action="pub" th:data-id="${article.id}"
+														style="margin-left: 10px" title="发布"
+														th:if="${page.param.status.name() == 'DRAFT'}"><span
+															class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></a>
+														<a th:href="@{/mgr/article/update/}+${article.id}"
+														style="margin-left: 10px" title="编辑"
+														th:if="${page.param.status.name() != 'DELETED'}"><span
+															class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+														<a style="margin-left: 10px" href="###"
+														th:if="${page.param.status.name() == 'PUBLISHED'}"
+														th:data-clipboard-text="${urls.getUrl(article)}"
+														title="拷贝文章访问地址"><span
+															class="glyphicon glyphicon-share-alt" aria-hidden="true"></span></a>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+								<div th:if="${page.totalPage > 1}">
+									<ul class="pagination">
+										<li
+											th:each="i : ${#numbers.sequence(page.listbegin, page.listend-1)}">
+											<a th:text="${i}" th:data-page="${i}" href="###"></a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/article.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script th:src="@{/static/js/clipboard.min.js}"></script>
+	<script>
+		$(function() {
+			var clipboard = new Clipboard('[data-clipboard-text]');
+			clipboard.on('success', function() {
+				bootbox.alert("拷贝成功");
+			});
+			clipboard.on('error', function() {
+				bootbox.alert("拷贝失败");
+			});
+		});
+	</script>
+</body>
+</html>

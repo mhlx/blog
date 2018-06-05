@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="extend.html">自定义标签</a></li>
+					</ol>
+
+					<h2>自定义标签</h2>
+					<p>
+						所有的标签都继承自
+						<code>me.qyh.blog.core.templatedata.DataTagProcessor&lt;T&gt;</code>
+						，其中T为标签的返回类型
+					</p>
+					<p>继承该类后需要实现一个抽象方法：</p>
+					<pre class="prettyprint lang-java">protected abstract T query(Attributes attributes) throws LogicException;</pre>
+					<ul>
+						<li>Attributes为标签属性，<b>不忽略大小写</b>，通过get(String
+							key)方法可以获取标签某个属性的值
+						</li>
+					</ul>
+
+					<h2>示例：开发获取bing每日图片的标签</h2>
+					<p>
+						了解一些基本的情况后尝试开发一个获取bing.com背景图片的标签，要想开发这样的标签，首先得知道bing提供的图片api地址： <a
+							href="http://cn.bing.com/HPImageArchive.aspx?format=js&idx=-1&n=1">http://cn.bing.com/HPImageArchive.aspx?format=js&idx=-1&n=1</a>,
+						其中参数n返回一条数据，参数idx如果为-1，返回今天的图片，如果为0返回昨天的，为1返回前天的，依此类推。
+					</p>
+
+					<h3>定义BingImageDataTagProcessor</h3>
+					<pre class="prettyprint lang-java">package me.qyh.blog.core.templatedata;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.UrlResource;
+
+import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.templatedata.DataTagProcessor;
+import me.qyh.blog.util.Jsons;
+import me.qyh.blog.util.Resources;
+
+/**
+ * 用于获取bing的背景图片
+ * 
+ * @author Administrator
+ *
+ */
+public class BingBackgroundImageDataTagProcessor extends DataTagProcessor&lt;String&gt; {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(BingBackgroundImageDataTagProcessor.class);
+
+	// 完整的查询地址
+	private final String queryUrl;
+
+	// 查询前缀，必须以http||https开头
+	protected final String prefix;
+
+	// 背景图片地址
+	private String backgroundUrl;
+
+	public BingBackgroundImageDataTagProcessor(String name, String dataName, String prefix) {
+		super(name, dataName);
+		this.prefix = prefix;
+		this.queryUrl = prefix + "/HPImageArchive.aspx?format=js&idx=0&n=1";
+	}
+
+	public BingBackgroundImageDataTagProcessor(String name, String dataName) {
+		this(name, dataName, "https://cn.bing.com");
+	}
+
+	@Override
+	protected String query(Attributes attributes) throws LogicException {
+		if (backgroundUrl == null) {
+			synchronized (this) {
+				if (backgroundUrl == null) {
+					refresh();
+				}
+			}
+		}
+
+		return backgroundUrl;
+	}
+
+	/**
+	 * 从地址中返回的内容解析背景图片地址
+	 * 
+	 * @param content
+	 * @return
+	 */
+	protected Optional&lt;String&gt; parseRelativeUrl(String content) {
+		return parseFromJson(content);
+	}
+
+	private Optional&lt;String&gt; parseFromJson(String content) {
+		return Optional.ofNullable(Jsons.readJson(content).execute("images[0]->url"));
+	}
+
+	/**
+	 * 定时任务调用
+	 */
+	public void refresh() {
+		// 查询背景图片地址
+		String content;
+		try {
+			content = Resources.readResourceToString(new UrlResource(new URL(queryUrl)));
+			backgroundUrl = parseRelativeUrl(content).orElse(null);
+			if (backgroundUrl != null) {
+				backgroundUrl = prefix + backgroundUrl;
+			}
+		} catch (IOException e) {
+			LOGGER.error("从地址：" + queryUrl + "获取内容失败：" + e.getMessage(), e);
+		}
+	}
+}
+
+					
+					
+					
+					</pre>
+
+					<h3>配置</h3>
+					<pre class="prettyprint lang-xml">&lt;bean id=&quot;bingBackgroundImageDataTagProcessor&quot;
+	class=&quot;me.qyh.blog.core.templatedata.BingBackgroundImageDataTagProcessor&quot;&gt;
+	&lt;constructor-arg index=&quot;0&quot; value=&quot;Bing&quot; /&gt;
+	&lt;constructor-arg index=&quot;1&quot; value=&quot;bingImage&quot; /&gt;
+	&lt;constructor-arg index=&quot;2&quot; value=&quot;https://cn.bing.com&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean class=&quot;me.qyh.blog.web.thymeleaf.TemplateServiceImpl&quot;&gt;
+	&lt;property name=&quot;processors&quot;&gt;
+		&lt;list&gt;
+			&lt;ref bean=&quot;bingBackgroundImageDataTagProcessor&quot;/&gt;
+		&lt;/list&gt;
+	&lt;/property&gt;
+&lt;/bean&gt;
+</pre>
+					<h3>查看效果</h3>
+					<p>
+						配置完成之后，<b>重启你的应用容器</b>，在可以配置的页面上引入如下html片段，即可显示bing的图片
+					</p>
+					<pre class="prettyprint lang-html">&lt;data name=&quot;Bing&quot;/&gt;
+
+&lt;img th:src=&quot;&#36;{bingImage}&quot; th:if=&quot;&#36;{bingImage != null}&quot;/&gt;</pre>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+	});
+</script>
+</html>

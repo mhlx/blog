@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		   					 http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+						     http://www.springframework.org/schema/context 
+						     http://www.springframework.org/schema/context/spring-context-4.0.xsd
+						     http://www.springframework.org/schema/aop 
+						     http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+						     http://www.springframework.org/schema/tx 
+						     http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+						      http://www.springframework.org/schema/cache 
+						     http://www.springframework.org/schema/cache/spring-cache-4.0.xsd 
+						     http://www.springframework.org/schema/task
+		   					 http://www.springframework.org/schema/task/spring-task-4.0.xsd ">
+
+	<context:property-placeholder
+		location="classpath:resources/mybatis/db.properties" />
+
+	<!-- database -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
+		destroy-method="close">
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}" />
+		<property name="driverClassName" value="${jdbc.driverClass}" />
+		<property name="username" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="poolName" value="blogCP" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="cachePrepStmts">true</prop>
+				<prop key="prepStmtCacheSize">250</prop>
+				<prop key="prepStmtCacheSqlLimit">2048</prop>
+				<prop key="useServerPrepStmts">true</prop>
+				<prop key="useLocalSessionState">true</prop>
+				<prop key="useLocalTransactionState">true</prop>
+				<prop key="rewriteBatchedStatements">true</prop>
+				<prop key="cacheResultSetMetadata">true</prop>
+				<prop key="cacheServerConfiguration">true</prop>
+				<prop key="elideSetAutoCommits">true</prop>
+				<prop key="maintainTimeStats">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- transaction -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource" />
+	<tx:annotation-driven
+		transaction-manager="txManager" />
+
+
+
+	<context:component-scan
+		base-package="me.qyh.blog.core.service,
+					  me.qyh.blog.core.security,
+					  me.qyh.blog.core.text,
+					  me.qyh.blog.core.validator,
+					  me.qyh.blog.file.service,
+					  me.qyh.blog.file.validator,
+					  me.qyh.blog.core.config" />
+
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<!-- 缓存配置 -->
+	<cache:annotation-driven />
+	<bean id="cacheManager"
+		class="org.springframework.cache.caffeine.CaffeineCacheManager">
+		<property name="cacheSpecification"
+			value="maximumSize=500,expireAfterAccess=20m" />
+	</bean>
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames"
+			value="classpath:resources/messages/message" />
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+
+	<bean class="me.qyh.blog.core.message.Messages" />
+
+	<bean id="articleIndexer"
+		class="me.qyh.blog.core.service.impl.JcsegArticleIndexer">
+		<constructor-arg index="0" value="SEARCH" />
+		<property name="useRAMDirectory" value="true"/>
+	</bean>
+
+	<!-- 文章缓存 -->
+	<bean id="articleService"
+		class="me.qyh.blog.core.service.impl.ArticleServiceImpl" />
+
+	<bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"
+		destroy-method="destroy">
+		<property name="awaitTerminationSeconds" value="60" />
+		<property name="waitForTasksToCompleteOnShutdown"
+			value="true" />
+	</bean>
+
+	<bean id="taskScheduler"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler"
+		destroy-method="destroy">
+		<property name="errorHandler" ref="loggingErrorHandler" />
+		<property name="poolSize" value="10" />
+		<property name="awaitTerminationSeconds" value="60" />
+		<property name="waitForTasksToCompleteOnShutdown"
+			value="true" />
+	</bean>
+
+	<task:annotation-driven executor="taskExecutor"
+		scheduler="taskScheduler" proxy-target-class="true" />
+
+	<!-- 定时任务 -->
+	<task:scheduled-tasks scheduler="taskScheduler">
+
+		<!-- 默认5秒查询一次 待发布的文章 -->
+		<task:scheduled ref="articleService"
+			method="publishScheduled" fixed-rate="5000" />
+
+		<!-- 每隔30min将索引写入物理文件 -->
+		<task:scheduled ref="articleIndexer" method="commit"
+			fixed-rate="1800000" />
+
+		<!-- 每天凌晨3点清空待刪除的文件 -->
+		<task:scheduled ref="fileService" method="clear"
+			cron="0 0 3 * * ?" />
+
+
+	</task:scheduled-tasks>
+
+	<!-- 文件管理 -->
+	<bean class="me.qyh.blog.file.store.JavaImageHelper" />
+	<bean class="me.qyh.blog.file.store.DefaultFileManager" />
+
+	<bean class="me.qyh.blog.core.plugin.PluginHandlerRegistry" />
+</beans>      

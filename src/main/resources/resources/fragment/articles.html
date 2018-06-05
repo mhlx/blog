@@ -1,0 +1,58 @@
+<data name="articlePage" th:currentPage="${param.currentPage}"
+				queryPrivate="true" th:sort="${param.sort}"
+				th:query="${param.query}" th:tag="${param.tag}"
+				th:begin="${param.begin}" th:end="${param.end}"
+				th:from="${param.from}" />
+<div th:if="${#lists.isEmpty(articlePage.datas)}">
+	<div class="alert alert-info">当前没有任何文章</div>
+</div>
+<div th:unless="${#lists.isEmpty(articlePage.datas)}">
+	<div class="well" th:each="article : ${articlePage.datas}">
+		<h4>
+			<span th:if="${article.hasLock()}" class="glyphicon glyphicon-lock"
+				style="margin-right: 5px"></span><span
+				th:if="${article.level != null}">【置顶】</span> <span
+				th:if="${space == null}"><a
+				th:href="${urls.getUrl(article.space)}"
+				th:text="'【'+${article.space.name}+'】'"></a></span> <a
+				th:href="${urls.getUrl(article)}" th:utext="${article.title}"> </a>
+		</h4>
+		<div style="margin-top: 5px; margin-bottom: 10px"
+			th:unless="${#lists.isEmpty(article.tags)}">
+			<span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span
+				th:each="tag : ${article.tags}" style="margin-right: 10px"> <a
+				th:href=" ${urls.getArticlesUrlHelper().getArticlesUrl(tag)}"
+				th:utext=" ${tag.name}"></a>
+			</span>
+		</div>
+		<div style="margin-top: 5px; margin-bottom: 10px">
+			<span class="glyphicon glyphicon-time" aria-hidden="true"></span>  <span
+				th:text="${times.format(article.pubDate,'yyyy-MM-dd HH:mm')}"
+				th:data-timestamp="${times.getTime(article.pubDate)}"></span>
+		</div>
+
+		<div style="margin-top: 5px; margin-bottom: 10px">
+			<span aria-hidden="true" class="glyphicon glyphicon-fire"
+				title="点击次数"></span>&nbsp;<span th:text="${article.hits}"> </span>
+			  <span class="glyphicon glyphicon-comment" title="评论数"
+				aria-hidden="true"></span>&nbsp;<span th:text="${article.comments}"> </span>
+		</div>
+		<div th:if="${article.space == space || articlePage.param.hasQuery()}">
+			<div th:utext="${article.summary}"
+				th:unless="${article.hasLock() && user == null}"></div>
+			<div th:if="${article.hasLock() && user == null}">
+				<strong th:text="${messages.getMessage('article.locked','文章受锁保护')}"></strong>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div th:if="${articlePage.totalPage > 1}">
+	<ul class="pagination">
+		<li
+			th:each=" i : ${#numbers.sequence(articlePage.listbegin, articlePage.listend-1)}"
+			th:class="${(i == articlePage.currentPage) ? 'active' : ''}"><a
+			th:href="${urls.getArticlesUrlHelper().getArticlesUrl(articlePage.param,i)}"
+			th:text="${i}"></a></li>
+	</ul>
+</div>

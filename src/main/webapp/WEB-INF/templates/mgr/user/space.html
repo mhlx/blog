@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="mgr/base/head :: head('空间管理')"></head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('space')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row" style="padding: 5px">
+				<div class="col-md-8 col-md-offset-2">
+					<div class="alert alert-danger" th:unless="${error == null}"
+						th:text="${messages.getMessage(error)}"></div>
+					<div style="margin-bottom: 5px">
+						<button class="btn btn-default" data-toggle="modal"
+							data-target="#spaceModal">创建一个新的空间</button>
+					</div>
+					<div th:if="${#lists.isEmpty(spaces)}">
+						<div class="alert alert-info">
+							<strong>当前没有任何空间</strong>
+						</div>
+					</div>
+					<div th:unless="${#lists.isEmpty(spaces)}">
+						<div class="table-responsive">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>空间名</th>
+										<th>别名</th>
+										<th>创建日期</th>
+										<th>默认</th>
+										<th>私有</th>
+										<th>锁保护</th>
+										<th>&nbsp;</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="space : ${spaces}">
+										<td><a th:href="${urls.getUrl(space)}"
+											th:title="${space.name}" data-toggle="tooltip"
+											th:text="${#strings.length(space.name) > 5  ? #strings.substring(space.name,0,5)+'...' : space.name}"></a></td>
+										<td><a th:title="${space.alias}" data-toggle="tooltip"
+											th:text="${#strings.length(space.alias) > 5  ? #strings.substring(space.alias,0,5)+'...' : space.alias}"
+											href="###"></a></td>
+										<td
+											th:text="${#dates.format(space.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+										<td th:text="${space.isDefault ? '是' : '否'}"></td>
+										<td th:text="${space.isPrivate ? '是' : '否'}"></td>
+										<td th:data-lockId="${space.lockId}"
+											th:text="${space.lockId != null ? '是' : '否'}"></td>
+										<td><a href="###" data-toggle="modal" style="margin-right:20px"
+											data-target="#editSpaceModal" th:data-id="${space.id}"><span
+												class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+											<a href="###" th:data-id="${space.id}" data-action="delete"><span class="glyphicon glyphicon-remove"
+												aria-hidden="true"></span></a></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="spaceModal" tabindex="-1" role="dialog"
+		aria-labelledby="spaceModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="spaceModalLabel">新的空间</h4>
+				</div>
+				<div class="modal-body">
+					<div class="alert alert-warning">空间一旦创建成功，别名将无法被更改，请慎重</div>
+					<div class="tip"></div>
+					<form>
+						<div class="form-group">
+							<label for="alias" class="control-label">空间名(1~20个字符):</label> <input
+								type="text" class="form-control" name="name">
+						</div>
+						<div class="form-group">
+							<label for="alias" class="control-label">别名(1~20个字母):</label> <input
+								type="text" class="form-control" name="alias">
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox" name="isDefault" />默认 </label>
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox" name="isPrivate" />私人 </label>
+						</div>
+						<div class="lock_container"></div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="create">创建</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="editSpaceModal" tabindex="-1" role="dialog"
+		aria-labelledby="editSpaceModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="editSpaceModalLabel">空间修改</h4>
+				</div>
+				<div class="modal-body">
+					<div class="tip"></div>
+					<form>
+						<input type="hidden" name="id">
+						<div class="form-group">
+							<label for="alias" class="control-label">空间名(1~20个字符):</label> <input
+								type="text" class="form-control" name="name">
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox" name="isDefault" />默认 </label>
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox" name="isPrivate" />私人 </label>
+						</div>
+						<div class="lock_container"></div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="update">更新</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/mgr/space.js}"></script>
+</body>
+</html>

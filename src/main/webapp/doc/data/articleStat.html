@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+
+
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="articleStat.html">文章统计标签</a></li>
+					</ol>
+
+					<h2>文章统计标签</h2>
+					<h3>默认dataName</h3>
+					<p>articleStatistics</p>
+					<h3>结果返回</h3>
+					<p>返回一个不为null的ArticleStatistics对象</p>
+					<p>ArticleStatistics可访问属性如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>lastModifyDate</td>
+									<td>Timestamp</td>
+									<td>是</td>
+									<td>文章最后修改日期</td>
+								</tr>
+								<tr>
+									<td>lastPubDate</td>
+									<td>Timestamp</td>
+									<td>是</td>
+									<td>文章最后发布日期</td>
+								</tr>
+								<tr>
+									<td>totalHits</td>
+									<td>int</td>
+									<td>否</td>
+									<td>点击总数</td>
+								</tr>
+								<tr>
+									<td>totalArticles</td>
+									<td>int</td>
+									<td>否</td>
+									<td>文章总数</td>
+								</tr>
+
+								<tr>
+									<td>spaceStatisticsList</td>
+									<td>List&lt;ArticleSpaceStatistics&gt;</td>
+									<td>否</td>
+									<td>文章各个空间下文章总数，只有当查询默认空间时这个属性才不会为空，<a data-toggle="modal"
+										data-target="#articleSpaceStatisticsModal" href="###">点击查看ArticleSpaceStatistics可访问属性</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>默认配合模板</h3>
+					<pre class="prettyprint lang-html">&lt;div  th:if=&quot;${articleStatistics != null}&quot; th:remove=&quot;tag&quot;&gt;
+&lt;div class=&quot;panel panel-default&quot;&gt;
+	&lt;div class=&quot;panel-heading&quot;&gt;
+		&lt;h3 class=&quot;panel-title&quot;&gt;文章统计&lt;/h3&gt;
+	&lt;/div&gt;
+	&lt;ul class=&quot;list-group&quot;&gt;
+		&lt;li class=&quot;list-group-item&quot;&gt;&lt;strong&gt;文章总数：&lt;/strong&gt;&lt;span
+			th:text=&quot;${articleStatistics.totalArticles}&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+		&lt;li class=&quot;list-group-item&quot;&gt;&lt;strong&gt;访问量：&lt;/strong&gt;&lt;span
+			th:text=&quot;${articleStatistics.totalHits}&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+		&lt;li class=&quot;list-group-item&quot;
+			th:if=&quot;${articleStatistics.lastPubDate != null}&quot;&gt;&lt;strong&gt;最后发布日期：&lt;/strong&gt;&lt;span
+			th:text=&quot;${times.format(articleStatistics.lastPubDate,&#x27;yyyy-MM-dd HH:mm&#x27;)}&quot; th:data-timestamp=&quot;${times.getTime(articleStatistics.lastPubDate)}&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+		&lt;li class=&quot;list-group-item&quot;
+			th:if=&quot;${articleStatistics.lastModifyDate != null}&quot;&gt;&lt;strong&gt;最后修改日期：&lt;/strong&gt;&lt;span
+			th:text=&quot;${times.format(articleStatistics.lastModifyDate,&#x27;yyyy-MM-dd HH:mm&#x27;)}&quot; th:data-timestamp=&quot;${times.getTime(articleStatistics.lastModifyDate)}&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+	&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div th:unless=&quot;${#lists.isEmpty(articleStatistics.spaceStatisticsList)}&quot; class=&quot;panel panel-default&quot;&gt;
+	&lt;div class=&quot;panel-heading&quot;&gt;
+		&lt;h3 class=&quot;panel-title&quot;&gt;空间文章统计&lt;/h3&gt;
+	&lt;/div&gt;
+	&lt;div class=&quot;table-responsive&quot;&gt;
+		&lt;table class=&quot;table&quot;&gt;
+			&lt;thead&gt;
+				&lt;tr&gt;
+					&lt;th&gt;空间&lt;/th&gt;
+					&lt;th&gt;文章数&lt;/th&gt;
+				&lt;/tr&gt;
+			&lt;/thead&gt;
+			&lt;tbody&gt;
+				&lt;tr th:each=&quot;spaceStatistics : ${articleStatistics.spaceStatisticsList}&quot;&gt;
+					&lt;td&gt;&lt;a
+						th:href=&quot;${urls.getUrl(spaceStatistics.space)}&quot;
+						th:text=&quot;${spaceStatistics.space.name}&quot;&gt;&lt;/a&gt;&lt;/td&gt;
+					&lt;td th:text=&quot;${spaceStatistics.count}&quot;&gt;&lt;/td&gt;
+				&lt;/tr&gt;
+			&lt;/tbody&gt;
+		&lt;/table&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+					</pre>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+
+<div class="modal fade" id="articleSpaceStatisticsModal" tabindex="-1"
+	role="dialog" aria-labelledby="articleSpaceStatisticsModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="articleSpaceStatisticsModalLabel">空间属性</h4>
+			</div>
+			<div class="modal-body">
+				<div class="table-responsive">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>属性名</th>
+								<th class="col-md-3">类型</th>
+								<th>是否可能为null</th>
+								<th class="col-md-4">说明</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>space</td>
+								<td>Space</td>
+								<td>否</td>
+								<td>空间</td>
+							</tr>
+							<tr>
+								<td>count</td>
+								<td>int</td>
+								<td>否</td>
+								<td>空间下文章数目</td>
+							</tr>
+							<tr>
+							<td colspan="4">
+								<table class="table table-bordered">
+									<caption>空间可访问属性如下</caption>
+									<tr>
+										<th>属性名</th>
+										<th>属性类型</th>
+										<th>是否可能为null</th>
+										<th>说明</th>
+									</tr>
+									<tr>
+										<td>id</td>
+										<td>int</td>
+										<td>否</td>
+										<td>空间ID</td>
+									</tr>
+									<tr>
+										<td>alias</td>
+										<td>string</td>
+										<td>否</td>
+										<td>空间别名</td>
+									</tr>
+									<tr>
+										<td>name</td>
+										<td>string</td>
+										<td>否</td>
+										<td>空间名称</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+	});
+</script>
+</html>

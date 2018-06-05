@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		   					 http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean
+		class="me.qyh.blog.template.service.impl.TemplateServiceImpl">
+		<property name="processors">
+			<list>
+				<bean
+					class="me.qyh.blog.template.render.data.ArticleDataTagProcessor">
+					<constructor-arg index="0" value="文章详情" />
+					<constructor-arg index="1" value="article" />
+				</bean>
+				<bean
+					class="me.qyh.blog.template.render.data.ArticlesDataTagProcessor">
+					<constructor-arg index="0" value="文章列表" />
+					<constructor-arg index="1" value="articlePage" />
+				</bean>
+				<bean
+					class="me.qyh.blog.template.render.data.ArticleNavDataTagProcessor">
+					<constructor-arg index="0" value="上一篇下一篇" />
+					<constructor-arg index="1" value="articleNav" />
+				</bean>
+				<bean
+					class="me.qyh.blog.template.render.data.ArticleTagDataTagProcessor">
+					<constructor-arg index="0" value="标签集" />
+					<constructor-arg index="1" value="articleTags" />
+				</bean>
+				<bean
+					class="me.qyh.blog.template.render.data.SpacesDataTagProcessor">
+					<constructor-arg index="0" value="所有空间" />
+					<constructor-arg index="1" value="spaces" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.ArticleStatisticsDataTagProcessor">
+					<constructor-arg index="0" value="文章统计" />
+					<constructor-arg index="1"
+						value="articleStatistics" />
+				</bean>
+				<bean
+					class="me.qyh.blog.template.render.data.TagStatisticsDataTagProcessor">
+					<constructor-arg index="0" value="标签统计" />
+					<constructor-arg index="1" value="tagStatistics" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.FilesDataTagProcessor">
+					<constructor-arg index="0" value="文件查询" />
+					<constructor-arg index="1" value="filePage" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.UserDataTagProcessor">
+					<constructor-arg index="0" value="用户信息" />
+					<constructor-arg index="1" value="myInfo" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.RandomArticleDataTagProcessor">
+					<constructor-arg index="0" value="随机文章" />
+					<constructor-arg index="1" value="randomArticle" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.ArticleArchivesDataTagProcessor">
+					<constructor-arg index="0" value="文章归档" />
+					<constructor-arg index="1" value="archives" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.NewsPageDataTagProcessor">
+					<constructor-arg index="0" value="动态列表" />
+					<constructor-arg index="1" value="newsPage" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.LastNewsDataTagProcessor">
+					<constructor-arg index="0" value="最近动态" />
+					<constructor-arg index="1" value="lastNews" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.NewsDataTagProcessor">
+					<constructor-arg index="0" value="动态" />
+					<constructor-arg index="1" value="news" />
+				</bean>
+				
+				<bean class="me.qyh.blog.template.render.data.NewsStatisticsDataTagProcessor">
+					<constructor-arg index="0" value="动态统计" />
+					<constructor-arg index="1" 
+						value="newsStatistics" />
+				</bean>
+				
+				<bean
+					class="me.qyh.blog.template.render.data.NewsNavDataTagProcessor">
+					<constructor-arg index="0" value="上一条下一条" />
+					<constructor-arg index="1" value="newsNav" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.CommentStatisticsDataTagProcessor">
+					<constructor-arg index="0" value="评论统计" />
+					<constructor-arg index="1"
+						value="commentStatistics" />
+				</bean>
+
+				<bean
+					class="me.qyh.blog.template.render.data.CommentCountDataTagProcessor">
+					<constructor-arg index="0" value="评论总数" />
+					<constructor-arg index="1" value="commentCount" />
+				</bean>
+
+			</list>
+		</property>
+		<property name="fragments">
+			<list>
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="文章详情" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/article.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="文章列表" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/articles.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="上一篇下一篇" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/articleNav.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="标签集" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/articleTags.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="顶部导航" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/nav.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="底部" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/foot.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="文章统计" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/articleStatistics.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="标签统计" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/tagStatistics.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="评论统计" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/commentStatistics.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+				
+				<bean class="me.qyh.blog.template.entity.Fragment">
+					<constructor-arg index="0" value="动态统计" />
+					<constructor-arg index="1"
+						value="classpath:resources/fragment/newsStatistics.html"
+						type="org.springframework.core.io.Resource" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+</beans>      

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+					</ol>
+					<h2>概述</h2>
+					<p>
+						数据标签是模版中用来获取数据的一种主要的方式，所有的数据标签都被定义在resources/spring/ui.xml中，例如</p>
+					<pre class="prettyprint lang-xml">&lt;bean class=&quot;me.qyh.blog.web.thymeleaf.TemplateServiceImpl&quot;&gt;
+	&lt;property name=&quot;processors&quot;&gt;
+		&lt;list&gt;
+			&lt;bean class=&quot;me.qyh.blog.core.thymeleaf.data.ArticleDataTagProcessor&quot;&gt;
+				&lt;constructor-arg index=&quot;0&quot; value=&quot;文章详情&quot; /&gt;
+				&lt;constructor-arg index=&quot;1&quot; value=&quot;article&quot; /&gt;
+			&lt;/bean&gt;
+		&lt;/list&gt;
+	&lt;/property&gt;
+&lt;/bean&gt;</pre>
+					即定义了一个标签名为文章详情的dataTag
+
+
+					<p>
+						DataTagProcessor构造方法接受两个参数：第一个是标签名，第二个是用于访问数据的名称，例如标签：&lt;data
+						name="文章详情" idOrAlias="test"/&gt;
+						代表着查询别名为test的文章，如果存在该文章，通过&#36;{article.id }即可访问文章的id</p>
+
+					<h2>引用形式</h2>
+					<p>基本的dataTag由name和一些其他属性组成，例如：
+					<pre class="prettyprint lang-xml">&lt;data name=&quot;标签名&quot; 属性名1=&quot;属性值1&quot; 属性名2=&quot;属性值2&quot;/&gt;</pre>
+					name属性用来查找DataTagProcessor，其他属性用于逻辑判断或者用作查询参数
+
+					<h3>指定dataName</h3>
+					<p>在如下情况中：</p>
+					<pre class="prettyprint lang-xml">&lt;data name=&quot;文章列表&quot;&gt;
+&lt;data name=&quot;文章列表 query="test"&quot;&gt;</pre>
+					由于两个标签拥有相同的数据名称articlePage，因此将无法正常工作，此时可以通过标签的dataName属性来直接指定，例如：
+					<pre class="prettyprint lang-xml">&lt;data name=&quot;文章列表&quot;&gt;
+&lt;data name=&quot;文章列表 query="test" dataName="articlePage2"&quot;&gt;</pre>
+					此时即可通过&#36;{articlePage}和&#36;{articlePage2}分别来访问每个标签的查询结果
+					<div class="alert alert-warning">
+						dataName属性值必须符合
+						<code>^[A-Za-z0-9]+$</code>
+						正则，(即只能为英文字母或者数字或者两者的组合)
+					</div>
+
+					<h2>ajax访问</h2>
+					<p>如果需要让标签支持ajax访问，只需要设置DataTagProcessor的callable属性为true即可，例如：</p>
+					<pre class="prettyprint lang-xml">&lt;bean class=&quot;me.qyh.blog.web.thymeleaf.TemplateServiceImpl&quot;&gt;
+	&lt;property name=&quot;processors&quot;&gt;
+		&lt;list&gt;
+			&lt;bean class=&quot;me.qyh.blog.core.thymeleaf.data.ArticleDataTagProcessor&quot;&gt;
+				&lt;constructor-arg index=&quot;0&quot; value=&quot;文章详情&quot; /&gt;
+				&lt;constructor-arg index=&quot;1&quot; value=&quot;article&quot; /&gt;
+				&lt;property name="callable" value="true"/&gt;
+			&lt;/bean&gt;
+		&lt;/list&gt;
+	&lt;/property&gt;
+&lt;/bean&gt;</pre>
+					此时通过链接<i>/data/{标签名}?属性名1=属性值1&属性名2=属性值2</i>&nbsp;或者&nbsp;<i>/space/{spaceAlias}/data/{标签名}?属性名1=属性值1&属性名2=属性值2</i>即可获取json数据
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+	});
+</script>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="../../static/css/sb-admin-2.css">
+<link href="../../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../../static/js/html5shiv.min.js"></script>
+      <script src="../../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+				
+					<ol class="breadcrumb">
+						<li><a href="../tag.html">标签</a></li>
+						<li><a href="index.html">数据标签</a></li>
+						<li><a href="articleNav.html">标签集标签</a></li>
+					</ol>
+				
+					<h2>标签集标签</h2>
+					<h3>默认dataName</h3>
+					<p>articleTags</p>
+					<h3>结果返回</h3>
+					<p>返回List&lt;TagCount&gt;，只会为空，不会为null</p>
+					<p>TagCount可访问属性如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>tag</td>
+									<td>Tag</td>
+									<td>否</td>
+									<td>标签，<a href="###" id="tagModalLink">查看标签可访问属性</a></td>
+								</tr>
+								<tr>
+									<td>count</td>
+									<td>int</td>
+									<td>否</td>
+									<td>标签关联的文章数量</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					
+					<h3>默认配合模板</h3>
+					<pre class="prettyprint lang-html">&lt;div class=&quot;panel panel-default&quot; th:unless=&quot;&#36;{#lists.isEmpty(articleTags)}&quot;&gt;
+	&lt;div class=&quot;panel-heading&quot;&gt;
+		&lt;h3 class=&quot;panel-title&quot;&gt;标签&lt;/h3&gt;
+	&lt;/div&gt;
+	&lt;div class=&quot;table-responsive&quot;&gt;
+		&lt;table class=&quot;table&quot;&gt;
+			&lt;thead&gt;
+				&lt;tr&gt;
+					&lt;th&gt;标签&lt;/th&gt;
+					&lt;th&gt;博客数量&lt;/th&gt;
+				&lt;/tr&gt;
+			&lt;/thead&gt;
+			&lt;tbody&gt;
+				&lt;tr th:each=&quot;articleTag : &#36;{articleTags}&quot;&gt;
+					&lt;td &gt;&lt;a th:href=&quot;&#36;{urls.getArticlesUrl(articleTag.tag.name)}&quot; th:text=&quot;&#36;{articleTag.tag.name}&quot;&gt;&lt;/a&gt;&lt;/td&gt;
+					&lt;td th:text=&quot;&#36;{articleTag.count}&quot;&gt;&lt;/td&gt;
+				&lt;/tr&gt;
+			&lt;/tbody&gt;
+		&lt;/table&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+
+
+					</pre>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="modal" id="tagModal" tabindex="-1" role="dialog"
+		aria-labelledby="tagModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="tagModalLabel">标签属性</h4>
+				</div>
+				<div class="modal-body">
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性名</th>
+									<th class="col-md-3">类型</th>
+									<th>是否可能为null</th>
+									<th class="col-md-4">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>Integer</td>
+									<td>否</td>
+									<td>标签ID</td>
+								</tr>
+								<tr>
+									<td>name</td>
+									<td>String</td>
+									<td>否</td>
+									<td>标签名</td>
+								</tr>
+								<tr>
+									<td>create</td>
+									<td>Timestamp</td>
+									<td>否</td>
+									<td>标签创建日期</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("dataTagNav.html");
+		
+		$("#tagModalLink").click(function(){
+			$("#tagModal").modal('show');
+		})
+		
+	});
+</script>
+</html>

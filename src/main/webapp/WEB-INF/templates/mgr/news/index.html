@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+<head th:fragment="head(title)">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<link th:href="@{/static/bootstrap/css/bootstrap.min.css}"
+	rel="stylesheet">
+<link rel="stylesheet"
+	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}">
+<link rel="stylesheet" th:href="@{/static/css/sb-admin-2.css}">
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<title>动态管理</title>
+<style>
+.media-body img{
+	display: block;
+    max-width: 200px;
+    height: auto;
+}
+</style>
+</head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('news')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2">
+					<a class="btn btn-primary" th:href="@{/mgr/news/write}">新增</a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 10px">
+				<div class="col-md-8 col-md-offset-2">
+					<div class="alert alert-danger" th:unless="${error == null}"
+						th:text="${messages.getMessage(error)}"></div>
+					<form style="display: none" th:action="@{/mgr/news/index}"
+						id="pageForm">
+						<input type="hidden" th:value="${page.currentPage}"
+							name="currentPage" id="currentPage"/>
+					</form>
+					<div class="alert alert-info" th:if="${#lists.isEmpty(page.datas)}"
+						style="margin-top: 10px">当前没有任何动态</div>
+					<div th:unless="${#lists.isEmpty(page.datas)}">
+						<div class="media" th:each="news:${page.datas}">
+							<div class="media-left">
+								<a th:href="${urls.getUrl(news)}"> <img class="media-object"
+									th:src="${gravatars.getOptionalUrl(user.gravatar).orElse('/static/img/guest.png')}"
+									style="width: 32px; height: 32px">
+								</a>
+							</div>
+							<div class="media-body">
+								<h6 class="media-heading">
+									<span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>
+									<a href="javascript:void(0)" th:data-del="${news.id}"
+										style="margin-left: 5px">删除</a> <a
+										th:href="@{/mgr/news/update/}+${news.id}"
+										style="margin-left: 5px">更新</a>
+								</h6>
+								<p th:utext="${news.content}"></p>
+								<p class="text text-info" th:if="${news.comments > 0}">共有[[${news.comments}]]条评论</p>
+							</div>
+						</div>
+					</div>
+					<div th:if="${page.totalPage > 1}">
+						<ul class="pagination">
+							<li
+								th:each="i : ${#numbers.sequence(page.listbegin, page.listend-1)}">
+								<a th:text="${i}" th:data-page="${i}" href="###"></a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+
+	<script type="text/javascript">
+		$(function() {
+			$("[data-page]").click(function(){
+				$("#currentPage").val($(this).attr('data-page'));
+				$("#pageForm").submit();
+			});
+			$('[data-del]').click(
+					function() {
+						var id = $(this).attr('data-del');
+						bootbox.confirm("确定要删除吗？这将无法被恢复！！！", function(result) {
+							if (result) {
+								$.post(basePath + '/mgr/news/del/' + id, {},
+										function(data) {
+											if (data.success) {
+												bootbox.alert("删除成功");
+												setTimeout(function() {
+													window.location.reload();
+												}, 500)
+											} else {
+												bootbox.alert(data.message);
+											}
+										});
+							}
+						});
+					});
+		})
+	</script>
+</body>
+</html>

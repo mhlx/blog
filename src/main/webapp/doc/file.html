@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="../static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/sb-admin-2.css">
+<link href="../static/prettify/github-v2.min.css" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="../static/js/html5shiv.min.js"></script>
+      <script src="../static/js/respond.min.js"></script>
+    <![endif]-->
+<style>
+body {
+	word-wrap: break-word;
+}
+</style>
+</head>
+<body onload="prettyPrint();">
+	<div id="nav"></div>
+
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<h2>概述</h2>
+					<p>
+						系统文件存储关系： <img src="filestore.png" class="img-responsive" />
+					</p>
+					<h2>FileStore</h2>
+					<p>多个FileStore组成一个FileServer，FileServer用于主要的文件存储，并且提供了动态缩放等服务</p>
+					<h3>LocalResourceRequestHandlerFileStore</h3>
+					<p>本地文件存储，同时承担着文件访问的工作</p>
+					<h4>可配置项</h4>
+					<p>由于继承自ResourceHttpRequestHandler,所以支持ResourceHttpRequestHandler的配置项，除此之外，还支持以下配置项</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性</th>
+									<th>类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th>说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>id</td>
+									<td>int</td>
+									<td>是</td>
+									<td></td>
+									<td>存储器ID，<b>全局唯一</b></td>
+								</tr>
+								<tr>
+									<td>name</td>
+									<td>string</td>
+									<td>是</td>
+									<td></td>
+									<td>存储器名称</td>
+								</tr>
+								<tr>
+									<td>absPath</td>
+									<td>string</td>
+									<td>是</td>
+									<td></td>
+									<td>文件存储的绝对路径,<b>指向一个文件夹</b></td>
+								</tr>
+								<tr>
+									<td>urlPrefix</td>
+									<td>string</td>
+									<td>否</td>
+									<td>{配置的地址}/file</td>
+									<td>文件访问前缀，<b>如果需要指定其他路径，必须提供一个绝对地址</b></td>
+								</tr>
+								<tr>
+									<td>requestMatcher</td>
+									<td>RequestMatcher</td>
+									<td>否</td>
+									<td></td>
+									<td>请求匹配器，可用于防盗链</td>
+								</tr>
+								<tr>
+									<td>readOnly</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>true</td>
+									<td>如果该属性设置了true， 那么将无法再用来存储文件</td>
+								</tr>
+								<tr>
+									<td>registerMapping</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>false</td>
+									<td>是否注册为Controller，如果为true，会受到拦截器的影响，可以用来做一些额外的权限判断，比如只允许登录后访问，如果为false，等价于
+										<pre class="prettyprint lang-xml">&lt;mvc:resources location=&quot;/resources/&quot; mapping=&quot;/resources/**&quot;/&gt;</pre>
+										如果只是作为一个单纯的存储器，建议为false，另外，如果为true，不应该被nginx或者apache代理
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h4>CommonResourceStore</h4>
+					<p>构造函数</p>
+					<pre class="prettyprint lang-java">CommonResourceStore()
+CommonResourceStore(String urlPatternPrefix)</pre>
+					默认的urlPatternPrefix为file，也就是说，所有
+					/file/**请求都会被这个文件存储器处理，通过指定urlPatternPrefix可以更改路径，例如
+					<pre class="prettyprint lang-java">CommonResourceStore("file2")</pre>
+					所有 /file2/**请求会被存储器处理
+
+					<h5>PrivateResourceStore</h5>
+					<p>构造函数同 CommonResourceStore</p>
+					<div class="alert alert-warning">这个类会被注册为Controller，不能被nginx或者apache代理！</div>
+
+
+					<h4>ThumbnailSupport</h4>
+					<p>用于支持图片的动态缩放服务</p>
+					<h4>可配置项</h4>
+					<p>由于继承自LocalResourceRequestHandlerFileStore,所以支持LocalResourceRequestHandlerFileStore的配置项，除此之外，还支持以下配置项</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性</th>
+									<th>类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>resizeValidator</td>
+									<td>ResizeValidator</td>
+									<td>否</td>
+									<td></td>
+									<td>校验缩放尺寸是否能够被接受，默认为接受任意缩放尺寸</td>
+								</tr>
+								<tr>
+									<td>supportWebp</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>false</td>
+									<td>是否支持webp,<a href="#imagehelper"><b>该选项的开启受到ImageHelper的限制，如果ImageHelper无法处理webp格式的图片，那么supportWebp始终为false</b></a>，
+										开启该选项之后，某些浏览器(Chrome)访问图片时会自动生成webp格式的缩略图，通过指定nowebp参数(可以为任意值)，可生成jpeg|png格式的缩略图
+									</td>
+								</tr>
+								<tr>
+									<td>thumbAbsPath</td>
+									<td>string</td>
+									<td>是</td>
+									<td></td>
+									<td>缩略图文件存放绝对路径，<b>指向一个文件夹</b></td>
+								</tr>
+								<tr>
+									<td>smallResize</td>
+									<td>Resize</td>
+									<td>否</td>
+									<td></td>
+									<td>小缩略图尺寸，如果不提供，则为图片原始尺寸</td>
+								</tr>
+								<tr>
+									<td>middleResize</td>
+									<td>Resize</td>
+									<td>否</td>
+									<td></td>
+									<td>中缩略图尺寸，如果不提供，则为图片原始尺寸</td>
+								</tr>
+								<tr>
+									<td>largeResize</td>
+									<td>Resize</td>
+									<td>否</td>
+									<td></td>
+									<td>大缩略图尺寸，如果不提供，则为图片原始尺寸</td>
+								</tr>
+								<tr>
+									<td colspan="5"><i>如果提供了resizeValidator，那么提供的尺寸必须能被ResizeValidator校验通过</i></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="alert alert-info">
+						图片的缩放格式：
+						<div class="table-responsive">
+							<table class="table">
+								<tbody>
+									<tr>
+										<td>http://localhost/image/1.png/64</td>
+										<td>生成64尺寸的缩略图</td>
+									</tr>
+									<tr>
+										<td>http://localhost/image/1.png/64X32</td>
+										<td>生成64x32尺寸的缩略图(<b>保持原图的纵横比</b>)
+										</td>
+									</tr>
+									<tr>
+										<td>http://localhost/image/1.png/64X32!</td>
+										<td>生成64x32尺寸的缩略图(<b>强制缩放</b>)
+										</td>
+									</tr>
+									<tr>
+										<td colspan="2">默认情况下，无论何种缩放，都不会将图片放大</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<p id="imagehelper">
+							缩略图服务依赖于
+							<code>ImageHelper</code>
+							，系统默认提供了
+							<code>GraphicsMagickImageHelper</code>
+							和
+							<code>JavaImageHelper</code>
+							两个辅助类，GraphicsMagickImageHelper<b>依赖于<a
+								href="http://www.graphicsmagick.org">GraphicsMagick</a>和<a
+								href="http://mvnrepository.com/artifact/org.im4java/im4java/1.4.0">im4java</a>，以及<a
+								href="https://developers.google.com/speed/webp/docs/precompiled">libwebp</a></b>，JavaImageHelper不依赖任何第三方，但它会消耗更多的内存和CPU，同时不支持webp格式的图片处理
+						</p>
+					</div>
+
+					<h5>ImageResourceStore</h5>
+					<p>用于存储jpg|jpeg|png|gif格式的图片</p>
+					<h4>可配置项</h4>
+					<p>除了ThumbnailSupport的可配置项之外，还支持以下配置项</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性</th>
+									<th>类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>sourceProtected</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>false</td>
+									<td>是否开启原图保护，如果开启，那么只能通过缩略图路径访问图片，<b>GIF图片不受限制</b></td>
+								</tr>
+								<tr>
+									<td>animatedWebpConfigure</td>
+									<td>AnimatedWebpConfigure</td>
+									<td>否</td>
+									<td>null</td>
+									<td>是否开启AnimatedWebp，如果开启，那么在浏览器支持webp的情况下，会将gif转化为animated
+										webp(<b>该选项的开启受到ImageHelper的限制，如果ImageHelper无法处理animated
+											webp格式的图片，那么无法生成animated webp) 
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					AnimatedWebpConfigure的构造函数如下：
+					<pre class="prettyprint lang-java">AnimatedWebpConfigure(int semaphore);
+</pre>
+					semaphore用来限制同时转化animated webp的线程数，可配置项如下：
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性</th>
+									<th>类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th class="col-md-6">说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>lossy</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>true</td>
+									<td>请见 <a
+										href="https://developers.google.com/speed/webp/docs/gif2webp#options">https://developers.google.com/speed/webp/docs/gif2webp</a></td>
+								</tr>
+								<tr>
+									<td>mixed</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>false</td>
+									<td>请见 <a
+										href="https://developers.google.com/speed/webp/docs/gif2webp#options">https://developers.google.com/speed/webp/docs/gif2webp</a></td>
+								</tr>
+								<tr>
+									<td>q</td>
+									<td>float(0~100)</td>
+									<td>否</td>
+									<td>75F</td>
+									<td>请见 <a
+										href="https://developers.google.com/speed/webp/docs/gif2webp#options">https://developers.google.com/speed/webp/docs/gif2webp</a></td>
+								</tr>
+								<tr>
+									<td>method</td>
+									<td>int(0~6)</td>
+									<td>否</td>
+									<td>4</td>
+									<td>请见 <a
+										href="https://developers.google.com/speed/webp/docs/gif2webp#options">https://developers.google.com/speed/webp/docs/gif2webp</a></td>
+								</tr>
+								<tr>
+									<td>metadata</td>
+									<td>Metadata</td>
+									<td>否</td>
+									<td>NONE</td>
+									<td>请见 <a
+										href="https://developers.google.com/speed/webp/docs/gif2webp#options">https://developers.google.com/speed/webp/docs/gif2webp</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h5>VideoResourceStore</h5>
+					<p>用来存储视频文件</p>
+					<div class="alert alert-warning">
+						这个文件存储器依赖于 <a href="https://www.ffmpeg.org">ffmpeg</a>!
+					</div>
+					<p>构造函数如下：</p>
+					<pre class="prettyprint lang-java">VideoResourceStore(String urlPatternPrefix, String[] allowExtensions, int timeoutSecond)
+					</pre>
+					allowExtensions用于指定允许的视频格式，默认为mp4<br> timeoutSecond
+					用于获取视频封面的最长秒数，如果超过这个时间，则获取失败
+
+
+					<h3>AbstractOssFileStore</h3>
+					<p>用于支持第三方的oss存储</p>
+					<p>AbstractOssFileStore构造函数如下：</p>
+					<pre class="prettyprint lang-java">AbstractOssFileStore(int id, String name)</pre>
+					<p>其中id为存储器ID，全局唯一，name为存储器名称</p>
+					<p>AbstractOssFileStore可配置项如下：</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性</th>
+									<th>类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th>说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>backupAbsPath</td>
+									<td>string</td>
+									<td>否</td>
+									<td></td>
+									<td>备份绝对路径，<b>指向一个文件夹</b>，如果提供，每次上传到七牛云之前会将文件备份到该目录
+									</td>
+								</tr>
+								<tr>
+									<td>smallResize</td>
+									<td>Resize</td>
+									<td>否</td>
+									<td></td>
+									<td>小缩略图尺寸，如果不提供，则为图片原始尺寸，开启原图保护之后无效</td>
+								</tr>
+								<tr>
+									<td>middleResize</td>
+									<td>Resize</td>
+									<td>否</td>
+									<td></td>
+									<td>中缩略图尺寸，如果不提供，则为图片原始尺寸，开启原图保护之后无效</td>
+								</tr>
+								<tr>
+									<td>largeResize</td>
+									<td>Resize</td>
+									<td>否</td>
+									<td></td>
+									<td>打缩略图尺寸，如果不提供，则为图片原始尺寸，开启原图保护之后无效</td>
+								</tr>
+						</table>
+					</div>
+					<h4>QiniuFileStore</h4>
+					<p>用来支持七牛云的oss存储</p>
+					<p>QiniuFileStore构造函数如下：</p>
+					<pre class="prettyprint lang-java">QiniuFileStore(int id, String name,String ak, String sk, String bucket)</pre>
+					<p>其中id为存储器ID，全局唯一，name为存储器名称，ak为appkey，sk为密钥，bucket为存储空间</p>
+					<p>QiniuFileStore继承自AbstractOssFileStore，同时支持配置以下属性:</p>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性</th>
+									<th>类型</th>
+									<th>是否必须</th>
+									<th>默认</th>
+									<th>说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>urlPrefix</td>
+									<td>string</td>
+									<td>是</td>
+									<td></td>
+									<td>外链访问前缀</td>
+								</tr>
+								<tr>
+									<td>secret</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>false</td>
+									<td>是否是私人bucket</td>
+								</tr>
+								<tr>
+									<td>privateDownloadUrlExpires</td>
+									<td>long</td>
+									<td>否</td>
+									<td>3600</td>
+									<td>下载链接有效时间</td>
+								</tr>
+								<tr>
+									<td>sourceProtected</td>
+									<td>boolean</td>
+									<td>否</td>
+									<td>false</td>
+									<td>原图保护，开启原图保护之后必须提供styleSplitChar和style</td>
+								</tr>
+								<tr>
+									<td>styleSplitChar</td>
+									<td>char</td>
+									<td>否</td>
+									<td>-</td>
+									<td>样式分隔符</td>
+								</tr>
+								<tr>
+									<td>style</td>
+									<td>string</td>
+									<td>否</td>
+									<td></td>
+									<td>图片访问样式</td>
+								</tr>
+						</table>
+					</div>
+
+					<h3>配置多个FileStore</h3>
+					<p>
+						默认情况下，每个类型的FileStore都只能分别配置一个，但可以通过在它们的构造函数中指定具体的路径来配置多个， <b>即便如此，每个存储器仍应该指向不同的存储文件夹，并且存储文件夹之间不应该存在父子关系</b>，下面是一个参考配置：
+					</p>
+					<pre class="prettyprint lang-xml">&lt;bean class=&quot;me.qyh.blog.file.local.CommonResourceStore&quot;&gt;
+	&lt;property name=&quot;absPath&quot; value=&quot;/web/file/blog_file&quot; /&gt;
+	&lt;property name=&quot;id&quot; value=&quot;2&quot; /&gt;
+	&lt;property name=&quot;name&quot; value=&quot;文件存储&quot; /&gt;
+	&lt;property name=&quot;cacheSeconds&quot; value=&quot;31556926&quot; /&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;me.qyh.blog.file.local.CommonResourceStore&quot;&gt;
+	&lt;constructor-arg value=&quot;file2&quot; /&gt;
+	&lt;property name=&quot;absPath&quot; value=&quot;/web/file/blog_file2&quot; /&gt;
+	&lt;property name=&quot;id&quot; value=&quot;3&quot; /&gt;
+	&lt;property name=&quot;name&quot; value=&quot;文件存储2&quot; /&gt;
+	&lt;property name=&quot;cacheSeconds&quot; value=&quot;31556926&quot; /&gt;
+&lt;/bean&gt;
+						</pre>
+
+					<h3>文件删除</h3>
+					<p>为了尽可能的减少服务器压力，当删除文件时候并不会立即删除实际的文件，只是将实际文件置为待删除状态，通过FileClearJob在某个时刻统一删除，
+						可以在resources/spring/file.xml中配置该job的频率，默认为凌晨三点执行一次删除工作，默认配置如下：</p>
+					<pre class="prettyprint lang-xml">&lt;task:scheduled-tasks scheduler=&quot;taskScheduler&quot;&gt;
+	&lt;task:scheduled ref=&quot;fileService&quot; method=&quot;clear&quot; cron=&quot;0 0 3 * * ?&quot; /&gt;
+&lt;/task:scheduled-tasks&gt;
+					</pre>
+					<div class="alert alert-warning">在文件写入操作下(上传、复制以及移动)，如果写入了一个待删除的文件夹，例如/todelete路径已经被置为待删除状态，而我现在向该路径上传新文件，此时会立即执行删除原文件的操作</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../static/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+	src="../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/prettify/prettify.js"></script>
+<script>
+	$(function() {
+		$("#nav").load("nav.html");
+	});
+</script>
+</html>

@@ -1,0 +1,66 @@
+<data name="archives"/>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap-tree/bootstrap-treeview.min.css}" />
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<title>文章归档</title>
+</head>
+<body>
+	<fragment name="顶部导航" />
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8">
+				<div id="tree"></div>
+			</div>
+		</div>
+	</div>
+	<fragment name="底部" />
+	<div th:replace="base/foot_source">&nbsp;</div>
+	<script type="text/javascript" th:src="@{/static/bootstrap-tree/bootstrap-treeview.min.js}"></script>
+	<script th:inline="javascript">
+  		var data = $.parseJSON([[${jsons.write(archives)}]]).nodes;
+  		if(data.length == 0){
+  			$("#tree").html('<div class="alert alert-info">没有可供归档的文章</div>');
+  		}else{
+  			for(var i=0;i<data.length;i++){
+  	          addHref(data[i]);
+  	      	}
+  	  		$(function(){
+  	  			$('#tree').treeview({data: data,enableLinks:true,showBorder:false,selectable:false});
+  	  		});
+  	  		function addHref(data){
+  	           if(data.title){
+  	             if(data.alias && data.alias != null){
+  	             	data.href = rootPath+'/space/'+data.space.alias+'/article/'+data.alias
+  	             }else{
+  	             	data.href = rootPath+'/space/'+data.space.alias+'/article/'+data.id
+  	             }
+  	             data.text = data.title;
+  	           }
+  	          data.state = {
+  	            expanded: true
+  	          };
+  	           var nodes = data.nodes;
+  	          if(nodes){
+  	          	for(var i=0;i<nodes.length;i++){
+  	            	addHref(nodes[i])
+  	            }
+  	          }
+  	  		}
+  		}
+  	</script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.core.dao.NewsDao">
+
+	<resultMap type="News" id="NewsDetail">
+		<id column="id" property="id" />
+		<result column="news_hits" property="hits" />
+		<result column="news_content" property="content" />
+		<result column="news_write" property="write" />
+		<result column="news_update" property="update" />
+		<result column="news_private" property="isPrivate" />
+		<result column="news_allowComment" property="allowComment" />
+	</resultMap>
+	
+	<resultMap type="NewsStatistics" id="NewsStatisticsDetail">
+		<result column="lastWrite" property="lastWrite" />
+		<result column="lastModify" property="lastModify" />
+		<result column="total" property="total" />
+		<result column="totalHits" property="totalHits" />
+	</resultMap>
+
+	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO blog_news(news_content,news_write,news_update,news_private,news_allowComment)
+		VALUES(#{content},#{write},#{update},#{isPrivate},#{allowComment})
+	</insert>
+
+	<update id="update">
+		UPDATE blog_news
+		<set>
+			<if test="content != null">
+				news_content = #{content},
+			</if>
+			<if test="write != null">
+				news_write = #{write},
+			</if>
+			<if test="update != null">
+				news_update = #{update},
+			</if>
+			<if test="isPrivate != null">
+				news_private = #{isPrivate},
+			</if>
+			<if test="allowComment != null">
+				news_allowComment = #{allowComment}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<delete id="deleteById">
+		DELETE FROM blog_news WHERE id = #{id}
+	</delete>
+
+	<select id="selectById" resultMap="NewsDetail">
+		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news WHERE id = #{id}
+	</select>
+
+	<select id="selectByIds" resultMap="NewsDetail">
+		SELECT
+		id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		WHERE id IN
+		<foreach collection="collection" item="id" open="(" close=")"
+			separator=",">#{id}</foreach>
+	</select>
+	
+	<select id="selectPage" resultMap="NewsDetail">
+		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		<where>
+			<if test="begin != null and begin != null">
+				news_write BETWEEN #{begin} AND #{end}
+			</if>
+			<if test="!queryPrivate">
+				AND news_private = false
+			</if>
+		</where>
+		<choose>
+			<when test="asc">
+				ORDER BY news_write
+			</when>
+			<otherwise>
+				ORDER BY news_write DESC,id DESC
+			</otherwise>
+		</choose>
+		LIMIT #{offset},#{pageSize}
+	</select>
+	
+	<select id="selectCount" resultType="int">
+		SELECT COUNT(id)  FROM blog_news
+		<where>
+			<if test="begin != null and begin != null">
+				news_write BETWEEN #{begin} AND #{end}
+			</if>
+			<if test="!queryPrivate">
+				AND news_private = false
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectLast" resultMap="NewsDetail">
+		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		<where>
+			<if test="!queryPrivate">
+				news_private = #{queryPrivate}
+			</if>
+		</where>
+		ORDER BY news_write DESC,id DESC 
+		LIMIT 0,#{limit}
+	</select>
+	
+	<select id="selectStatistics" resultMap="NewsStatisticsDetail">
+		SELECT
+		COUNT(id) AS total,
+		MAX(news_update) AS lastModify,
+		MAX(news_write) AS lastWrite,
+		COALESCE(SUM(news_hits),0) AS totalHits
+		FROM blog_news
+		<where>
+			<if test="!queryPrivate">
+				AND news_private = false
+			</if>
+		</where>
+	</select>
+	
+	<select id="getPreviousNews" resultMap="NewsDetail">
+		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		WHERE news_write  <![CDATA[ < ]]> #{news.write}
+		<if test="!queryPrivate">
+			AND news_private = false
+		</if>
+		ORDER BY news_write DESC,id DESC
+		LIMIT 0,1
+	</select>
+
+	<select id="getNextNews" resultMap="NewsDetail">
+		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		WHERE news_write  > #{news.write}
+		<if test="!queryPrivate">
+			AND news_private = false
+		</if>
+		ORDER BY news_write ASC,id ASC
+		LIMIT 0,1
+	</select>
+	
+	<update id="updateHits">
+		UPDATE blog_news SET news_hits = #{hits} WHERE
+		id = #{id}
+	</update>
+
+	<select id="selectHits" resultType="int">
+		SELECT news_hits FROM blog_news
+		WHERE id = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.plugin.comment.dao.NewsCommentDao">
+
+	<select id="selectLastComments" resultMap="me.qyh.blog.plugin.comment.dao.CommentDao.CommentDetail">
+		SELECT 
+		a.id,a.parent_id,a.parent_path,a.content,a.module_id,a.module_type,a.comment_status,a.comment_editor,
+		a.comment_date,a.comment_status,a.comment_nickname,a.comment_email,a.comment_ip,a.comment_admin,a.comment_gravatar,a.comment_website,
+		 p.comment_editor AS p_comment_edtior,p.module_id AS p_module_id,p.module_type AS p_module_type,
+		p.comment_nickname AS p_comment_nickname,p.comment_email AS p_comment_email,p.comment_ip AS p_comment_ip,p.comment_admin AS p_comment_admin,p.comment_gravatar AS p_comment_gravatar
+		FROM blog_comment a
+		LEFT OUTER JOIN blog_comment p ON a.parent_id = p.id
+		LEFT OUTER JOIN blog_news bt ON a.module_id = bt.id
+		WHERE a.comment_status = 0
+		AND a.module_type = 'news'
+		<if test="!queryPrivate">
+			AND bt.news_private = FALSE
+		</if>
+		<if test="!queryAdmin">
+			AND a.comment_admin = FALSE
+		</if>
+		ORDER BY a.comment_date DESC ,a.id DESC
+		LIMIT 0,#{limit}
+	</select>
+	
+	
+	<select id="selectTotalCommentCount" resultType="int">
+		SELECT
+			COUNT(a.id)
+		FROM
+			blog_comment a
+		LEFT OUTER JOIN blog_news bt ON a.module_id = bt.id
+		WHERE 
+			a.comment_status = 0<!-- NORMAL -->
+			AND a.module_type = 'news'
+		<if test="!queryPrivate">
+			AND bt.news_private = false
+		</if>
+	</select>
+</mapper>

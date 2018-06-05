@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="mgr/base/head :: head('标签管理')"></head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('tag')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="alert alert-danger" th:unless="${error == null}"
+						th:text="${messages.getMessage(error)}"></div>
+					<form th:action="@{/mgr/tag/index}" id="pageForm">
+						<div class="input-group">
+							<input type="text" id="search-input" class="form-control"
+								placeholder="查询" aria-describedby="basic-addon2"
+								th:value="${page.param.tag}" name="tag"> <span
+								class="input-group-addon" id="basic-addon2"><a href="###"
+								id="search-btn"><span class="glyphicon glyphicon-search"
+									aria-hidden="true"></span></a></span>
+						</div>
+						<input type="hidden" th:value="${page.currentPage}"
+							name="currentPage" />
+					</form>
+					<div class="alert alert-info" style="margin-top: 10px"
+						th:if="${#lists.isEmpty(page.datas)}">当前没有任何标签</div>
+					<div th:unless="${#lists.isEmpty(page.datas)}">
+						<div class="table-responsive">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>标签名</th>
+										<th>创建日期</th>
+										<th>操作</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="tag : ${page.datas}">
+										<td><a href="###" th:title="${tag.name}"
+											data-toggle="tooltip"
+											th:text="${#strings.length(tag.name) > 10  ? #strings.substring(tag.name,0,10)+'...' : tag.name}"></a></td>
+										<td th:text="${#dates.format(tag.create, 'yyyy-MM-dd HH:mm')}"></td>
+										<td><a href="###" style="margin-right: 10px"
+											data-action="remove" th:data-id="${tag.id}"><span
+												class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+											<a href="###" style="margin-right: 10px" data-action="edit"
+											th:data-id="${tag.id}" th:data-tag="${tag.name}"><span
+												class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div th:if="${page.totalPage > 1}">
+						<ul class="pagination">
+							<li
+								th:each="i : ${#numbers.sequence(page.listbegin, page.listend-1)}">
+								<a th:text="${i}" th:data-page="${i}" href="###"></a>
+							</li>
+						</ul>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="editTagModal" tabindex="-1" role="dialog"
+		aria-labelledby="editTagModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="editTagModalLabel">标签更新</h4>
+				</div>
+				<div class="modal-body">
+					<div class="tip"></div>
+					<form autocomplete="off">
+						<div class="form-group">
+							<label for="name" class="control-label">名称(1~20个字符):</label> <input
+								type="hidden" class="form-control" name="id"> <input
+								type="text" class="form-control" name="name">
+						</div>
+						<div class="form-group">
+							<div class="checkbox">
+								<label> <input type="checkbox" id="merge">如果标签存在，则覆盖
+								</label>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="editTag">更新</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/mgr/tag.js}"></script>
+</body>
+</html>

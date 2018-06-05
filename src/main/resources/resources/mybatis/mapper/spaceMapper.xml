@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.core.dao.SpaceDao">
+	<resultMap type="Space" id="SpaceDetail">
+		<id column="space_id" property="id" />
+		<result column="space_alias" property="alias" />
+		<result column="is_private" property="isPrivate" />
+		<result column="createDate" property="createDate" />
+		<result column="space_name" property="name"/>
+		<result column="space_lock" property="lockId"/>
+		<result column="is_default" property="isDefault"/>
+	</resultMap>
+	
+	<update id="resetDefault">
+		UPDATE blog_space SET is_default = FALSE
+	</update>
+
+	<select id="selectByAlias" resultMap="SpaceDetail">
+		<include refid="spaceDetailSql"></include>
+		WHERE
+			space_alias = #{alias}
+	</select>
+	
+	<select id="selectByName" resultMap="SpaceDetail">
+		<include refid="spaceDetailSql"></include>
+		WHERE
+			space_name = #{name}
+	</select>
+	
+	<select id="selectById" resultMap="SpaceDetail">
+		<include refid="spaceDetailSql"></include>
+		WHERE
+			bs.id = #{id}
+	</select>
+
+	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO blog_space(space_name,space_alias,is_private,createDate,space_lock,is_default)
+		VALUES(#{name},#{alias},#{isPrivate},#{createDate},#{lockId},#{isDefault})
+	</insert>
+
+	<update id="update">
+		UPDATE blog_space
+		<set>
+			<if test="name != null">
+				space_name = #{name},
+			</if>
+			<if test="isPrivate != null">
+				is_private = #{isPrivate},
+			</if>
+			<if test="isDefault != null">
+				is_default = #{isDefault},
+			</if>
+			space_lock = #{lockId}
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<select id="selectByParam" resultMap="SpaceDetail">
+		<include refid="spaceDetailSql"></include>
+		<where>
+			<if test="!queryPrivate">
+				is_private = FALSE
+			</if>
+		</where>
+		ORDER BY createDate DESC,bs.id DESC
+	</select>
+	
+	<select id="selectDefault" resultMap="SpaceDetail">
+		<include refid="spaceDetailSql"></include>
+		WHERE
+			is_default = true
+	</select>
+	
+	<update id="deleteLock">
+		UPDATE blog_space SET  space_lock = NULL WHERE space_lock = #{lockId}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM blog_space WHERE id = #{id}
+	</delete>
+	
+	<sql id="spaceDetailSql">
+		SELECT
+			bs.id AS space_id,
+			space_alias,
+			is_private,
+			createDate,
+			space_name,
+			space_lock,
+			is_default
+		FROM
+			blog_space bs
+	</sql>
+</mapper>

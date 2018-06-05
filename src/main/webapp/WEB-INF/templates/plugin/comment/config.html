@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="mgr/base/head :: head('评论配置')"></head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('config-comment')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row" style="padding: 5px">
+				<div class="col-md-6 col-md-offset-3">
+					<div class="tip" style="margin-top: 10px"></div>
+					<form method="post" id="commentForm">
+						<div class="form-group">
+							<label>是否审核评论</label> <label class="radio-inline"> <input
+								type="radio" name="check" value="true"
+								th:attr="checked=${config.check ? 'checked' : null}"> 是
+							</label> <label class="radio-inline"> <input type="radio"
+								name="check" value="false"
+								th:attr="checked=${config.check ? null : 'checked'}"> 否
+							</label>
+						</div>
+						<div class="form-group">
+							<label>编辑器</label> <select class="form-control" name="editor">
+								<option th:value="${config.editor.name()}" selected="selected"
+									th:text="'当前:'+${config.editor.name()}"></option>
+								<option value="HTML">HTML</option>
+								<option value="MD">MD</option>
+							</select>
+						</div>
+						<div class="alert alert-info">在单位时间(秒)内，用户最多只能评论多少条</div>
+						<div class="form-group">
+							<label for="">时间(秒)(1~300)</label> <input
+								class="form-control integer" placeholder="时间"
+								th:value="${config.limitSec}" name="limitSec">
+						</div>
+						<div class="form-group">
+							<label for="">允许发表评论数(1~100)</label> <input
+								class="form-control integer" placeholder="时间"
+								th:value="${config.limitCount}" name="limitCount">
+						</div>
+						<div class="form-group">
+							<label for="">评论每页显示数量</label> <input
+								class="form-control integer" placeholder="评论每页显示数量(1~50)"
+								th:value="${config.pageSize}" name="pageSize">
+						</div>
+						<div class="form-group">
+							<label for="">评论昵称</label> <input
+								class="form-control" placeholder="评论昵称"
+								th:value="${config.nickname}" name="nickname">
+						</div>
+						<button type="button" id="update" class="btn btn-default">修改评论配置</button>
+					</form>
+					<hr>
+					<form method="post" id="commentForm">
+						<div class="form-group">
+							<div class="input-group">
+								<input type="text" class="form-control" placeholder="ip" id="ip">
+								<div class="input-group-addon">
+									<a href="javascript:void(0)" id="blacklist-query"><span
+										class="glyphicon glyphicon-search"  aria-hidden="true"></span></a>
+								</div>
+							</div>
+						</div>
+					</form>
+					<div class="table-responsive" id="blacklist"></div>
+					<div id="blacklist-pager" style="display:none"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#update").click(function() {
+				var data = $("#commentForm").serializeObject();
+				$.ajax({
+					type : "post",
+					url : basePath + "/mgr/comment/updateConfig",
+					data : JSON.stringify(data),
+					dataType : "json",
+					contentType : 'application/json',
+					success : function(data) {
+						if (data.success) {
+							success(data.message);
+							setTimeout(function() {
+								window.location.reload();
+							}, 500);
+						} else {
+							error(data.message);
+						}
+					},
+					complete : function() {
+						$("#update").prop("disabled", false);
+					}
+				});
+			});
+			loadBlacklist(1);
+			$("#blacklist-query").click(function(){
+				loadBlacklist(1);
+			});
+			
+			$(document).on('click','[data-blacklist-page]',function(data){
+				var page = $(this).attr('data-blacklist-page');
+				loadBlacklist(parseInt(page));
+			});
+		});
+		var blacklistPage;
+		function removeBan(ip){
+			bootbox.confirm("确定要删除吗？",function(result){
+				if(result){
+					$.post(basePath+'/mgr/comment/removeBan',{ip:ip},function(data){
+						if(data.success){
+							loadBlacklist(blacklistPage);
+						}else{
+							bootbox.alert(data.message);
+						}
+					})
+				}
+			})
+		}
+		
+		function loadBlacklist(page){
+			$.get(basePath + '/mgr/comment/blacklist', {ip:$("#ip").val(),"currentPage":page}, function(data) {
+				if(data.success){
+					var page = data.data;
+					blacklistPage = page.currentPage;
+					if(page.datas.length == 0){
+						$("#blacklist").html('<div class="alert alert-info">没有被禁止的IP</div>');
+					} else {
+						var html = '<table class="table">';
+						html += '<tr><th>IP</th><th>操作</th></tr>';
+						for(var i=0;i<page.datas.length;i++){
+							var data = page.datas[i];
+							html += '<tr><td>'+data+'</td><td><a href="javascript:void(0)" onclick="removeBan(\''+data+'\')">删除</a></td></tr>';
+						}
+						html += '</table>';
+						$("#blacklist").html(html);
+						if(page.totalPage > 0){
+							html = '<nav>';
+							html += '<ul class="pagination">';
+							for(var i=page.listbegin;i<page.listend;i++){
+								if(i == page.currentPage){
+									html += '<li class="active"><a href="javascript:void(0)">'+i+'</a></li>';
+								}else{
+									html += '<li><a href="javascript:void(0)" data-blacklist-page="'+i+'">'+i+'</a></li>';
+								}
+							}
+							html += '</ul>';
+							html += '</nav>';
+							$("#blacklist-pager").html(html).show();
+						}else{
+							$("#blacklist-pager").html('').hide();
+						}
+					}
+				}else{
+					bootbox.alert(data.message);
+				}
+			});
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+<title th:text="${space == null ? '主页' : space.name}"></title>
+</head>
+<body>
+	<fragment name="顶部导航" />
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8">
+				<form id="loginForm" method="post"
+					th:if="${session.ga_user == null}">
+					<div class="form-group">
+						<label for="username">用户名 </label> <input type="text"
+							class="form-control" placeholder="用户名" id="username"
+							name="username" value="">
+					</div>
+					<div class="form-group">
+						<label for="password">密码 </label> <input type="password"
+							class="form-control" placeholder="密码" id="password"
+							name="password" value="">
+					</div>
+					<div class="checkbox">
+						<label> <input type="checkbox" id="rememberMe">
+							记住我
+						</label>
+					</div>
+					<button type="button" id="login-btn" class="btn btn-default">登录
+					</button>
+				</form>
+				<form id="optVerifyForm" th:if="${session.ga_user != null}">
+					<div class="form-group">
+						<label for="username">动态口令 </label> <input type="text"
+							class="form-control" placeholder="动态口令 " id="otpCode">
+					</div>
+					<button type="button" id="verify-btn" class="btn btn-default">登录
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal " tabindex="-1" role="dialog" id="validateCodeModal"
+		data-backdrop>
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">请输入验证码</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div id="validate-error" class="alert alert-danger"
+							style="display: none"></div>
+						<div class="form-group">
+							<img th:src="@{/captcha}" class="img-responsive" id="validateImg" />
+							<input type="text" class="form-control" id="validate"
+								aria-describedby="basic-addon3">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="validate-btn">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<fragment name="底部" />
+	<div th:replace="base/foot_source">&nbsp;</div>
+	<script th:inline="javascript">
+        var gotoUrl = [[${(param.goto == null || param.goto.isEmpty()) ? urls.url : param.goto}]];
+    </script>
+	<script type="text/javascript">
+     $(document).ready(function(){
+       	$("#validateCodeModal").on('show.bs.modal',function(){
+        	$("#validate").val("");
+        });
+    	 $.get(rootPath+'/login/needCaptcha',{},function(flag){
+    		 if(flag){
+    			 $("#captchaContainer").show();
+    		 }else{
+     			 $("#captchaContainer").hide();
+     		 }
+    	 })
+        $("#login-btn").click(function(){
+        var username = $("#username").val();
+          var password = $("#password").val();
+          var validateCode = $("#validate").val();
+          $.ajax({
+            type : "post",
+            url : rootPath+'/login?validateCode='+validateCode,
+            data : JSON.stringify({
+              "username" : username,
+              "password" : password,
+              "rememberMe":$("#rememberMe").is(":checked")
+            }),
+            dataType : "json",
+            contentType : 'application/json',
+            success : function(data) {
+              if (data.success) {
+                window.location.href = gotoUrl;
+              } else {
+            	  if(data.code == 'otp.required'){
+                	window.location.reload();
+            	  } else {
+                      if(data.code == 'validateCode.error'){
+                        $("#validate-btn").unbind('click').bind('click',function(){
+                          $("#validateCodeModal").modal('hide'); 
+                          $("#login-btn").click();
+                        });
+                        $("#validateCodeModal").modal('show'); 
+                      }else{
+                      	bootbox.alert(data.message);
+                      }
+            	  }
+              }
+            },
+            complete : function() {
+             $("#validateImg").attr("src",rootPath+'/captcha?time='+$.now())
+            }
+          });
+        });
+    	 
+    	 $("#verify-btn").click(function(){
+    		 var url = basePath+"/login/otpVerify?code="+$("#otpCode").val();
+    		 if($("#validateCode").length > 0){
+    			 url += "&validateCode="+$("#validateCode").val();
+    		 }
+    		 $.ajax({
+					type : "post",
+					url : url,
+					data : {},
+					contentType : 'application/json',
+					success : function(data){
+						if(data.success){
+			                window.location.href = gotoUrl;
+						} else {
+							if(data.code == 'validateCode.error'){
+                              $("#validate-btn").unbind('click').bind('click',function(){
+                                $("#validateCodeModal").modal('hide'); 
+                                 $("#verify-btn").click();
+                              });
+                              $("#validateCodeModal").modal('show'); 
+                            }else{
+                              bootbox.alert(data.message);
+                            }
+						}
+					},
+					complete:function(){
+						if($("#validateImg").length > 0)
+							$("#validateImg").attr("src",rootPath+'/captcha?time='+$.now())
+					}
+				});
+    	 });
+        });
+    </script>
+</body>

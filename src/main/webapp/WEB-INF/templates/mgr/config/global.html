@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="mgr/base/head :: head('分页数目配置')"></head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('config-global')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row" style="padding: 5px">
+				<div class="col-md-6 col-md-offset-3">
+					<div class="tip" style="margin-top: 10px"></div>
+					<form method="post" id="globalForm">
+						<div class="form-group">
+							<label for="">文件每页显示数量</label> <input
+								class="form-control integer" placeholder="文件每页显示数量"
+								th:value="${config.filePageSize}" name="filePageSize">
+						</div>
+						<div class="form-group">
+							<label for="">用户模板片段每页显示数量</label> <input
+								class="form-control integer" placeholder="用户挂件每页显示数量"
+								th:value="${config.fragmentPageSize}"
+								name="fragmentPageSize">
+						</div>
+						<div class="form-group">
+							<label for="">用户自定义页面每页显示数量</label> <input
+								class="form-control integer" placeholder="用户挂件每页显示数量"
+								th:value="${config.pagePageSize}" name="pagePageSize">
+						</div>
+						<div class="form-group">
+							<label for="">文章每页显示数量</label> <input
+								class="form-control integer" placeholder="文章每页显示数量"
+								th:value="${config.articlePageSize}" name="articlePageSize">
+						</div>
+						<div class="form-group">
+							<label for="">标签每页显示数量</label> <input
+								class="form-control integer" placeholder="标签每页显示数量"
+								th:value="${config.tagPageSize}" name="tagPageSize">
+						</div>
+						<div class="form-group">
+							<label for="">动态每页显示数量</label> <input
+								class="form-control integer" placeholder="动态每页显示数量"
+								th:value="${config.newsPageSize}" name="newsPageSize">
+						</div>
+						<button type="button" id="update" class="btn btn-default">修改全局配置</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		$("#update").click(function() {
+			var data = $("#globalForm").serializeObject();
+			$.ajax({
+				type : "post",
+				url : basePath + "/mgr/config/global/update",
+				data : JSON.stringify(data),
+				dataType : "json",
+				contentType : 'application/json',
+				success : function(data) {
+					if (data.success) {
+						success(data.message);
+						setTimeout(function() {
+							window.location.reload();
+						}, 500);
+					} else {
+						error(data.message);
+					}
+				},
+				complete : function() {
+					$("#update").prop("disabled", false);
+				}
+			});
+		});
+	});
+	</script>
+</body>
+</html>
