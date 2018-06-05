@@ -565,7 +565,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 更新文章点击数
 	 * 
-	 * @since 6.5
+	 * @since 6.4
 	 * @param hitsMap
 	 *            key文章ID value文章<b>当前</b>点击数
 	 */
