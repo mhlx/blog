@@ -31,14 +31,13 @@ public class MarkdownItPluginHandler extends PluginHandlerSupport {
 
 	private final PluginProperties pluginProperties = PluginProperties.getInstance();
 
-	private final HttpClient client = HttpClient.newHttpClient();
-
 	private final Logger logger = LoggerFactory.getLogger(MarkdownItPluginHandler.class);
 
 	@Override
 	protected void registerBean(BeanRegistry registry) {
+		HttpClient client = HttpClient.newHttpClient();
 		String url = pluginProperties.get(URL_KEY).orElseThrow();
-		if (isServiceAvailable(url)) {
+		if (isServiceAvailable(url, client)) {
 			registry.register(MarkdownItMarkdown2Html.class.getName(),
 					BeanDefinitionBuilder.genericBeanDefinition(MarkdownItMarkdown2Html.class)
 							.setScope(BeanDefinition.SCOPE_SINGLETON).addConstructorArgValue(url)
@@ -46,7 +45,7 @@ public class MarkdownItPluginHandler extends PluginHandlerSupport {
 		}
 	}
 
-	private boolean isServiceAvailable(String url) {
+	private boolean isServiceAvailable(String url, HttpClient client) {
 		URI uri;
 		try {
 			uri = new URI(url);
@@ -72,7 +71,16 @@ public class MarkdownItPluginHandler extends PluginHandlerSupport {
 
 	@Override
 	public boolean enable() {
-		return pluginProperties.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(false);
+		return pluginProperties.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(false) && isIncubatorEnable();
+	}
+
+	private boolean isIncubatorEnable() {
+		try {
+			Class.forName("jdk.incubator.http.HttpClient");
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }
