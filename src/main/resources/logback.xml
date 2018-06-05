@@ -31,7 +31,6 @@
 
 	<root level="ERROR">
 		<appender-ref ref="consoleAppender" />
-		<appender-ref ref="errorDailyRollingFileAppender" />
 	</root>
 
 </configuration>

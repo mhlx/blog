@@ -114,6 +114,9 @@
                 $("#pjax-news").on('pjax:end', function() {
                     refresh();
                     $cmt.renderComment(_config);
+                    $.post(basePath + '/news/hit/' + _config.moduleId, {}, function() {
+
+                    });
                 })
             }
         })

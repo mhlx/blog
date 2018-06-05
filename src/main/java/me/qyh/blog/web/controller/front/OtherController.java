@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,7 +86,7 @@ public class OtherController {
 			String content = templateRender.doRender(templateName, null, request, new ReadOnlyResponse(response),
 					new ParseConfig(true, false));
 
-			write(content, MediaType.TEXT_HTML, response);
+			Webs.writeInfo(response, new JsonResult(true, content));
 
 		} catch (TemplateRenderException e) {
 			Webs.writeInfo(response, new JsonResult(false, e.getRenderErrorDescription()));
@@ -96,17 +95,6 @@ public class OtherController {
 				throw (RuntimeException) e;
 			}
 			throw new SystemException(e.getMessage(), e);
-		}
-	}
-
-	private void write(String content, MediaType type, HttpServletResponse response) throws IOException {
-		if (MediaType.TEXT_HTML.equals(type)) {
-			Webs.writeInfo(response, new JsonResult(true, content));
-		} else {
-			response.setContentType(type.toString());
-			response.setCharacterEncoding(Constants.CHARSET.name());
-			response.getWriter().write(content);
-			response.getWriter().flush();
 		}
 	}
 }

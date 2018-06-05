@@ -83,7 +83,7 @@ public class TemplateReturnValueHandler implements HandlerMethodReturnValueHandl
 
 		if (pjax) {
 			templateName = templateRender.processPjaxTemplateName(templateName, nativeRequest);
-			if (!contentType.equals(MediaType.TEXT_HTML_VALUE)) {
+			if (!isHtmlContentType(contentType)) {
 				throw new LogicException("template.pjax.unsupport", "模板不支持pjax渲染");
 			}
 		}
@@ -135,6 +135,10 @@ public class TemplateReturnValueHandler implements HandlerMethodReturnValueHandl
 			return "text/css";
 		}
 		return "application/octet-stream";
+	}
+
+	protected boolean isHtmlContentType(String contentType) {
+		return MediaType.TEXT_HTML_VALUE.equals(contentType);
 	}
 
 }

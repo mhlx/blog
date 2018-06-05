@@ -25,7 +25,6 @@
 			<data name="articleStatistics" />
 			<data name="newsStatistics" />
 			<data name="commentStatistics" />
-			<transaction:end />
 			<div class="col-lg-8 col-md-8  col-sm-8 text" id="pjax-articles">
 				<fragment name="文章列表" />
 			</div>
@@ -45,9 +44,11 @@
 	<script>
 		$(function() {
 			if ($.support.pjax) {
-				$(document).on('pjax:beforeSend',
+				$(document).on(
+						'pjax:beforeSend',
 						function(event, xhr, options) {
-							xhr.setRequestHeader('X-Fragment', encodeURI('文章列表'));
+							xhr.setRequestHeader('X-Fragment',
+									encodeURI('文章列表'));
 						});
 				$(document).pjax('#pjax-articles ul a', '#pjax-articles')
 			}

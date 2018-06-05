@@ -68,6 +68,7 @@ public final class ThymeleafRenderExecutor implements TemplateRenderExecutor {
 
 	private static final String X_PJAX_Container_HEADER_NAME = "X-PJAX-Container";
 	private static final String X_PJAX_FRAGMENT = "X-Fragment";
+	private static final String X_FULLAPGE = "X-Fullpage";
 
 	// COPIED FROM ThymeleafView 3.0.9.RELEASE
 	@Override
@@ -78,6 +79,10 @@ public final class ThymeleafRenderExecutor implements TemplateRenderExecutor {
 
 	@Override
 	public String processPjaxTemplateName(String templateName, HttpServletRequest request) throws LogicException {
+		Boolean fullpage = Boolean.parseBoolean(request.getHeader(X_FULLAPGE));
+		if (fullpage) {
+			return templateName;
+		}
 		String fragment = request.getHeader(X_PJAX_FRAGMENT);
 		if (!Validators.isEmptyOrNull(fragment, true)) {
 			fragment = FragmentValidator.validName(fragment, true);
