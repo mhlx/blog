@@ -167,7 +167,7 @@ abstract class CacheableHitsStrategy<E extends BaseEntity> implements HitsStrate
 			String ip = Environment.getIP();
 			if (ip != null && ips.putIfAbsent(ip, Boolean.TRUE) == null) {
 				adder.increment();
-				if (ipNums.decrementAndGet() <= 0) {
+				if (ipNums.decrementAndGet() == 0) {
 					Integer id = e.getId();
 					if (flushMap.remove(id) != null) {
 						doFlush(List.of(new HitsWrapper(id, hitsMap.remove(id))), false);

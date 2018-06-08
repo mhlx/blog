@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.file.entity;
 
+import java.util.Arrays;
+
 import me.qyh.blog.core.entity.BaseEntity;
 import me.qyh.blog.core.util.Validators;
 
@@ -115,11 +117,6 @@ public class CommonFile extends BaseEntity {
 		if (extension == null) {
 			return false;
 		}
-		for (String ext : exts) {
-			if (ext.equalsIgnoreCase(extension)) {
-				return true;
-			}
-		}
-		return false;
+		return Arrays.stream(exts).anyMatch(ext -> ext.equalsIgnoreCase(extension));
 	}
 }

@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService, InitializingBean {
 	public User login(LoginBean loginBean) throws LogicException {
 		if (user.getName().equals(loginBean.getUsername())
 				&& BCrypts.matches(loginBean.getPassword(), user.getPassword())) {
-			return user;
+			return getUser();
 		}
 		throw new LogicException("user.loginFail", "登录失败");
 	}

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 <meta name="_csrf" th:content="${_csrf.token}" />
 <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-
 <link rel="stylesheet"
 	th:href="@{/static/bootstrap/css/bootstrap.min.css}">
 <link rel="stylesheet"
@@ -16,10 +16,11 @@
 	th:href="@{/static/codemirror/theme/base16-light.css}">
 <link rel="stylesheet"
 	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}">
-	<link rel="stylesheet"
+<link rel="stylesheet"
 	th:href="@{/static/codemirror/addon/dialog/dialog.css}">
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css}">
+<link rel="stylesheet" th:href="@{/static/css/markdown.css}">
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 <!--[if lt IE 9]>
@@ -27,15 +28,26 @@
       <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 <style>
+#toolbar {
+	background-color: #f5f5f5;
+	height: 30px;
+	position: fixed;
+	left: 0;
+	width: 50%;
+	padding-left: 10px;
+	padding-right: 10px;
+	overflow: auto;
+	overflow-y: hidden;
+}
+
 #in {
 	position: fixed;
-	top: 0;
+	top: 30px;
 	left: 0;
 	bottom: 0;
 	width: 50%;
 	height: auto;
 	overflow: auto;
-	box-shadow: -10px 2px 6px 10px rgba(0, 0, 0, 0.4);
 }
 
 #out {
@@ -65,98 +77,212 @@
 }
 
 .CodeMirror-scroll {
-	padding: 30px;
+	padding: 10px;
 	box-sizing: border-box;
-	overflow-x:hidden !important;
+	overflow-x: hidden !important;
 }
 
 .icon {
 	margin-top: 5px;
 	cursor: pointer;
-	z-index:999999;
 	font-size: 16px;
 	margin-right: 20px;
 	margin-bottom: 5px
 }
-.modal{
-z-index: 9999999}
 
+.modal {
+	z-index: 9999999
+}
 </style>
 </head>
 <body>
 	<div class="container-fluid">
 		<div class="col-md-6">
 			<div id="toolbar">
-				<span class="glyphicon glyphicon-pencil icon" style="color: red"
-					title="基本信息" onclick="showBase()"></span> <span
+				<span class="glyphicon glyphicon-save icon" style="color: red"
+					title="保存" onclick="showBase()"></span> <span
 					class="glyphicon glyphicon-file icon" title="文件"
 					onclick="openFile()"></span>
-					<span class="icon glyphicon"
-					title="emoji" onclick="emoji.show()">😀</span>
-					<span
-					class="glyphicon glyphicon-cog icon" title="预览样式设置"
-					onclick="openSettingModal()"></span>
+				<!-- 					<span class="icon glyphicon" -->
+				<!-- 					title="emoji" onclick="emoji.show()">😀</span> -->
+				<span class="glyphicon glyphicon-question-sign icon"
+					data-toggle="modal" data-target="#helpModal" aria-hidden="true"></span>
 			</div>
 			<div id="in" style="display: none">
-				<textarea id="code" style="width: 100%; height: 100%" th:text="${article.content}"></textarea>
+				<textarea id="code" style="width: 100%; height: 100%"
+					th:text="${article.content}"></textarea>
 			</div>
 		</div>
-		<div class="col-md-6" id="out">
-			<div class="embed-responsive">
-				<iframe class="embed-responsive-item"
-					th:src="@{/mgr/article/write/mdPreview}"></iframe>
-			</div>
-		</div>
+		<div class="col-md-6 markdown-body" id="out"></div>
 	</div>
 
 
-
-	<div class="modal fade" id="settingModal" tabindex="-1" role="dialog"
+	<div class="modal fade" id="helpModal" tabindex="-1" role="dialog"
 		style="z-index: 9999999">
-		<div class="modal-dialog" role="document">
+		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title">预览样式设置</h4>
+					<h4 class="modal-title">编辑器说明</h4>
 				</div>
 				<div class="modal-body">
-					<form>
-						<div class="form-group">
-							<label>preview样式</label><input id="css-preview-text" type="text" class="form-control" value="markdown-body"/>
-						</div>
-						<div class="form-group">
-							<label>css文件位置</label>
-							<textarea id="css-link-text" class="form-control" cols="8" rows="8"><span th:remove="tag" th:text="@{/static/bootstrap/css/bootstrap.min.css}"></span>
-<span th:remove="tag" th:text="@{/static/prettify/prettify.css}"></span>
-<span th:remove="tag" th:text="@{/static/css/markdown.css}"></span></textarea>
-						</div>
-						<div class="form-group">
-							<label>style样式</label>
-							<textarea id="css-style-text" class="form-control" cols="8" rows="8">body {
-	margin: 0;
-	padding: 0;
-	word-wrap: break-word;
+					<h3>基础</h3>
+					<ol>
+						<li><p>
+								支持<b>图片</b>粘贴上传
+							</p></li>
+						<li><p>支持文件拖曳上传</p></li>
+						<li><p>支持拖曳导入md文件</p></li>
+					</ol>
+					<h3>快捷键</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<tr>
+								<th>快捷键</th>
+								<th>说明</th>
+							</tr>
+							<tr>
+								<td>Ctrl + S</td>
+								<td>保存文章</td>
+							</tr>
+							<tr>
+								<td>Alt + F</td>
+								<td>寻找文本</td>
+							</tr>
+							<tr>
+								<td>Shift + Ctrl + F</td>
+								<td>替换单个文本</td>
+							</tr>
+							<tr>
+								<td>Shift + Ctrl + R</td>
+								<td>替换全部文本</td>
+							</tr>
+						</table>
+					</div>
+					<h3>markdown语法</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<tr>
+								<th>格式</th>
+								<th>说明</th>
+							</tr>
+							<tr>
+								<td>粗体</td>
+								<td>**内容** <br> __内容__
+								</td>
+							</tr>
+							<tr>
+								<td>斜体</td>
+								<td>*内容* <br> _内容_
+								</td>
+							</tr>
+							<tr>
+								<td>链接</td>
+								<td>[link text](http://url.com/ "title")<br> [link
+									text](http://url.com/)
+								</td>
+							</tr>
+							<tr>
+								<td>图片</td>
+								<td>![alt text](http://path/to/img.jpg "title")<br>
+									![alt text](http://path/to/img.jpg)
+								</td>
+							</tr>
+
+							<tr>
+								<td>标题</td>
+								<td># h1<br> ## h2<br> ...
+								</td>
+							</tr>
+							<tr>
+								<td>有序列表(无段落)</td>
+								<td><pre>1.one
+2.two</pre>
+								</td>
+							</tr>
+							<tr>
+								<td>无需列表(有段落)</td>
+								<td><pre>* A list item.
+
+  With multiple paragraphs.
+
+* bar</pre>
+								</td>
+							</tr>
+							<tr>
+								<td>嵌套列表</td>
+								<td><pre>* Abacus
+  * anser
+* Bubbles
+  1. bunk
+  2. bupkis
+     * bar
+  3. burper
+* Cunning</pre></td>
+							</tr>
+							<tr>
+								<td>引用</td>
+								<td>> 内容</td>
+							</tr>
+							<tr>
+								<td>代码</td>
+								<td>`内容`<br>
+								`` `内容` ``
+								</td>
+							</tr>
+							
+							<tr>
+								<td>代码块</td>
+								<td><pre>```
+public static void main(String [] args){
+
 }
-#preview{
-	padding-top:0px
-}
-.markdown-body{
-	padding-top:0px !important;
-}</textarea>
-						</div>
-					</form>
+```</pre>
+								</td>
+							</tr>
+							<tr>
+								<td>水平线</td>
+								<td>---<br>* * *<br>- - - - 
+								</td>
+							</tr>
+							<tr>
+								<td>换行(行末两个空格)</td>
+								<td><pre>第一行   
+第二行</pre>
+								</td>
+							</tr>
+							<tr>
+								<td>表格</td>
+								<td><pre>| A | B | C | 
+| - | :-: | -: | 
+| 左对齐 | 居中对齐| 右对齐 | </pre>
+								</td>
+							</tr>
+							<tr>
+								<td>锚点</td>
+								<td>[内容](#1)
+								</td>
+							</tr>
+							<tr>
+								<td>脚注</td>
+								<td><pre>Markdown[^1]
+[^1]: 内容</pre>
+								</td>
+							</tr>
+						</table>
+					</div>
 				</div>
 				<div class="modal-footer">
-					<button class="btn btn-primary" type="button" id="submit-setting">设置样式</button>
+					<button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
 				</div>
 			</div>
 		</div>
 	</div>
-	
-	
+
+
 
 	<div class="modal fade" id="baseModal" tabindex="-1" role="dialog"
 		style="z-index: 9999999">
@@ -170,7 +296,8 @@ z-index: 9999999}
 					<h4 class="modal-title">基本信息</h4>
 				</div>
 				<div class="modal-body">
-					<div class="alert alert-danger" id="error-tip" style="display:none"></div>
+					<div class="alert alert-danger" id="error-tip"
+						style="display: none"></div>
 					<form>
 						<div class="form-group">
 							<label>博客标题</label><input type="text" class="form-control"
@@ -183,21 +310,31 @@ z-index: 9999999}
 								maxlength="200" id="alias" th:value="${article.alias}" />
 						</div>
 						<div class="form-group">
-							<label>摘要 </label>
-							<textarea class="form-control" cols="8" rows="8"
-								placeholder="(0~2000字符)" id="summary"
-								th:text="${article.summary}"></textarea>
+							<label>摘要 </label> <a href="javascript:void(0)"><span
+								onclick="previewSummary($(this))"
+								class="glyphicon glyphicon-eye-open icon"></span></a>
+							<div id="summary-content"
+								style="position: relative; height: 310px">
+								<textarea class="form-control" cols="8" rows="8"
+									placeholder="(0~2000字符)" id="summary"
+									th:text="${article.summary}"></textarea>
+							</div>
+							<div id="summary-rendered" class="markdown-body"
+								style="display: none; max-height: 300px; overflow-y: auto">
+
+							</div>
 						</div>
 						<div class="form-group">
 							<label>特征图像</label><input type="text" class="form-control"
 								placeholder="特征图像" maxlength="255" id="featureImage"
 								th:value="${article.featureImage}" />
 						</div>
-						<div class="form-group has-feedback has-clear" id="tags-input-container">
-								    <label>标签 </label> 
-								    <input type="text" id="tags-input" class="form-control" placeholder="标签(小于20个字符)"/>
-								</div>
-								<div id="tags-container" class="well" style="margin-top: 5px"></div>
+						<div class="form-group has-feedback has-clear"
+							id="tags-input-container">
+							<label>标签 </label> <input type="text" id="tags-input"
+								class="form-control" placeholder="标签(小于20个字符)" />
+						</div>
+						<div id="tags-container" class="well" style="margin-top: 5px"></div>
 						<div class="form-group">
 							<label>空间</label> <select class="form-control" id="space">
 								<option th:each="space : ${spaces}" th:text="${space.name}"
@@ -313,599 +450,9 @@ z-index: 9999999}
 	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/emoji.js}"></script>
 	<script th:src="@{/static/js/modal.js}"></script>
-	<script type="text/javascript">
-	
-		var autoParse = true;
-		var publishing = false;
-		var tags = [];
-		function detect() {
-			var wwidth = $(window).width();
-			if (wwidth <= 768) {
-				autoParse = false;
-				toEditor();
-				$("#mobile-style").remove();
-				$("head").append("<style type='text/css' id='mobile-style'>.icon {font-size: 30px} .CodeMirror-scroll{margin-top:20px}</style>");
-				$(".embed-responsive").css({"margin-top":'30px'}).height($(window).height()-52);
-				$("#out iframe").height($(".embed-responsive").height());
-			} else {
-				autoParse = true;
-				$("#in").css({
-					width : '50%'
-				}).show();
-				$("#out").css({
-					left : '50%'
-				}).show();
-				$("#editor-icon").remove();
-				$("#preview-icon").remove();
-				$("#mobile-style").remove();
-				if (editor)
-					render();
-				$(".embed-responsive").height($("#out").height());
-				
-				document.addEventListener('drop', function(e){
-				      e.preventDefault();
-				      e.stopPropagation(); var reader = new FileReader();
- 						var file = e.dataTransfer.files[0];
-				      if(file.name.indexOf('.md') == -1){
-				    	  base64Upload(file);
-				      } else {
-					      reader.onload = function(e){
-					        editor.setValue(e.target.result);
-					      };
-					      reader.readAsText(file);
-				      }
-				 }, false);
-				
-			}
-		}
-		detect();
-		var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
-			mode : 'gfm',
-			lineNumbers : false,
-			matchBrackets : true,
-			lineWrapping : true,
-			theme : 'base16-light',
-			dragDrop:false,
-		    extraKeys: {"Enter": "newlineAndIndentContinueMarkdownList","Alt-F": "findPersistent","Ctrl-A":"selectAll"}
-		});
-		
-		var summaryEditor = CodeMirror.fromTextArea(document.getElementById('summary'), {
-			mode : 'gfm',
-			lineNumbers : false,
-			matchBrackets : true,
-			lineWrapping : true,
-			theme : 'base16-light',
-			dragDrop:false,
-		    extraKeys: {"Enter": "newlineAndIndentContinueMarkdownList","Alt-F": "findPersistent","Ctrl-A":"selectAll"}
-		});
-		
-		$("#baseModal .CodeMirror").css({"position":"static","height":"300px"});
-		$("#baseModal .CodeMirror-scroll").css({"padding":"5px"});
-		
-		editor.on('paste',function(editor,evt){
-			var clipboardData, pastedData;
-// 		    evt.stopPropagation();
-// 		    evt.preventDefault();
-		    clipboardData = evt.clipboardData || window.clipboardData;
-		    console.log(clipboardData.getData('text/html'))
-		    var files = clipboardData.files;
-		    if(files.length > 0){
-		    	var f = files[0];//上传第一张
-		    	var type = f.type;
-		    	if(type.indexOf('image/') == -1){
-		    		bootbox.alert("只能上传图片文件");
-		    		return ;
-		    	}
-		    	
-		    	base64Upload(f);
-		    	
-		    }
-		})
-		
-		CodeMirror.keyMap.default["Shift-Tab"] = "indentLess";
-		CodeMirror.keyMap.default["Tab"] = "indentMore";
-		
-		emoji.setClick(function(emoji){
-			editor.replaceSelection(emoji);
-			return true;
-		});
-		
-
-
-// 		$(window).resize(function() {
-// 			detect();
-// 		});
-
-		function toEditor() {
-			$("#out").hide();
-			$("#in").css({
-				width : '100%'
-			}).show();
-			$("#editor-icon").remove();
-			$("#preview-icon").remove();
-			$(".icon").show();
-			$("#toolbar")
-					.append(
-							'<span onclick="toPreview()" class="glyphicon glyphicon-eye-open icon" id="preview-icon" title="预览"></span>');
-		}
-
-		function toPreview() {
-			render();
-			$("#in").hide();
-			$("#out").css({
-				left : '0%'
-			}).show();
-			$(".embed-responsive").css({"margin-top":'30px'}).height($(window).height()-52);
-			$("#out iframe").height($(".embed-responsive").height());
-			$("#editor-icon").remove();
-			$("#preview-icon").remove();
-			$(".icon").hide();
-			$("#toolbar")
-					.append(
-							'<span onclick="toEditor()" class="glyphicon glyphicon-eye-close icon" id="editor-icon" title="取消预览"></span>');
-		}
-		var renderTimer;
-		var render = function() {
-			if (renderTimer) {
-				clearTimeout(renderTimer);
-			}
-			renderTimer = setTimeout(function() {
-				var toParse = editor.getValue();
-				$.ajax({
-					type : "post",
-					async:false,
-					url : basePath + '/mgr/article/write/preview',
-					contentType : "application/json",
-					data : JSON.stringify({
-						editor : 'MD',
-						content : toParse
-					}),
-					success : function(data) {
-						var parsed;
-						if (data.success) {
-							parsed = data.data;
-						} else {
-							parsed = '';
-						}
-						var preview = $("#out iframe").contents().find(
-								'#preview');
-						try {
-							
-						 	var out = preview[0];
-					        var old = out.cloneNode(true);
-					        $("#out iframe")[0].contentWindow.setPreview(parsed);
-					        
-					        var allold = old.getElementsByTagName("*");
-					        if (allold === undefined) return;
-
-					        var allnew = out.getElementsByTagName("*");
-					        if (allnew === undefined) return;
-
-					        for (var i = 0, max = Math.max(allold.length, allnew.length); i < max; i++) {
-					            var _old = allold[i];
-					            var _new = allnew[i]
-					            if(_new === undefined){
-					            	//delete
-					            	return ;
-					            }
-					            if(_old === undefined || !_old.isEqualNode(_new)){
-						        	$('#out iframe').contents().scrollTop(allnew[i].offsetTop);
-						        	return ;
-					            }
-					        }
-							
-						} catch (e) {
-							console.log(e);
-						}
-					},
-					complete : function() {
-					}
-				});
-
-			}, 500);
-		};
-		
-
-		render();
-
-		editor.on('change', function(e) {
-			if (autoParse) {
-				render();
-			}
-		});
-
-		function showBase() {
-			$("#baseModal").modal('show');
-		}
-
-		function openFile() {
-			fileSelectPageQuery(1, '');
-			$("#fileSelectModal").modal("show");
-		}
-		
-		function openSettingModal(){
-			$("#settingModal").modal("show");
-		}
-		
-		function setStyle(succ){
-			try {
-				 $("#out iframe")[0].contentWindow.setStyle(getStyle());
-				 if(succ){
-					 succ();
-				 }
-			} catch (e) {
-				setTimeout(function(){
-					setStyle(succ);
-				},100)
-			}
-		}
-		
-		function getStyle(){
-			return {"csses":$("#css-link-text").val(),"styles":$("#css-style-text").val(),"preview":$.trim($("#css-preview-text").val())};
-		}
-		
-		$(function(){
-			setStyle();
-			$("#submit-setting").click(function(){
-				setStyle(function(){
-					$("#settingModal").modal('hide')
-				});
-			});
-			
-			$.get(basePath + '/mgr/lock/all',{},function(data){
-				var oldLock = $("#oldLock").val();
-				if(data.success){
-					var locks = data.data;
-					if(locks.length > 0){
-						var html = '';
-						html += '<div class="form-group">'
-						html += '<label for="lockId" class="control-label">锁:</label> ';
-						html += '<select id="lockId" class="form-control">';
-						html += '<option value="">无</option>';
-						for(var i=0;i<locks.length;i++){
-							var lock = locks[i];
-							if(lock.id == oldLock){
-								html += '<option value="'+lock.id+'" selected="selected">'+lock.name+'</option>';
-							}else{
-								html += '<option value="'+lock.id+'">'+lock.name+'</option>';
-							}
-						}
-						html += '</select>';
-						html += '</div>';
-						$("#lock_container").html(html);
-					}
-				}else{
-					console.log(data.data);
-				}
-			});
-			
-			
-			$("#status").change(function() {
-				if ($(this).val() == 'SCHEDULED') {
-					$("#scheduleContainer").show();
-				} else {
-					$("#scheduleContainer").hide();
-				}
-			});
-			
-			var oldTags = $("#oldTags").val();
-			if(oldTags != ''){
-				var oldTagArray = oldTags.split(",");
-				for(var i=0;i<oldTagArray.length;i++){
-					var tag = oldTagArray[i];
-					if(tag != ''){
-						addTag(tag);
-						renderTag();
-					}
-				}
-			}
-			var oldSpace = $("#oldSpace").val();
-			if(oldSpace != ""){
-				$("#space").val(oldSpace);
-			}
-
-			$("#tags-input").on('input',function(e) {
-				var me = $(this);
-				var tag = me.val();
-				$("#add-tag-sign").remove();
-				if($.trim(tag).length > 0){
-					$("#tags-input").after('<a onclick="_addTag()" class="glyphicon glyphicon-ok-sign form-control-feedback form-control-clear" id="add-tag-sign" style="pointer-events: auto; text-decoration: none;cursor: pointer;"></a>');
-				}
-			});
-			
-			setInterval(function(){
-				save();
-			},10000);
-			
-			$("#submit-art").click(function(){
-				publishing = true;
-				var me = $(this);
-				var article = getArticle();
-				me.prop("disabled",true);
-				var url = "";
-				if(article.id && article.id != null){
-					url = basePath+"/mgr/article/update";
-				}else{
-					url = basePath+"/mgr/article/write";
-				}
-				$.ajax({
-					type : "post",
-					url : url,
-		            contentType:"application/json",
-					data : JSON.stringify(article),
-					success : function(data){
-						if(data.success){
-							bootbox.alert("保存成功");
-							setTimeout(function(){
-								window.location.href = basePath+'/mgr/article/index';
-							},500)
-						} else {
-							$("#error-tip").html(data.message).show();
-							publishing = false;
-						}
-					},
-					complete:function(){
-						me.prop("disabled",false);
-					}
-				});
-			});
-			
-			$("#baseModal").on("show.bs.modal",function(){
-				$("#error-tip").html('').hide();
-			});
-			
-			$("#baseModal").on("shown.bs.modal",function(){
-				summaryEditor.refresh();
-			});
-			
-		});
-		
-		function _addTag(){
-			var me =$("#tags-input");
-			addTag($.trim(me.val()));
-			renderTag();
-			me.val("");
-			$("#add-tag-sign").remove();
-		}
-		
-		function getArticle(){
-			var article = {};
-			article.title = $("#title").val();
-			if($.trim(article.title) == ""){
-				article.title = "No title";
-			}
-			article.content = editor.getValue();
-			article.from = $("#from").val();
-			article.status = $("#status").val();
-			if($("#level").val() != ''){
-				article.level = $("#level").val();
-			}
-			if(article.status == 'SCHEDULED'){
-				article.pubDate = $("#scheduleDate").val()
-			};
-			article.isPrivate = $("#private").prop("checked");
-			article.allowComment = $("#allowComment").prop("checked");
-			article.tags = tags;
-			article.featureImage = $("#featureImage").val();
-			article.summary = summaryEditor.getValue();
-			article.space = {"id":$("#space").val()};
-			article.editor = 'MD';
-			if($("#lockId").val() != ""){
-				article.lockId = $("#lockId").val();
-			}
-			article.alias = $("#alias").val();
-			if($("#id").val() != ""){
-				article.id = $("#id").val();
-			}
-			return article;
-		}
-		
-		function save(){
-			if(publishing){
-				return ;
-			}
-			var article = getArticle();
-			article.status = 'DRAFT';
-			if(article.content == ''){
-				return ;
-			}
-			var url = "";
-			if(article.id && article.id != null){
-				url = basePath+"/mgr/article/update";
-			}else{
-				url = basePath+"/mgr/article/write";
-			}
-			publishing = true;
-			$.ajax({
-				type : "post",
-				url : url,
-				async:false,
-	            contentType:"application/json",
-				data : JSON.stringify(article),
-				success : function(data){
-					if(data.success){
-						$("#id").val(data.data.id);
-					}
-				},
-				complete:function(){
-					publishing = false;
-				}
-			});
-		}
-		
-		function showTagError(error) {
-			if ($("#tag-tip").length == 0)
-				$("#tags-input").before(error);
-			setTimeout(function() {
-				$("#tag-tip").remove();
-			}, 1000);
-		}
-
-		function addTag(tag) {
-			var tag = $.trim(tag);
-			if (tags.length >= 10) {
-				showTagError('<span id="tag-tip" class="text text-danger">最多只能有10标签</span>')
-			} else if (tag == "" || tag.length > 20) {
-				showTagError('<span id="tag-tip" class="text text-danger">标签名在1~20个字符之间</span>')
-			} else {
-				for (var i = 0; i < tags.length; i++) {
-					var _tag = tags[i];
-					if (_tag.name == tag) {
-						showTagError('<span id="tag-tip" class="text text-danger">已经存在该标签</span>')
-						$("#tags-input").val("");
-						return;
-					}
-				}
-				tags.push({
-					"name" : $.trim(tag)
-				});
-			}
-		}
-
-		function renderTag() {
-			if(tags.length == 0){
-				$("#tags-container").html('');
-				return ;
-			}
-			var html = '<div class="table-responsive"><table class="table table-borderless">';
-			if (tags.length > 5) {
-				html += '<tr>';
-				for (var i = 0; i < 5; i++) {
-					html += getLabel_html(tags[i].name);
-				}
-				html += '</tr>';
-				html += '<tr>';
-				for (var i = 5; i < tags.length; i++) {
-					html += getLabel_html(tags[i].name);
-				}
-				html += '</tr>';
-			} else {
-				html += '<tr>';
-				for (var i = 0; i < tags.length; i++) {
-					html += getLabel_html(tags[i].name);
-				}
-				html += '</tr>';
-			}
-			html += '<table></div>';
-			$("#tags-container").html(html);
-		}
-		
-		function save(){
-			if(publishing){
-				return ;
-			}
-			var article = getArticle();
-			article.status = 'DRAFT';
-			if(article.content == ''){
-				return ;
-			}
-			var url = "";
-			if(article.id && article.id != null){
-				url = basePath+"/mgr/article/update";
-			}else{
-				url = basePath+"/mgr/article/write";
-			}
-			publishing = true;
-			$.ajax({
-				type : "post",
-				url : url,
-				async:false,
-	            contentType:"application/json",
-				data : JSON.stringify(article),
-				success : function(data){
-					if(data.success){
-						$("#id").val(data.data.id);
-						//showAutoSaveTip(new Date());
-					}
-				},
-				complete:function(){
-					publishing = false;
-				}
-			});
-		}
-
-		function getLabel_html(tag) {
-			return '<td><span class="label label-success">'
-					+ tag
-					+ '<a href="###" onclick="removeTag($(this))" style="margin-left:5px"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></span></td>';
-		}
-
-		function removeTag(o) {
-			var tag = o.parent().text();
-			for (var i = 0; i < tags.length; i++) {
-				if (tags[i].name == tag) {
-					tags.splice(i, 1);
-					renderTag();
-					return;
-				}
-			}
-		}
-		
-		
-		function showAutoSaveTip(time){
-			$("#auto-save-tip").remove();
-			var hour = time.getHours();
-			var minute = time.getMinutes();
-			var second = time.getSeconds();
-			if(hour < 10){
-				hour = "0" + hour;
-			}
-			if(minute < 10){
-				minute = "0" + minute;
-			}
-			if(second < 10){
-				second = "0"+second;
-			}
-			$('body').append('<div id="auto-save-tip"  style="position:fixed;top:0;text-align:center;width:100%"><div class="alert alert-info" style="width:200px;margin:0 auto;margin-top:5px;z-index:9999999;">'+(hour + ':' + minute+ ':'+second)+'自动保存成功</div></div>');
-			setTimeout(function(){
-				$("#auto-save-tip").remove();
-			},1500);
-		}
-		
-		function base64Upload(f){
-			//show pick up
-			if(f.size == 0){
-				bootbox.alert('不能上传空文件或者文件夹');
-				return;
-			}
-	    	var reader = new FileReader();
-	    	
-	    	dirChooser.choose(function(dir,store){
-	    		var left = $(window).width()/2 - 64;
-	    		var top = $(window).height()/2 - 64;
-	    		$("#upload-loading").remove();
-	    		$('body').append("<div id='upload-loading'><div class='modal-backdrop in' style='z-index: 1040;'></div><img src='"+basePath+"/static/img/loading.gif' style='position:absolute;top:"+top+"px;left:"+left+"px' /></div>");
-	    		reader.onload = (function(theFile) {
-		            return function(e) {
-		            	var base64 = e.target.result;
-		            	$.post(basePath+'/mgr/file/uploadWithBase64',{parent:dir.id,store:store,name:f.name,base64:base64},function(data){
-				    		$("#upload-loading").remove();
-		            		if(data.success){
-		            			var result = data.data[0];
-		            			if(result.error){
-		            				bootbox.alert(result.error);
-		            			} else {
-		            				var name = result.name;
-		            				var ext = name.split('.').pop().toLowerCase();
-		            				if(ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif'){
-		            					var middle = result.thumbnailUrl ? result.thumbnailUrl.middle : result.url;
-			            				var large = result.thumbnailUrl ? result.thumbnailUrl.large : result.url;
-			            				var md = '[!['+result.name+']('+middle+' "'+result.name+'")]('+large+' "'+result.name+'")';
-			            				editor.replaceSelection(md);
-		            				} else {
-		            					var md = '['+result.name+']('+result.url+')';
-		            					editor.replaceSelection(md);
-		            				}
-		            			}
-		            		}else{
-		            			bootbox.alert(data.message);
-		            		}
-		            	})
-		            };
-		          })(f);
-		         reader.readAsDataURL(f);
-	    	});
-		}
-	</script>
+	<script th:src="@{/static/js/markdown-it.js}"></script>
+	<script th:src="@{/static/js/markdown-it-footnote.min.js}"></script>
+	<script th:src="@{/static/js/waitForImages.js}"></script>
+	<script th:src="@{/static/js/mgr/article_md.js}"></script>
 </body>
 </html>

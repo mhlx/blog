@@ -39,7 +39,7 @@
 		</div>
 		<div th:if="${article.space == space || articlePage.param.hasQuery()}">
 			<div th:utext="${article.summary}"
-				th:unless="${article.hasLock() && user == null}"></div>
+				th:unless="${article.hasLock() && user == null}" th:attr="class=${article.editor.name() == 'MD' ? 'markdown-body' : null}"></div>
 			<div th:if="${article.hasLock() && user == null}">
 				<strong th:text="${messages.getMessage('article.locked','文章受锁保护')}"></strong>
 			</div>
