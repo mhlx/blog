@@ -21,6 +21,7 @@
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css}">
 <link rel="stylesheet" th:href="@{/static/css/markdown.css}">
+<link rel="stylesheet" th:href="@{/static/prettify/github-v2.min.css}">
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 <!--[if lt IE 9]>
@@ -93,11 +94,19 @@
 .modal {
 	z-index: 9999999
 }
+
+#stat{
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	width:50%;
+	text-align:right;
+	display:none
+}
 </style>
 </head>
 <body>
-	<div class="container-fluid">
-		<div class="col-md-6">
+	<div>
 			<div id="toolbar">
 				<span class="glyphicon glyphicon-save icon" style="color: red"
 					title="保存" onclick="showBase()"></span> <span
@@ -112,8 +121,8 @@
 				<textarea id="code" style="width: 100%; height: 100%"
 					th:text="${article.content}"></textarea>
 			</div>
-		</div>
-		<div class="col-md-6 markdown-body" id="out"></div>
+		<div class="markdown-body" id="out"></div>
+		<div id="stat"></div>
 	</div>
 
 
@@ -136,6 +145,7 @@
 							</p></li>
 						<li><p>支持文件拖曳上传</p></li>
 						<li><p>支持拖曳导入md文件</p></li>
+						<li><p>支持拖曳导入html文件(自动转化为markdown)</p></li>
 					</ol>
 					<h3>快捷键</h3>
 					<div class="table-responsive">
@@ -450,9 +460,13 @@ public static void main(String [] args){
 	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/emoji.js}"></script>
 	<script th:src="@{/static/js/modal.js}"></script>
-	<script th:src="@{/static/js/markdown-it.js}"></script>
-	<script th:src="@{/static/js/markdown-it-footnote.min.js}"></script>
+	<script th:src="@{/static/markdown/markdown-it.js}"></script>
+	<script th:src="@{/static/markdown/markdown-it-footnote.min.js}"></script>
+	<script th:src="@{/static/markdown/turndown.js}"></script>
+	<script th:src="@{/static/markdown/turndown-plugin-gfm.js}"></script>
 	<script th:src="@{/static/js/waitForImages.js}"></script>
+	<script th:src="@{/static/prettify/prettify.js}"></script>
+	<script th:src="@{/static/js/mgr/article_editor.js}"></script>
 	<script th:src="@{/static/js/mgr/article_md.js}"></script>
 </body>
 </html>
