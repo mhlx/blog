@@ -166,37 +166,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="selectPage" resultMap="ArticleDetail">
-		SELECT
-		art.id AS art_id,
-		art.pubDate,
-		art.lastModifyDate,
-		art.title,
-		art.isPrivate,
-		art.hits,
-		art.summary,
-		art.art_level,
-		art.art_status,
-		art.editor,
-		art.art_from,
-		art.space_id,
-		art.art_lock,
-		art.art_alias,
-		art.feature_image,
-		sp.space_alias,
-		space_lock,
-		sp.is_private AS space_is_private,
-		sp.space_name,
-		GROUP_CONCAT(bt.tag_name) AS tags
-		FROM
-		blog_article art
-		LEFT OUTER JOIN blog_space sp
-		ON art.space_id = sp.id
-		LEFT OUTER JOIN
-		blog_article_tag bat ON
-		bat.article_id = art.id
-		LEFT OUTER JOIN blog_tag
-		bt ON bat.tag_id =
-		bt.id
+		<include refid="articlePageSql"/>
 		<where>
 			<if test="space != null and space.hasId()">
 				art.space_id = #{space.id}
@@ -260,37 +230,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="selectPageByIds" resultMap="ArticleDetail">
-		SELECT
-		art.id AS art_id,
-		art.pubDate,
-		art.lastModifyDate,
-		art.title,
-		art.isPrivate,
-		art.hits,
-		art.summary,
-		art.art_level,
-		art.art_status,
-		art.art_from,
-		art.space_id,
-		art.art_lock,
-		art.art_alias,
-		art.feature_image,
-		sp.space_alias,
-		space_lock,
-		sp.space_name,
-		sp.is_private AS space_is_private,
-		GROUP_CONCAT(bt.tag_name) AS tags
-		FROM
-		blog_article art
-		LEFT OUTER JOIN
-		blog_space sp
-		ON art.space_id = sp.id
-		LEFT OUTER JOIN blog_article_tag
-		bat ON
-		bat.article_id = art.id
-		LEFT OUTER JOIN blog_tag bt ON bat.tag_id
-		=
-		bt.id
+		<include refid="articlePageSql"/>
 		WHERE art.id IN
 		<foreach collection="collection" item="id" open="(" close=")"
 			separator=",">#{id}</foreach>
@@ -608,5 +548,39 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		bat ON
 		bat.article_id = art.id
 		LEFT OUTER JOIN blog_tag bt ON bat.tag_id = bt.id
+	</sql>
+	
+	<sql id="articlePageSql">
+		SELECT
+		art.id AS art_id,
+		art.pubDate,
+		art.lastModifyDate,
+		art.title,
+		art.isPrivate,
+		art.hits,
+		art.summary,
+		art.art_level,
+		art.art_status,
+		art.editor,
+		art.art_from,
+		art.space_id,
+		art.art_lock,
+		art.art_alias,
+		art.feature_image,
+		sp.space_alias,
+		space_lock,
+		sp.is_private AS space_is_private,
+		sp.space_name,
+		GROUP_CONCAT(bt.tag_name) AS tags
+		FROM
+		blog_article art
+		LEFT OUTER JOIN blog_space sp
+		ON art.space_id = sp.id
+		LEFT OUTER JOIN
+		blog_article_tag bat ON
+		bat.article_id = art.id
+		LEFT OUTER JOIN blog_tag
+		bt ON bat.tag_id =
+		bt.id
 	</sql>
 </mapper>
