@@ -1,3 +1,22 @@
+var md = (function() {
+		var md = window.markdownit({
+			html : true,
+			linkify : true,
+			typographer : true
+		}).use(window.markdownitFootnote);
+
+		var injectLineNumbers = function(tokens, idx, options, env, slf) {
+			var line;
+			if (tokens[idx].map && tokens[idx].level === 0) {
+				line = tokens[idx].map[0];
+				tokens[idx].attrJoin('class', 'line');
+				tokens[idx].attrSet('data-line', String(line));
+			}
+			return slf.renderToken(tokens, idx, options, env, slf);
+		}
+		md.renderer.rules.paragraph_open = md.renderer.rules.heading_open = injectLineNumbers;
+		return md;
+	})();
 var editor = (function() {
 	var autoParse = true;
 	var scrollMap;
@@ -251,25 +270,8 @@ var editor = (function() {
 		return turndownService;
 	})();
 
-	var md = (function() {
-		var md = window.markdownit({
-			html : true,
-			linkify : true,
-			typographer : true
-		}).use(window.markdownitFootnote);
-
-		var injectLineNumbers = function(tokens, idx, options, env, slf) {
-			var line;
-			if (tokens[idx].map && tokens[idx].level === 0) {
-				line = tokens[idx].map[0];
-				tokens[idx].attrJoin('class', 'line');
-				tokens[idx].attrSet('data-line', String(line));
-			}
-			return slf.renderToken(tokens, idx, options, env, slf);
-		}
-		md.renderer.rules.paragraph_open = md.renderer.rules.heading_open = injectLineNumbers;
-		return md;
-	})();
+	
+	
 	
 	var base64Upload = function(f){
 		// show pick up
