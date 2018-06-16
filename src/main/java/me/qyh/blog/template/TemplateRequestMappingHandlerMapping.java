@@ -80,6 +80,18 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 
 	private HandlerInterceptor[] interceptorArray;
 
+	/**
+	 * 在应用启动期间，允许插件覆盖系统默认的路径
+	 * 
+	 * @since 6.5
+	 */
+	private HandlerMethodRegister register = (o, h, m) -> {
+		synchronized (this) {
+			super.unregisterMapping(m);
+			super.registerHandlerMethod(o, h, m);
+		}
+	};
+
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
@@ -180,11 +192,17 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 		}
 	}
 
+	@Override
+	protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
+		this.register.register(handler, method, mapping);
+	}
+
 	@EventListener
 	void start(ContextRefreshedEvent evt) {
 		if (evt.getApplicationContext().getParent() == null) {
 			return;
 		}
+		this.register = (o, h, m) -> super.registerHandlerMethod(o, h, m);
 		templateInterceptors.addAll(BeanFactoryUtils
 				.beansOfTypeIncludingAncestors(getApplicationContext(), TemplateInterceptor.class, true, false)
 				.values());
@@ -261,6 +279,10 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 				chain.addInterceptor(interceptor);
 			}
 		}
+	}
+
+	private interface HandlerMethodRegister {
+		void register(Object handler, Method method, RequestMappingInfo mapping);
 	}
 
 }

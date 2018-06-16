@@ -32,8 +32,6 @@ import org.thymeleaf.util.FastStringWriter;
 
 import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.Markdown2Html;
-import me.qyh.blog.core.util.StringUtils;
-import me.qyh.blog.core.util.Validators;
 
 /**
  * 能够使用 markdown标签
@@ -71,7 +69,7 @@ public class MarkdownModelProcessor extends AbstractElementModelProcessor {
 					model.reset();
 					reset = true;
 
-					model.add(context.getModelFactory().createText(toMarkdown(writer.toString())));
+					model.add(context.getModelFactory().createText(markdown2Html.toHtml(writer.toString())));
 
 				} catch (IOException e) {
 					throw new TemplateProcessingException(e.getMessage(), e);
@@ -95,21 +93,5 @@ public class MarkdownModelProcessor extends AbstractElementModelProcessor {
 			}
 			model.remove(0);// remove <markdown>
 		}
-	}
-
-	protected String toMarkdown(String html) {
-		if (!Validators.isEmptyOrNull(html, true)) {
-			String lines[] = html.split("\\r?\\n");
-			if (lines.length == 1) {
-				html = markdown2Html.toHtml(StringUtils.trimBegin(lines[0]) + "\r\n");
-			} else {
-				StringBuilder sb = new StringBuilder();
-				for (String line : lines) {
-					sb.append(StringUtils.trimBegin(line)).append("\r\n");
-				}
-				html = markdown2Html.toHtml(sb.toString());
-			}
-		}
-		return html;
 	}
 }

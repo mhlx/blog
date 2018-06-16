@@ -582,8 +582,6 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 重建索引
 	 * 
-	 * @throws IOException
-	 * 
 	 */
 	public synchronized void rebuildIndex() {
 		executor.submit(() -> {

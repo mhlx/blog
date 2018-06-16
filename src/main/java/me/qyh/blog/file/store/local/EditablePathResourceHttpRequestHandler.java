@@ -99,7 +99,7 @@ public class EditablePathResourceHttpRequestHandler extends CustomResourceHttpRe
 	@Autowired
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private static final Set<String> editableExts = Set.of("js", "css", "json", "txt", "xml");
+	private static final Set<String> editableExts = Set.of("js", "css", "json", "txt", "xml", "html");
 
 	/**
 	 * @param rootLocation

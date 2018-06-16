@@ -104,9 +104,6 @@ $(function() {
 						}
 					});
 
-	setInterval(function() {
-		save();
-	}, 10000);
 
 	$("#submit-art").click(function() {
 		publishing = true;
@@ -288,7 +285,7 @@ function renderTag() {
 	$("#tags-container").html(html);
 }
 
-function save() {
+function save(fn) {
 	if (publishing) {
 		return;
 	}
@@ -313,7 +310,9 @@ function save() {
 		success : function(data) {
 			if (data.success) {
 				$("#id").val(data.data.id);
-				// showAutoSaveTip(new Date());
+				if(fn){
+					fn();
+				}
 			}
 		},
 		complete : function() {
@@ -378,58 +377,17 @@ function inputSummry(o) {
 	$("#summary-rendered").html('').hide();
 	$("#summary-content").show();
 }
-
-function bold() {
-	var text = editor.getSelection();
-	if (text == '') {
-		editor.replaceRange("****", editor.getCursor());
-		editor.focus();
-		var str = "**";
-		var mynum = str.length;
-		var start_cursor = editor.getCursor();
-		var cursorLine = start_cursor.line;
-		var cursorCh = start_cursor.ch;
-		editor.setCursor({
-			line : cursorLine,
-			ch : cursorCh - mynum
-		});
-	} else {
-		editor.replaceSelection("**" + text + "**");
+var save_timer;
+editor.on('change',function(){
+		if (save_timer) {
+		clearTimeout(save_timer);
 	}
-}
-
-function italic() {
-	var text = editor.getSelection();
-	if (text == '') {
-		editor.replaceRange("**", editor.getCursor());
-		editor.focus();
-		var str = "*";
-		var mynum = str.length;
-		var start_cursor = editor.getCursor();
-		var cursorLine = start_cursor.line;
-		var cursorCh = start_cursor.ch;
-		editor.setCursor({
-			line : cursorLine,
-			ch : cursorCh - mynum
-		});
-	} else {
-		editor.replaceSelection("*" + text + "*");
-	}
-}
-
-function blockQuote() {
-	var text = editor.getSelection();
-	if (text == '') {
-		editor.replaceRange("> ", editor.getCursor());
-		editor.focus();
-		var start_cursor = editor.getCursor();
-		var cursorLine = start_cursor.line;
-		var cursorCh = start_cursor.ch;
-		editor.setCursor({
-			line : cursorLine,
-			ch : cursorCh
-		});
-	} else {
-		editor.replaceSelection("> " + text);
-	}
-}
+	save_timer = setTimeout(function() {
+		save(function(){
+			$("#saveTip").html("自动保存于" + new Date().format("HH:MM:ss")).show();
+			save_timer = setTimeout(function() {
+				$("#saveTip").html("").hide();
+			}, 1800);
+		})
+	}, 2000);
+})

@@ -41,6 +41,7 @@ import me.qyh.blog.core.vo.JsonResult;
 import me.qyh.blog.file.store.local.EditablePathResourceHttpRequestHandler;
 import me.qyh.blog.file.validator.StaticFileQueryParamValidator;
 import me.qyh.blog.file.validator.StaticFileUploadValidator;
+import me.qyh.blog.file.vo.FileContent;
 import me.qyh.blog.file.vo.StaticFileQueryParam;
 import me.qyh.blog.file.vo.StaticFileUpload;
 import me.qyh.blog.file.vo.UnzipConfig;
@@ -96,8 +97,14 @@ public class StaticFileMgrController extends BaseMgrController {
 	public String edit(@RequestParam("path") String path, Model model, RedirectAttributes ra) {
 		try {
 			checkHandler();
-			model.addAttribute("file", handler.getEditableFile(path));
-			return "mgr/file/local_editor";
+			FileContent fileContent = handler.getEditableFile(path);
+			model.addAttribute("file", fileContent);
+
+			String ext = fileContent.getExt().toLowerCase();
+			if (ext.equals("htm")) {
+				ext = "html";
+			}
+			return "mgr/file/local/editor_" + ext;
 		} catch (LogicException e) {
 			ra.addFlashAttribute(Constants.ERROR, e.getLogicMessage());
 			return "redirect:/mgr/static/index";

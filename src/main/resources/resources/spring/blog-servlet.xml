@@ -75,6 +75,7 @@
 		<property name="animatedWebpConfigure">
 			<bean class="me.qyh.blog.file.store.local.AnimatedWebpConfigure">
 				<constructor-arg index="0" value="1" />
+				<property name="sec" value="20"/>
 			</bean>
 		</property>
 	</bean>
@@ -151,6 +152,9 @@
 	<!-- class="me.qyh.blog.file.store.local.GravatarResourceHttpRequestHandler"> -->
 	<!-- <constructor-arg index="0" value="/web/file/gravatar" /> -->
 	<!-- </bean> -->
+	
+	
+	<aop:aspectj-autoproxy proxy-target-class="true" />
 
 	<bean class="me.qyh.blog.web.interceptor.AppInterceptor" />
 	<bean class="me.qyh.blog.web.WebConfiguration" />

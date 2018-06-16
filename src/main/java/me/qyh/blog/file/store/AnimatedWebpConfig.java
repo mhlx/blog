@@ -23,6 +23,8 @@ package me.qyh.blog.file.store;
  */
 public class AnimatedWebpConfig {
 
+	private int sec;// 最长处理时间
+
 	public enum Metadata {
 		ALL("all"), NONE("none"), ICC("icc"), XMP("xmp");
 
@@ -48,6 +50,7 @@ public class AnimatedWebpConfig {
 		this.method = config.method;
 		this.mixed = config.mixed;
 		this.q = config.q;
+		this.sec = config.sec;
 	}
 
 	private boolean lossy = true;
@@ -96,6 +99,14 @@ public class AnimatedWebpConfig {
 
 	public void setMetadata(Metadata metadata) {
 		this.metadata = metadata;
+	}
+
+	public int getSec() {
+		return sec;
+	}
+
+	public void setSec(int sec) {
+		this.sec = sec;
 	}
 
 }

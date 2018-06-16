@@ -330,7 +330,11 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 
 	protected void processAnimatedCommand(AnimatedWebpConfig config, Path gif, Path dest) throws ProcessException {
 		List<String> command = buildCommand(config, gif, dest);
-		ProcessUtils.runProcess(command, 10, TimeUnit.SECONDS);
+		int sec = config.getSec();
+		if (sec <= 0) {
+			sec = 10;
+		}
+		ProcessUtils.runProcess(command, sec, TimeUnit.SECONDS);
 	}
 
 }
