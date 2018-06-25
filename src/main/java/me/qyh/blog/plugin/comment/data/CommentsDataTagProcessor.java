@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.plugin.comment.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.context.Environment;
@@ -66,6 +68,11 @@ public class CommentsDataTagProcessor extends DataTagProcessor<CommentPageResult
 		param.setStatus(!Environment.isLogin() ? CommentStatus.NORMAL : null);
 
 		return commentService.queryComment(param);
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of("moduleType", "moduleId", "mode", "asc", "currentPage", "pageSize");
 	}
 
 }

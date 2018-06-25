@@ -19,8 +19,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import me.qyh.blog.core.message.Message;
@@ -28,8 +26,6 @@ import me.qyh.blog.core.message.Messages;
 import me.qyh.blog.core.plugin.DataTagProcessorRegistry;
 import me.qyh.blog.core.plugin.Menu;
 import me.qyh.blog.core.plugin.MenuRegistry;
-import me.qyh.blog.core.plugin.MybatisConfigurer;
-import me.qyh.blog.core.plugin.PluginHandlerRegistry;
 import me.qyh.blog.core.plugin.PluginHandlerSupport;
 import me.qyh.blog.core.plugin.PluginProperties;
 import me.qyh.blog.core.plugin.TemplateRegistry;
@@ -47,8 +43,6 @@ public class CommentPluginHandler extends PluginHandlerSupport {
 	private static final String FORCE_SEND_SEC_KEY = "plugin.comment.email.forceSendSec";
 
 	private final PluginProperties pluginProperties = PluginProperties.getInstance();
-
-	private final String rootPackage = PluginHandlerRegistry.getRootPluginPackage(this.getClass()) + ".";
 
 	private Messages messages;
 
@@ -76,23 +70,21 @@ public class CommentPluginHandler extends PluginHandlerSupport {
 							.getBeanDefinition());
 		}
 
-		registry.registerXml(new ClassPathResource(rootPackage.replace('.', '/') + "bean.xml"));
+		registry.registerXml("bean.xml");
 
-		registry.scanAndRegister(rootPackage + "validator", rootPackage + "component");
+		registry.scanAndRegister("validator", "component");
 	}
 
 	@Override
 	protected void registerChildBean(BeanRegistry registry) {
-		registry.scanAndRegister(rootPackage + "web.controller");
+		registry.scanAndRegister("web.controller");
 	}
 
 	@Override
-	public void configureMybatis(MybatisConfigurer configurer) throws Exception {
-		configurer.addBasePackages(rootPackage + "dao");
-		ResourcePatternResolver resolver = ResourcePatternUtils.getResourcePatternResolver(null);
-		String rootPath = rootPackage.replace('.', '/') + "mapper/";
-		configurer.addMapperLocations(resolver.getResources(rootPath + "*.xml"));
-		configurer.addTypeAliasResources(new ClassPathResource(rootPath + "typeAlias.txt"));
+	public void configureMybatis(RelativeMybatisConfigurer configurer) throws Exception {
+		configurer.addBasePackages("dao");
+		configurer.addRelativeTypeAliasLocations("mapper/typeAlias.txt");
+		configurer.addRelativeMapperLocationPattern("mapper/*.xml");
 	}
 
 	@Override

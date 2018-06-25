@@ -49,8 +49,10 @@ $(document).ready(function() {
 			var m = $(this).attr("data-handler");
 			switch(m){
 			case 'file':
-				fileSelectPageQuery(1,'');
-	        	$("#fileSelectModal").modal("show");
+				fileChooser.choose(function(data){
+					handleFile(data);
+					return true;
+				});
 				break;
 			case 'localFile':
 				sfq.show();
@@ -473,4 +475,21 @@ $(document).ready(function() {
 				bootbox.alert(data.message);
 			}
 		});
+	}
+	
+	
+
+	function handleFile(data){
+		var cf = data.cf;
+		var ext = cf.extension.toLowerCase();
+		if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
+			editor.replaceSelection('<a href="'+cf.url+'" target="_blank" title="'+cf.originalFilename+'">'+cf.url+'</a>')
+		} else {
+			var thumb = cf.thumbnailUrl;
+			if(thumb){
+				editor.replaceSelection('<a href="'+thumb.large+'" target="_blank" title="'+cf.originalFilename+'"><img src="'+thumb.middle+'" alt="'+cf.originalFilename+'"/></a>')
+			} else {
+				editor.replaceSelection('<img src="'+cf.url+'"  alt="'+cf.originalFilename+'"/>')
+			}
+		}
 	}

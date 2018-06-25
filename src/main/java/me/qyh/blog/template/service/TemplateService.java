@@ -22,12 +22,14 @@ import java.util.function.Consumer;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.vo.PageResult;
+import me.qyh.blog.template.BackendTemplate;
 import me.qyh.blog.template.PathTemplate;
 import me.qyh.blog.template.SystemTemplate;
 import me.qyh.blog.template.Template;
 import me.qyh.blog.template.entity.Fragment;
 import me.qyh.blog.template.entity.HistoryTemplate;
 import me.qyh.blog.template.entity.Page;
+import me.qyh.blog.template.vo.BackendTemplateInfo;
 import me.qyh.blog.template.vo.DataBind;
 import me.qyh.blog.template.vo.DataTag;
 import me.qyh.blog.template.vo.DataTagProcessorBean;
@@ -295,22 +297,6 @@ public interface TemplateService {
 	void registerPreview(Fragment fragment) throws LogicException;
 
 	/**
-	 * 获取模板片段的模板名称
-	 * <p>
-	 * 如果IP为预览IP，并且为预览模板，返回预览模板名
-	 * </p>
-	 * 
-	 * @param name
-	 *            名称
-	 * @param space
-	 *            空间
-	 * @param ip
-	 *            ip地址
-	 * @return
-	 */
-	String getFragmentTemplateName(String name, Space space, String ip);
-
-	/**
 	 * 获取系统模板
 	 * 
 	 * @return
@@ -334,20 +320,6 @@ public interface TemplateService {
 	PreviewImport previewImport(ExportPages exportPages) throws LogicException;
 
 	/**
-	 * 解除某些预览的页面
-	 * 
-	 * @param templates
-	 */
-	void unregisterPreview(PathTemplate... templates);
-
-	/**
-	 * 解除某些预览的模板片段
-	 * 
-	 * @param names
-	 */
-	void unregisterPreview(Fragment... fragments);
-
-	/**
 	 * 更新数据的是否可以外部调用
 	 * 
 	 * @since 6.2
@@ -355,5 +327,38 @@ public interface TemplateService {
 	 * @param callable
 	 */
 	void updateDataCallable(String name, boolean callable);
+
+	/**
+	 * 获取所有管理台模板的路径情况
+	 * 
+	 * @return
+	 */
+	List<BackendTemplateInfo> getAllBackendTemplateInfos();
+
+	/**
+	 * 编辑管理台页面
+	 * 
+	 * @param path
+	 *            管理台模板路径
+	 * @param content
+	 *            模板内容
+	 * @throws LogicException
+	 */
+	void editBackendTemplate(String path, String content) throws LogicException;
+
+	/**
+	 * 删除<b>编辑过</b>的管理台页面
+	 * 
+	 * @param path
+	 */
+	void deleteBackendTemplate(String path);
+
+	/**
+	 * 获取管理台页面
+	 * 
+	 * @param path
+	 * @return
+	 */
+	Optional<BackendTemplate> getBackendTemplate(String path);
 
 }

@@ -37,4 +37,8 @@ public class ArticleTagDataTagProcessor extends DataTagProcessor<List<TagCount>>
 		return articleService.queryTags();
 	}
 
+	@Override
+	public List<String> getAttributes() {
+		return List.of();
+	}
 }

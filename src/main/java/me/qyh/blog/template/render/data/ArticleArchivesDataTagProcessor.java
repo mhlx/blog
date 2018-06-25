@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.exception.LogicException;
@@ -41,6 +43,11 @@ public class ArticleArchivesDataTagProcessor extends DataTagProcessor<ArticleArc
 	protected ArticleArchiveTree query(Attributes attributes) throws LogicException {
 		ArticleArchiveMode mode = attributes.getEnum("mode", ArticleArchiveMode.class).orElse(ArticleArchiveMode.YMD);
 		return articleService.selectArticleArchives(mode);
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of("mode");
 	}
 
 }

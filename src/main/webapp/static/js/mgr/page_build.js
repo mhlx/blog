@@ -46,8 +46,10 @@ $(document).ready(function() {
 			var m = $(this).attr("data-handler");
 			switch(m){
 			case 'file':
-				fileSelectPageQuery(1,'');
-	        	$("#fileSelectModal").modal("show");
+				fileChooser.choose(function(data){
+					handleFile(data);
+					return true;
+				});
 				break;
 			case 'localFile':
 				sfq.show();
@@ -99,8 +101,22 @@ $(document).ready(function() {
 	    }
 	    return true;
 	 });
-	function addDataTag(name){
-		editor.replaceSelection('<data name="'+name+'"/>');
+	function addDataTag(dataName){
+		for(var i=0;i<dataTags.length;i++){var tag =dataTags[i];
+			if(tag.dataName == dataName){
+				
+				var html = '<data name="'+dataName+'"';
+				if(tag.attrs.length > 0){
+					for(var j=0;j<tag.attrs.length;j++){
+						html += " "+tag.attrs[j]+"=\"\"";
+					}
+				}
+				html += '/>';
+				
+				editor.replaceSelection(html);
+				break;
+			}
+		}
 		$("#lookupModal").modal('hide');
 	}
 	function addFragment(name){
@@ -180,7 +196,7 @@ $(document).ready(function() {
 	function lookup(){
 		$("#lookupModal").modal('show');
 	}
-	
+	var dataTags = [];
 	function showDataTags(){
 		var html = '';
 		$('[aria-labelledby="data-tab"]').html('<img src="'+basePath+'/static/img/loading.gif" class="img-responsive center-block"/>')
@@ -190,6 +206,7 @@ $(document).ready(function() {
 				return ;
 			}
 			data = data.data;
+			dataTags = data;
 			html += '<div class=" table-responsive" style="margin-top:10px">';
 			html += '<table class="table">';
 			for(var i=0;i<data.length;i++){
@@ -537,3 +554,18 @@ var getFileExtension = function (url) {
         ? url.substring(index + 1) // Only keep file extension
         : ""; // No extension found
 };
+
+function handleFile(data){
+	var cf = data.cf;
+	var ext = cf.extension.toLowerCase();
+	if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
+		editor.replaceSelection('<a href="'+cf.url+'" target="_blank" title="'+cf.originalFilename+'">'+cf.url+'</a>')
+	} else {
+		var thumb = cf.thumbnailUrl;
+		if(thumb){
+			editor.replaceSelection('<a href="'+thumb.large+'" target="_blank" title="'+cf.originalFilename+'"><img src="'+thumb.middle+'" alt="'+cf.originalFilename+'"/></a>')
+		} else {
+			editor.replaceSelection('<img src="'+cf.url+'"  alt="'+cf.originalFilename+'"/>')
+		}
+	}
+}

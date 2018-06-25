@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.entity.Article;
@@ -35,4 +37,8 @@ public class RandomArticleDataTagProcessor extends DataTagProcessor<Article> {
 		return articleService.selectRandom(attributes.getBoolean("queryLock").orElse(false)).orElse(null);
 	}
 
+	@Override
+	public List<String> getAttributes() {
+		return List.of("queryLock");
+	}
 }

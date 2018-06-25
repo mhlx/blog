@@ -22,8 +22,6 @@ import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.plugin.LockProviderRegistry;
 import me.qyh.blog.core.plugin.Menu;
 import me.qyh.blog.core.plugin.MenuRegistry;
-import me.qyh.blog.core.plugin.MybatisConfigurer;
-import me.qyh.blog.core.plugin.PluginHandlerRegistry;
 import me.qyh.blog.core.plugin.PluginHandlerSupport;
 import me.qyh.blog.core.plugin.TemplateRegistry;
 import me.qyh.blog.core.util.Resources;
@@ -33,8 +31,6 @@ public class SysLockPluginHandler extends PluginHandlerSupport {
 
 	private SysLockProvider provider;
 
-	private final String rootPackage = PluginHandlerRegistry.getRootPluginPackage(this.getClass()) + ".";
-
 	@Override
 	public void init(ApplicationContext applicationContext) throws Exception {
 		provider = applicationContext.getBean(SysLockProvider.class);
@@ -42,20 +38,19 @@ public class SysLockPluginHandler extends PluginHandlerSupport {
 
 	@Override
 	protected void registerBean(BeanRegistry registry) {
-		registry.scanAndRegister(rootPackage + "component", rootPackage + "validator");
+		registry.scanAndRegister("component", "validator");
 	}
 
 	@Override
 	protected void registerChildBean(BeanRegistry registry) {
-		registry.scanAndRegister(rootPackage + "web.controller");
+		registry.scanAndRegister("web.controller");
 	}
 
 	@Override
-	public void configureMybatis(MybatisConfigurer configurer) throws Exception {
-		String rootPath = rootPackage.replace('.', '/') + "mapper/";
-		configurer.addBasePackages(rootPackage + "dao");
-		configurer.addMapperLocations(new ClassPathResource(rootPath + "lockMapper.xml"));
-		configurer.addTypeAliasResources(new ClassPathResource(rootPath + "typeAlias.txt"));
+	public void configureMybatis(RelativeMybatisConfigurer configurer) throws Exception {
+		configurer.addBasePackages("dao");
+		configurer.addRelativeMapperLocationPattern("mapper/*.xml");
+		configurer.addRelativeTypeAliasLocations("mapper/typeAlias.txt");
 
 	}
 

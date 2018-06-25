@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.exception.LogicException;
@@ -33,6 +35,11 @@ public class TagStatisticsDataTagProcessor extends DataTagProcessor<TagStatistic
 	@Override
 	protected TagStatistics query(Attributes attributes) throws LogicException {
 		return tagService.queryTagStatistics();
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of();
 	}
 
 }

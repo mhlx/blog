@@ -1,7 +1,6 @@
 	var publishing = false;
 	var tags = [];
 	var editor;
-	var editor_mode = $("#editorMode").val();
 	$(function() {
 		var mixedMode = {
 		        name: "htmlmixed",
@@ -10,20 +9,11 @@
 		                      {matches: /(text|application)\/(x-)?vb(a|script)/i,
 		                       mode: "vbscript"}]
 		      };
-		if(editor_mode == 'HTML'){
-			  editor = CodeMirror.fromTextArea(document.getElementById("text"), {
-		        mode: mixedMode,
-		        lineNumbers: true,
-		        autoCloseTags: true
-		      });
-		}else{
-			editor = CodeMirror.fromTextArea(document.getElementById("text"), {
-			    mode: 'markdown',
-		        lineNumbers: true,
-		        theme: "default",
-		        extraKeys: {"Enter": "newlineAndIndentContinueMarkdownList"}
-		      });
-		}
+	  editor = CodeMirror.fromTextArea(document.getElementById("text"), {
+        mode: mixedMode,
+        lineNumbers: true,
+        autoCloseTags: true
+      });
 		editor.setSize('100%',600)
 		$("#previewLab").click(function(){
 			var preview = $("#preview iframe").contents().find('#preview');
@@ -34,8 +24,10 @@
 			var m = $(this).attr("data-md-handler");
 			switch(m){
 			case 'file':
-				fileSelectPageQuery(1,'');
-	        	$("#fileSelectModal").modal("show");
+				fileChooser.choose(function(data){
+					handleFile(data);
+					return true;
+				});
 				break;
 			case 'code':
 				$("#code_area").val('');
@@ -308,7 +300,7 @@
 		article.featureImage = $("#featureImage").val();
 		article.summary = $("#summary").val();
 		article.space = {"id":$("#space").val()};
-		article.editor = editor_mode;
+		article.editor = 'HTML';
 		if($("#lockId").val() != ""){
 			article.lockId = $("#lockId").val();
 		}
@@ -317,4 +309,19 @@
 			article.id = $("#id").val();
 		}
 		return article;
+	}
+	
+	function handleFile(data){
+		var cf = data.cf;
+		var ext = cf.extension.toLowerCase();
+		if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
+			editor.replaceSelection('<a href="'+cf.url+'" target="_blank" title="'+cf.originalFilename+'">'+cf.url+'</a>')
+		} else {
+			var thumb = cf.thumbnailUrl;
+			if(thumb){
+				editor.replaceSelection('<a href="'+thumb.large+'" target="_blank" title="'+cf.originalFilename+'"><img src="'+thumb.middle+'" alt="'+cf.originalFilename+'"/></a>')
+			} else {
+				editor.replaceSelection('<img src="'+cf.url+'"  alt="'+cf.originalFilename+'"/>')
+			}
+		}
 	}

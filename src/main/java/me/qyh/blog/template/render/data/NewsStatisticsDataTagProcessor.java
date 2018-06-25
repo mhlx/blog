@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.exception.LogicException;
@@ -35,4 +37,8 @@ public class NewsStatisticsDataTagProcessor extends DataTagProcessor<NewsStatist
 		return newsService.queryNewsStatistics();
 	}
 
+	@Override
+	public List<String> getAttributes() {
+		return List.of();
+	}
 }

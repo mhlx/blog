@@ -347,8 +347,7 @@ public class TemplateMapping {
 						.hasNext();) {
 					Map.Entry<String, PreviewTemplate> entry = it.next();
 					for (String templateName : templateNames) {
-						String previewTemplateName = PreviewTemplate.isPreviewTemplate(templateName) ? templateName
-								: PreviewTemplate.TEMPLATE_PREVIEW_PREFIX + templateName;
+						String previewTemplateName = PreviewTemplate.getTemplateName(templateName);
 						if (previewTemplateName.equals(entry.getValue().getTemplateName())) {
 							it.remove();
 							continue out;
@@ -443,7 +442,7 @@ public class TemplateMapping {
 			Objects.requireNonNull(ori);
 			lock.writeLock().lock();
 			try {
-				PreviewTemplate preview = wrap(ori);
+				PreviewTemplate preview = new PreviewTemplate(ori);
 				String pattern = ori.getRelativePath();
 				String templateName = preview.getTemplateName();
 
@@ -475,13 +474,6 @@ public class TemplateMapping {
 			} finally {
 				lock.writeLock().unlock();
 			}
-		}
-
-		private PreviewTemplate wrap(PathTemplate ori) {
-			if (ori instanceof PreviewTemplate) {
-				return (PreviewTemplate) ori;
-			}
-			return new PreviewTemplate(ori);
 		}
 
 		private boolean isHighestPriorityPattern(String pattern, PatternsMatchCondition sysCondition) {

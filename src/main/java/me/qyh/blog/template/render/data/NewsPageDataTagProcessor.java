@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.config.ConfigServer;
@@ -66,4 +68,8 @@ public class NewsPageDataTagProcessor extends DataTagProcessor<PageResult<News>>
 		return newsService.queryNews(param);
 	}
 
+	@Override
+	public List<String> getAttributes() {
+		return List.of("begin", "end", "queryPrivate", "asc", "pageSize", "currentPage");
+	}
 }

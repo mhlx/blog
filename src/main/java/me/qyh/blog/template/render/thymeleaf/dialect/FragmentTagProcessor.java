@@ -27,9 +27,15 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.util.FastStringWriter;
 
 import me.qyh.blog.core.context.Environment;
+import me.qyh.blog.template.PreviewTemplate;
+import me.qyh.blog.template.entity.Fragment;
 import me.qyh.blog.template.service.TemplateService;
 
 /**
+ * Fragment 标签处理器，fragment标签和
+ * th:insert|th:replace的最主要区别在于，th:insert|th:replace的缓存和页面关联，而fragment缓存与页面无关
+ * 
+ * {@link https://github.com/thymeleaf/thymeleaf/issues/515}
  * {@link http://www.thymeleaf.org/doc/tutorials/3.0/extendingthymeleaf.html#creating-our-own-dialect}
  * 
  * @author mhlx
@@ -60,8 +66,10 @@ public class FragmentTagProcessor extends DefaultAttributesTagProcessor {
 		Map<String, String> attMap = processAttribute(context, tag);
 		String name = attMap.get(NAME);
 		if (name != null) {
-			String templateName = templateService.getFragmentTemplateName(name, Environment.getSpace(),
-					Environment.getIP());
+			String templateName = Fragment.getTemplateName(name, Environment.getSpace());
+			if (templateService.isPreviewIp(Environment.getIP())) {
+				templateName = PreviewTemplate.getTemplateName(templateName);
+			}
 			Writer writer = new FastStringWriter(200);
 
 			context.getConfiguration().getTemplateManager()

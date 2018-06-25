@@ -1,19 +1,12 @@
 package me.qyh.blog.plugin.markdowniteditor;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
-import jdk.incubator.http.HttpClient;
-import jdk.incubator.http.HttpClient.Version;
-import jdk.incubator.http.HttpRequest;
-import jdk.incubator.http.HttpRequest.BodyPublisher;
-import jdk.incubator.http.HttpResponse;
-import jdk.incubator.http.HttpResponse.BodyHandler;
 import me.qyh.blog.core.plugin.PluginHandlerSupport;
 import me.qyh.blog.core.plugin.PluginProperties;
 import me.qyh.blog.core.util.Jsons;
@@ -94,13 +87,6 @@ server.listen(port, hostname, () => {
  * 
  * 这样通过 post http://localhost:3000 即可获取转化后的文本
  * 
- * <p>
- * <b>采用了java9的httpclient来简化操作，需要在tomcat的启动参数中，加入额外的模块，例如在catalina.sh中加入</b>
- * </p>
- * 
- * <pre>
- * JAVA_OPTS=--add-modules=jdk.incubator.httpclient
- * </pre>
  * 
  * @author wwwqyhme
  *
@@ -119,14 +105,12 @@ public class MarkdownItEditorPluginHandler extends PluginHandlerSupport {
 
 	@Override
 	protected void registerBean(BeanRegistry registry) {
-		HttpClient client = HttpClient.newHttpClient();
 		String url = pluginProperties.get(URL_KEY).orElseThrow();
-		serviceAvailable = isServiceAvailable(url, client);
+		serviceAvailable = isServiceAvailable(url);
 		if (serviceAvailable) {
 			registry.register(MarkdownItMarkdown2Html.class.getName(),
 					BeanDefinitionBuilder.genericBeanDefinition(MarkdownItMarkdown2Html.class)
-							.setScope(BeanDefinition.SCOPE_SINGLETON).addConstructorArgValue(url)
-							.addConstructorArgValue(client).getBeanDefinition());
+							.setScope(BeanDefinition.SCOPE_SINGLETON).addConstructorArgValue(url).getBeanDefinition());
 		}
 	}
 
@@ -139,25 +123,12 @@ public class MarkdownItEditorPluginHandler extends PluginHandlerSupport {
 		registry.register(ArticleEditorAspect.class.getName(), simpleBeanDefinition(ArticleEditorAspect.class));
 	}
 
-	private boolean isServiceAvailable(String url, HttpClient client) {
-		URI uri;
+	private boolean isServiceAvailable(String url) {
 		try {
-			uri = new URI(url);
-		} catch (URISyntaxException e) {
-			logger.warn("无法解析的地址：" + url + "," + e.getMessage(), e);
-			return false;
-		}
-		HttpRequest req = HttpRequest.newBuilder().uri(uri).version(Version.HTTP_1_1)
-				.POST(BodyPublisher.fromString("# test")).build();
-		try {
-			HttpResponse<String> resp = client.send(req, BodyHandler.asString());
-			String json = resp.body();
+			String json = Https.post(url, "# test 你好");
 			Jsons.readValue(JsonResult.class, json);
 			return true;
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			return false;
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.warn("尝试转化markdown失败：" + e.getMessage(), e);
 			return false;
 		}
@@ -165,16 +136,7 @@ public class MarkdownItEditorPluginHandler extends PluginHandlerSupport {
 
 	@Override
 	public boolean enable() {
-		return pluginProperties.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(false) && isIncubatorEnable();
-	}
-
-	private boolean isIncubatorEnable() {
-		try {
-			Class.forName("jdk.incubator.http.HttpClient");
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
+		return pluginProperties.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(false);
 	}
 
 }

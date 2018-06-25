@@ -15,6 +15,7 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,11 @@ public class NewsDataTagProcessor extends DataTagProcessor<News> {
 			throw new LogicException("news.notExists", "动态不存在");
 		}
 		return null;
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of("id", "ignoreException");
 	}
 
 }

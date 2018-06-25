@@ -40,6 +40,7 @@ import org.thymeleaf.templateresource.ITemplateResource;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
+import me.qyh.blog.template.BackendTemplate;
 import me.qyh.blog.template.Template;
 import me.qyh.blog.template.event.TemplateEvitEvent;
 import me.qyh.blog.template.render.thymeleaf.ThymeleafTemplateResolver.TemplateResource;
@@ -84,22 +85,27 @@ public class ThymeleafCacheManager extends AbstractCacheManager implements Appli
 			TemplateData templateData = value.getTemplateData();
 			ITemplateResource resource = templateData.getTemplateResource();
 			if (resource instanceof TemplateResource) {
-				// @since 6.0
-				if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
-					return;
-				}
-				if (key.getOwnerTemplate() != null) {
-					return;
-				}
 				final Template template = ((TemplateResource) resource).getTemplate();
 				String templateName = templateData.getTemplate();
+				if (!Template.isTemplate(templateName)) {
+					templateName = BackendTemplate.getTemplateName(templateName);
+				} else {
+					// @since 6.0
+					if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
+						return;
+					}
+					if (key.getOwnerTemplate() != null) {
+						return;
+					}
+				}
+				final String _templateName = templateName;
 				tpe.execute(() ->
 				/**
 				 * 如果是Template，此时应该和当前的Template进行比对，如果一致才放入缓存 因为如果读写操作并发执行的话，此时的数据可能是旧的数据
 				 * 
 				 * 这个操作可能是同步的，因此在首次载入时效率可能非常低
 				 */
-				templateService.compareTemplate(templateName, template, flag -> {
+				templateService.compareTemplate(_templateName, template, flag -> {
 					if (flag) {
 						cache.put(key, value);
 					}
@@ -208,10 +214,9 @@ public class ThymeleafCacheManager extends AbstractCacheManager implements Appli
 							if (ownerTemplate.equals(templateName)) {
 								keysToBeRemoved.add(templateCacheKey);
 							}
-						} else {
-							if (templateCacheKey.getTemplate().equals(templateName)) {
-								keysToBeRemoved.add(templateCacheKey);
-							}
+						}
+						if (templateCacheKey.getTemplate().equals(templateName)) {
+							keysToBeRemoved.add(templateCacheKey);
 						}
 					}
 				}

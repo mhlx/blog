@@ -35,28 +35,6 @@
 
 	<bean class="me.qyh.blog.web.security.ProxyIPGetter" />
 
-	<bean id="templateEngine"
-		class="me.qyh.blog.template.render.thymeleaf.ThymeleafTemplateEngine">
-		<property name="templateResolvers">
-			<set>
-				<bean
-					class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
-					<property name="prefix" value="/WEB-INF/templates/" />
-					<property name="suffix" value=".html" />
-					<property name="templateMode" value="HTML" />
-					<property name="characterEncoding" value="utf-8" />
-				</bean>
-				<bean
-					class="me.qyh.blog.template.render.thymeleaf.ThymeleafTemplateResolver" />
-			</set>
-		</property>
-		<property name="enableSpringELCompiler" value="true" />
-		<property name="cacheManager">
-			<bean
-				class="me.qyh.blog.template.render.thymeleaf.ThymeleafCacheManager" />
-		</property>
-	</bean>
-
 	<bean class="me.qyh.blog.template.render.TemplateRender" />
 
 	<bean

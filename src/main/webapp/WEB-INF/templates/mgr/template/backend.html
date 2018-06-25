@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="mgr/base/head :: head('管理台页面编辑')"></head>
+<body>
+	<nav th:replace="mgr/base/nav :: active('tpl-backend')"></nav>
+	<div id="page-wrapper" style="padding: 10px">
+		<div class="container-fluid">
+			<div class="row" style="padding: 5px">
+				<div class="col-md-12">
+					<form class="form-inline" style="margin-bottom: 20px">
+						<div class="form-group">
+							<label class="sr-only">路径</label> <input type="text" id="search"
+								class="form-control"  placeholder="路径">
+						</div>
+					</form>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+							<tr>
+								<th>路径</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody  id="table">
+							
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="base/foot_source"></div>
+	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
+	<script>
+		$(function() {
+			var datas;
+			var write = function(datas){
+				$("#table").html('');
+				for(var i=0;i<datas.length;i++){
+					var style = "margin-right:10px";
+					if(!datas[i].rewrite){
+						style += ";display:none";
+					}
+					$("#table").append('<tr><td>'+datas[i].path+'</td><td><a href="###" style="'+style+'" data-remove="'+datas[i].path+'"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a><a href="'+basePath+'/mgr/template/backend/edit?path='+datas[i].path+'"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a></td></tr>');
+				}
+			}
+			var refresh = function(){
+				$.get(basePath+"/mgr/template/backend/paths",{},function(data){
+					if(data.success){
+						datas = data.data;
+						write(datas);
+					}else{
+						bootbox.alert(data.message);
+					}
+				});
+			}
+			refresh();
+			$(document).on('click','[data-remove]',function(){
+				var path = $(this).data('remove');
+				bootbox.confirm("确定要删除吗？",function(flag){
+					if(flag){
+						$.post(basePath + "/mgr/template/backend/delete", {
+							path : path
+						}, function(data) {
+							bootbox.alert(data.message);
+							if(data.success){
+								refresh();
+							}
+						});
+					}
+				})
+			});
+			var timer;
+			$("#search").on('input',function(){
+				if(timer){
+					clearTimeout(timer);
+				}
+				timer = setTimeout(() => {
+					var v = $(this).val();
+					if(v == ''){
+						write(datas);
+					} else {
+						var _datas = [];
+						for(var i=0;i<datas.length;i++){
+							if(datas[i].path.indexOf(v) != -1){
+								_datas.push(datas[i]);
+							}
+						}
+						write(_datas);
+					}
+				}, 100);
+			});
+		});
+	</script>
+</body>
+</html>

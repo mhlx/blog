@@ -136,7 +136,8 @@ body {
 	<div>
 		<div id="toolbar">
 			<i class="fas fa-save icon" style="color: red" title="保存"
-				onclick="showBase()"></i> <i class="fas fa-question-circle icon"
+				onclick="showBase()"></i><i class="fas fa-file icon" title="文件"
+				onclick="files.get()"></i> <i class="fas fa-question-circle icon"
 				data-toggle="modal" data-target="#helpModal"></i> <i
 				class="far fa-check-square icon" onclick="toggleToolbar($(this))"
 				id="toggle-toolbar"></i> <i class="far fa-window-maximize icon"
@@ -474,7 +475,7 @@ public static void main(String [] args){
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/md_file.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/mgr/editor_file.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/dirChooser.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/emoji.js}"></script>
@@ -513,6 +514,8 @@ public static void main(String [] args){
 	<script th:src="@{/static/plugin/markdowniteditor/editor/sync.js?v=1}"></script>
 	<script
 		th:src="@{/static/plugin/markdowniteditor/editor/custom_search.js?v=6}"></script>
+		
+	<script th:src="@{/static/plugin/markdowniteditor/editor/file.js}"></script>
 	<script
 		th:src="@{/static/plugin/markdowniteditor/editor/inner_bar.js?v=4}"></script>
 	<script

@@ -34,10 +34,6 @@ import me.qyh.blog.core.util.Validators;
  */
 public final class SystemTemplate implements PathTemplate {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private static final String SYSTEM_PREFIX = TEMPLATE_PREFIX + "System" + SPLITER;
 	private final String path;
 	private String template;

@@ -49,4 +49,9 @@ public class HitsHistoryDataTagProcessor extends DataTagProcessor<List<HitsHisto
 		return hitsHistoryLogger.getHistory(num);
 	}
 
+	@Override
+	public List<String> getAttributes() {
+		return List.of("num");
+	}
+
 }

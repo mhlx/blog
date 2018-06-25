@@ -15,15 +15,13 @@
  */
 package me.qyh.blog.template;
 
-import java.io.Serializable;
-
 /**
  * 模板
  * 
  * @author Administrator
  *
  */
-public interface Template extends Serializable {
+public interface Template {
 
 	/**
 	 * 模板分割符

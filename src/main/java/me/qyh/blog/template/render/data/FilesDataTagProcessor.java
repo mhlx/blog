@@ -17,6 +17,7 @@ package me.qyh.blog.template.render.data;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,11 @@ public class FilesDataTagProcessor extends DataTagProcessor<PageResult<BlogFile>
 
 		String path = attributes.getString("path").orElse(null);
 		return fileService.queryFiles(path, param);
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of("extensions", "pageSize", "currentPage", "type", "ignorePaging", "fileName", "path");
 	}
 
 }

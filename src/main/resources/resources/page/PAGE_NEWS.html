@@ -130,9 +130,9 @@
         $('[data-comment-detail=\''+moduleId+'\']').html('').hide();
         $(this).remove();
       }); 
-      $("#asc").change(function(){
+      $(document).on("change","#asc",function(){
     	  window.location.href = basePath + '/news?asc='+$(this).is(":checked");
-      });
+        }); 
     });
     var afterLoad = function(page){
       var moduleId = page.param.module.id;

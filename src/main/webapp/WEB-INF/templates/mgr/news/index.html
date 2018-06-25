@@ -58,6 +58,7 @@
 							<div class="media-body">
 								<h6 class="media-heading">
 									<span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>
+									<span class="glyphicon glyphicon-fire" aria-hidden="true" style="margin-left: 5px">[[${news.hits}]]</span>
 									<a href="javascript:void(0)" th:data-del="${news.id}"
 										style="margin-left: 5px">删除</a> <a
 										th:href="@{/mgr/news/update/}+${news.id}"

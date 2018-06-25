@@ -16,6 +16,7 @@
 package me.qyh.blog.template.render.data;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.MapBindingResult;
@@ -110,5 +111,11 @@ public class ArticlesDataTagProcessor extends DataTagProcessor<PageResult<Articl
 
 		validator.validate(param, new MapBindingResult(new HashMap<>(), "articleQueryParam"));
 		return param;
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of("begin", "end", "query", "from", "tag", "sort", "currentPage", "pageSize", "highlight",
+				"ignoreLevel", "queryLock", "spaces", "ignorePaging", "queryPrivate");
 	}
 }

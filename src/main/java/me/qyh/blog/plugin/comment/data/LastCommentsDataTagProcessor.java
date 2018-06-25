@@ -47,4 +47,9 @@ public class LastCommentsDataTagProcessor extends DataTagProcessor<List<Comment>
 		return attributes.getInteger("limit").filter(limit -> limit > 0 && limit <= MAX_LIMIT).orElse(DEFAULT_LIMIT);
 	}
 
+	@Override
+	public List<String> getAttributes() {
+		return List.of("moduleType", "queryAdmin", "limit");
+	}
+
 }

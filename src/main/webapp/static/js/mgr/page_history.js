@@ -1,4 +1,4 @@
-(function($){
+(function(){
 	$('<div class="modal" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="queryModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h4 class="modal-title">历史模板</h4></div><div class="modal-body"><div class="container-fluid"><div id="history-tip"></div><div class="table-responsive" id="historyTableContainer"></div></div></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">关闭</button></div></div></div></div>').appendTo($('body'));
 	var modal = $('#historyModal');
 	var editor;
@@ -56,4 +56,4 @@
 		
 	}
 	
-})(jQuery);
+})();

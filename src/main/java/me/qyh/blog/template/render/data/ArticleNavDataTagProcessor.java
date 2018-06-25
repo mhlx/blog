@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.entity.Article;
@@ -43,6 +45,11 @@ public class ArticleNavDataTagProcessor extends DataTagProcessor<ArticleNav> {
 		}
 		return attributes.getString(ID_OR_ALIAS)
 				.flatMap(idOrAlias -> articleService.getArticleNav(idOrAlias, queryLock)).orElse(null);
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of("queryLock", "idOrAlias", "ref-article");
 	}
 
 }

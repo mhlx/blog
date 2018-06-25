@@ -44,4 +44,9 @@ public class SpacesDataTagProcessor extends DataTagProcessor<List<Space>> {
 		return spaceService.querySpace(new SpaceQueryParam());
 	}
 
+	@Override
+	public List<String> getAttributes() {
+		return List.of();
+	}
+
 }

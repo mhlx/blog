@@ -315,7 +315,7 @@
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/md_file.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/mgr/editor_file.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/dirChooser.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
 	<script type="text/javascript" th:src="@{/static/js/mgr/emoji.js}"></script>
@@ -526,8 +526,21 @@
 		}
 
 		function openFile() {
-			fileSelectPageQuery(1, '');
-			$("#fileSelectModal").modal("show");
+			fileChooser.choose(function(data){
+			    var cf = data.cf;
+				var ext = cf.extension.toLowerCase();
+				if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
+					editor.replaceSelection('['+cf.originalFilename+']('+cf.url+')')
+				} else {
+					var thumb = cf.thumbnailUrl;
+					if(thumb){
+						editor.replaceSelection('[!['+cf.originalFilename+']('+thumb.middle+')]('+thumb.large+')')
+					} else {
+						editor.replaceSelection('!['+cf.originalFilename+']('+cf.url+')')
+					}
+				}
+			   return true;
+		 });
 		}
 		
 		function openSettingModal(){

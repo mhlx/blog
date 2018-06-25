@@ -33,6 +33,7 @@ import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
 import me.qyh.blog.core.exception.SystemException;
+import me.qyh.blog.template.BackendTemplate;
 import me.qyh.blog.template.Template;
 import me.qyh.blog.template.service.TemplateService;
 
@@ -55,15 +56,14 @@ public class ThymeleafTemplateResolver implements ITemplateResolver {
 
 	@Override
 	public TemplateResolution resolveTemplate(IEngineConfiguration configuration, String ownerTemplate,
-			String templateName, Map<String, Object> templateResolutionAttributes) {
+			String originalTemplateName, Map<String, Object> templateResolutionAttributes) {
+		String templateName = originalTemplateName;
 		if (!Template.isTemplate(templateName)) {
-			return null;
+			templateName = BackendTemplate.getTemplateName(templateName);
 		}
-
 		Optional<Template> optional = templateService.queryTemplate(templateName);
 		ITemplateResource templateResource = optional.<ITemplateResource>map(TemplateResource::new)
 				.orElseGet(() -> emptyTemplateResource);
-
 		ICacheEntryValidity cacheEntryValidity = optional.map(template -> {
 			return template.cacheable() ? AlwaysValidCacheEntryValidity.INSTANCE
 					: NonCacheableCacheEntryValidity.INSTANCE;

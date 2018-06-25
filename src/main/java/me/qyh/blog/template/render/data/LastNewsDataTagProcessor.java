@@ -43,4 +43,9 @@ public class LastNewsDataTagProcessor extends DataTagProcessor<List<News>> {
 	private int getLimit(Attributes attributes) {
 		return attributes.getInteger("limit").filter(limit -> limit > 0 && limit <= MAX_LIMIT).orElse(DEFAULT_LIMIT);
 	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of("limit");
+	}
 }

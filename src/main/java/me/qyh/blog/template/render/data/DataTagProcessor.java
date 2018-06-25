@@ -101,6 +101,13 @@ public abstract class DataTagProcessor<T> {
 		return false;
 	}
 
+	/**
+	 * 获取data标签所有可能的属性
+	 * 
+	 * @return
+	 */
+	public abstract List<String> getAttributes();
+
 	public final class Attributes {
 		private final Map<String, Object> attMap;
 

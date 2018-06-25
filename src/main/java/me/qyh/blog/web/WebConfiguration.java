@@ -16,6 +16,7 @@
 package me.qyh.blog.web;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,11 +30,16 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.cache.ICacheManager;
 
 import me.qyh.blog.core.util.Jsons;
 import me.qyh.blog.file.store.local.StaticResourceUrlHandlerMapping;
 import me.qyh.blog.template.TemplateRequestMappingHandlerMapping;
 import me.qyh.blog.template.render.TemplateRender;
+import me.qyh.blog.template.render.thymeleaf.ThymeleafCacheManager;
+import me.qyh.blog.template.render.thymeleaf.ThymeleafTemplateEngine;
+import me.qyh.blog.template.render.thymeleaf.ThymeleafTemplateResolver;
 import me.qyh.blog.web.view.TemplateReturnValueHandler;
 
 /**
@@ -113,6 +119,25 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
 	@Override
 	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
 		resolvers.add(exceptionResolver);
+	}
+
+	@Bean
+	public ICacheManager templateCacheManager() {
+		return new ThymeleafCacheManager();
+	}
+
+	@Bean
+	public ThymeleafTemplateResolver thymeleafTemplateResolver() {
+		return new ThymeleafTemplateResolver();
+	}
+
+	@Bean
+	public TemplateEngine templateEngine() {
+		ThymeleafTemplateEngine templateEngine = new ThymeleafTemplateEngine();
+		templateEngine.setEnableSpringELCompiler(true);
+		templateEngine.setCacheManager(templateCacheManager());
+		templateEngine.setTemplateResolvers(Set.of(thymeleafTemplateResolver()));
+		return templateEngine;
 	}
 
 }

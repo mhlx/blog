@@ -1,4 +1,4 @@
-var dirChooser = (function($){
+var dirChooser = (function(){
 	var dir;
 	var modal = '<div class="modal" id="dirChooserModal" tabindex="-1"';
 	modal += 'role="dialog" aria-labelledby="fileSelectModalLabel">';
@@ -153,4 +153,4 @@ var dirChooser = (function($){
 		
 	}
 	
-})(jQuery);
+})();

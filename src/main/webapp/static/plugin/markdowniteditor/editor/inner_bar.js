@@ -46,7 +46,7 @@ var inner_bar = (function(editor,config){
                     }, 50)
                 });
   
-   $($inner_bar).on('click', '[data-bold]', function() {
+                $inner_bar.on('click', '[data-bold]', function() {
                 var text = editor.getSelection();
                 if (text == '') {
                     editor.replaceRange("****", editor.getCursor());
@@ -102,7 +102,9 @@ var inner_bar = (function(editor,config){
             });
 
            $inner_bar.on('click', '[data-file]', function() {
-               openFile();
+        	   
+        	   files.get();
+               
             });
   
   			 $inner_bar.on('click', '[data-uncheck-list]', function() {

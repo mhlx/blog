@@ -1,0 +1,175 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<link th:href="@{/static/bootstrap/css/bootstrap.min.css}"
+	rel="stylesheet">
+<link rel="stylesheet" th:href="@{/static/css/sb-admin-2.css}">
+<link rel="stylesheet"
+	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}">
+<link th:href="@{/static/codemirror/lib/codemirror.css}"
+	rel="stylesheet">
+<link th:href="@{/static/codemirror/addon/hint/show-hint.css}"
+	rel="stylesheet">
+<link th:href="@{/static/css/blog.css}" rel="stylesheet">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/addon/dialog/dialog.css}">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css}">
+<!--[if lt IE 9]>
+	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
+	  <script th:src="@{/static/js/respond.min.js}"></script>
+	<![endif]-->
+
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="md-header btn-toolbar">
+				<div class="btn-group" style="width: 98%">
+					<button class="btn-default btn-sm btn" type="button"
+						data-handler="file">文件</button>
+					<button class="btn-default btn-sm btn" type="button"
+						data-handler="localFile">本地文件</button>
+					<button class="btn-default btn-sm btn" type="button"
+						data-handler="format">格式化</button>
+					<a class="btn-default btn-sm btn" target="_blank"
+						th:href="@{/doc/index.html}">文档</a> <a
+						class="btn-default btn-sm btn" type="button" onclick="save()">保存</a>
+				</div>
+			</div>
+			<textarea style="display: none" id="editor"
+				th:text="${template.template}"></textarea>
+		</div>
+	</div>
+	<div class="modal" id="lookupModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">查询</h4>
+				</div>
+				<div class="modal-body">
+					<ul id="myTab" class="nav nav-tabs" role="tablist">
+						<li role="presentation" class="active"><a href="#dataTags"
+							id="data-tab" role="tab" data-toggle="tab" aria-controls="home"
+							aria-expanded="true">数据</a></li>
+						<li role="presentation"><a href="#fragment" role="tab"
+							id="fragment-tab" data-toggle="tab" aria-controls="profile">模板片段</a></li>
+					</ul>
+					<div class="tab-content">
+						<div role="tabpanel" class="tab-pane fade in active" id="dataTags"
+							aria-labelledby="data-tab"></div>
+						<div role="tabpanel" class="tab-pane fade" id="fragment"
+							aria-labelledby="fragment-tab"></div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="base/foot_source"></div>
+	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
+	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
+	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
+	<script th:src="@{/static/codemirror/mode/css/css.js}"></script>
+	<script th:src="@{/static/codemirror/mode/xml/xml.js}"></script>
+	<script th:src="@{/static/codemirror/addon/edit/closetag.js}"></script>
+	<script th:src="@{/static/codemirror/addon/fold/xml-fold.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/show-hint.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/xml-hint.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/html-hint.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/javascript-hint.js}"></script>
+	<script th:src="@{/static/codemirror/mode/htmlmixed/htmlmixed.js}"></script>
+	<script th:src="@{/static/codemirror/addon/dialog/dialog.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/scroll/annotatescrollbar.js}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/search/matchesonscrollbar.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/jump-to-line.js}"></script>
+	<script th:src="@{/static/js-beautify/beautify.min.js}"></script>
+	<script th:src="@{/static/js-beautify/beautify-css.min.js}"></script>
+	<script th:src="@{/static/js-beautify/beautify-html.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/js/canvas-to-blob.min.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
+	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
+	<script th:src="@{/static/js/modal.js}"></script>
+	<script th:src="@{/static/js/clipboard.min.js}"></script>
+	<script th:src="@{/static/js/local_storage.js}"></script>
+	<script th:src="@{/static/js/mgr/editor_file.js}"></script>
+	<script th:src="@{/static/js/mgr/static_file.js}"></script>
+	<script th:src="@{/static/js/mgr/page_editor.js}"></script>
+	<script th:inline="javascript">
+	var path = [[${template.path}]];
+	var editor;
+	$(document).ready(function(){
+		editor = createEditor('editor',[{key:'Ctrl-S',fun:function(){
+			save();
+		}}]);
+		editor.setSize('100%', $(window).height() - 30);
+		
+		$('[data-handler]').click(function(){
+			var m = $(this).attr("data-handler");
+			switch(m){
+			case 'file':
+				fileChooser.choose(function(data){
+					handleFile(data);
+					return true;
+				});
+				break;
+			case 'localFile':
+				sfq.show();
+				break;
+			case 'format':
+				editor.format();
+				break;
+			case 'template':
+				showTemplateModal();
+				break;
+			case 'lock':
+				showLock();
+				break;
+			case 'historyTemplate':
+				loadHistoryTemplate();
+				break;
+			default:
+				break;
+			}
+		})
+	});
+	
+	function save(){
+		$.post(basePath+'/mgr/template/backend/edit',{path:path,content:editor.getValue()},function(data){
+			bootbox.alert(data.message);
+		});
+	}
+	</script>
+</body>
+</html>

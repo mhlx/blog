@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.context.Environment;
@@ -37,6 +39,11 @@ public class CommentStatisticsDataTagProcessor extends DataTagProcessor<CommentS
 			return new CommentStatistics();
 		}
 		return commentServer.queryCommentStatistics(Environment.getSpace());
+	}
+
+	@Override
+	public List<String> getAttributes() {
+		return List.of();
 	}
 
 }

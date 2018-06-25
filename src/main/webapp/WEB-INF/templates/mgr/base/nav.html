@@ -33,16 +33,20 @@
 				<ul class="nav" id="side-menu">
 					<li><a th:href="@{/mgr/user/index}"
 						th:class="${tag == 'userinfo'}? active:''"> 个人信息管理</a></li>
-					<li th:class="${tag == 'space'}? active:''"><a
-						th:href="@{/mgr/space/index}"> 空间管理</a></li>
-					<li th:class="${tag == 'files'}? active:''"><a
-						th:href="@{/mgr/file/index}"> 文件管理</a></li>
-					<li th:class="${tag == 'files'}? active:''"><a
-						th:href="@{/mgr/static/index}"> 静态资源管理</a></li>
+					<li><a th:href="@{/mgr/space/index}"
+						th:class="${tag == 'space'}? active:''"> 空间管理</a></li>
+					<li><a href="javascript:;" data-toggle="collapse"
+						data-target="#fileMgr">文件管理</a>
+						<ul id="fileMgr" class="nav nav-second-level collapse in">
+							<li><a th:href="@{/mgr/file/index}"
+								th:class="${tag == 'files'}? active:''"> 存储服务</a></li>
+							<li><a th:href="@{/mgr/static/index}"
+								th:class="${tag == 'staticFiles'}? active:''"> 静态资源</a></li>
+						</ul></li>
 					<li><a th:href="@{/mgr/article/index}"
 						th:class="${tag == 'article'}? active:''"> 文章管理</a></li>
-					<li th:class="${tag == 'news'}? active:''"><a
-						th:href="@{/mgr/news/index}">动态管理</a></li>
+					<li><a th:href="@{/mgr/news/index}"
+						th:class="${tag == 'news'}? active:''">动态管理</a></li>
 					<li><a href="javascript:;" data-toggle="collapse"
 						data-target="#tplMgr"> 模板管理</a>
 						<ul id="tplMgr" class="nav nav-second-level collapse in">
@@ -50,7 +54,10 @@
 								th:href="@{/mgr/template/page/index}">页面管理</a></li>
 							<li><a th:class="${tag == 'tpl-fragment'}? active:''"
 								th:href="@{/mgr/template/fragment/index}">模板片段管理</a></li>
-							<li><a th:href="@{/mgr/template/data/index}">数据管理</a></li>
+							<li><a th:class="${tag == 'tpl-backend'}? active:''"
+								th:href="@{/mgr/template/backend/index}">管理台页面管理</a></li>
+							<li><a th:href="@{/mgr/template/data/index}"
+								th:class="${tag == 'tpl-data'}? active:''">数据管理</a></li>
 							<li><a th:class="${tag == 'tpl-export'}? active:''"
 								th:href="@{/mgr/template/export}">模板导入导出</a></li>
 							<li><a th:class="${tag == 'tpl-other'}? active:''"

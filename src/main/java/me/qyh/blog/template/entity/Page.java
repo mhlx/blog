@@ -23,6 +23,7 @@ import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.template.PathTemplate;
+import me.qyh.blog.template.PreviewTemplate;
 import me.qyh.blog.template.Template;
 
 public class Page extends BaseEntity implements PathTemplate {
@@ -231,5 +232,10 @@ public class Page extends BaseEntity implements PathTemplate {
 			sb.append(templatePath);
 		}
 		return sb.toString();
+	}
+
+	public static boolean isPreivewPageTemplate(String templateSign) {
+		return PreviewTemplate.getOriginalTemplateName(templateSign).map(templateName -> isPageTemplate(templateName))
+				.orElse(false);
 	}
 }

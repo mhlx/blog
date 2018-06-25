@@ -1,4 +1,5 @@
-var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
+var fileChooser = (function(){
+	var modal = '<div class="modal" tabindex="-1"';
 	modal += 'role="dialog" aria-labelledby="fileSelectModalLabel">';
 	modal += '<div class="modal-dialog modal-lg" role="document">';
 	modal += '<div class="modal-content">';
@@ -7,112 +8,62 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 	modal += 'aria-label="Close">';
 	modal += '<span aria-hidden="true">&times;</span>';
 	modal += '</button>';
-	modal += '<h4 class="modal-title" id="fileSelectModalLabel">文件选择</h4>';
+	modal += '<h4 class="modal-title" >文件选择</h4>';
 	modal += '</div>';
 	modal += '<div class="modal-body">';
-	modal += '<div class="container-fluid" id="fileSelectMain"></div>';
+	modal += '<div class="container-fluid"></div>';
 	modal += '</div>';
 	modal += '<div class="modal-footer">';
-	modal += '<button type="button" class="btn btn-default" id="create-folder">新建文件夹</button>';
-	modal += '<button type="button" class="btn btn-default" id="file-upload">上传</button>';
+	modal += '<button type="button" class="btn btn-default" data-create-folder>新建文件夹</button>';
+	modal += '<button type="button" class="btn btn-default" data-upload>上传</button>';
 	modal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
 	modal += '</div>';
 	modal += '</div>';
 	modal += '</div>';
 	modal += '</div>';
+
+
+	var fileSelectModal = $(modal);
+	fileSelectModal.appendTo($('body'));
 	
-	var imageModal = '<div class="modal " id="imageModal" tabindex="-1"';
-	imageModal += 'role="dialog">';
-	imageModal += '<div class="modal-dialog modal-lg" role="document">';
-	imageModal += '<div class="modal-content">';
-	imageModal += '<div class="modal-header">';
-	imageModal += '<button type="button" class="close" data-dismiss="modal"';
-	imageModal += 'aria-label="Close">';
-	imageModal += '<span aria-hidden="true">&times;</span>';
-	imageModal += '</button>';
-	imageModal += '<h4 class="modal-title"></h4>';
-	imageModal += '</div>';
-	imageModal += '<div class="modal-body">';
-	imageModal += '<div class="container-fluid">';
-	imageModal += '<div class="form-group">';
-	imageModal += '<label >图片地址</label> <input  class="form-control" placeholder="图片地址" >';
-	imageModal += '</div>';
-	imageModal += '<div class="form-group">';
-	imageModal += '<label >图片描述</label> <input  class="form-control" placeholder="图片描述" >';
-	imageModal += '</div>';
-	imageModal += '<div class="form-group">';
-	imageModal += '<label >图片链接</label> <input class="form-control" placeholder="图片链接" >';
-	imageModal += '</div>';
-	imageModal += '</div>';
-	imageModal += '<div class="modal-footer">';
-	imageModal += '<button type="button" class="btn btn-default" id="image-confirm-btn">确定</button>';
-	imageModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
-	imageModal += '</div>';
-	imageModal += '</div>';
-	imageModal += '</div>';
-	imageModal += '</div>';
+	var fileSelectMain = fileSelectModal.find('.container-fluid');
 	
-	
-	var linkModal = '<div class="modal " id="linkModal" tabindex="-1"';
-	linkModal += 'role="dialog">';
-	linkModal += '<div class="modal-dialog modal-lg" role="document">';
-	linkModal += '<div class="modal-content">';
-	linkModal += '<div class="modal-header">';
-	linkModal += '<button type="button" class="close" data-dismiss="modal"';
-	linkModal += 'aria-label="Close">';
-	linkModal += '<span aria-hidden="true">&times;</span>';
-	linkModal += '</button>';
-	linkModal += '<h4 class="modal-title"></h4>';
-	linkModal += '</div>';
-	linkModal += '<div class="modal-body">';
-	linkModal += '<div class="container-fluid">';
-	linkModal += '<div class="form-group">';
-	linkModal += '<label >链接地址</label> <input  class="form-control" placeholder="链接地址" >';
-	linkModal += '</div>';
-	linkModal += '<div class="form-group">';
-	linkModal += '<label >链接标题</label> <input  class="form-control" placeholder="链接标题" >';
-	linkModal += '</div>';
-	linkModal += '</div>';
-	linkModal += '<div class="modal-footer">';
-	linkModal += '<button type="button" class="btn btn-default" id="link-confirm-btn">确定</button>';
-	linkModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
-	linkModal += '</div>';
-	linkModal += '</div>';
-	linkModal += '</div>';
-	linkModal += '</div>';
-	
-	var createFolderModal = '<div class="modal fade" id="createFolderModal" tabindex="-1" role="dialog" aria-labelledby="createFolderModalLabel">';
-	createFolderModal += '<div class="modal-dialog" role="document">';
-	createFolderModal += '<div class="modal-content">';
-	createFolderModal += '<div class="modal-header">';
-	createFolderModal += '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
-	createFolderModal += '<span aria-hidden="true">&times;</span>';
-	createFolderModal += '</button>';
-	createFolderModal += '<h4 class="modal-title" id="createFolderModalLabel">新文件夹</h4>';
-	createFolderModal += '</div>';
-	createFolderModal += '<div class="modal-body">';
-	createFolderModal += '<div class="create-tip"></div>';
-	createFolderModal += '<form autocomplete="off">';
-	createFolderModal += '<input type="hidden" name="parent">';
-	createFolderModal += '<div class="form-group">';
-	createFolderModal += '<label for="name" class="control-label">路径(1~20个字符):</label> <input type="text" class="form-control" name="path"><input type="text" class="form-control" style="display:none">';
-	createFolderModal += '</div>';
-	createFolderModal += '</form>';
-	createFolderModal += '</div>';
-	createFolderModal += '<div class="modal-footer">';
-	createFolderModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
-	createFolderModal += '<button type="button" class="btn btn-primary" id="createFolder">创建</button>';
-	createFolderModal += '</div>';
-	createFolderModal += '</div>';
-	createFolderModal += '</div>';
-	createFolderModal += '</div>';
-	
-	if($("#createFolderModal").length == 0){
-		$(createFolderModal).appendTo($("body"));
+	(function(){
+		var createFolderModal = '<div class="modal fade"tabindex="-1" role="dialog" aria-labelledby="createFolderModalLabel">';
+		createFolderModal += '<div class="modal-dialog" role="document">';
+		createFolderModal += '<div class="modal-content">';
+		createFolderModal += '<div class="modal-header">';
+		createFolderModal += '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+		createFolderModal += '<span aria-hidden="true">&times;</span>';
+		createFolderModal += '</button>';
+		createFolderModal += '<h4 class="modal-title">新文件夹</h4>';
+		createFolderModal += '</div>';
+		createFolderModal += '<div class="modal-body">';
+		createFolderModal += '<div class="create-tip"></div>';
+		createFolderModal += '<form autocomplete="off">';
+		createFolderModal += '<input type="hidden" name="parent">';
+		createFolderModal += '<div class="form-group">';
+		createFolderModal += '<label for="name" class="control-label">路径(1~20个字符):</label> <input type="text" class="form-control" name="path"><input type="text" class="form-control" style="display:none">';
+		createFolderModal += '</div>';
+		createFolderModal += '</form>';
+		createFolderModal += '</div>';
+		createFolderModal += '<div class="modal-footer">';
+		createFolderModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+		createFolderModal += '<button type="button" class="btn btn-primary" data-create>创建</button>';
+		createFolderModal += '</div>';
+		createFolderModal += '</div>';
+		createFolderModal += '</div>';
+		createFolderModal += '</div>';
 		
-		$("#createFolder").click(function(){
-			$("#createFolder").prop("disabled",true);
-			var data = $("#createFolderModal").find("form").serializeObject();
+		
+
+		createFolderModal = $(createFolderModal);
+		createFolderModal.appendTo($('body'));
+		
+		createFolderModal.find('data-create').click(function(){
+			var me = $(this);
+			me.prop("disabled",true);
+			var data = createFolderModal.find("form").serializeObject();
 			var parent = data.parent;
 			if(parent){
 				delete data["parent"];
@@ -133,28 +84,35 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 				url : url + "?path="+data.path,
 				success : function(data){
 					if(data.success){
-						$("#createFolderModal").modal("hide");
+						createFolderModal.modal("hide");
 					} else {
-						$("#createFolderModal").find(".create-tip").html('<div class="alert alert-danger">'+data.message+'</div>');
+						createFolderModal.find(".create-tip").html('<div class="alert alert-danger">'+data.message+'</div>');
 					}
 				},
 				complete:function(){
-					$("#createFolder").prop("disabled",false);
+					me.prop("disabled",false);
 				}
 			});
 		});
 		
-		$("#createFolderModal").on('hidden.bs.modal',function(){
-			$("#createFolderModal").find(".create-tip").html('');
-			$("#createFolderModal").find("form")[0].reset();
+		createFolderModal.on('hidden.bs.modal',function(){
+			createFolderModal.find(".create-tip").html('');
+			createFolderModal.find("form")[0].reset();
 			fileSelectPageQuery(lastParam.currentPage,lastParam.parent);
-			$("#fileSelectModal").modal("show");
+			fileSelectModal.modal("show");
 		});
 		
-	}
+		fileSelectModal.find('[data-create-folder]').click(function(){
+			fileSelectModal.modal('hide');
+			createFolderModal.find("input[name='parent']").val(lastParam.parent);
+			createFolderModal.modal("show");
+		});
+	})();
 	
 	
-	if($("#uploadModal").length == 0){
+	
+	
+	(function(){
 		var stores = [];
 		$.ajax({
 			type : "get",
@@ -169,7 +127,7 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 			}
 		});
 		
-		var uploadModal = '<div class="modal" id="uploadModal" tabindex="-1" role="dialog"';
+		var uploadModal = '<div class="modal" tabindex="-1" role="dialog"';
 		uploadModal += '	aria-labelledby="uploadModalLabel">';
 		uploadModal += '<div class="modal-dialog modal-lg" role="document">';
 		uploadModal += '<div class="modal-content">';
@@ -178,12 +136,12 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 		uploadModal += '	aria-label="Close">';
 		uploadModal += '<span aria-hidden="true">&times;</span>';
 		uploadModal += '</button>';
-		uploadModal += '<h4 class="modal-title" id="uploadModalLabel">文件上传</h4>';
+		uploadModal += '<h4 class="modal-title">文件上传</h4>';
 		uploadModal += '</div>';
 		uploadModal += '<div class="modal-body">';
 		uploadModal += '<div class="container-fluid">';
 		uploadModal += '<div class="row" style="padding: 5px">';
-		uploadModal += '<form id="fileupload" class="form-horizontal" autocomplete="off"';
+		uploadModal += '<form class="form-horizontal" autocomplete="off"';
 		uploadModal += ' action="'+basePath+'/mgr/file/upload" method="POST"';
 		uploadModal += 'enctype="multipart/form-data">';
 		uploadModal += '<div class="col-md-12" style="margin-bottom: 20px">';
@@ -239,16 +197,17 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 		uploadModal += '</div>';
 		uploadModal += '</div>';
 		
-		$(uploadModal).appendTo($("body"));
+		uploadModal = $(uploadModal);
+		uploadModal.appendTo($("body"));
 		
-		$("#uploadModal").on('hidden.bs.modal',function(){
-			$("#uploadModal").find("form")[0].reset();
-			$("#uploadModal .files").html("");
+		uploadModal.on('hidden.bs.modal',function(){
+			uploadModal.find("form")[0].reset();
+			uploadModal.find(".files").html("");
 			fileSelectPageQuery(lastParam.currentPage,lastParam.parent);
-			$("#fileSelectModal").modal("show");
+			fileSelectModal.modal("show");
 		});
 		
-		$('#fileupload').fileupload({
+		uploadModal.find("form").eq(0).fileupload({
 			dataType : 'json',
 			autoUpload : false,
 			singleFileUploads : false,
@@ -320,144 +279,39 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 			        return rows;
 			    }
 		});
-	}
+		
+		fileSelectModal.find('[data-upload]').click(function(){
+			fileSelectModal.modal('hide');
+			uploadModal.find("input[name='parent']").val(lastParam.parent);
+			uploadModal.modal("show");
+		});
+	})();
 	
-	if($("#fileSelectModal").length == 0){
-		$(modal).appendTo($("body"));
-		
-		$("#file-upload").click(function(){
-			$("#fileSelectModal").modal('hide');
-			$("#uploadModal input[name='parent']").val(lastParam.parent);
-			$("#uploadModal").modal("show");
-		});
-		
-		$("#create-folder").click(function(){
-			$("#fileSelectModal").modal('hide');
-			$("#createFolderModal input[name='parent']").val(lastParam.parent);
-			$("#createFolderModal").modal("show");
-		});
-		$("#fileSelectModal").on('hidden.bs.modal',function(){
-			$("#fileSelectMain").html('');
-		});
-		$("#fileSelectModal").on('click','a[data-parent][data-page]',function(){
-			var page = $(this).attr("data-page");
-			var parent = $(this).attr("data-parent");
-			fileSelectPageQuery(page, parent);
-		})
-		
-		$("#fileSelectModal").on('click','a[data-extension][data-url][data-description]',function(){
-			$("#fileSelectModal").modal('hide');
-			var me = $(this);
-			var ext = me.attr("data-extension");
-			if(isImage(ext)){
-				$("#imageModal").find("input").eq(0).val(me.find('img').attr("data-middle"));
-				$("#imageModal").find("input").eq(1).val(me.attr("data-description"));
-				$("#imageModal").find("input").eq(2).val(me.attr("data-url"));
-				$("#imageModal").modal("show")
-			} else {
-				$("#linkModal").find("input").eq(0).val(me.attr("data-url"));
-				$("#linkModal").find("input").eq(1).val(me.attr("data-description"));
-				$("#linkModal").modal("show")
-			}
-		});
-		
-		
-		if($("#imageModal").length == 0){
-			$(imageModal).appendTo($('body'));
-			$("#imageModal").on('hidden.bs.modal',function(){
-				fileSelectPageQuery(lastParam.currentPage,lastParam.parent);
-				$("#fileSelectModal").modal("show");
-			});
-			
-			
-			$("#image-confirm-btn").click(function(){
-				  var url  = $("#imageModal").find("input").eq(0).val();
-                var alt  = $("#imageModal").find("input").eq(1).val();
-                var link = $("#imageModal").find("input").eq(2).val();
-
-                if (url === "")
-                {
-              	  $("#imageModal").modal("hide");
-              	  return ;
-                }
-
-					var altAttr = (alt !== "") ? " \"" + alt + "\"" : "";
-
-                if (link === "" || link === "http://" || link === "https://")
-                {
-            		if(alt == ""){
-            			editor.replaceSelection('<img src="'+url+'" />')
-            		}else{
-            			editor.replaceSelection('<img src="'+url+'" alt="'+alt+'"/>')
-            		}
-                }
-                else
-                {
-            		if(alt == ""){
-            			editor.replaceSelection('<a href="'+link+'"><img src="'+url+'"/></a>')
-            		}else{
-            			editor.replaceSelection('<a href="'+link+'"><img src="'+url+'" alt="'+alt+'"/></a>')
-            		}
-                }
-
-                $("#imageModal").modal("hide");
-			});
-		}
-		
-		if($("#linkModal").length == 0){
-			$(linkModal).appendTo($('body'));
-			$("#linkModal").on('hidden.bs.modal',function(){
-				fileSelectPageQuery(lastParam.currentPage,lastParam.parent);
-				$("#fileSelectModal").modal("show");
-			});
-			
-			$("#link-confirm-btn").click(function(){
-				  var url  = $("#linkModal").find("input").eq(0).val();
-                var title  = $("#linkModal").find("input").eq(1).val();
-
-                if (url === "http://" || url === "https://" || url === "")
-                {
-              	  $("#linkModal").modal("hide");return;
-                }
-                
-                var str  = '<a href="'+url+'">'+title+'</a>';
-                
-                if (title == "")
-                {
-                	str = '<a href="'+url+'">'+url+'</a>';
-                }                                
-
-                editor.replaceSelection(str);
-
-                $("#linkModal").modal("hide");
-			});
-		}
-	}
+	fileSelectModal.on('hidden.bs.modal',function(){
+		fileSelectMain.html('');
+	});
 	
-
-	var imageExtensions = ["jpg","jpeg","png","gif","webp"];
-	var isImage = function(ext){
-		for(var i=0;i<imageExtensions.length;i++){
-			if(ext.toLowerCase() == imageExtensions[i]){
-				return true;
-			}
-		}
-		return false;
-	}
+	fileSelectModal.on('click','a[data-parent][data-page]',function(){
+		var page = $(this).attr("data-page");
+		var parent = $(this).attr("data-parent");
+		fileSelectPageQuery(page, parent);
+	});
+	
 	var lastParam = {currentPage : 1};
+	var datas = [];
 	var fileSelectPageQuery = function(page,parent){
 		var param = {};
 		param.currentPage = page;
 		if(parent && parent != "")
 			param.parent = parent;
-		$("#fileSelectMain").html("<img src='"+basePath+"/static/img/loading.gif' class='img-responsive center-block' />")
+		fileSelectMain.html("<img src='"+basePath+"/static/img/loading.gif' class='img-responsive center-block' />")
 		$.get(basePath+'/mgr/file/query',param,function(data){
 			if(data.success){
 				lastParam = param;
-				$("#fileSelectMain").html(getRenderHtml(data.data));
-				$('#fileSelectMain [data-toggle="tooltip"]').tooltip();
+				fileSelectMain.html(getRenderHtml(data.data));
+				fileSelectMain.find('[data-toggle="tooltip"]').tooltip();
 			} else {
-				$("#fileSelectMain").html('<div class="row"><div class="col-md-12"><div class="alert alert-danger">'+data.message+'</div></div></div>');
+				fileSelectMain.html('<div class="row"><div class="col-md-12"><div class="alert alert-danger">'+data.message+'</div></div></div>');
 			}
 		})
 	}
@@ -479,7 +333,7 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 			html += '</div>';
 		}
 		var page = data.page;
-		var datas = page.datas;
+		datas = page.datas;
 		html += '<div class="row">';
 		html += '<div class="col-md-12"><div class="tip"></div>';
 		if(datas.length > 0){
@@ -492,7 +346,7 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 					html += '<a href="###" data-page="1" data-parent="'+data.id+'" "><img src="'+basePath+'/static/fileicon/folder.png" class="img-responsive" style="height:100px"/></a>';
 				} else {
 					var url =data.cf.url;
-					html += '<a href="###" data-extension="'+data.cf.extension+'"  data-url="'+url+'" data-description="'+data.cf.originalFilename+'">'
+					html += '<a href="###" data-file="'+data.id+'">'
 					if(data.cf.thumbnailUrl){
 						html += '<img  src="'+data.cf.thumbnailUrl.small+'" data-middle="'+data.cf.thumbnailUrl.middle+'" class="img-responsive" style="height:100px"/>';
 					} else {
@@ -529,3 +383,36 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 		html += '</div>';
 		return html;
 	}
+	var fileCallback;
+	fileSelectModal.on("click","[data-file]",function(){
+		if(!fileCallback){
+			return ;
+		}
+		var id = $(this).data('file');
+		for(var i=0;i<datas.length;i++){
+			var data = datas[i];
+			if(data.id == id){
+				var result = fileCallback(data);
+				if(typeof(result) === 'boolean'){
+					if(result){
+						fileSelectModal.modal('hide');
+					}
+				}else{
+					fileSelectModal.modal('hide');
+				}
+				break;
+			}
+		}
+	}); 
+	
+	fileSelectModal.on("show.bs.modal",function(){
+		fileSelectPageQuery(1);
+	});
+	
+	return {
+		choose:function(callback){
+			fileCallback = callback;
+			fileSelectModal.modal('show');
+		}
+	};
+})();

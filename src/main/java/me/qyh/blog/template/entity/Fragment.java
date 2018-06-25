@@ -235,8 +235,8 @@ public class Fragment extends BaseEntity implements Template {
 	}
 
 	public static boolean isPreviewFragmentTemplate(String templateName) {
-		return templateName != null
-				&& templateName.startsWith(PreviewTemplate.TEMPLATE_PREVIEW_PREFIX + FRAGMENT_PREFIX);
+		return templateName != null && PreviewTemplate.getOriginalTemplateName(templateName)
+				.map(name -> isFragmentTemplate(name)).orElse(false);
 	}
 
 	public boolean isDel() {
