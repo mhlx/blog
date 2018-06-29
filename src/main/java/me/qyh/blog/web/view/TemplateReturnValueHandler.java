@@ -140,5 +140,4 @@ public class TemplateReturnValueHandler implements HandlerMethodReturnValueHandl
 	protected boolean isHtmlContentType(String contentType) {
 		return MediaType.TEXT_HTML_VALUE.equals(contentType);
 	}
-
 }

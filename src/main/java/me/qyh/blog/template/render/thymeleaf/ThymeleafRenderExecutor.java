@@ -193,7 +193,6 @@ public final class ThymeleafRenderExecutor implements TemplateRenderExecutor {
 		} else {
 			processMarkupSelectors = null;
 		}
-
 		return viewTemplateEngine.process(templateName, processMarkupSelectors, context);
 	}
 

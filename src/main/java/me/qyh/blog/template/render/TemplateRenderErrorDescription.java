@@ -19,8 +19,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.annotations.Expose;
-
 public class TemplateRenderErrorDescription implements Serializable {
 
 	/**
@@ -30,11 +28,6 @@ public class TemplateRenderErrorDescription implements Serializable {
 
 	private final List<TemplateErrorInfo> templateErrorInfos = new ArrayList<>();
 	private String expression;// 表达式
-
-	/**
-	 * @since 5.9
-	 */
-	@Expose(deserialize = false, serialize = false)
 	private String stackTrace;
 
 	public TemplateRenderErrorDescription() {

@@ -102,9 +102,7 @@ public final class TemplateRender implements InitializingBean, TemplateRenderMod
 			}
 
 			// 如果没有逻辑异常，转化模板异常
-			Optional<TemplateRenderException> optional = config.isWritableStackTraceOnTemplateRenderException()
-					? templateExceptionTranslater.translate(templateName, e)
-					: templateExceptionTranslater.translateNoFillTrace(templateName, e);
+			Optional<TemplateRenderException> optional = templateExceptionTranslater.translate(templateName, e);
 			if (optional.isPresent()) {
 				throw optional.get();
 			}

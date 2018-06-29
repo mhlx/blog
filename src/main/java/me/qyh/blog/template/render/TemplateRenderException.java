@@ -15,12 +15,7 @@
  */
 package me.qyh.blog.template.render;
 
-import java.util.List;
-
-import org.springframework.util.CollectionUtils;
-
-import me.qyh.blog.template.PreviewTemplate;
-import me.qyh.blog.template.render.TemplateRenderErrorDescription.TemplateErrorInfo;
+import me.qyh.blog.core.util.ExceptionUtils;
 
 public class TemplateRenderException extends Exception {
 
@@ -31,12 +26,14 @@ public class TemplateRenderException extends Exception {
 
 	private final String templateName;
 	private final TemplateRenderErrorDescription renderErrorDescription;
+	private final boolean fromPreview;
 
 	public TemplateRenderException(String templateName, TemplateRenderErrorDescription description, Throwable ex,
-			boolean enableSuppression, boolean writableStackTrace) {
-		super(null, ex, enableSuppression, writableStackTrace);
+			boolean fromPreview) {
+		super(null, ex, true, false);
 		this.renderErrorDescription = description;
 		this.templateName = templateName;
+		this.fromPreview = fromPreview;
 	}
 
 	public TemplateRenderErrorDescription getRenderErrorDescription() {
@@ -53,17 +50,16 @@ public class TemplateRenderException extends Exception {
 	}
 
 	public boolean isFromPreview() {
-		if (PreviewTemplate.isPreviewTemplate(templateName)) {
-			return true;
-		}
-		List<TemplateErrorInfo> templateErrorInfos = renderErrorDescription.getTemplateErrorInfos();
-		if (!CollectionUtils.isEmpty(templateErrorInfos)) {
-			for (TemplateErrorInfo info : templateErrorInfos) {
-				if (PreviewTemplate.isPreviewTemplate(info.getTemplateName())) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return fromPreview;
 	}
+
+	/**
+	 * 将错误栈写入 {@code TemplateRenderErrorDescription}
+	 * 
+	 * @see TemplateRenderErrorDescription#getStackTrace()
+	 */
+	public void writeStackTrace() {
+		renderErrorDescription.setStackTrace(ExceptionUtils.getStackTrace(this));
+	}
+
 }

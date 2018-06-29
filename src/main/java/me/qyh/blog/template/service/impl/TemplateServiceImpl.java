@@ -20,7 +20,6 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,8 +36,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import javax.servlet.ServletContext;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -57,8 +53,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -67,7 +61,6 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.ServletContextResource;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -87,12 +80,10 @@ import me.qyh.blog.core.service.impl.EmptyCommentServer;
 import me.qyh.blog.core.service.impl.Transactions;
 import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.core.util.Jsons;
-import me.qyh.blog.core.util.Resources;
 import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.core.vo.PageResult;
 import me.qyh.blog.core.vo.SpaceQueryParam;
-import me.qyh.blog.template.BackendTemplate;
 import me.qyh.blog.template.PathTemplate;
 import me.qyh.blog.template.PatternAlreadyExistsException;
 import me.qyh.blog.template.PreviewTemplate;
@@ -112,7 +103,6 @@ import me.qyh.blog.template.event.PageUpdateEvent;
 import me.qyh.blog.template.event.TemplateEvitEvent;
 import me.qyh.blog.template.render.data.DataTagProcessor;
 import me.qyh.blog.template.service.TemplateService;
-import me.qyh.blog.template.vo.BackendTemplateInfo;
 import me.qyh.blog.template.vo.DataBind;
 import me.qyh.blog.template.vo.DataTag;
 import me.qyh.blog.template.vo.DataTagProcessorBean;
@@ -155,8 +145,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	private PlatformTransactionManager platformTransactionManager;
 	@Autowired
 	private TemplateMapping templateMapping;
-	@Autowired
-	private ServletContext servletContext;
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
@@ -176,8 +164,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	private String previewIp;
 
 	private List<Fragment> previewFragments = new ArrayList<>();
-
-	private BackendTemplateManager backendTemplateManager;
 
 	private static final Path DATA_CONFIG = FileUtils.HOME_DIR.resolve("blog/data_config.json");
 
@@ -409,10 +395,17 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 	@Override
 	public Optional<Template> queryTemplate(String templateName) {
-		return getTemplateProcessor(templateName)
+		if (!Template.isTemplate(templateName)) {
+			return Optional.empty();
+		}
+		Optional<Template> op = getTemplateProcessor(templateName)
 				.map(processor -> Transactions.executeInReadOnlyTransaction(platformTransactionManager, status -> {
 					return processor.getTemplate(templateName);
 				}));
+		if (PreviewTemplate.isPreviewTemplate(templateName)) {
+			return op.map(PreviewTemplate::new);
+		}
+		return op;
 	}
 
 	@Override
@@ -813,10 +806,16 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	 * @param id
 	 * @return
 	 */
+	@Override
 	public Optional<HistoryTemplate> getHistoryTemplate(Integer id) {
 		return Transactions.executeInReadOnlyTransaction(platformTransactionManager, status -> {
 			return Optional.ofNullable(historyTemplateDao.selectById(id));
 		});
+	}
+
+	@Override
+	public boolean isPreviewIp(String ip) {
+		return previewIp != null && previewIp.equals(ip);
 	}
 
 	/**
@@ -890,11 +889,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		this.templateProcessors.add(new PageTemplateProcessor());
 		// Fragment Template Processor
 		this.templateProcessors.add(new FragmentTemplateProcessor());
-
-		this.backendTemplateManager = new BackendTemplateManager(servletContext);
-
-		// Backend Template Processor
-		this.templateProcessors.add(backendTemplateManager.getProcessor());
 
 		if (commentServer == null) {
 			commentServer = EmptyCommentServer.INSTANCE;
@@ -1264,15 +1258,23 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 		@Override
 		public Template getTemplate(String templateName) {
-			if (Page.isPreivewPageTemplate(templateName)) {
-				return templateMapping.getPreviewTemplateMapping().getPreviewTemplate(templateName).orElse(null);
+			Template template = null;
+			Optional<String> op = Page.getOriginalTemplateFromPreviewTemplateName(templateName);
+			String originalTemplateName = op.isPresent() ? op.get() : templateName;
+			if (op.isPresent()) {
+				template = templateMapping.getPreviewTemplateMapping().getPreviewTemplate(originalTemplateName)
+						.orElse(null);
 			}
-			return queryPageWithTemplateName(templateName).orElse(null);
+			if (template == null) {
+				template = queryPageWithTemplateName(originalTemplateName).orElse(null);
+			}
+			return template;
 		}
 
 		@Override
 		public boolean canProcess(String templateSign) {
-			return Page.isPageTemplate(templateSign) || Page.isPreivewPageTemplate(templateSign);
+			return Page.isPageTemplate(templateSign)
+					|| Page.getOriginalTemplateFromPreviewTemplateName(templateSign).isPresent();
 		}
 	}
 
@@ -1280,15 +1282,14 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 		@Override
 		public Template getTemplate(String templateName) {
-			boolean preview = PreviewTemplate.isPreviewTemplate(templateName);
-			String finalTemplateName = preview ? PreviewTemplate.getOriginalTemplateName(templateName).orElseThrow()
-					: templateName;
-			if (preview) {
+			Optional<String> op = Fragment.getOriginalTemplateFromPreviewTemplateName(templateName);
+			String originalTemplateName = op.isPresent() ? op.get() : templateName;
+			if (op.isPresent()) {
 				synchronized (TemplateServiceImpl.this) {
 					if (!previewFragments.isEmpty()) {
 						Fragment best = null;
 						for (Fragment previewFragment : previewFragments) {
-							if (previewFragment.getTemplateName().equals(finalTemplateName)) {
+							if (previewFragment.getTemplateName().equals(originalTemplateName)) {
 								if (!previewFragment.isGlobal() || previewFragment.getSpace() != null) {
 									best = previewFragment;
 									break;
@@ -1297,17 +1298,18 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 							}
 						}
 						if (best != null) {
-							return new PreviewTemplate(best);
+							return best;
 						}
 					}
 				}
 			}
-			return queryFragmentWithTemplateName(finalTemplateName).orElse(null);
+			return queryFragmentWithTemplateName(originalTemplateName).orElse(null);
 		}
 
 		@Override
 		public boolean canProcess(String templateSign) {
-			return Fragment.isFragmentTemplate(templateSign) || Fragment.isPreviewFragmentTemplate(templateSign);
+			return Fragment.isFragmentTemplate(templateSign)
+					|| Fragment.getOriginalTemplateFromPreviewTemplateName(templateSign).isPresent();
 		}
 	}
 
@@ -1334,11 +1336,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			throw new LogicException("fragment.user.notExists", "模板片段不存在");
 		}
 		return fragment;
-	}
-
-	@Override
-	public boolean isPreviewIp(String ip) {
-		return previewIp != null && previewIp.equals(ip);
 	}
 
 	@Override
@@ -1426,39 +1423,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		}
 	}
 
-	@Override
-	public List<BackendTemplateInfo> getAllBackendTemplateInfos() {
-		return backendTemplateManager.getAllBackendTemplateInfos();
-	}
-
-	@Override
-	public synchronized void editBackendTemplate(String path, String content) throws LogicException {
-		backendTemplateManager.edit(path, content);
-		this.applicationEventPublisher.publishEvent(new TemplateEvitEvent(this, path));
-	}
-
-	@Override
-	public synchronized void deleteBackendTemplate(String path) {
-		if (backendTemplateManager.delete(path)) {
-			this.applicationEventPublisher.publishEvent(new TemplateEvitEvent(this, path));
-		}
-	}
-
-	@Override
-	public Optional<BackendTemplate> getBackendTemplate(String path) {
-		Template template = backendTemplateManager.getProcessor().getTemplate(BackendTemplate.getTemplateName(path));
-		if (template == null) {
-			return Optional.empty();
-		}
-		BackendTemplate cast;
-		if (template instanceof PreviewTemplate) {
-			cast = (BackendTemplate) ((PreviewTemplate) template).getOriginalTemplate();
-		} else {
-			cast = (BackendTemplate) template;
-		}
-		return Optional.of(cast);
-	}
-
 	private Map<String, Boolean> readCallableMap() {
 		try {
 			String content = new String(Files.readAllBytes(DATA_CONFIG), Constants.CHARSET);
@@ -1479,175 +1443,5 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			throw new LogicException("space.notExists", "空间不存在");
 		}
 		return space;
-	}
-
-	private final class BackendTemplateManager {
-		private final ServletContext sc;
-
-		private static final String PREFIX = "/WEB-INF/templates/";
-		private static final String SUFFIX = ".html";
-
-		private final Set<String> allBackendTemplatePaths;
-		private final BackendTemplateProcessor processor;
-
-		private final Path root = FileUtils.HOME_DIR.resolve("blog/backend");
-
-		public BackendTemplateManager(ServletContext sc) {
-			super();
-			this.sc = sc;
-			Path root = Paths.get(sc.getRealPath(PREFIX));
-			try {
-				this.allBackendTemplatePaths = Files.walk(root).filter(FileUtils::isRegularFile)
-						.filter(p -> p.toString().endsWith(SUFFIX)).map(path -> getPath(root, path))
-						.collect(Collectors.toCollection(LinkedHashSet::new));
-			} catch (IOException e) {
-				throw new SystemException(e.getMessage(), e);
-			}
-			this.processor = new BackendTemplateProcessor();
-		}
-
-		private String getPath(Path root, Path path) {
-			String relative = root.relativize(path).toString();
-			return FileUtils.cleanPath(relative.substring(0, relative.length() - SUFFIX.length()));
-		}
-
-		/**
-		 * 获取所有的管理台页面路径
-		 * 
-		 * @return
-		 */
-		public List<BackendTemplateInfo> getAllBackendTemplateInfos() {
-			return allBackendTemplatePaths.stream()
-					.map(path -> new BackendTemplateInfo(path, FileUtils.exists(root.resolve(path))))
-					.collect(Collectors.toList());
-		}
-
-		public BackendTemplateProcessor getProcessor() {
-			return processor;
-		}
-
-		public void edit(String path, String content) throws LogicException {
-			if (!allBackendTemplatePaths.contains(path)) {
-				throw new LogicException("template.backend.notExists", "管理台模板路径不存在");
-			}
-			Path dest = root.resolve(path);
-			FileUtils.createFile(dest);
-			try (Writer writer = Files.newBufferedWriter(dest, Constants.CHARSET)) {
-				writer.write(content);
-			} catch (IOException e) {
-				throw new SystemException(e.getMessage(), e);
-			}
-		}
-
-		public boolean delete(String path) {
-			boolean flag = allBackendTemplatePaths.contains(path);
-			if (flag) {
-				FileUtils.deleteQuietly(root.resolve(path));
-			}
-			return flag;
-		}
-
-		public final class BackendTemplateProcessor implements TemplateProcessor {
-
-			@Override
-			public boolean canProcess(String templateSign) {
-				return BackendTemplate.isBackendTemplate(templateSign);
-			}
-
-			@Override
-			public Template getTemplate(String templateName) {
-				String path = BackendTemplate.getPath(templateName).orElseThrow();
-				if (allBackendTemplatePaths.contains(path)) {
-					Path dest = root.resolve(path);
-					if (FileUtils.exists(dest)) {
-						return new PathBackendTemplate(path, dest);
-					}
-					return new ServletContextBackendTemplate(sc, PREFIX + path + SUFFIX, path);
-				}
-				return null;
-			}
-		}
-
-		private final class PathBackendTemplate extends BackendTemplate {
-
-			private final Path dest;
-			private String content;
-
-			public PathBackendTemplate(String path, Path dest) {
-				super(path);
-				this.dest = dest;
-			}
-
-			@Override
-			public String getTemplate() {
-				if (content == null) {
-					try {
-						Resource resource = new PathResource(dest);
-						content = Resources.readResourceToString(resource);
-					} catch (IOException e) {
-						throw new SystemException(e.getMessage(), e);
-					}
-				}
-				return content;
-			}
-
-			@Override
-			public Template cloneTemplate() {
-				return new PathBackendTemplate(getPath(), dest);
-			}
-
-			@Override
-			public boolean equalsTo(Template other) {
-				if (Validators.baseEquals(this, other)) {
-					PathBackendTemplate rhs = (PathBackendTemplate) other;
-					return Objects.equals(this.getPath(), rhs.getPath()) && Objects.equals(this.dest, rhs.dest)
-							&& Objects.equals(this.getTemplate(), rhs.getTemplate());
-				}
-				return false;
-			}
-		}
-
-		private final class ServletContextBackendTemplate extends BackendTemplate {
-
-			private final ServletContext sc;
-			private final String resourcePath;
-			private String content;
-
-			public ServletContextBackendTemplate(ServletContext sc, String resourcePath, String path) {
-				super(path);
-				this.sc = sc;
-				this.resourcePath = resourcePath;
-			}
-
-			@Override
-			public Template cloneTemplate() {
-				return new ServletContextBackendTemplate(sc, resourcePath, getPath());
-			}
-
-			@Override
-			public String getTemplate() {
-				if (content == null) {
-					try {
-						Resource resource = new ServletContextResource(sc, resourcePath);
-						content = Resources.readResourceToString(resource);
-					} catch (IOException e) {
-						throw new SystemException(e.getMessage(), e);
-					}
-				}
-				return content;
-			}
-
-			@Override
-			public boolean equalsTo(Template other) {
-				if (Validators.baseEquals(this, other)) {
-					ServletContextBackendTemplate rhs = (ServletContextBackendTemplate) other;
-					return Objects.equals(this.getPath(), rhs.getPath())
-							&& Objects.equals(this.resourcePath, rhs.resourcePath)
-							&& Objects.equals(this.getTemplate(), rhs.getTemplate());
-				}
-				return false;
-			}
-		}
-
 	}
 }

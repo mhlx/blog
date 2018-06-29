@@ -88,7 +88,7 @@ public class OtherController {
 			}
 
 			String content = templateRender.doRender(templateName, null, request, new ReadOnlyResponse(response),
-					new ParseConfig(true, false));
+					new ParseConfig(true));
 
 			Webs.writeInfo(response, new JsonResult(true, content));
 

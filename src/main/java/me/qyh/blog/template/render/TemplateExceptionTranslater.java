@@ -34,14 +34,4 @@ public interface TemplateExceptionTranslater {
 	 */
 	Optional<TemplateRenderException> translate(String templateName, Throwable e);
 
-	/**
-	 * @since 5.10
-	 * @param templateName
-	 * @param e
-	 * @return
-	 */
-	default Optional<TemplateRenderException> translateNoFillTrace(String templateName, Throwable e) {
-		return translate(templateName, e);
-	}
-
 }

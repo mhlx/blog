@@ -164,6 +164,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
 			TemplateRenderException tre = (TemplateRenderException) ex;
+			tre.writeStackTrace();
 			if (!tre.isFromPreview()) {
 				LOGGER.error("[" + UrlUtils.buildFullRequestUrl(request) + "]" + ex.getMessage(), ex);
 			}

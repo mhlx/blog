@@ -17,6 +17,12 @@ package me.qyh.blog.template;
 
 import java.util.Optional;
 
+/**
+ * 预览模板
+ * 
+ * @author wwwqyhme
+ *
+ */
 public final class PreviewTemplate implements Template {
 	private final Template template;
 
@@ -58,16 +64,6 @@ public final class PreviewTemplate implements Template {
 	public boolean equalsTo(Template other) {
 		return false;
 	}
-
-//	@Override
-//	public String getRelativePath() {
-//		return template.getRelativePath();
-//	}
-//
-//	@Override
-//	public boolean hasPathVariable() {
-//		return template.hasPathVariable();
-//	}
 
 	@Override
 	public boolean cacheable() {

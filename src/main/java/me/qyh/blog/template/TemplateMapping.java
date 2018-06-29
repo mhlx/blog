@@ -300,7 +300,7 @@ public class TemplateMapping {
 
 	public final class PreviewTemplateMapping {
 
-		private final Map<String, PreviewTemplate> previewTemplateMap = new HashMap<>();
+		private final Map<String, PathTemplate> previewTemplateMap = new HashMap<>();
 		private final PatternsRequestConditionHolder previewHolder = new PatternsRequestConditionHolder();
 
 		/**
@@ -309,7 +309,7 @@ public class TemplateMapping {
 		 * @param templateName
 		 * @return
 		 */
-		public Optional<PreviewTemplate> getPreviewTemplate(String templateName) {
+		public Optional<PathTemplate> getPreviewTemplate(String templateName) {
 			lock.writeLock().lock();
 			try {
 				return previewTemplateMap.values().stream()
@@ -343,12 +343,11 @@ public class TemplateMapping {
 			}
 			lock.writeLock().lock();
 			try {
-				out: for (Iterator<Map.Entry<String, PreviewTemplate>> it = previewTemplateMap.entrySet().iterator(); it
+				out: for (Iterator<Map.Entry<String, PathTemplate>> it = previewTemplateMap.entrySet().iterator(); it
 						.hasNext();) {
-					Map.Entry<String, PreviewTemplate> entry = it.next();
+					Map.Entry<String, PathTemplate> entry = it.next();
 					for (String templateName : templateNames) {
-						String previewTemplateName = PreviewTemplate.getTemplateName(templateName);
-						if (previewTemplateName.equals(entry.getValue().getTemplateName())) {
+						if (templateName.equals(entry.getValue().getTemplateName())) {
 							it.remove();
 							continue out;
 						}
@@ -373,14 +372,15 @@ public class TemplateMapping {
 						.filter(pattern -> isHighestPriorityPattern(pattern, sysCondition)).collect(Collectors.toSet());
 				if (!highestPriorityPatterns.isEmpty()) {
 					if (highestPriorityPatterns.contains(path)) {
-						return Optional.of(new TemplateMatch(path, previewTemplateMap.get(path).getTemplateName()));
+						return Optional.of(new TemplateMatch(path,
+								PreviewTemplate.getTemplateName(previewTemplateMap.get(path).getTemplateName())));
 					} else {
 						List<String> bestMatchPatterns = new PatternsMatchCondition(highestPriorityPatterns)
 								.getMatchingPatterns(path);
 						if (!bestMatchPatterns.isEmpty()) {
 							String bestPattern = bestMatchPatterns.get(0);
-							return Optional.of(new TemplateMatch(bestPattern,
-									previewTemplateMap.get(bestPattern).getTemplateName()));
+							return Optional.of(new TemplateMatch(bestPattern, PreviewTemplate
+									.getTemplateName(previewTemplateMap.get(bestPattern).getTemplateName())));
 						}
 					}
 				}
@@ -421,8 +421,8 @@ public class TemplateMapping {
 							}
 
 						}
-						return Optional.of(
-								new TemplateMatch(bestPattern, previewTemplateMap.get(bestPattern).getTemplateName()));
+						return Optional.of(new TemplateMatch(bestPattern, PreviewTemplate
+								.getTemplateName(previewTemplateMap.get(bestPattern).getTemplateName())));
 					}
 				}
 
@@ -442,17 +442,16 @@ public class TemplateMapping {
 			Objects.requireNonNull(ori);
 			lock.writeLock().lock();
 			try {
-				PreviewTemplate preview = new PreviewTemplate(ori);
 				String pattern = ori.getRelativePath();
-				String templateName = preview.getTemplateName();
+				String templateName = ori.getTemplateName();
 
 				if (isKeyPath(pattern)) {
 					throw new PatternAlreadyExistsException(pattern);
 				}
 
-				for (Iterator<Map.Entry<String, PreviewTemplate>> it = previewTemplateMap.entrySet().iterator(); it
+				for (Iterator<Map.Entry<String, PathTemplate>> it = previewTemplateMap.entrySet().iterator(); it
 						.hasNext();) {
-					Entry<String, PreviewTemplate> entry = it.next();
+					Entry<String, PathTemplate> entry = it.next();
 					if (entry.getValue().getTemplateName().equals(templateName)) {
 						it.remove();
 						break;
@@ -468,17 +467,12 @@ public class TemplateMapping {
 					}
 				}
 
-				previewTemplateMap.put(pattern, preview);
+				previewTemplateMap.put(pattern, ori);
 				previewHolder.setCondition(new PatternsMatchCondition(previewTemplateMap.keySet()));
 
 			} finally {
 				lock.writeLock().unlock();
 			}
-		}
-
-		private boolean isHighestPriorityPattern(String pattern, PatternsMatchCondition sysCondition) {
-			return sysMap.containsKey(pattern) || pattern.indexOf('{') == -1
-					|| !sysCondition.getMatchingPatterns(pattern).isEmpty();
 		}
 
 	}
@@ -570,7 +564,7 @@ public class TemplateMapping {
 		}
 	}
 
-	public final class TemplateMatch {
+	public class TemplateMatch {
 		private final String pattern;
 		private final String templateName;
 
@@ -590,9 +584,13 @@ public class TemplateMapping {
 	}
 
 	private boolean isHighestPriority(String pattern, String templateName) {
-		return SystemTemplate.isSystemTemplate(templateName) || sysMap.containsKey(pattern)
-				|| !new PatternsMatchCondition(sysMap.keySet()).getMatchingPatterns(pattern).isEmpty()
-				|| pattern.indexOf('{') == -1;
+		return SystemTemplate.isSystemTemplate(templateName)
+				|| isHighestPriorityPattern(pattern, new PatternsMatchCondition(sysMap.keySet()));
+	}
+
+	private boolean isHighestPriorityPattern(String pattern, PatternsMatchCondition sysCondition) {
+		return sysMap.containsKey(pattern) || pattern.indexOf('{') == -1
+				|| !sysCondition.getMatchingPatterns(pattern).isEmpty();
 	}
 
 	/**

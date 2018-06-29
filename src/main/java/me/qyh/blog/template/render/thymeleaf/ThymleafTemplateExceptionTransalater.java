@@ -24,6 +24,8 @@ import org.thymeleaf.exceptions.TemplateProcessingException;
 
 import me.qyh.blog.core.util.ExceptionUtils;
 import me.qyh.blog.core.util.Validators;
+import me.qyh.blog.template.render.ParseContextHolder;
+import me.qyh.blog.template.render.ParsedTemplate;
 import me.qyh.blog.template.render.TemplateExceptionTranslater;
 import me.qyh.blog.template.render.TemplateRenderErrorDescription;
 import me.qyh.blog.template.render.TemplateRenderErrorDescription.TemplateErrorInfo;
@@ -40,26 +42,26 @@ public class ThymleafTemplateExceptionTransalater implements TemplateExceptionTr
 
 	@Override
 	public Optional<TemplateRenderException> translate(String templateName, Throwable e) {
-		return translate(templateName, e, true, true);
-	}
-
-	@Override
-	public Optional<TemplateRenderException> translateNoFillTrace(String templateName, Throwable e) {
-		return translate(templateName, e, false, false);
-	}
-
-	private Optional<TemplateRenderException> translate(String templateName, Throwable e, boolean enableSuppression,
-			boolean writableStackTrace) {
 		if (e instanceof TemplateProcessingException) {
+			boolean preview = isPreview(ParseContextHolder.getContext().getLastChain());
 			return Optional.of(new TemplateRenderException(templateName,
-					fromException((TemplateProcessingException) e, templateName, writableStackTrace), e,
-					enableSuppression, writableStackTrace));
+					fromException((TemplateProcessingException) e, templateName), e, preview));
 		}
 		return Optional.empty();
 	}
 
-	private TemplateRenderErrorDescription fromException(TemplateProcessingException e, String templateName,
-			boolean writableStackTrace) {
+	private boolean isPreview(ParsedTemplate chain) {
+		if (chain.isPreview()) {
+			return true;
+		}
+		List<ParsedTemplate> children = chain.getChildren();
+		if (children.isEmpty()) {
+			return false;
+		}
+		return isPreview(children.get(children.size() - 1));
+	}
+
+	private TemplateRenderErrorDescription fromException(TemplateProcessingException e, String templateName) {
 		TemplateRenderErrorDescription description = new TemplateRenderErrorDescription();
 		List<Throwable> ths = ExceptionUtils.getThrowableList(e);
 		TemplateProcessingException last = null;
@@ -76,16 +78,13 @@ public class ThymleafTemplateExceptionTransalater implements TemplateExceptionTr
 			}
 		}
 		if (last != null) {
-			last.setTemplateName(null);
-			description.setExpression(tryGetExpression(last.getMessage()));
-		}
-		if (writableStackTrace) {
-			description.setStackTrace(ExceptionUtils.getStackTrace(e));
+			description.setExpression(tryGetExpression(last));
 		}
 		return description;
 	}
 
-	private String tryGetExpression(String errorMsg) {
+	private String tryGetExpression(TemplateProcessingException e) {
+		String errorMsg = e.getMessage();
 		if (errorMsg.startsWith(SPEL_EXPRESSION_ERROR_PREFIX)) {
 			String expression = StringUtils.delete(errorMsg, SPEL_EXPRESSION_ERROR_PREFIX).trim();
 			return expression.substring(1, expression.length() - 1);

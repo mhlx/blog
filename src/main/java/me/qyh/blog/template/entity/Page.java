@@ -17,6 +17,7 @@ package me.qyh.blog.template.entity;
 
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Optional;
 
 import me.qyh.blog.core.entity.BaseEntity;
 import me.qyh.blog.core.entity.Space;
@@ -234,8 +235,8 @@ public class Page extends BaseEntity implements PathTemplate {
 		return sb.toString();
 	}
 
-	public static boolean isPreivewPageTemplate(String templateSign) {
-		return PreviewTemplate.getOriginalTemplateName(templateSign).map(templateName -> isPageTemplate(templateName))
-				.orElse(false);
+	public static Optional<String> getOriginalTemplateFromPreviewTemplateName(String templateSign) {
+		return PreviewTemplate.getOriginalTemplateName(templateSign)
+				.filter(templateName -> isPageTemplate(templateName));
 	}
 }

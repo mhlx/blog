@@ -18,6 +18,7 @@ package me.qyh.blog.template.entity;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
@@ -234,11 +235,6 @@ public class Fragment extends BaseEntity implements Template {
 		return templateName != null && templateName.startsWith(FRAGMENT_PREFIX);
 	}
 
-	public static boolean isPreviewFragmentTemplate(String templateName) {
-		return templateName != null && PreviewTemplate.getOriginalTemplateName(templateName)
-				.map(name -> isFragmentTemplate(name)).orElse(false);
-	}
-
 	public boolean isDel() {
 		return del;
 	}
@@ -246,4 +242,9 @@ public class Fragment extends BaseEntity implements Template {
 	public void setDel(boolean del) {
 		this.del = del;
 	}
+
+	public static Optional<String> getOriginalTemplateFromPreviewTemplateName(String templateName) {
+		return PreviewTemplate.getOriginalTemplateName(templateName).filter(name -> isFragmentTemplate(name));
+	}
+
 }

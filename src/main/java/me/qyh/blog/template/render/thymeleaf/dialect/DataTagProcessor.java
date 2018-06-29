@@ -141,7 +141,7 @@ public class DataTagProcessor extends DefaultAttributesTagProcessor {
 
 	private Optional<DataBind> queryDataBind(DataTag dataTag) {
 		try {
-			return templateService.queryData(dataTag, ParseContextHolder.getContext().onlyCallable()
+			return templateService.queryData(dataTag, ParseContextHolder.getContext().isOnlyCallable()
 					&& !ParseContextHolder.getContext().getRoot().isCallable());
 		} catch (LogicException e) {
 			throw new RuntimeLogicException(e);
