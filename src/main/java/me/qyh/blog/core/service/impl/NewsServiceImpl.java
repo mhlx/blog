@@ -39,6 +39,7 @@ import me.qyh.blog.core.event.NewsDelEvent;
 import me.qyh.blog.core.event.NewsUpdateEvent;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.service.CommentServer;
+import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.NewsService;
 import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.vo.NewsNav;

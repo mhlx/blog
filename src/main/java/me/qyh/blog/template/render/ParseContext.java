@@ -16,6 +16,7 @@
 package me.qyh.blog.template.render;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.transaction.TransactionStatus;
 
@@ -55,18 +56,21 @@ public class ParseContext {
 		return config.isOnlyCallable();
 	}
 
-	public ParsedTemplate getRoot() {
-		return root;
+	public Optional<ParsedTemplate> getRoot() {
+		return Optional.ofNullable(root);
 	}
 
 	public void setRoot(ParsedTemplate root) {
 		this.root = root;
 	}
 
-	public ParsedTemplate getLastChain() {
+	public Optional<ParsedTemplate> getLastChain() {
+		if (root == null) {
+			return Optional.empty();
+		}
 		ParsedTemplate chainRoot = new ParsedTemplate(root);
 		addToChain(this.root, chainRoot);
-		return chainRoot;
+		return Optional.of(chainRoot);
 	}
 
 	private void addToChain(ParsedTemplate root, ParsedTemplate chainRoot) {

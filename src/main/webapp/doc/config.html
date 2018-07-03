@@ -41,53 +41,6 @@ GoogleAuthenticator(String secret,int window)</pre>
 							href="https://myaccount.google.com/signinoptions/two-step-verification">https://myaccount.google.com/signinoptions/two-step-verification</a>中选择身份验证器应用可以看到
 					</p>
 					<p>window为窗口，默认为3，也就是说，-30s~30s内都可以认证通过，最大值为17</p>
-
-					<h3>2.文章点击策略</h3>
-					<h4>
-						2.1
-						<code>me.qyh.blog.core.service.impl.CacheableHitsStrategy</code>
-					</h4>
-					<p>默认缓存的策略，在该缓存策略下，每隔一段时间才会将文章的点击量写入数据库以及索引文件，因此在根据点击量排序时，无法实时反映</p>
-					<p>这个类接收以下可配置参数：</p>
-					<div class="table-responsive">
-						<table class="table">
-							<tr>
-								<th>参数名</th>
-								<th>类型</th>
-								<th>默认值</th>
-								<th>说明</th>
-							</tr>
-							<tr>
-								<td>validIp</td>
-								<td>boolean</td>
-								<td>true</td>
-								<td>是否缓存IP，如果为true，那么在一个刷新周期内，同一IP重复点击只会被视为一次点击</td>
-							</tr>
-							<tr>
-								<td>maxIps</td>
-								<td>int</td>
-								<td>100</td>
-								<td>如果在一个刷新周期内，超过maxIps个不同的ip点击了该文章，立即将该文章的点击数写入数据库</td>
-							</tr>
-							<tr>
-								<td>flushNum</td>
-								<td>int</td>
-								<td>50</td>
-								<td>刷新时，每flushNum篇点击数写入数据库，例入有51篇文章待写入，那么默认将会分两次写入</td>
-							</tr>
-						</table>
-						<div class="alert alert-warning">需要定时任务的支持，默认为
-						<pre class="prettyprint lang-xml">&lt;!-- 如果配置了缓存点击量策略，那么每隔600s更新文章点击量 --&gt;
-&lt;task:scheduled ref=&quot;cacheableHitsStrategy&quot; method=&quot;flush&quot;
-	fixed-rate=&quot;600000&quot; /&gt;</pre>
-						</div>
-					</div>
-					
-					<h4>
-						2.2
-						<code>me.qyh.blog.core.service.impl.ArticleServiceImpl$DefaultHitsStrategy(private)</code>
-					</h4>
-					<p>每次点击文章都将会被写入数据库以及索引文件</p>
 				</div>
 			</div>
 		</div>

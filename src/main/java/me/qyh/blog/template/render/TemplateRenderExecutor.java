@@ -27,7 +27,6 @@ import me.qyh.blog.core.exception.LogicException;
 public interface TemplateRenderExecutor {
 
 	/**
-	 * 
 	 * @param viewTemplateName
 	 * @param model
 	 *            额外参数

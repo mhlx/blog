@@ -35,8 +35,8 @@ body {
 					</ol>
 
 					<h2>最近被访问文章标签</h2>
-					<h3>默认dataName</h3>
-					<p>recentlyViewdArticles</p>
+					<button data-clipboard class="btn btn-default">拷贝</button>
+					<pre class="prettyprint lang-html">&lt;data name=&quot;recentlyViewdArticles&quot; num=&quot;&quot;/&gt;</pre>
 					<h3>可接受的标签属性</h3>
 					<div class="table-responsive">
 						<table class="table">
@@ -76,6 +76,8 @@ body {
 <script type="text/javascript"
 	src="../../static/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script src="../../static/js/clipboard.min.js"></script>
+<script src="data_tag_copy.js"></script>
 <script>
 	$(function() {
 		$("#nav").load("dataTagNav.html");

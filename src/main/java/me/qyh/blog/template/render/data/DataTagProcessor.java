@@ -62,13 +62,15 @@ public abstract class DataTagProcessor<T> {
 	 * @return
 	 * @throws LogicException
 	 */
-	public final DataBind getData(Map<String, Object> attributes) throws LogicException {
-		Attributes atts = new Attributes(attributes);
-		T result = query(atts);
-		DataBind bind = new DataBind();
-		bind.setData(result);
-		bind.setDataName(dataName);
-		return bind;
+	public final DataBind getData(Map<String, Object> attributes) {
+		final Attributes atts = new Attributes(attributes);
+		return new DataBind(dataName) {
+
+			@Override
+			public Object getData() throws LogicException {
+				return query(atts);
+			}
+		};
 	}
 
 	protected abstract T query(Attributes attributes) throws LogicException;

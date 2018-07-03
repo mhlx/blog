@@ -37,7 +37,7 @@ body {
 					<h2>自定义标签</h2>
 					<p>
 						所有的标签都继承自
-						<code>me.qyh.blog.core.templatedata.DataTagProcessor&lt;T&gt;</code>
+						<code>me.qyh.blog.template.render.data.DataTagProcessor&lt;T&gt;</code>
 						，其中T为标签的返回类型
 					</p>
 					<p>继承该类后需要实现一个抽象方法：</p>
@@ -56,10 +56,10 @@ body {
 					</p>
 
 					<h3>定义BingImageDataTagProcessor</h3>
-					<pre class="prettyprint lang-java">package me.qyh.blog.core.templatedata;
-
+					<pre class="prettyprint lang-java">
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -67,9 +67,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.UrlResource;
 
 import me.qyh.blog.core.exception.LogicException;
-import me.qyh.blog.core.templatedata.DataTagProcessor;
-import me.qyh.blog.util.Jsons;
-import me.qyh.blog.util.Resources;
+import me.qyh.blog.core.util.Jsons;
+import me.qyh.blog.core.util.Resources;
+import me.qyh.blog.template.render.data.DataTagProcessor;
 
 /**
  * 用于获取bing的背景图片
@@ -93,11 +93,11 @@ public class BingBackgroundImageDataTagProcessor extends DataTagProcessor&lt;Str
 	public BingBackgroundImageDataTagProcessor(String name, String dataName, String prefix) {
 		super(name, dataName);
 		this.prefix = prefix;
-		this.queryUrl = prefix + "/HPImageArchive.aspx?format=js&idx=0&n=1";
+		this.queryUrl = prefix + &quot;/HPImageArchive.aspx?format=js&amp;idx=0&amp;n=1&quot;;
 	}
 
 	public BingBackgroundImageDataTagProcessor(String name, String dataName) {
-		this(name, dataName, "https://cn.bing.com");
+		this(name, dataName, &quot;https://cn.bing.com&quot;);
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class BingBackgroundImageDataTagProcessor extends DataTagProcessor&lt;Str
 	}
 
 	private Optional&lt;String&gt; parseFromJson(String content) {
-		return Optional.ofNullable(Jsons.readJson(content).execute("images[0]->url"));
+		return Jsons.readJson(content).execute(&quot;images[0]-&gt;url&quot;);
 	}
 
 	/**
@@ -140,39 +140,30 @@ public class BingBackgroundImageDataTagProcessor extends DataTagProcessor&lt;Str
 				backgroundUrl = prefix + backgroundUrl;
 			}
 		} catch (IOException e) {
-			LOGGER.error("从地址：" + queryUrl + "获取内容失败：" + e.getMessage(), e);
+			LOGGER.error(&quot;从地址：&quot; + queryUrl + &quot;获取内容失败：&quot; + e.getMessage(), e);
 		}
 	}
-}
 
-					
-					
-					
+	@Override
+	public List&lt;String&gt; getAttributes() {
+		return List.of();
+	}
+}
 					</pre>
 
 					<h3>配置</h3>
-					<pre class="prettyprint lang-xml">&lt;bean id=&quot;bingBackgroundImageDataTagProcessor&quot;
-	class=&quot;me.qyh.blog.core.templatedata.BingBackgroundImageDataTagProcessor&quot;&gt;
-	&lt;constructor-arg index=&quot;0&quot; value=&quot;Bing&quot; /&gt;
-	&lt;constructor-arg index=&quot;1&quot; value=&quot;bingImage&quot; /&gt;
-	&lt;constructor-arg index=&quot;2&quot; value=&quot;https://cn.bing.com&quot; /&gt;
-&lt;/bean&gt;
-
-&lt;bean class=&quot;me.qyh.blog.web.thymeleaf.TemplateServiceImpl&quot;&gt;
-	&lt;property name=&quot;processors&quot;&gt;
-		&lt;list&gt;
-			&lt;ref bean=&quot;bingBackgroundImageDataTagProcessor&quot;/&gt;
-		&lt;/list&gt;
-	&lt;/property&gt;
-&lt;/bean&gt;
+					<pre class="prettyprint lang-xml">&lt;bean  class=&quot;me.qyh.blog.template.render.data.BingBackgroundImageDataTagProcessor&quot;&gt;
+     &lt;constructor-arg index=&quot;0&quot; value=&quot;bing每日图片&quot; /&gt;
+     &lt;constructor-arg index=&quot;1&quot; value=&quot;bing&quot; /&gt;
+&lt;/bean&gt;					
 </pre>
 					<h3>查看效果</h3>
 					<p>
 						配置完成之后，<b>重启你的应用容器</b>，在可以配置的页面上引入如下html片段，即可显示bing的图片
 					</p>
-					<pre class="prettyprint lang-html">&lt;data name=&quot;Bing&quot;/&gt;
+					<pre class="prettyprint lang-html">&lt;data name=&quot;bing&quot;/&gt;
 
-&lt;img th:src=&quot;&#36;{bingImage}&quot; th:if=&quot;&#36;{bingImage != null}&quot;/&gt;</pre>
+&lt;img th:src=&quot;&#36;{bing}&quot; th:if=&quot;&#36;{bing != null}&quot;/&gt;</pre>
 				</div>
 			</div>
 		</div>

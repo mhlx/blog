@@ -137,10 +137,6 @@ body {
 					<h2>fragment标签</h2>
 					<p>模板片段标签，引用形式为&lt;fragment
 						name=""/&gt;，其中name属性为模板片段名称，在实际的渲染过程中，通过当前空间和模板名称来确定fragment</p>
-					<div class="alert alert-info">
-						fragment标签实际上会被转化成&lt;div th:replace="" &gt;&lt;/div&gt;<br>因此name属性可以使用选择器，例如&lt;fragment
-						name="nav :: li"/&gt;
-					</div>
 
 					<h2>lock标签</h2>
 					<p>
@@ -151,14 +147,13 @@ body {
 					</div>
 					<div class="alert alert-info">
 						lock标签支持type属性，如果该属性值为block，那么lock标签下还支持两个额外的标签：locked和unlocked，
-						locked标签里面的内容将会在用户没有解锁时渲染，unlocked标签中的内容会在用户解锁后渲染。locked标签内还可以通过${urls.getUnlockUrl(lock,urls.getFullUrl(#request))}来获取解锁地址
+						locked标签里面的内容将会在用户没有解锁时渲染，unlocked标签中的内容会在用户解锁后渲染。locked标签内还可以通过${urls.getUnlockUrl(lock,urls.fullUrl)}来获取解锁地址
 						<p>注意事项：</p>
 						<ul>
 							<li><span class="text text-warning">lock标签不支持嵌套</span></li>
 							<li><span class="text text-warning">
 									locked和unlocked标签必须在lock内使用</span></li>
-							<li><span class="text text-warning">
-									lock与访问路径无关</span></li>
+							<li><span class="text text-warning"> lock与访问路径无关</span></li>
 						</ul>
 					</div>
 
@@ -175,36 +170,27 @@ body {
 					</div>
 
 					<h2>
-						data标签[<a href="data/index.html">查看数据标签</a>]
+						data标签[<a href="data/articles.html">查看数据标签</a>]
 					</h2>
 					<p>数据标签是页面获取数据的主要来源，引用形式：&lt;data
-						name="标签名"/&gt;，标签有两个基本的属性，name和dataName，name用来查找标签，dataName用来传递数据，
-						例如&lt;data name="文章列表"
-						dataName="articlePage"/&gt;，在标签之后可以通过&#36;{articlePage}来获取结果，dataName可以作为属性在data标签上设置，一旦设置，将会
-						忽略默认的dataName，这在某些情况下可能很有用，例如评论查询</p>
-					<p>所有的标签名称和默认的dataName都可以在resource/spring/ui.xml中配置</p>
-					<p>关于data标签的ajax访问：</p>
-					<p>
-						如果需要data数据被ajax访问，那么可以设置DataTagProcessor的属性callable为true，<b>该操作重启容器之后才会生效</b>，
-						然后通过访问/data/标签名或者/space/{space}/data/标签名，来获取ajax结果，标签属性可以通过键值对的形式来设置，例如：
-						<a href="https://www.qyh.me/data/文章日期归档?mode=YMD" target="_blank">https://www.qyh.me/data/文章日期归档?mode=YMD</a>，或者
-						<a href="https://www.qyh.me/space/life/data/文章日期归档?mode=YMD"
-							target="_blank">https://www.qyh.me/space/life/data/文章日期归档?mode=YMD</a>
-					</p>
+						name="标签名"/&gt;，标签有两个基本的属性，name和alias，name用来查找标签，传递数据，alias用来设置获取数据的别名，
+						例如&lt;data name="articlePage"
+						/&gt;，在标签之后可以通过&#36;{articlePage}来获取结果，通过设置alias可以改变数据获取名称，例如
+						&lt;data name="articlePage" alias="ap"/&gt;,
+						此时获取文章列表数据不再通过&#36;${articlePage}，而是通过&#36;{ap}</p>
+					<div class="alert alert-info">
+						<ul>
+							<li>所有的标签名称|数据获取名称都可以在resource/spring/template.xml中配置</li>
+							<li>通过管理台 -> 模板管理 -> 数据管理可以控制该数据是否允许ajax访问，基本访问形式为
+								/data/{name} 或者 /space/{space}/data/{name}</li>
+						</ul>
+					</div>
 
-
-
-					<h2>MediaType标签</h2>
-					<p>mediaType标签可以用来决定一个路径的资源类型，例如</p>
-					<pre class="prettyprint lang-xml">&lt;mediaType value=&quot;application/json&quot;/&gt;
-&lt;data name=&quot;文章列表&quot; th:query=&quot;${param.query}&quot;/&gt;
-&lt;div th:utext=&quot;${jsons.write(articlePage)}&quot; th:remove=&quot;tag&quot;&gt;
-  
-&lt;/div&gt;</pre>
-					<p>将会将文章列表以json形式输出</p>
 					<div class="alert alert-warning">
-						一个页面可以放置任意多个&lt;mediaType/&gt;标签，但最终以最后一个被解析的mediaType标签为准</div>
-
+						<ul>
+							<li>在页面的解析过程中，是从上到下顺序解析的，也就是说必须在data标签之后才能获取数据</li>
+						</ul>
+					</div>
 
 					<h2>period标签</h2>
 					<p>该标签主要用来在指定时间段内执行内容，标签的基本访问形式为：&lt;period begin="" end=""

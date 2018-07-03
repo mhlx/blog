@@ -24,6 +24,7 @@ import org.thymeleaf.exceptions.TemplateProcessingException;
 
 import me.qyh.blog.core.util.ExceptionUtils;
 import me.qyh.blog.core.util.Validators;
+import me.qyh.blog.template.PreviewTemplate;
 import me.qyh.blog.template.render.ParseContextHolder;
 import me.qyh.blog.template.render.ParsedTemplate;
 import me.qyh.blog.template.render.TemplateExceptionTranslater;
@@ -43,11 +44,22 @@ public class ThymleafTemplateExceptionTransalater implements TemplateExceptionTr
 	@Override
 	public Optional<TemplateRenderException> translate(String templateName, Throwable e) {
 		if (e instanceof TemplateProcessingException) {
-			boolean preview = isPreview(ParseContextHolder.getContext().getLastChain());
+			boolean preview = PreviewTemplate.isPreviewTemplate(templateName);
+			if (!preview) {
+				preview = isPreview(ParseContextHolder.getContext().getLastChain());
+			}
 			return Optional.of(new TemplateRenderException(templateName,
 					fromException((TemplateProcessingException) e, templateName), e, preview));
 		}
 		return Optional.empty();
+	}
+
+	private boolean isPreview(Optional<ParsedTemplate> op) {
+		if (op.isPresent()) {
+			return isPreview(op.get());
+		} else {
+			return false;
+		}
 	}
 
 	private boolean isPreview(ParsedTemplate chain) {

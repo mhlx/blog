@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package me.qyh.blog.core.service.impl;
+package me.qyh.blog.core.service;
+
+import me.qyh.blog.core.service.impl.ArticleIndexer;
+import me.qyh.blog.core.service.impl.ArticleServiceImpl;
 
 /**
  * 文章内容处理器，用于文章内容的调整,<b>同时也将用于构建索引时文章内容的预处理</b>

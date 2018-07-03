@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationContext;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.context.IWebContext;
+import org.thymeleaf.context.LazyContextVariable;
 import org.thymeleaf.exceptions.TemplateProcessingException;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
@@ -37,6 +38,7 @@ import me.qyh.blog.core.exception.RuntimeLogicException;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.template.render.ParseContextHolder;
+import me.qyh.blog.template.render.ParsedTemplate;
 import me.qyh.blog.template.service.TemplateService;
 import me.qyh.blog.template.vo.DataBind;
 import me.qyh.blog.template.vo.DataTag;
@@ -53,6 +55,13 @@ public class DataTagProcessor extends DefaultAttributesTagProcessor {
 	private static final String ALIAS = "alias";
 	private static final int PRECEDENCE = 1000;
 	private static final String NAME_ATTR = "name";
+
+	/**
+	 * 使用变量时才加载
+	 * 
+	 * @since 6.5
+	 */
+	private static final String LAZY = "lazy";
 
 	/**
 	 * <p>
@@ -120,7 +129,6 @@ public class DataTagProcessor extends DefaultAttributesTagProcessor {
 					iter.remove();
 				}
 			}
-
 			DataTag dataTag = new DataTag(name, tagAttMap);
 
 			Optional<DataBind> optional = queryDataBind(dataTag);
@@ -132,7 +140,18 @@ public class DataTagProcessor extends DefaultAttributesTagProcessor {
 				if (request.getAttribute(bind.getDataName()) != null) {
 					throw new TemplateProcessingException("属性" + bind.getDataName() + "已经存在于request中");
 				}
-				request.setAttribute(bind.getDataName(), bind.getData());
+				if (Boolean.parseBoolean(attMap.get(LAZY))) {
+					request.setAttribute(bind.getDataName(), new LazyContextVariable<Object>() {
+
+						@Override
+						protected Object loadValue() {
+							return getData(bind);
+						}
+
+					});
+				} else {
+					request.setAttribute(bind.getDataName(), getData(bind));
+				}
 			});
 		} finally {
 			structureHandler.removeElement();
@@ -140,11 +159,16 @@ public class DataTagProcessor extends DefaultAttributesTagProcessor {
 	}
 
 	private Optional<DataBind> queryDataBind(DataTag dataTag) {
+		return templateService.queryData(dataTag, ParseContextHolder.getContext().isOnlyCallable()
+				&& !ParseContextHolder.getContext().getRoot().map(ParsedTemplate::isCallable).orElse(false));
+	}
+
+	private Object getData(DataBind bind) {
 		try {
-			return templateService.queryData(dataTag, ParseContextHolder.getContext().isOnlyCallable()
-					&& !ParseContextHolder.getContext().getRoot().isCallable());
+			return bind.getData();
 		} catch (LogicException e) {
 			throw new RuntimeLogicException(e);
 		}
 	}
+
 }

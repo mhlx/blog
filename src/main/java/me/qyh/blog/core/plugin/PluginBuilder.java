@@ -91,7 +91,7 @@ public class PluginBuilder {
 	}
 
 	public static void main(String[] args) throws Exception {
-		build("pte", Paths.get("C:\\java\\projects\\nblog"), Paths.get("f:/plugin"));
+		build("comment", Paths.get("F:\\workspace\\blog"), Paths.get("f:/plugin"));
 	}
 
 }

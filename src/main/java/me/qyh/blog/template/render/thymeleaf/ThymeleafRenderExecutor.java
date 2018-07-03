@@ -29,11 +29,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.MediaType;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.TemplateSpec;
 import org.thymeleaf.context.WebExpressionContext;
 import org.thymeleaf.exceptions.TemplateProcessingException;
 import org.thymeleaf.spring5.context.webmvc.SpringWebMvcThymeleafRequestContext;
@@ -42,11 +44,13 @@ import org.thymeleaf.spring5.naming.SpringContextVariableNames;
 import org.thymeleaf.standard.expression.FragmentExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
+import org.thymeleaf.templatemode.TemplateMode;
 
 import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.template.entity.Fragment;
+import me.qyh.blog.template.render.ParseContextHolder;
 import me.qyh.blog.template.render.ReadOnlyResponse;
 import me.qyh.blog.template.render.TemplateRenderExecutor;
 import me.qyh.blog.template.validator.FragmentValidator;
@@ -70,7 +74,6 @@ public final class ThymeleafRenderExecutor implements TemplateRenderExecutor {
 	private static final String X_PJAX_FRAGMENT = "X-Fragment";
 	private static final String X_FULLAPGE = "X-Fullpage";
 
-	// COPIED FROM ThymeleafView 3.0.9.RELEASE
 	@Override
 	public String execute(String viewTemplateName, final Map<String, Object> model, final HttpServletRequest request,
 			final ReadOnlyResponse response) {
@@ -96,6 +99,7 @@ public final class ThymeleafRenderExecutor implements TemplateRenderExecutor {
 		}
 	}
 
+	// COPIED FROM ThymeleafView 3.0.9.RELEASE
 	private String doExecutor(String viewTemplateName, final Map<String, Object> model,
 			final HttpServletRequest request, final HttpServletResponse response) {
 
@@ -193,7 +197,38 @@ public final class ThymeleafRenderExecutor implements TemplateRenderExecutor {
 		} else {
 			processMarkupSelectors = null;
 		}
-		return viewTemplateEngine.process(templateName, processMarkupSelectors, context);
+		String contentType = ParseContextHolder.getContext().getConfig().getContentType();
+		TemplateSpec sec = new TemplateSpec(templateName, processMarkupSelectors, parseMode(contentType), null);
+		return viewTemplateEngine.process(sec, context);
+	}
+
+	/**
+	 * 根据模板名称来获取解析模式
+	 * 
+	 * @since 6.5
+	 * @param templateName
+	 * @return
+	 */
+	protected TemplateMode parseMode(String contentType) {
+		if (Validators.isEmptyOrNull(contentType, true)) {
+			return TemplateMode.HTML;
+		}
+		if (contentType.startsWith(MediaType.TEXT_HTML_VALUE)) {
+			return TemplateMode.HTML;
+		}
+		if (contentType.startsWith(MediaType.APPLICATION_XML_VALUE)) {
+			return TemplateMode.XML;
+		}
+		if (contentType.startsWith("text/css")) {
+			return TemplateMode.CSS;
+		}
+		if (contentType.startsWith("text/javascript")) {
+			return TemplateMode.JAVASCRIPT;
+		}
+		if (contentType.startsWith(MediaType.TEXT_PLAIN_VALUE)) {
+			return TemplateMode.TEXT;
+		}
+		return TemplateMode.HTML;
 	}
 
 	private void addRequestContextAsVariable(final Map<String, Object> model, final String variableName,

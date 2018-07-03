@@ -140,7 +140,7 @@ public interface TemplateService {
 	 * @return
 	 * @throws LogicException
 	 */
-	Optional<DataBind> queryData(DataTag dataTag, boolean onlyCallable) throws LogicException;
+	Optional<DataBind> queryData(DataTag dataTag, boolean onlyCallable);
 
 	/**
 	 * 查询系统数据

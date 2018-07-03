@@ -30,12 +30,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,8 +60,11 @@ import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.RuntimeLogicException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.plugin.ArticleHitHandlerRegistry;
+import me.qyh.blog.core.service.ArticleContentHandler;
+import me.qyh.blog.core.service.ArticleHitHandler;
 import me.qyh.blog.core.service.ArticleService;
 import me.qyh.blog.core.service.CommentServer;
+import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.Markdown2Html;
@@ -120,6 +121,13 @@ public class ArticleServiceImpl
 
 	private List<ArticleHitHandler> hitHandlers = new ArrayList<>();
 
+	/**
+	 * @since 6.5
+	 */
+	private int publishSchedulePeriodSec;
+	@Autowired
+	private TaskScheduler taskScheduler;
+
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<Article> getArticleForView(String idOrAlias) {
@@ -159,7 +167,6 @@ public class ArticleServiceImpl
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "hotTags", allEntries = true) })
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Article updateArticle(Article article) throws LogicException {
@@ -240,7 +247,6 @@ public class ArticleServiceImpl
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "hotTags", allEntries = true) })
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Article writeArticle(Article article) throws LogicException {
@@ -299,7 +305,6 @@ public class ArticleServiceImpl
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "hotTags", allEntries = true) })
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Article publishDraft(Integer id) throws LogicException {
 		Article article = articleDao.selectById(id);
@@ -421,7 +426,6 @@ public class ArticleServiceImpl
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "hotTags", allEntries = true) })
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Article logicDeleteArticle(Integer id) throws LogicException {
 		Article article = articleDao.selectById(id);
@@ -444,7 +448,6 @@ public class ArticleServiceImpl
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "hotTags", allEntries = true) })
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Article recoverArticle(Integer id) throws LogicException {
 		Article article = articleDao.selectById(id);
@@ -483,12 +486,6 @@ public class ArticleServiceImpl
 		articleDao.deleteById(id);
 
 		applicationEventPublisher.publishEvent(new ArticleDelEvent(this, List.of(article), false));
-	}
-
-	@Override
-	@Caching(evict = { @CacheEvict(value = "hotTags", allEntries = true, condition = "#result > 0") })
-	public int publishScheduled() {
-		return scheduleManager.publish();
 	}
 
 	/**
@@ -531,7 +528,6 @@ public class ArticleServiceImpl
 
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(value = "hotTags", key = "'hotTags-'+'space-'+(T(me.qyh.blog.core.context.Environment).getSpace())+'-private-'+(T(me.qyh.blog.core.context.Environment).isLogin())")
 	public List<TagCount> queryTags() {
 		return articleTagDao.selectTags(Environment.getSpace(), Environment.isLogin());
 	}
@@ -633,6 +629,12 @@ public class ArticleServiceImpl
 		if (markdown2Html == null) {
 			markdown2Html = CommonMarkdown2Html.INSTANCE;
 		}
+
+		if (publishSchedulePeriodSec <= 0) {
+			publishSchedulePeriodSec = 5;
+		}
+
+		taskScheduler.scheduleAtFixedRate(scheduleManager::publish, publishSchedulePeriodSec * 1000L);
 	}
 
 	private Optional<Article> getCheckedArticle(String idOrAlias) {
@@ -758,7 +760,7 @@ public class ArticleServiceImpl
 					Integer id = article.getId();
 					int hits = articleDao.selectHits(id) + 1;
 					articleDao.updateHits(id, hits);
-					
+
 					Transactions.afterCommit(() -> {
 						articleIndexer.updateHits(Map.of(id, hits));
 					});
@@ -811,6 +813,10 @@ public class ArticleServiceImpl
 			throw new LogicException("space.notExists", "空间不存在");
 		}
 		return space;
+	}
+
+	public void setPublishSchedulePeriodSec(int publishSchedulePeriodSec) {
+		this.publishSchedulePeriodSec = publishSchedulePeriodSec;
 	}
 
 }

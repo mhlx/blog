@@ -35,7 +35,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.entity.BaseEntity;
 import me.qyh.blog.core.exception.SystemException;
-import me.qyh.blog.core.service.impl.HitsStrategy;
+import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.impl.Transactions;
 
 /**

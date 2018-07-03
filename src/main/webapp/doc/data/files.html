@@ -35,8 +35,8 @@ body {
 					</ol>
 
 					<h2>文件查询标签</h2>
-					<h3>默认dataName</h3>
-					<p>filePage</p>
+					<button data-clipboard class="btn btn-default">拷贝</button>
+					<pre class="prettyprint lang-html">&lt;data name=&quot;filePage&quot; extensions=&quot;&quot; pageSize=&quot;&quot; currentPage=&quot;&quot; type=&quot;&quot; ignorePaging=&quot;&quot; fileName=&quot;&quot; path=&quot;&quot;/&gt;</pre>
 					<h3>可接受的标签属性</h3>
 					<div class="table-responsive">
 						<table class="table">
@@ -310,6 +310,8 @@ body {
 <script type="text/javascript"
 	src="../../static/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script src="../../static/js/clipboard.min.js"></script>
+<script src="data_tag_copy.js"></script>
 <script>
 	$(function() {
 		$("#nav").load("dataTagNav.html");

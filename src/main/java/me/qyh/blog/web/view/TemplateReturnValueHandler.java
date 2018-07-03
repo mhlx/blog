@@ -92,7 +92,7 @@ public class TemplateReturnValueHandler implements HandlerMethodReturnValueHandl
 
 		try {
 			content = templateRender.doRender(templateName, mavContainer.getModel(), nativeRequest,
-					new ReadOnlyResponse(nativeResponse), new ParseConfig());
+					new ReadOnlyResponse(nativeResponse), new ParseConfig(false, contentType));
 
 		} catch (RedirectException | MissLockException e) {
 			throw e;

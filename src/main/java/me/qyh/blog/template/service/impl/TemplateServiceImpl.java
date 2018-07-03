@@ -380,7 +380,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	}
 
 	@Override
-	public Optional<DataBind> queryData(DataTag dataTag, boolean onlyCallable) throws LogicException {
+	public Optional<DataBind> queryData(DataTag dataTag, boolean onlyCallable) {
 		Optional<DataTagProcessor<?>> processor = processors.stream()
 				.filter(pro -> pro.getDataName().equals(dataTag.getName()) || pro.getName().equals(dataTag.getName()))
 				.findAny();

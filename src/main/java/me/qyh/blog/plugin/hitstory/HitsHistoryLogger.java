@@ -39,7 +39,7 @@ import me.qyh.blog.core.entity.Article;
 import me.qyh.blog.core.event.ArticleDelEvent;
 import me.qyh.blog.core.event.ArticleUpdateEvent;
 import me.qyh.blog.core.exception.SystemException;
-import me.qyh.blog.core.service.impl.ArticleHitHandler;
+import me.qyh.blog.core.service.ArticleHitHandler;
 import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.core.util.SerializationUtils;
 import me.qyh.blog.core.util.Times;

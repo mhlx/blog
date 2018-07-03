@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package me.qyh.blog.core.service.impl;
+package me.qyh.blog.core.service;
 
 import me.qyh.blog.core.entity.BaseEntity;
 

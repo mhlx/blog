@@ -57,7 +57,8 @@ public final class PreTemplateHandler extends AbstractTemplateHandler {
 			Template template = ((TemplateResource) templateResource).getTemplate();
 			addTemplateDataStack(PreviewTemplate.isPreviewTemplate(template.getTemplateName()), template.isCallable(),
 					templateStack);
-			if (!parseContext.getRoot().isCallable() && parseContext.isOnlyCallable()) {
+			if (!parseContext.getRoot().map(ParsedTemplate::isCallable).orElse(false)
+					&& parseContext.isOnlyCallable()) {
 				throw new RuntimeLogicException(new Message("template.notCallable", "模板无法被调用"));
 			}
 			// TemplateResource 可能来自于缓存，为了防止修改数据，这里clone后传给页面
@@ -80,7 +81,7 @@ public final class PreTemplateHandler extends AbstractTemplateHandler {
 
 	private void addTemplateDataStack(boolean preview, boolean callable, List<TemplateData> datas) {
 		ParseContext context = ParseContextHolder.getContext();
-		ParsedTemplate root = context.getRoot();
+		ParsedTemplate root = context.getRoot().orElse(null);
 		if (root == null) {
 			context.setRoot(toParsedTemplate(datas.get(0), preview, callable));
 		} else {

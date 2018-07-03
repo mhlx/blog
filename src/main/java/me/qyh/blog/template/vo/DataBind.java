@@ -15,18 +15,18 @@
  */
 package me.qyh.blog.template.vo;
 
-public class DataBind {
+import me.qyh.blog.core.exception.LogicException;
 
-	private Object data;
+public abstract class DataBind {
+
 	private String dataName;
 
-	public Object getData() {
-		return data;
+	public DataBind(String dataName) {
+		super();
+		this.dataName = dataName;
 	}
 
-	public void setData(Object data) {
-		this.data = data;
-	}
+	public abstract Object getData() throws LogicException;
 
 	public String getDataName() {
 		return dataName;

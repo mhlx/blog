@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
@@ -91,8 +89,6 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict(value = "articleCache", allEntries = true),
-			@CacheEvict(value = "articleFilesCache", allEntries = true) })
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Space updateSpace(Space space) throws LogicException {

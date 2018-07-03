@@ -36,8 +36,8 @@ body {
 					</ol>
 
 					<h2>动态统计标签</h2>
-					<h3>默认dataName</h3>
-					<p>newsStatistics</p>
+					<button data-clipboard class="btn btn-default">拷贝</button>
+					<pre class="prettyprint lang-html">&lt;data name=&quot;commentStatistics&quot;/&gt;</pre>
 					<h3>结果返回</h3>
 					<p>返回一个不为null的NewsStatistics对象</p>
 					<p>NewsStatistics可访问属性如下：</p>
@@ -109,6 +109,8 @@ body {
 <script type="text/javascript"
 	src="../../static/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../static/prettify/prettify.js"></script>
+<script src="../../static/js/clipboard.min.js"></script>
+<script src="data_tag_copy.js"></script>
 <script>
 	$(function() {
 		$("#nav").load("dataTagNav.html");

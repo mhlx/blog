@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import me.qyh.blog.core.plugin.ArticleContentHandlerRegistry;
+import me.qyh.blog.core.service.ArticleContentHandler;
 
 /**
  * 用于支持多个ArticleContentHandler

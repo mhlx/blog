@@ -119,14 +119,6 @@
 	<!-- 定时任务 -->
 	<task:scheduled-tasks scheduler="taskScheduler">
 
-		<!-- 默认5秒查询一次 待发布的文章 -->
-		<task:scheduled ref="articleService"
-			method="publishScheduled" fixed-rate="5000" />
-
-		<!-- 每隔30min将索引写入物理文件 -->
-		<task:scheduled ref="articleIndexer" method="commit"
-			fixed-rate="1800000" />
-
 		<!-- 每天凌晨3点清空待刪除的文件 -->
 		<task:scheduled ref="fileService" method="clear"
 			cron="0 0 3 * * ?" />
@@ -135,7 +127,7 @@
 	</task:scheduled-tasks>
 
 	<!-- 文件管理 -->
-	<bean class="me.qyh.blog.file.store.JavaImageHelper" />
+	<bean class="me.qyh.blog.file.store.GraphicsMagickImageHelper" />
 	<bean class="me.qyh.blog.file.store.DefaultFileManager" />
 
 	<bean class="me.qyh.blog.core.plugin.PluginHandlerRegistry" />

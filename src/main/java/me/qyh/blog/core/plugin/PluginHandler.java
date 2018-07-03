@@ -20,7 +20,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import me.qyh.blog.core.service.impl.HitsStrategy;
+import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.template.render.data.DataTagProcessor;
 import me.qyh.blog.web.WebExceptionResolver;
 

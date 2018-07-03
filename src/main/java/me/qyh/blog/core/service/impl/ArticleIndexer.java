@@ -83,6 +83,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 
@@ -94,6 +95,7 @@ import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.Tag;
 import me.qyh.blog.core.exception.SystemException;
+import me.qyh.blog.core.service.ArticleContentHandler;
 import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.Markdown2Html;
 import me.qyh.blog.core.util.FileUtils;
@@ -169,6 +171,13 @@ public abstract class ArticleIndexer implements InitializingBean {
 	private boolean useRAMDirectory;
 
 	private int pageSize;
+
+	/**
+	 * @since 6.5
+	 */
+	private int commitSchedulePeriodSec;
+	@Autowired
+	private TaskScheduler taskScheduler;
 
 	static {
 		FileUtils.forceMkdir(INDEX_DIR);
@@ -641,14 +650,14 @@ public abstract class ArticleIndexer implements InitializingBean {
 		qboostMap.put(CONTENT, boostMap.getOrDefault(CONTENT, 1F));
 		// 新增标签
 		addTags(tagDao.selectAll().stream().map(Tag::getName).toArray(String[]::new));
+
+		if (commitSchedulePeriodSec <= 0) {
+			commitSchedulePeriodSec = 180;
+		}
+		taskScheduler.scheduleAtFixedRate(this::commit, commitSchedulePeriodSec * 1000L);
 	}
 
-	/**
-	 * <p>
-	 * <b>仅供定时任务调用！！！</b>
-	 * </p>
-	 */
-	public synchronized void commit() {
+	private synchronized void commit() {
 		executor.submit(() -> {
 			oriWriter.commit();
 			return null;
@@ -695,5 +704,9 @@ public abstract class ArticleIndexer implements InitializingBean {
 
 	public void setPageSize(int pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public void setCommitSchedulePeriodSec(int commitSchedulePeriodSec) {
+		this.commitSchedulePeriodSec = commitSchedulePeriodSec;
 	}
 }

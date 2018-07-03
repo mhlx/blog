@@ -18,7 +18,6 @@ package me.qyh.blog.core.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +57,6 @@ public class TagServiceImpl implements TagService {
 	}
 
 	@Override
-	@CacheEvict(value = "hotTags", allEntries = true)
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Tag updateTag(Tag tag, boolean merge) throws LogicException {
@@ -90,7 +88,6 @@ public class TagServiceImpl implements TagService {
 	}
 
 	@Override
-	@CacheEvict(value = "hotTags", allEntries = true)
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void deleteTag(Integer id) throws LogicException {
 		Tag db = tagDao.selectById(id);

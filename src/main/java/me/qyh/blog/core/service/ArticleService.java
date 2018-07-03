@@ -71,14 +71,6 @@ public interface ArticleService {
 	PageResult<Article> queryArticle(ArticleQueryParam param);
 
 	/**
-	 * 发表要发表的计划博客
-	 * 
-	 * @return 成功发表的数量
-	 * 
-	 */
-	int publishScheduled();
-
-	/**
 	 * 插入|更新 文章
 	 * 
 	 * <b>自动保存的文章将会被设置为DRAFT</b>
