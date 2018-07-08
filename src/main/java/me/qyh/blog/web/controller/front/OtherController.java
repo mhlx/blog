@@ -33,12 +33,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import me.qyh.blog.core.config.Constants;
-import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.vo.JsonResult;
-import me.qyh.blog.template.PreviewTemplate;
-import me.qyh.blog.template.entity.Fragment;
+import me.qyh.blog.template.render.Fragments;
 import me.qyh.blog.template.render.ParseConfig;
 import me.qyh.blog.template.render.ReadOnlyResponse;
 import me.qyh.blog.template.render.TemplateRender;
@@ -90,10 +88,7 @@ public class OtherController {
 		}
 		try {
 
-			String templateName = Fragment.getTemplateName(fragment, Environment.getSpace());
-			if (templateService.isPreviewIp(Environment.getIP())) {
-				templateName = PreviewTemplate.getTemplateName(templateName);
-			}
+			String templateName = Fragments.getCurrentTemplateName(fragment);
 
 			String content = templateRender.doRender(templateName, null, request, new ReadOnlyResponse(response),
 					new ParseConfig(true));

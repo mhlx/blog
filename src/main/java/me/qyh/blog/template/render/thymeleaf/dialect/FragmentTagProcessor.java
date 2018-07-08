@@ -26,14 +26,14 @@ import org.thymeleaf.processor.element.IElementTagStructureHandler;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.util.FastStringWriter;
 
-import me.qyh.blog.core.context.Environment;
-import me.qyh.blog.template.PreviewTemplate;
-import me.qyh.blog.template.entity.Fragment;
-import me.qyh.blog.template.service.TemplateService;
+import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.template.render.Fragments;
+import me.qyh.blog.template.validator.FragmentValidator;
 
 /**
  * Fragment 标签处理器，fragment标签和
  * th:insert|th:replace的最主要区别在于，th:insert|th:replace的缓存和页面关联，而fragment缓存与页面无关
+ * 
  * 
  * {@link https://github.com/thymeleaf/thymeleaf/issues/515}
  * {@link http://www.thymeleaf.org/doc/tutorials/3.0/extendingthymeleaf.html#creating-our-own-dialect}
@@ -47,8 +47,6 @@ public class FragmentTagProcessor extends DefaultAttributesTagProcessor {
 	private static final int PRECEDENCE = 1000;
 	private static final String NAME = "name";
 
-	private final TemplateService templateService;
-
 	public FragmentTagProcessor(String dialectPrefix, ApplicationContext ctx) {
 		super(TemplateMode.HTML, // This processor will apply only to HTML mode
 				dialectPrefix, // Prefix to be applied to name for matching
@@ -57,7 +55,6 @@ public class FragmentTagProcessor extends DefaultAttributesTagProcessor {
 				null, // No attribute name: will match by tag name
 				false, // No prefix to be applied to attribute name
 				PRECEDENCE); // Precedence (inside dialect's own precedence)
-		this.templateService = ctx.getBean(TemplateService.class);
 	}
 
 	@Override
@@ -66,11 +63,15 @@ public class FragmentTagProcessor extends DefaultAttributesTagProcessor {
 		Map<String, String> attMap = processAttribute(context, tag);
 		String name = attMap.get(NAME);
 		if (name != null) {
-			String templateName = Fragment.getTemplateName(name, Environment.getSpace());
 
-			if (templateService.isPreviewIp(Environment.getIP())) {
-				templateName = PreviewTemplate.getTemplateName(templateName);
+			try {
+				FragmentValidator.validName(name, false);
+			} catch (LogicException e) {
+				structureHandler.removeElement();
+				return;
 			}
+
+			String templateName = Fragments.getCurrentTemplateName(name);
 
 			Writer writer = new FastStringWriter(200);
 

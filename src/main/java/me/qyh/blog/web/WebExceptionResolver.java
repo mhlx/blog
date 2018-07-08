@@ -147,7 +147,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 			}
 			String authUrl = null;
 			// 将链接放入
-			if ("get".equalsIgnoreCase(request.getMethod())) {
+			if ("GET".equals(request.getMethod())) {
 				authUrl = getFullUrl(request);
 			}
 			return getErrorForward(request, new Error403Info(ERROR_403, 403, authUrl));

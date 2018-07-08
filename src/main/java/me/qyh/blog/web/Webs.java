@@ -42,6 +42,7 @@ public class Webs {
 	public static final String SPACE_ATTR_NAME = Webs.class.getName() + ".SPACE";
 	public static final String SPACE_URLS_ATTR_NAME = Webs.class.getName() + ".SPACE_URLS";
 	public static final String IP_ATTR_NAME = Webs.class.getName() + ".IP";
+	public static final String PREVIEW_ATTR_NAME = Webs.class.getName() + ".PREVIEW";
 
 	/**
 	 * tomcat client abort exception <br>
@@ -102,7 +103,7 @@ public class Webs {
 	 */
 	public static boolean unlockRequest(HttpServletRequest request) {
 		Boolean isUnlock = (Boolean) request.getAttribute(UNLOCK_ATTR_NAME);
-		return isUnlock != null && isUnlock;
+		return Boolean.TRUE.equals(isUnlock);
 	}
 
 	/**
@@ -113,7 +114,7 @@ public class Webs {
 	 */
 	public static boolean errorRequest(HttpServletRequest request) {
 		Boolean isError = (Boolean) request.getAttribute(ERROR_ATTR_NAME);
-		return isError != null && isError;
+		return Boolean.TRUE.equals(isError);
 	}
 
 	/**
@@ -190,6 +191,17 @@ public class Webs {
 	 */
 	public static String getIP(HttpServletRequest request) {
 		return (String) request.getAttribute(IP_ATTR_NAME);
+	}
+
+	/**
+	 * 判断当前请求IP是否是预览IP
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static boolean isPreview(HttpServletRequest request) {
+		Boolean isPreview = (Boolean) request.getAttribute(PREVIEW_ATTR_NAME);
+		return Boolean.TRUE.equals(isPreview);
 	}
 
 	/**

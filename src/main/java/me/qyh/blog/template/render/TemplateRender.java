@@ -174,6 +174,7 @@ public final class TemplateRender implements InitializingBean, TemplateRenderMod
 		pros.put("strings", StringUtils.class);
 		pros.put("times", Times.class);
 		pros.put("formats", Formats.class);
+		pros.put("fragments", Fragments.class);
 		pros.put("gravatars", new Gravatars(gravatarUrlGenerator));
 	}
 

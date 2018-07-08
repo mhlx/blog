@@ -392,9 +392,9 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 
 	protected String getSourcePathByResizePath(String path) {
 		String sourcePath = path;
-		int idOf = path.lastIndexOf('/');
-		if (idOf != -1) {
-			sourcePath = path.substring(0, path.lastIndexOf('/'));
+		int index = path.lastIndexOf('/');
+		if (index != -1) {
+			sourcePath = path.substring(0, index);
 		}
 		return FileUtils.cleanPath(sourcePath);
 	}

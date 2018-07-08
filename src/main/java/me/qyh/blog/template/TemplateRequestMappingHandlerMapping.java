@@ -98,11 +98,12 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 
 		String ip = ipGetter.getIp(request);
 		request.setAttribute(Webs.IP_ATTR_NAME, ip);
+		request.setAttribute(Webs.PREVIEW_ATTR_NAME, templateService.isPreviewIp(ip));
 
 		if (Webs.errorRequest(request) || "GET".equals(request.getMethod())) {
 			Optional<TemplateMatch> matchOptional;
 
-			if (isPreview(request)) {
+			if (Webs.isPreview(request)) {
 				matchOptional = templateMapping.getPreviewTemplateMapping()
 						.getBestHighestPriorityTemplateMatch(lookupPath);
 			} else {
@@ -126,7 +127,7 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 		if ("GET".equals(request.getMethod())) {
 			Optional<TemplateMatch> matchOptional;
 
-			if (isPreview(request)) {
+			if (Webs.isPreview(request)) {
 				matchOptional = templateMapping.getPreviewTemplateMapping()
 						.getBestPathVariableTemplateMatch(lookupPath);
 			} else {
@@ -228,10 +229,6 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 			return bean instanceof TemplateHandler ? Optional.of((TemplateHandler) bean) : Optional.empty();
 		}
 		return Optional.empty();
-	}
-
-	private boolean isPreview(HttpServletRequest request) {
-		return templateService.isPreviewIp(Webs.getIP(request));
 	}
 
 	private void setUriTemplateVariables(TemplateMatch match, String lookupPath, HttpServletRequest request) {

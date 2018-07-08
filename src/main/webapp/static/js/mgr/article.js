@@ -6,7 +6,27 @@ $(document).ready(function() {
 			if($(this).attr("data-status")){
 				window.location.href = basePath+"/mgr/article/index?status="+$(this).attr("data-status")
 			}else{
-				window.location.href = basePath + '/mgr/article/write';
+				bootbox.prompt({
+				    title: "选择编辑器",
+				    inputType: 'select',
+				    inputOptions: [
+				        {
+				            text: 'markdown',
+				            value: ''
+				        },
+				        {
+				            text: 'html',
+				            value: 'HTML'
+				        }
+				    ],
+				    callback: function (result) {
+				    	if(result != ''){
+					    	window.location.href = basePath + '/mgr/article/write?editor='+result;
+				    	}else{
+					    	window.location.href = basePath + '/mgr/article/write';
+				    	}
+				    }
+				});
 			}
 		})
 		$("a[data-action]").click(function() {

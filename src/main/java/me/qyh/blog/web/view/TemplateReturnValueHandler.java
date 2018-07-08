@@ -99,7 +99,7 @@ public class TemplateReturnValueHandler implements HandlerMethodReturnValueHandl
 		} catch (Exception e) {
 
 			// 解锁页面不能出现异常，不再跳转(防止死循环)
-			if (Webs.unlockRequest(nativeRequest) && "get".equalsIgnoreCase(nativeRequest.getMethod())) {
+			if (Webs.unlockRequest(nativeRequest) && "GET".equals(nativeRequest.getMethod())) {
 				LOGGER.error("在解锁页面发生了一个异常，为了防止死循环，这个页面发生异常将会无法跳转，异常栈信息:" + e.getMessage(), e);
 				return;
 			}

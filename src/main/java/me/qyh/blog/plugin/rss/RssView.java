@@ -78,4 +78,11 @@ public class RssView extends AbstractRssFeedView {
 		feed.setEncoding(Constants.CHARSET.name());
 	}
 
+	@Override
+	protected Channel newFeed() {
+		Channel channel = new Channel("rss_2.0");
+		channel.setEncoding(Constants.CHARSET.name());
+		return channel;
+	}
+
 }

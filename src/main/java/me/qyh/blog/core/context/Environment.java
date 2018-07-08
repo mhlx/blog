@@ -21,7 +21,6 @@ import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.User;
 import me.qyh.blog.core.security.AuthencationException;
 
-
 /**
  * 当前环境，用于在上下文中获取用户、空间以及当前ip信息
  * 
@@ -30,9 +29,7 @@ import me.qyh.blog.core.security.AuthencationException;
  */
 public final class Environment {
 
-	private static final ThreadLocal<User> USER_LOCAL = new ThreadLocal<>();
-	private static final ThreadLocal<Space> SPACE_LOCAL = new ThreadLocal<>();
-	private static final ThreadLocal<String> IP_LOCAL = new ThreadLocal<>();
+	private static final ThreadLocal<Env> LOCAL = ThreadLocal.withInitial(Env::new);
 
 	/**
 	 * 获取当前用户
@@ -40,7 +37,7 @@ public final class Environment {
 	 * @return 如果没有登录，返回null
 	 */
 	public static User getUser() {
-		return USER_LOCAL.get();
+		return LOCAL.get().user;
 	}
 
 	/**
@@ -50,7 +47,7 @@ public final class Environment {
 	 * 
 	 */
 	public static Space getSpace() {
-		return SPACE_LOCAL.get();
+		return LOCAL.get().space;
 	}
 
 	/**
@@ -84,14 +81,7 @@ public final class Environment {
 	 *            用户
 	 */
 	public static void setUser(User user) {
-		USER_LOCAL.set(user);
-	}
-
-	/**
-	 * 移除用户上下文
-	 */
-	public static void removeUser() {
-		USER_LOCAL.remove();
+		LOCAL.get().user = user;
 	}
 
 	/**
@@ -109,14 +99,7 @@ public final class Environment {
 	 * @param space
 	 */
 	public static void setSpace(Space space) {
-		SPACE_LOCAL.set(space);
-	}
-
-	/**
-	 * 移除空间上下文
-	 */
-	public static void removeSpace() {
-		SPACE_LOCAL.remove();
+		LOCAL.get().space = space;
 	}
 
 	/**
@@ -144,7 +127,7 @@ public final class Environment {
 	 * @return
 	 */
 	public static String getIP() {
-		return IP_LOCAL.get();
+		return LOCAL.get().ip;
 	}
 
 	/**
@@ -153,15 +136,38 @@ public final class Environment {
 	 * @param ip
 	 */
 	public static void setIP(String ip) {
-		IP_LOCAL.set(ip);
+		LOCAL.get().ip = ip;
+	}
+
+	/**
+	 * 设置当前访问IP是否为预览IP
+	 * 
+	 * @param ip
+	 */
+	public static void setPreview(boolean preview) {
+		LOCAL.get().preview = preview;
+	}
+
+	/**
+	 * 判断当前请求IP是否为预览IP
+	 * 
+	 * @return
+	 */
+	public static boolean isPreview() {
+		return LOCAL.get().preview;
 	}
 
 	/**
 	 * 清空所有的上下文
 	 */
 	public static void remove() {
-		USER_LOCAL.remove();
-		SPACE_LOCAL.remove();
-		IP_LOCAL.remove();
+		LOCAL.remove();
+	}
+
+	private static final class Env {
+		private User user;
+		private Space space;
+		private String ip;
+		private boolean preview;
 	}
 }

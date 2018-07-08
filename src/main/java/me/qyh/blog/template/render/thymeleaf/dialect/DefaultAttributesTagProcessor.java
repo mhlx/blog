@@ -98,27 +98,14 @@ abstract class DefaultAttributesTagProcessor extends AbstractElementTagProcessor
 
 				final IStandardExpression expression = expressionParser.parseExpression(context, attributeValue);
 
-				if (expression != null && expression instanceof FragmentExpression) {
-					// This is merely a FragmentExpression (not complex, not combined with
-					// anything), so we can apply a shortcut
-					// so that we don't require a "null" result for this expression if the template
-					// does not exist. That will
-					// save a call to resource.exists() which might be costly.
-
-					final FragmentExpression.ExecutedFragmentExpression executedFragmentExpression = FragmentExpression
-							.createExecutedFragmentExpression(context, (FragmentExpression) expression);
-
-					expressionResult = FragmentExpression.resolveExecutedFragmentExpression(context,
-							executedFragmentExpression, true);
-
-				} else {
-
-					// Default attributes will ALWAYS be executed in RESTRICTED mode, for safety
-					// reasons (they might
-					// create attributes involved in code execution)
-					expressionResult = expression.execute(context, StandardExpressionExecutionContext.RESTRICTED);
-
+				if (expression instanceof FragmentExpression) {
+					throw new TemplateProcessingException("表达式:" + attributeValue + "不能为一个FragmentExpression");
 				}
+
+				// Default attributes will ALWAYS be executed in RESTRICTED mode, for safety
+				// reasons (they might
+				// create attributes involved in code execution)
+				expressionResult = expression.execute(context, StandardExpressionExecutionContext.RESTRICTED);
 
 			} else {
 				expressionResult = null;

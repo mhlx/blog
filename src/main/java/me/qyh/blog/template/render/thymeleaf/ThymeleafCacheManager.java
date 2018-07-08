@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.util.CollectionUtils;
 import org.thymeleaf.cache.AbstractCacheManager;
 import org.thymeleaf.cache.ExpressionCacheKey;
 import org.thymeleaf.cache.ICache;
@@ -85,12 +84,12 @@ public class ThymeleafCacheManager extends AbstractCacheManager implements Appli
 			ITemplateResource resource = templateData.getTemplateResource();
 			if (resource instanceof TemplateResource) {
 				// @since 6.0
-				if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
-					return;
-				}
-				if (key.getOwnerTemplate() != null) {
-					return;
-				}
+//				if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
+//					return;
+//				}
+//				if (key.getOwnerTemplate() != null) {
+//					return;
+//				}
 				final Template template = ((TemplateResource) resource).getTemplate();
 				String templateName = templateData.getTemplate();
 				tpe.execute(() ->

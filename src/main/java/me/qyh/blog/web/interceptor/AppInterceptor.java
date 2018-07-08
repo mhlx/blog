@@ -100,6 +100,7 @@ public class AppInterceptor extends HandlerInterceptorAdapter {
 				setLockKeys(request);
 				setSpace(request, handlerMethod);
 				Environment.setIP(Webs.getIP(request));
+				Environment.setPreview(Webs.isPreview(request));
 				csrfCheck(request, response);
 			} catch (AuthencationException | LockException | SpaceNotFoundException | CsrfException e) {
 				removeContext();
@@ -196,7 +197,7 @@ public class AppInterceptor extends HandlerInterceptorAdapter {
 			}
 			request.setAttribute(CsrfToken.class.getName(), csrfToken);
 			request.setAttribute(csrfToken.getParameterName(), csrfToken);
-			if ("get".equalsIgnoreCase(request.getMethod())) {
+			if ("GET".equals(request.getMethod())) {
 				// GET请求不能检查，否则死循环
 				return;
 			}
