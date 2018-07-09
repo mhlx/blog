@@ -386,14 +386,16 @@ public class ArticleServiceImpl
 		if (!CollectionUtils.isEmpty(datas)) {
 			List<Integer> ids = datas.stream().map(Article::getId).collect(Collectors.toList());
 			Map<Integer, Integer> countsMap = commentServer.queryCommentNums(COMMENT_MODULE_TYPE, ids);
-			for (Article article : datas) {
+			Map<Integer, String> htmlMap = markdown2Html
+					.toHtmls(datas.stream().filter(article -> Editor.MD.equals(article.getEditor()))
+							.collect(Collectors.toMap(Article::getId, Article::getSummary)));
+			datas.stream().forEach(article -> {
 				Integer comments = countsMap.get(article.getId());
 				article.setComments(comments == null ? 0 : comments);
-
 				if (Editor.MD.equals(article.getEditor())) {
-					article.setSummary(markdown2Html.toHtml(article.getSummary()));
+					article.setSummary(htmlMap.get(article.getId()));
 				}
-			}
+			});
 		}
 		return page;
 	}

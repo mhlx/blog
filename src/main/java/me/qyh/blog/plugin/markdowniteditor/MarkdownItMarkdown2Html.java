@@ -1,6 +1,8 @@
 package me.qyh.blog.plugin.markdowniteditor;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import me.qyh.blog.core.exception.SystemException;
@@ -19,11 +21,33 @@ class MarkdownItMarkdown2Html implements Markdown2Html {
 
 	@Override
 	public String toHtml(String markdown) {
+		if (markdown == null) {
+			return "";
+		}
 		try {
-			String json = Https.post(url, markdown);
+			String json = Https.post(url, Jsons.write(Map.of(1, markdown)));
 			JsonResult result = Jsons.readValue(JsonResult.class, json);
 			if (result.isSuccess()) {
-				return Objects.toString(result.getData());
+				return Objects.toString(((Map<?, ?>) result.getData()).get("1"), "");
+			}
+			throw new SystemException("转化markdown失败:" + result);
+		} catch (IOException e) {
+			throw new SystemException(e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public Map<Integer, String> toHtmls(Map<Integer, String> markdownMap) {
+		try {
+			String json = Https.post(url, Jsons.write(markdownMap));
+			JsonResult result = Jsons.readValue(JsonResult.class, json);
+			if (result.isSuccess()) {
+				Map<Integer, String> map = new HashMap<>();
+				Map<?, ?> resultMap = (Map<?, ?>) result.getData();
+				resultMap.forEach((k, v) -> {
+					map.put(Integer.parseInt(k.toString()), Objects.toString(v, ""));
+				});
+				return map;
 			}
 			throw new SystemException("转化markdown失败:" + result);
 		} catch (IOException e) {

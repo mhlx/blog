@@ -96,6 +96,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	private HtmlClean htmlClean;
 	@Autowired
 	protected CommentDao commentDao;
+	@Autowired(required = false)
 	private Markdown2Html markdown2Html;
 	@Autowired
 	private UserService userService;
@@ -309,6 +310,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		commentDao.insert(comment);
 
 		handleComment(comment);
+		handleCommentsContent(List.of(comment));
 
 		applicationEventPublisher.publishEvent(new CommentEvent(this, comment));
 
@@ -361,6 +363,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 			for (Comment comment : datas) {
 				handleComment(comment);
 			}
+			handleCommentsContent(datas);
 			datas = handleTree(datas, param.isAsc());
 			break;
 		default:
@@ -368,6 +371,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 			for (Comment comment : datas) {
 				handleComment(comment);
 			}
+			handleCommentsContent(datas);
 			break;
 		}
 
@@ -393,6 +397,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		int count = commentDao.selectCountByPeriod(param);
 		List<Comment> datas = commentDao.selectPageByPeriod(param);
 		datas.forEach(this::handleComment);
+		handleCommentsContent(datas);
 		return new PageResult<>(param, count, datas);
 	}
 
@@ -432,6 +437,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		for (Comment comment : comments) {
 			handleComment(comment);
 		}
+		handleCommentsContent(comments);
 		return comments;
 	}
 
@@ -467,6 +473,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 			}
 		}
 		comments.add(comment);
+		handleCommentsContent(comments);
 		return comments;
 	}
 
@@ -515,6 +522,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 			module.setObject(referenceMap.get(module));
 			handleComment(comment);
 		}
+		handleCommentsContent(comments);
 
 		return new PageResult<>(param, count, comments);
 	}
@@ -693,20 +701,28 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		} else {
 			comment.setUrl(urlHelper.getUrl());
 		}
-		String content = comment.getContent();
-		if (comment.getEditor().equals(Editor.MD)) {
-			content = markdown2Html.toHtml(comment.getContent());
-		}
-		if (!comment.getAdmin()) {
-			comment.setContent(htmlClean.clean(content));
-		} else {
-			comment.setContent(content);
-		}
 		Comment p = comment.getParent();
 		if (p != null) {
 			fillComment(p);
 		}
 		fillComment(comment);
+	}
+
+	private void handleCommentsContent(List<Comment> comments) {
+		Map<Integer, String> htmlMap = markdown2Html
+				.toHtmls(comments.stream().filter(cmt -> Editor.MD.equals(cmt.getEditor()))
+						.collect(Collectors.toMap(Comment::getId, Comment::getContent)));
+		comments.forEach(cmt -> {
+			String content = cmt.getContent();
+			if (Editor.MD.equals(cmt.getEditor())) {
+				content = htmlMap.get(cmt.getId());
+			}
+			if (!cmt.getAdmin()) {
+				cmt.setContent(htmlClean.clean(content));
+			} else {
+				cmt.setContent(content);
+			}
+		});
 	}
 
 	private void fillComment(Comment comment) {

@@ -1,6 +1,7 @@
 package me.qyh.blog.plugin.markdowniteditor;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +126,7 @@ public class MarkdownItEditorPluginHandler extends PluginHandlerSupport {
 
 	private boolean isServiceAvailable(String url) {
 		try {
-			String json = Https.post(url, "# test 你好");
+			String json = Https.post(url, Jsons.write(Map.of(1, "# test 你好")));
 			Jsons.readValue(JsonResult.class, json);
 			return true;
 		} catch (IOException e) {
