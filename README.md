@@ -1,3 +1,5 @@
+# No doubt,广电 is one of the biggest bitch in China
+
 ```
 while(!广电.ISDEAD)
 	FUCK 广电
