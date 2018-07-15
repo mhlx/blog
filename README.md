@@ -1,4 +1,8 @@
-# FUCK 广电
+```
+while(!广电.ISDEAD)
+	FUCK 广电
+鞭尸
+```
 
 
 版本：6.4 RELEASE
