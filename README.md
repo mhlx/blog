@@ -7,7 +7,7 @@ while(!广电.ISDEAD)
 ```
 
 
-版本：6.4 RELEASE
+版本：6.5 RELEASE
 
 重型博客
 
@@ -20,3 +20,5 @@ spring & mybatis & thymeleaf
 demo : https://www.qyh.me  
 changelog : https://www.qyh.me/changelog  
 feature : https://www.qyh.me/project/blog  
+
+download released jars at https://gitlab.com/qianyuhao/blog-release
