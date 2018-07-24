@@ -21,4 +21,4 @@ demo : https://www.qyh.me
 changelog : https://www.qyh.me/changelog  
 feature : https://www.qyh.me/project/blog  
 
-download released jars at https://gitlab.com/qianyuhao/blog-release
+历史版本下载： https://gitlab.com/qianyuhao/blog-release
