@@ -123,9 +123,6 @@
 		<property name="cacheSeconds" value="31556926" />
 	</bean>
 
-	<bean
-		class="me.qyh.blog.file.store.local.StaticResourceHttpRequestHandler" />
-
 	<!-- <bean -->
 	<!-- class="me.qyh.blog.file.store.local.GravatarResourceHttpRequestHandler"> -->
 	<!-- <constructor-arg index="0" value="/web/file/gravatar" /> -->
@@ -147,6 +144,6 @@
 	<bean class="me.qyh.blog.web.RememberMeService">
 		<constructor-arg value="blog"/>
 	</bean>
-
+	
 
 </beans>

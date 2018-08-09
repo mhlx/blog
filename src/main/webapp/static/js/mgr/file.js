@@ -118,15 +118,16 @@ $(document).ready(function(){
 				$.get(basePath + "/mgr/file/"+id+"/pro",{},function(data){
 					if(data.success){
 						data = data.data;
+						var base = data.base
 						var html = '';
-						var typename = data.type == "DIRECTORY" ? '文件夹' : '文件'
+						var typename = base.type == "DIRECTORY" ? '文件夹' : '文件'
 						html += '<p><strong>文件类型</strong>：'+typename+'</p>'
-						html += '<p><strong>文件大小</strong>：'+data.totalSize+'字节</p>';
-						if(data.type == "DIRECTORY"){
-							var counts = data.counts;
+						html += '<p><strong>文件大小</strong>：'+base.size+'字节</p>';
+						if(base.type == "DIRECTORY"){
+							var counts = base.counts;
 							if(counts.length > 0){
 								for(var i=0;i<counts.length;i++){
-									var count = data.counts[i];
+									var count = counts[i];
 									var _typename = count.type == "DIRECTORY" ? '子文件夹' : '子文件';
 									html += '<p><strong>'+_typename+'个数</strong>：'+count.count+'</p>';
 								}
@@ -134,11 +135,13 @@ $(document).ready(function(){
 								html += '<p>没有任何子文件夹和子文件</p>';
 							}
 						} else {
-							if(data.width){
-								html += '<p><strong>宽</strong>：'+data.width+'</p>';
-								html += '<p><strong>高</strong>：'+data.height+'</p>';
+							html += '<p><strong>访问路径</strong>：<a href="'+base.url+'" target="blank">'+base.url+'</a></p>';
+						}
+						var other = data.other;
+						if(other){
+							for(var k in other){
+								html += '<p><strong>'+k+'</strong>：'+other[k]+'</p>';
 							}
-							html += '<p><strong>访问路径</strong>：<a href="'+data.url+'" target="blank">'+data.url+'</a></p>';
 						}
 						bootbox.alert(html);
 					}else{

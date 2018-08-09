@@ -16,13 +16,13 @@
 package me.qyh.blog.file.service;
 
 import java.util.List;
-import java.util.Map;
 
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.vo.PageResult;
 import me.qyh.blog.file.entity.BlogFile;
 import me.qyh.blog.file.store.FileStore;
 import me.qyh.blog.file.vo.BlogFilePageResult;
+import me.qyh.blog.file.vo.BlogFileProperties;
 import me.qyh.blog.file.vo.BlogFileQueryParam;
 import me.qyh.blog.file.vo.BlogFileUpload;
 import me.qyh.blog.file.vo.FileStatistics;
@@ -72,11 +72,11 @@ public interface FileService {
 	 * 
 	 * @param id
 	 *            文件id
-	 * @return 文件属性map
+	 * @return 文件属性
 	 * @throws LogicException
 	 *             查询属性异常
 	 */
-	Map<String, Object> getBlogFileProperty(Integer id) throws LogicException;
+	BlogFileProperties getBlogFileProperties(Integer id) throws LogicException;
 
 	/**
 	 * 获取可存储文件的文件储存器

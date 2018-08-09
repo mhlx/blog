@@ -38,11 +38,12 @@ public class NewsNavDataTagProcessor extends DataTagProcessor<NewsNav> {
 
 	@Override
 	protected NewsNav query(Attributes attributes) throws LogicException {
+		boolean queryLock = attributes.getBoolean("queryLock").orElse(false);
 		Object v = attributes.get(REF_NEWS).orElse(null);
 		if (v != null) {
-			return newsService.getNewsNav((News) v).orElse(null);
+			return newsService.getNewsNav((News) v, queryLock).orElse(null);
 		}
-		return attributes.getInteger(ID).flatMap(id -> newsService.getNewsNav(id)).orElse(null);
+		return attributes.getInteger(ID).flatMap(id -> newsService.getNewsNav(id, queryLock)).orElse(null);
 	}
 
 	@Override

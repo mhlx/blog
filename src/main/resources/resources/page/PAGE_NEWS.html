@@ -19,12 +19,12 @@
 	<![endif]-->
 <title>动态</title>
 <style>
-.media-body img{
+.media-body:not(.media-left) img{
 	display: block;
     max-width: 200px;
     height: auto;
 }
-.media-body video{
+.media-body:not(.media-left) video{
     max-width: 200px;
     height: auto;
 }
@@ -66,7 +66,8 @@
 									<span class="glyphicon glyphicon-fire" aria-hidden="true"
 										style="margin-left: 5px"></span>&nbsp;[[${news.hits}]]
 								</h5>
-								<p th:utext="${news.content}"></p>
+								<p th:utext="${news.content}" th:if="${user != null || !news.hasLock()}"></p>
+								<div class="alert alert-warning"  th:if="${user == null && news.hasLock()}">这条动态被锁保护，请访问<a th:href="${urls.getUrl(news)}">这里</a>访问</div>
 								<p
 									th:attr="style=${news.comments > 0 ? 'null' : 'display:none'}"
 									class="text text-info" th:data-comment-info="${news.id}">

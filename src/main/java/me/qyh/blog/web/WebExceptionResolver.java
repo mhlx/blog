@@ -190,10 +190,13 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 			/**
 			 * tomcat 9.0.6+ 设置status不是200再重定向无法显示页面 ？？？
+			 * <p>
+			 * <b>这个bug在tomcat 9.0.9+中被修复了</b>
+			 * </p>
 			 * 
 			 * @since 6.1
 			 */
-			response.reset();
+			// response.reset();
 
 			if (Webs.isAjaxRequest(request)) {
 				return new ModelAndView(new JsonView(new RedirectJsonResult(re.getUrl(), re.isPermanently())));
@@ -223,6 +226,10 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
+			if (Webs.isAjaxRequest(request)) {
+				return new ModelAndView(
+						new JsonView(new JsonResult(false, new Message("unlock.require", "需要解锁资源才能操作"))));
+			}
 			LockException ex = (LockException) e;
 			Lock lock = ex.getLock();
 			String redirectUrl = getFullUrl(request);

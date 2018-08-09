@@ -61,4 +61,14 @@ public interface CommentServer {
 	 * @return
 	 */
 	CommentStatistics queryCommentStatistics(Space space);
+
+	/**
+	 * 
+	 * 删除某个模块下的所有评论
+	 * 
+	 * @param module
+	 * @param moduleId
+	 * @since 6.6
+	 */
+	void deleteComments(String module, Integer moduleId);
 }

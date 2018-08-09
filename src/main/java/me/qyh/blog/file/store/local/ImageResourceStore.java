@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 
@@ -32,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.SystemException;
+import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.file.entity.CommonFile;
 import me.qyh.blog.file.store.AnimatedWebpConfig.Metadata;
@@ -68,6 +70,21 @@ public class ImageResourceStore extends ThumbnailSupport {
 	}
 
 	@Override
+	public Map<Message, String> getProperties(String key) {
+		Optional<Path> path = super.getFile(key);
+		if (path.isPresent()) {
+			try {
+				ImageInfo info = this.readImage(path.get());
+				return Map.of(new Message("image.width", "图片宽度"), String.valueOf(info.getWidth()),
+						new Message("image.height", "图片高度"), String.valueOf(info.getHeight()));
+			} catch (LogicException e) {
+				return Map.of();
+			}
+		}
+		return super.getProperties(key);
+	}
+
+	@Override
 	public CommonFile doStore(Path dest, String key, MultipartFile mf) throws LogicException {
 		ImageMultipareFile file;
 		if (mf instanceof ImageMultipareFile) {
@@ -88,9 +105,6 @@ public class ImageResourceStore extends ThumbnailSupport {
 		cf.setSize(mf.getSize());
 		cf.setStore(id);
 		cf.setOriginalFilename(file.getOriginalFilename());
-
-		cf.setWidth(ii.getWidth());
-		cf.setHeight(ii.getHeight());
 
 		return cf;
 	}

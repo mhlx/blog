@@ -151,26 +151,26 @@
 							</table>
 						</div>
 						
-						<div class="table-responsive"
-							th:with="staticFileStatistics=${statistics.staticFileStatistics}" th:if="${statistics.staticFileStatistics != null}">
-							<table class="table">
-								<caption>本地文件统计</caption>
-								<tbody>
-									<tr>
-										<th>文件夹数目</th>
-										<td th:text="${staticFileStatistics.dirCount}"></td>
-									</tr>
-									<tr>
-										<th>文件数目</th>
-										<td th:text="${staticFileStatistics.fileCount}"></td>
-									</tr>
-									<tr>
-										<th>文件总大小</th>
-										<td th:text="${formats.readByte(staticFileStatistics.fileSize)}"></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+<!-- 						<div class="table-responsive" -->
+<!-- 							th:with="staticFileStatistics=${statistics.staticFileStatistics}" th:if="${statistics.staticFileStatistics != null}"> -->
+<!-- 							<table class="table"> -->
+<!-- 								<caption>本地文件统计</caption> -->
+<!-- 								<tbody> -->
+<!-- 									<tr> -->
+<!-- 										<th>文件夹数目</th> -->
+<!-- 										<td th:text="${staticFileStatistics.dirCount}"></td> -->
+<!-- 									</tr> -->
+<!-- 									<tr> -->
+<!-- 										<th>文件数目</th> -->
+<!-- 										<td th:text="${staticFileStatistics.fileCount}"></td> -->
+<!-- 									</tr> -->
+<!-- 									<tr> -->
+<!-- 										<th>文件总大小</th> -->
+<!-- 										<td th:text="${formats.readByte(staticFileStatistics.fileSize)}"></td> -->
+<!-- 									</tr> -->
+<!-- 								</tbody> -->
+<!-- 							</table> -->
+<!-- 						</div> -->
 					</div>
 				</div>
 				<div class="col-md-4 ">

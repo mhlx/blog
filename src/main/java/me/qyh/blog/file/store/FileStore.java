@@ -15,11 +15,13 @@
  */
 package me.qyh.blog.file.store;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.message.Message;
 import me.qyh.blog.file.entity.CommonFile;
 
 /**
@@ -147,6 +149,16 @@ public interface FileStore {
 	 */
 	default MultipartFile preHandler(MultipartFile file) throws LogicException {
 		return file;
+	}
+
+	/**
+	 * 返回文件的属性
+	 * 
+	 * @param key
+	 * @return 如果文件不存在或者没有其他属性，返回null或者空
+	 */
+	default Map<Message, String> getProperties(String key) {
+		return Map.of();
 	}
 
 }

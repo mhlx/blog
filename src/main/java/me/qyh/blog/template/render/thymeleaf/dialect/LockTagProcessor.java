@@ -27,6 +27,7 @@ import me.qyh.blog.core.entity.Lock;
 import me.qyh.blog.core.exception.LockException;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.util.Validators;
+import me.qyh.blog.core.vo.UnlockResult;
 
 /**
  * {@link http://www.thymeleaf.org/doc/tutorials/3.0/extendingthymeleaf.html#creating-our-own-dialect}
@@ -63,16 +64,13 @@ public class LockTagProcessor extends AbstractElementTagProcessor {
 			String type = tag.getAttributeValue(TYPE);
 			boolean block = "block".equalsIgnoreCase(type);
 
-			LockException ex = null;
-			Lock lock = null;
-			try {
-				lockManager.openLock(lockId);
-			} catch (LockException e) {
-				ex = e;
-				lock = e.getLock();
-			}
+			/**
+			 * @since 6.6 不应该吃掉
+			 *        lockManager解锁抛出的异常，如果吃掉，lockManager回滚，此时如果在大事务内(transaction:end标签)，大事务仍然提交，会产生异常
+			 */
+			UnlockResult result = lockManager.openLockQuietly(lockId);
 
-			if (ex == null) {
+			if (result.isUnlocked()) {
 				if (block) {
 					structureHandler.setLocalVariable(VARIABLE_NAME, new LockStructure());
 					structureHandler.removeTags();
@@ -80,14 +78,14 @@ public class LockTagProcessor extends AbstractElementTagProcessor {
 				}
 			} else {
 				if (!block) {
-					throw ex;
+					throw new LockException(result.getLock(), result.getError());
 				}
 
 				if (context.getVariable(VARIABLE_NAME) != null) {
 					throw new TemplateProcessingException("lock标签中不能嵌套lock标签");
 				}
 
-				structureHandler.setLocalVariable(VARIABLE_NAME, new LockStructure(true, lock));
+				structureHandler.setLocalVariable(VARIABLE_NAME, new LockStructure(true, result.getLock()));
 				structureHandler.removeTags();
 				removed = true;
 			}

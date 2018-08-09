@@ -20,6 +20,9 @@ $(document).ready(function() {
 				        }
 				    ],
 				    callback: function (result) {
+				    	if(result == null){
+				    		return ;
+				    	}
 				    	if(result != ''){
 					    	window.location.href = basePath + '/mgr/article/write?editor='+result;
 				    	}else{

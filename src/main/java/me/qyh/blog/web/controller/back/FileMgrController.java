@@ -162,7 +162,7 @@ public class FileMgrController extends BaseMgrController {
 	@GetMapping("{id}/pro")
 	@ResponseBody
 	public JsonResult pro(@PathVariable("id") int id) throws LogicException {
-		return new JsonResult(true, fileService.getBlogFileProperty(id));
+		return new JsonResult(true, fileService.getBlogFileProperties(id));
 	}
 
 	@PostMapping({ "{parent}/createFolder", "createFolder" })

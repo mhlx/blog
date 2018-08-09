@@ -12,6 +12,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result column="news_update" property="update" />
 		<result column="news_private" property="isPrivate" />
 		<result column="news_allowComment" property="allowComment" />
+		<result column="news_lock" property="lockId" />
 	</resultMap>
 	
 	<resultMap type="NewsStatistics" id="NewsStatisticsDetail">
@@ -22,8 +23,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
-		INSERT INTO blog_news(news_content,news_write,news_update,news_private,news_allowComment)
-		VALUES(#{content},#{write},#{update},#{isPrivate},#{allowComment})
+		INSERT INTO blog_news(news_content,news_write,news_update,news_private,news_allowComment,news_lock)
+		VALUES(#{content},#{write},#{update},#{isPrivate},#{allowComment},#{lockId})
 	</insert>
 
 	<update id="update">
@@ -42,7 +43,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 				news_private = #{isPrivate},
 			</if>
 			<if test="allowComment != null">
-				news_allowComment = #{allowComment}
+				news_allowComment = #{allowComment},
+			</if>
+			<if test="lockId != null">
+				news_lock = #{lockId}
 			</if>
 		</set>
 		WHERE id = #{id}
@@ -53,25 +57,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 
 	<select id="selectById" resultMap="NewsDetail">
-		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news WHERE id = #{id}
+		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news WHERE id = #{id}
 	</select>
 
 	<select id="selectByIds" resultMap="NewsDetail">
 		SELECT
-		id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		id,news_content,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
 		WHERE id IN
 		<foreach collection="collection" item="id" open="(" close=")"
 			separator=",">#{id}</foreach>
 	</select>
 	
 	<select id="selectPage" resultMap="NewsDetail">
-		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
 		<where>
 			<if test="begin != null and begin != null">
 				news_write BETWEEN #{begin} AND #{end}
 			</if>
 			<if test="!queryPrivate">
 				AND news_private = false
+			</if>
+			<if test="!queryLock">
+				AND news_lock IS NULL
+			</if>
+			<if test="content != null and content != ''">
+				AND news_content  LIKE CONCAT('%', #{content},'%')
 			</if>
 		</where>
 		<choose>
@@ -94,14 +104,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="!queryPrivate">
 				AND news_private = false
 			</if>
+			<if test="!queryLock">
+				AND news_lock IS NULL
+			</if>
+			<if test="content != null and content != ''">
+				AND news_content  LIKE CONCAT('%', #{content},'%')
+			</if>
 		</where>
 	</select>
 	
 	<select id="selectLast" resultMap="NewsDetail">
-		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
+		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
 		<where>
 			<if test="!queryPrivate">
 				news_private = #{queryPrivate}
+			</if>
+			<if test="!queryLock">
+				AND news_lock IS NULL
 			</if>
 		</where>
 		ORDER BY news_write DESC,id DESC 
@@ -117,26 +136,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		FROM blog_news
 		<where>
 			<if test="!queryPrivate">
-				AND news_private = false
+				news_private = false
 			</if>
 		</where>
 	</select>
 	
 	<select id="getPreviousNews" resultMap="NewsDetail">
-		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
-		WHERE news_write  <![CDATA[ < ]]> #{news.write}
+		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
+		WHERE 
+		(news_write = #{news.write}   AND id <![CDATA[ < ]]> #{news.id})
+		OR (news_write <![CDATA[ < ]]> #{news.write})
 		<if test="!queryPrivate">
 			AND news_private = false
+		</if>
+		<if test="!queryLock">
+			AND news_lock IS NULL
 		</if>
 		ORDER BY news_write DESC,id DESC
 		LIMIT 0,1
 	</select>
 
 	<select id="getNextNews" resultMap="NewsDetail">
-		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits FROM blog_news
-		WHERE news_write  > #{news.write}
+		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
+		WHERE 
+		(news_write = #{news.write}   AND id > #{news.id})
+		OR (news_write > #{news.write})
 		<if test="!queryPrivate">
 			AND news_private = false
+		</if>
+		<if test="!queryLock">
+			AND news_lock IS NULL
 		</if>
 		ORDER BY news_write ASC,id ASC
 		LIMIT 0,1
@@ -151,4 +180,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		SELECT news_hits FROM blog_news
 		WHERE id = #{id}
 	</select>
+	
+	<update id="deleteLock">
+		UPDATE blog_news SET news_lock = NULL WHERE
+		news_lock = #{lockId}
+	</update>
 </mapper>

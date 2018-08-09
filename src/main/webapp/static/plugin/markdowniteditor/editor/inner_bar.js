@@ -20,8 +20,10 @@ var inner_bar = (function(editor,config){
                             '<i class="fas fa-redo" data-redo style="cursor: pointer;margin-right:20px"></i>' +
                             '<i class="fas fa-search" data-search style="cursor: pointer;margin-right:20px"></i>' +
                             '<i class="fas fa-times" data-remove style="cursor: pointer;margin-right:20px"></i>' +
+                            '<i class="fas fa-bullseye" data-cursor style="cursor: pointer;margin-right:20px"></i>' +
                             '</div>');
-   $inner_bar.appendTo($('body'));
+		
+			$inner_bar.appendTo($('body'));
  				var cursor_timer;
                 editor.on('cursorActivity', function(doc) {
 
@@ -45,8 +47,9 @@ var inner_bar = (function(editor,config){
                         }).show();
                     }, 50)
                 });
-  
-                $inner_bar.on('click', '[data-bold]', function() {
+				
+		
+			$($inner_bar).on('click', '[data-bold]', function() {
                 var text = editor.getSelection();
                 if (text == '') {
                     editor.replaceRange("****", editor.getCursor());
@@ -102,9 +105,7 @@ var inner_bar = (function(editor,config){
             });
 
            $inner_bar.on('click', '[data-file]', function() {
-        	   
-        	   files.get();
-               
+               files.get();
             });
   
   			 $inner_bar.on('click', '[data-uncheck-list]', function() {
@@ -291,6 +292,11 @@ var inner_bar = (function(editor,config){
                     editor.replaceSelection(_text + text);
                 }
             });
+			
+			$inner_bar.on('click', '[data-cursor]', function() {
+              cp.show();
+            });
+		
 
             $("[data-table-confirm]").click(function() {
                 var rows = parseInt($("#rows").val()) || 3;
@@ -324,5 +330,7 @@ var inner_bar = (function(editor,config){
                 	$inner_bar.hide();
                 }
             }
+			
+		
   
 })(editor,config);

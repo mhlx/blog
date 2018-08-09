@@ -54,6 +54,7 @@
 							<label>内容</label>
 							<textarea class="form-control summernote" id="content">[[${news.content}]]</textarea>
 						</div>
+						<div id="lock_container"></div>
 						<div class="checkbox">
 						    <label>
 						      <input id="private" type="checkbox" th:attr="checked=${news.isPrivate !=null && news.isPrivate ? 'checked' : null}"> 私人
@@ -70,6 +71,7 @@
 			</div>
 		</div>
 	</div>
+	<input type="hidden" th:value="${news.lockId}" id="oldLock" />
 	<input type="hidden" th:value="${news.id}" id="id" />
 	<div th:replace="base/foot_source"></div>
 	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
@@ -104,6 +106,32 @@
 		th:src="@{/static/summernote/plugin/file/file.js}"></script>
 	<script>
 		$(function(){
+			$.get(basePath + '/mgr/lock/all',{},function(data){
+				var oldLock = $("#oldLock").val();
+				if(data.success){
+					var locks = data.data;
+					if(locks.length > 0){
+						var html = '';
+						html += '<div class="form-group">'
+						html += '<label for="lockId" class="control-label">锁:</label> ';
+						html += '<select id="lockId" class="form-control">';
+						html += '<option value="">无</option>';
+						for(var i=0;i<locks.length;i++){
+							var lock = locks[i];
+							if(lock.id == oldLock){
+								html += '<option value="'+lock.id+'" selected="selected">'+lock.name+'</option>';
+							}else{
+								html += '<option value="'+lock.id+'">'+lock.name+'</option>';
+							}
+						}
+						html += '</select>';
+						html += '</div>';
+						$("#lock_container").html(html);
+					}
+				}else{
+					console.log(data.data);
+				}
+			});
 			$('#content').summernote({
 				lang: 'zh-CN',
 				height:270,
@@ -128,6 +156,9 @@
 				var edit = id && id != '';
 				var url = edit ? basePath + '/mgr/news/update' : basePath + '/mgr/news/write';
 				news.content = content;
+				var lockId = $("#lockId").val();
+				if(lockId != '')
+					news.lockId = lockId;
 				if(edit)
 					news.id = id;
 				news.write = $("#time").val();

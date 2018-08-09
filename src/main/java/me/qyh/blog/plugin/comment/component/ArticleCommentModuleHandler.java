@@ -23,7 +23,6 @@ import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import me.qyh.blog.core.config.UrlHelper;
@@ -33,14 +32,12 @@ import me.qyh.blog.core.entity.Article;
 import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.User;
-import me.qyh.blog.core.event.ArticleDelEvent;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.message.Messages;
 import me.qyh.blog.core.service.ArticleService;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.plugin.comment.dao.ArticleCommentDao;
-import me.qyh.blog.plugin.comment.dao.CommentDao;
 import me.qyh.blog.plugin.comment.entity.Comment;
 import me.qyh.blog.plugin.comment.entity.CommentModule;
 import me.qyh.blog.plugin.comment.service.CommentModuleHandler;
@@ -53,8 +50,6 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 	@Autowired
 	private LockManager lockManager;
 	@Autowired
-	private CommentDao commentDao;
-	@Autowired
 	private ArticleCommentDao articleCommentDao;
 	@Autowired
 	private ArticleDao articleDao;
@@ -65,10 +60,7 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 	@Autowired
 	private Messages messages;
 
-	private static final String MODULE_NAME = ArticleService.COMMENT_MODULE_TYPE;
-
-	private static final Message PROTECTED_COMMENT_MD = new Message("comment.protected", "\\*\\*\\*\\*\\*\\*");
-	private static final Message PROTECTED_COMMENT_HTML = new Message("comment.protected", "******");
+	private static final String MODULE_NAME = ArticleService.COMMENT_MODULE_NAME;
 
 	public ArticleCommentModuleHandler() {
 		super(new Message("comment.module.article", "文章"), MODULE_NAME);
@@ -132,17 +124,6 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 	public Map<Integer, Object> getReferences(Collection<Integer> ids) {
 		List<Article> articles = articleDao.selectSimpleByIds(ids);
 		return articles.stream().collect(Collectors.toMap(Article::getId, art -> art));
-	}
-
-	@EventListener
-	public void handleArticleEvent(ArticleDelEvent articleEvent) {
-		if (!articleEvent.isLogicDelete()) {
-			List<Article> articles = articleEvent.getArticles();
-			for (Article article : articles) {
-				CommentModule module = new CommentModule(MODULE_NAME, article.getId());
-				commentDao.deleteByModule(module);
-			}
-		}
 	}
 
 	@Override

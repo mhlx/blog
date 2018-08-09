@@ -308,6 +308,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			Page db = getRequiredPage(id);
 			historyTemplateDao.deleteByTemplateName(db.getTemplateName());
 			pageDao.deleteById(id);
+			commentServer.deleteComments(COMMENT_MODULE_NAME, id);
 			String templateName = db.getTemplateName();
 			evitPageCache(templateName);
 			this.applicationEventPublisher.publishEvent(new PageDelEvent(this, List.of(db)));

@@ -555,17 +555,20 @@ var getFileExtension = function (url) {
         : ""; // No extension found
 };
 
-function handleFile(data){
-	var cf = data.cf;
-	var ext = cf.extension.toLowerCase();
-	if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
-		editor.replaceSelection('<a href="'+cf.url+'" target="_blank" title="'+cf.originalFilename+'">'+cf.url+'</a>')
-	} else {
-		var thumb = cf.thumbnailUrl;
-		if(thumb){
-			editor.replaceSelection('<a href="'+thumb.large+'" target="_blank" title="'+cf.originalFilename+'"><img src="'+thumb.middle+'" alt="'+cf.originalFilename+'"/></a>')
+function handleFile(datas){
+	for(var i=0;i<datas.length;i++){
+		var data = datas[i];
+		var cf = data.cf;
+		var ext = cf.extension.toLowerCase();
+		if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
+			editor.replaceSelection('<a href="'+cf.url+'" target="_blank" title="'+cf.originalFilename+'">'+cf.url+'</a>')
 		} else {
-			editor.replaceSelection('<img src="'+cf.url+'"  alt="'+cf.originalFilename+'"/>')
+			var thumb = cf.thumbnailUrl;
+			if(thumb){
+				editor.replaceSelection('<a href="'+thumb.large+'" target="_blank" title="'+cf.originalFilename+'"><img src="'+thumb.middle+'" alt="'+cf.originalFilename+'"/></a>')
+			} else {
+				editor.replaceSelection('<img src="'+cf.url+'"  alt="'+cf.originalFilename+'"/>')
+			}
 		}
 	}
 }

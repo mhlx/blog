@@ -31,6 +31,8 @@ public class NewsQueryParam extends PageQueryParam {
 	private Date end;
 	private boolean queryPrivate;
 	private boolean asc;
+	private String content;
+	private boolean queryLock = true;
 
 	public NewsQueryParam() {
 		super();
@@ -74,6 +76,22 @@ public class NewsQueryParam extends PageQueryParam {
 
 	public void setAsc(boolean asc) {
 		this.asc = asc;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public boolean isQueryLock() {
+		return queryLock;
+	}
+
+	public void setQueryLock(boolean queryLock) {
+		this.queryLock = queryLock;
 	}
 
 }

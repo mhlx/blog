@@ -47,7 +47,7 @@ import me.qyh.blog.template.vo.TemplatePageQueryParam;
  */
 public interface TemplateService {
 
-	static final String COMMENT_MODULE_TYPE = "userpage";
+	static final String COMMENT_MODULE_NAME = "userpage";
 
 	/**
 	 * 插入用户自定义模板片段

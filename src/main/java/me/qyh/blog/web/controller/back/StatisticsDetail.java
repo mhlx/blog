@@ -20,7 +20,6 @@ import me.qyh.blog.core.vo.CommentStatistics;
 import me.qyh.blog.core.vo.NewsStatistics;
 import me.qyh.blog.core.vo.TagDetailStatistics;
 import me.qyh.blog.file.vo.FileStatistics;
-import me.qyh.blog.file.vo.StaticFileStatistics;
 import me.qyh.blog.template.vo.PageStatistics;
 
 class StatisticsDetail {
@@ -29,7 +28,6 @@ class StatisticsDetail {
 	private CommentStatistics commentStatistics;
 	private PageStatistics pageStatistics;
 	private FileStatistics fileStatistics;
-	private StaticFileStatistics staticFileStatistics;
 	private NewsStatistics newsStatistics;
 
 	public ArticleDetailStatistics getArticleStatistics() {
@@ -70,14 +68,6 @@ class StatisticsDetail {
 
 	public void setFileStatistics(FileStatistics fileStatistics) {
 		this.fileStatistics = fileStatistics;
-	}
-
-	public StaticFileStatistics getStaticFileStatistics() {
-		return staticFileStatistics;
-	}
-
-	public void setStaticFileStatistics(StaticFileStatistics staticFileStatistics) {
-		this.staticFileStatistics = staticFileStatistics;
 	}
 
 	public NewsStatistics getNewsStatistics() {

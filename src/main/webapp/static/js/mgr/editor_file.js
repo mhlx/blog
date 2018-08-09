@@ -12,21 +12,36 @@ var fileChooser = (function(){
 	modal += '</div>';
 	modal += '<div class="modal-body">';
 	modal += '<div class="container-fluid"></div>';
+//	modal += '<div class="container-fluid">123</div>';
 	modal += '</div>';
 	modal += '<div class="modal-footer">';
 	modal += '<button type="button" class="btn btn-default" data-create-folder>新建文件夹</button>';
 	modal += '<button type="button" class="btn btn-default" data-upload>上传</button>';
-	modal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+//	modal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+	modal += '<button type="button" class="btn btn-default" data-choose>选择</button>';
 	modal += '</div>';
 	modal += '</div>';
 	modal += '</div>';
 	modal += '</div>';
+	
+
+	var selected = [];
+//	var hasSelected = false;
+	var inSelected = function(id){
+		for(var i=0;i<selected.length;i++){
+			if(selected[i].id == id){
+				return true;
+			}
+		}
+		return false;
+	}
 
 
 	var fileSelectModal = $(modal);
 	fileSelectModal.appendTo($('body'));
 	
-	var fileSelectMain = fileSelectModal.find('.container-fluid');
+	var fileSelectMain = fileSelectModal.find('.container-fluid').eq(0);
+//	var fileSelectedMain = fileSelectModal.find('.container-fluid').eq(1);
 	
 	(function(){
 		var createFolderModal = '<div class="modal fade"tabindex="-1" role="dialog" aria-labelledby="createFolderModalLabel">';
@@ -106,6 +121,17 @@ var fileChooser = (function(){
 			fileSelectModal.modal('hide');
 			createFolderModal.find("input[name='parent']").val(lastParam.parent);
 			createFolderModal.modal("show");
+		});
+		
+		fileSelectModal.find('[data-choose]').click(function(){
+			try{
+				if(fileCallback){
+					fileCallback(selected);
+				} 
+			}catch (e) {
+				
+			}
+			fileSelectModal.modal('hide');
 		});
 	})();
 	
@@ -289,6 +315,8 @@ var fileChooser = (function(){
 	
 	fileSelectModal.on('hidden.bs.modal',function(){
 		fileSelectMain.html('');
+		selected = [];
+//		hasSelected = false;
 	});
 	
 	fileSelectModal.on('click','a[data-parent][data-page]',function(){
@@ -341,7 +369,9 @@ var fileChooser = (function(){
 			for(var i=0;i<datas.length;i++){
 				var data = datas[i];
 				html += '<div class="col-xs-6 col-md-4">';
-				html += '<div class="thumbnail text-center">';
+				var isInSelected = inSelected(data.id);
+				var style= isInSelected ? 'border:1px solid red' : '';
+				html += '<div class="thumbnail text-center" style="'+style+'">';
 				if(data.type == 'DIRECTORY'){
 					html += '<a href="###" data-page="1" data-parent="'+data.id+'" "><img src="'+basePath+'/static/fileicon/folder.png" class="img-responsive" style="height:100px"/></a>';
 				} else {
@@ -385,21 +415,39 @@ var fileChooser = (function(){
 	}
 	var fileCallback;
 	fileSelectModal.on("click","[data-file]",function(){
-		if(!fileCallback){
-			return ;
+		var me = $(this);
+		var id = me.data('file');
+		for(var i=0;i<selected.length;i++){
+			if(selected[i].id == id){
+				selected.splice(i,1);
+				me.parent().css({"border":"1px solid #ddd"});
+//				if(selected.length == 0){
+//					fileSelectedMain.html('');
+//					hasSelected = false;
+//				}else{
+//					fileSelectedMain.find('[data-selected="'+id+'"]').remove();
+//				}
+				return; 
+			}
 		}
-		var id = $(this).data('file');
 		for(var i=0;i<datas.length;i++){
 			var data = datas[i];
 			if(data.id == id){
-				var result = fileCallback(data);
-				if(typeof(result) === 'boolean'){
-					if(result){
-						fileSelectModal.modal('hide');
-					}
-				}else{
-					fileSelectModal.modal('hide');
-				}
+				selected.push(data);
+				var html = '';
+//				if(!hasSelected){
+//					html += '<div class="table-responsive">';
+//					html += '<table class="table">';
+//					html += '<tr><th>文件名</th></tr>';
+//					html += '<tr data-selected="'+id+'"><td>'+data.path+'</td></tr>';
+//					html += '</table>';
+//					html += '</div>';
+//					fileSelectedMain.html(html);
+//				} else {
+//					fileSelectedMain.find('table').append('<tr data-selected="'+id+'"><td>'+data.path+'</td></tr>');
+//				}
+//				hasSelected = true;
+				me.parent().css({"border":"1px solid red"})
 				break;
 			}
 		}

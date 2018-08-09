@@ -62,8 +62,7 @@ public class MarkdownModelProcessor extends AbstractElementModelProcessor {
 	protected void doProcess(ITemplateContext context, IModel model, IElementModelStructureHandler structureHandler) {
 		boolean reset = false;
 		try {
-			removeOpenTag(model);
-			if (model.size() > 0) {
+			if (removeOpenTag(model)) {
 				try (Writer writer = new FastStringWriter()) {
 					model.write(writer);
 					model.reset();
@@ -81,17 +80,21 @@ public class MarkdownModelProcessor extends AbstractElementModelProcessor {
 		}
 	}
 
-	protected void removeOpenTag(IModel model) {
+	protected boolean removeOpenTag(IModel model) {
 		int size = model.size();
 		if (size == 1) {
 			// <markdown/>
 			model.reset();
+			return false;
 		} else {
 			ITemplateEvent last = model.get(size - 1);
 			if (last instanceof ICloseElementTag) {
 				model.remove(size - 1);
+			} else {
+				return false;
 			}
 			model.remove(0);// remove <markdown>
+			return true;
 		}
 	}
 }

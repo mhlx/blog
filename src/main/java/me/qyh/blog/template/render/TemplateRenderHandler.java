@@ -18,9 +18,8 @@ package me.qyh.blog.template.render;
 import javax.servlet.http.HttpServletRequest;
 
 public interface TemplateRenderHandler {
+	boolean match(String templateName, HttpServletRequest request, String contentType);
 
-	boolean match(String templateName);
-
-	void afterRender(String result, HttpServletRequest request);
+	String afterRender(String content, HttpServletRequest request, String contentType);
 
 }

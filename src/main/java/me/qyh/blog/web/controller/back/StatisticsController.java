@@ -34,7 +34,6 @@ import me.qyh.blog.core.service.TagService;
 import me.qyh.blog.core.vo.CommentStatistics;
 import me.qyh.blog.core.vo.SpaceQueryParam;
 import me.qyh.blog.file.service.FileService;
-import me.qyh.blog.file.store.local.EditablePathResourceHttpRequestHandler;
 import me.qyh.blog.template.service.TemplateService;
 
 @Controller
@@ -55,8 +54,6 @@ public class StatisticsController extends BaseMgrController {
 	private SpaceService spaceService;
 	@Autowired
 	private NewsService newsService;
-	@Autowired(required = false)
-	private EditablePathResourceHttpRequestHandler editablePathResourceHttpRequestHandler;
 
 	@GetMapping
 	public String queryStatisticsDetail(@RequestParam(value = "spaceId", required = false) Integer spaceId,
@@ -73,9 +70,6 @@ public class StatisticsController extends BaseMgrController {
 			if (space == null) {
 				detail.setFileStatistics(fileService.queryFileStatistics());
 				detail.setNewsStatistics(newsService.queryNewsStatistics());
-				if (editablePathResourceHttpRequestHandler != null) {
-					detail.setStaticFileStatistics(editablePathResourceHttpRequestHandler.queryFileStatistics());
-				}
 			}
 
 			detail.setPageStatistics(templateService.queryPageStatistics(space));

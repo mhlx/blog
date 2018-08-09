@@ -51,7 +51,7 @@ public class NewsPageDataTagProcessor extends DataTagProcessor<PageResult<News>>
 		if (Environment.isLogin()) {
 			param.setQueryPrivate(attributes.getBoolean("queryPrivate").orElse(true));
 		}
-
+		attributes.getString("content").ifPresent(param::setContent);
 		param.setAsc(attributes.getBoolean("asc").orElse(false));
 		param.setPageSize(attributes.getInteger("pageSize").orElse(0));
 		param.setCurrentPage(attributes.getInteger("currentPage").orElse(1));

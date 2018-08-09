@@ -24,7 +24,6 @@ import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import me.qyh.blog.core.config.UrlHelper;
@@ -32,7 +31,6 @@ import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.message.Message;
-import me.qyh.blog.plugin.comment.dao.CommentDao;
 import me.qyh.blog.plugin.comment.dao.PageCommentDao;
 import me.qyh.blog.plugin.comment.entity.Comment;
 import me.qyh.blog.plugin.comment.entity.CommentModule;
@@ -40,16 +38,13 @@ import me.qyh.blog.plugin.comment.service.CommentModuleHandler;
 import me.qyh.blog.plugin.comment.vo.ModuleCommentCount;
 import me.qyh.blog.template.dao.PageDao;
 import me.qyh.blog.template.entity.Page;
-import me.qyh.blog.template.event.PageDelEvent;
 import me.qyh.blog.template.service.TemplateService;
 
 @Component
 public class PageCommentModuleHandler extends CommentModuleHandler {
 
-	private static final String MODULE_NAME = TemplateService.COMMENT_MODULE_TYPE;
+	private static final String MODULE_NAME = TemplateService.COMMENT_MODULE_NAME;
 
-	@Autowired
-	private CommentDao commentDao;
 	@Autowired
 	private PageDao pageDao;
 	@Autowired
@@ -93,13 +88,6 @@ public class PageCommentModuleHandler extends CommentModuleHandler {
 	public Map<Integer, Object> getReferences(Collection<Integer> ids) {
 		List<Page> pages = pageDao.selectSimpleByIds(ids);
 		return pages.stream().collect(Collectors.toMap(Page::getId, p -> p));
-	}
-
-	@EventListener
-	public void handlePageEvent(PageDelEvent event) {
-		for (Page page : event.getPages()) {
-			commentDao.deleteByModule(new CommentModule(MODULE_NAME, page.getId()));
-		}
 	}
 
 	@Override

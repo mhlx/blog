@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.dao.NewsDao;
 import me.qyh.blog.core.entity.News;
+import me.qyh.blog.core.event.LockDelEvent;
 import me.qyh.blog.core.event.NewsCreateEvent;
 import me.qyh.blog.core.event.NewsDelEvent;
 import me.qyh.blog.core.event.NewsUpdateEvent;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.service.CommentServer;
 import me.qyh.blog.core.service.HitsStrategy;
+import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.service.NewsService;
 import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.vo.NewsNav;
@@ -57,6 +60,8 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	@Autowired(required = false)
 	@Qualifier("newsHitsStrategy")
 	private HitsStrategy<News> hitsStrategy;
+	@Autowired
+	private LockManager lockManager;
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
@@ -70,6 +75,9 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 		}
 		List<News> newsList = newsDao.selectPage(param);
 		setNewsComments(newsList);
+		if (!Environment.isLogin()) {
+			newsList.stream().filter(news -> news.getLockId() != null).forEach(news -> news.setContent(null));
+		}
 		return new PageResult<>(param, newsDao.selectCount(param), newsList);
 	}
 
@@ -78,6 +86,11 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	public void saveNews(News news) throws LogicException {
 		if (news.getWrite() == null) {
 			news.setWrite(Timestamp.valueOf(Times.now()));
+		}
+		if (news.getIsPrivate()) {
+			news.setLockId(null);
+		} else {
+			lockManager.ensureLockAvailable(news.getLockId());
 		}
 		newsDao.insert(news);
 		applicationEventPublisher.publishEvent(new NewsCreateEvent(this, news));
@@ -90,6 +103,13 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 		if (old == null) {
 			throw new LogicException("news.notExists", "动态不存在");
 		}
+
+		if (news.getIsPrivate()) {
+			news.setLockId(null);
+		} else {
+			lockManager.ensureLockAvailable(news.getLockId());
+		}
+
 		news.setUpdate(Timestamp.valueOf(Times.now()));
 
 		newsDao.update(news);
@@ -100,10 +120,11 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	@Transactional(readOnly = true)
 	public Optional<News> getNews(Integer id) {
 		News news = newsDao.selectById(id);
-		if (news != null && !Environment.isLogin() && news.getIsPrivate()) {
-			return Optional.empty();
-		}
 		if (news != null) {
+			if (news.getIsPrivate()) {
+				Environment.doAuthencation();
+			}
+			lockManager.openLock(news.getLockId());
 			setNewsComments(news);
 		}
 		return Optional.ofNullable(news);
@@ -117,13 +138,15 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 			throw new LogicException("news.notExists", "动态不存在");
 		}
 		newsDao.deleteById(id);
+
+		commentServer.deleteComments(COMMENT_MODULE_NAME, id);
 		applicationEventPublisher.publishEvent(new NewsDelEvent(this, List.of(old)));
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<News> queryLastNews(int limit) {
-		List<News> newsList = newsDao.selectLast(limit, Environment.isLogin());
+	public List<News> queryLastNews(int limit, boolean queryLock) {
+		List<News> newsList = newsDao.selectLast(limit, Environment.isLogin(), queryLock);
 		setNewsComments(newsList);
 		return newsList;
 	}
@@ -136,24 +159,24 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<NewsNav> getNewsNav(Integer id) {
+	public Optional<NewsNav> getNewsNav(Integer id, boolean queryLock) {
 		News news = newsDao.selectById(id);
 		if (news == null) {
 			return Optional.empty();
 		}
-		return getNewsNav(news);
+		return getNewsNav(news, queryLock);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<NewsNav> getNewsNav(News news) {
+	public Optional<NewsNav> getNewsNav(News news, boolean queryLock) {
 		Objects.requireNonNull(news);
 		if (news.getIsPrivate()) {
 			Environment.doAuthencation();
 		}
 		boolean queryPrivate = Environment.isLogin();
-		News previous = newsDao.getPreviousNews(news, queryPrivate);
-		News next = newsDao.getNextNews(news, queryPrivate);
+		News previous = newsDao.getPreviousNews(news, queryPrivate, queryLock);
+		News next = newsDao.getNextNews(news, queryPrivate, queryLock);
 		if (previous == null && next == null) {
 			return Optional.empty();
 		}
@@ -166,6 +189,7 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 		if (!Environment.isLogin()) {
 			News news = newsDao.selectById(id);
 			if (news != null) {
+				lockManager.openLock(news.getLockId());
 				hitsStrategy.hit(news);
 			}
 		}
@@ -212,6 +236,11 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 				}
 			};
 		}
+	}
+
+	@EventListener
+	public void handleLockDeleteEvent(LockDelEvent event) {
+		newsDao.deleteLock(event.getLock().getId());
 	}
 
 }

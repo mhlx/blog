@@ -570,7 +570,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		CommentStatistics commentStatistics = new CommentStatistics();
 		boolean queryPrivate = Environment.isLogin();
 		for (CommentModuleHandler handler : handlerMap.values()) {
-			commentStatistics.addModule(new CommentModuleStatistics(handler.getType(), handler.getName(),
+			commentStatistics.addModule(new CommentModuleStatistics(handler.getModuleName(), handler.getName(),
 					handler.queryCommentNum(space, queryPrivate)));
 		}
 		return commentStatistics;
@@ -591,6 +591,15 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		}
 
 		return Optional.empty();
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	public void deleteComments(String module, Integer moduleId) {
+		CommentModuleHandler handler = handlerMap.get(module);
+		if (handler != null) {
+			handler.deleteComments(moduleId);
+		}
 	}
 
 	/**
@@ -782,7 +791,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 */
 	public void addCommentModuleHandler(CommentModuleHandler handler) {
 		Objects.requireNonNull(handler);
-		handlerMap.put(handler.getType(), handler);
+		handlerMap.put(handler.getModuleName(), handler);
 	}
 
 	public void setCheckers(List<CommentChecker> checkers) {

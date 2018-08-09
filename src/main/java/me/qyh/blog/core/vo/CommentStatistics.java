@@ -40,7 +40,7 @@ public class CommentStatistics {
 	 * @return
 	 */
 	public int getTotalArticleComments() {
-		return getComments(ArticleService.COMMENT_MODULE_TYPE);
+		return getComments(ArticleService.COMMENT_MODULE_NAME);
 	}
 
 	/**
@@ -49,11 +49,11 @@ public class CommentStatistics {
 	 * @return
 	 */
 	public int getTotalPageComments() {
-		return getComments(TemplateService.COMMENT_MODULE_TYPE);
+		return getComments(TemplateService.COMMENT_MODULE_NAME);
 	}
 
 	public int getNewsComments() {
-		return getComments(NewsService.COMMENT_MODULE_TYPE);
+		return getComments(NewsService.COMMENT_MODULE_NAME);
 	}
 
 	public int getComments(String type) {

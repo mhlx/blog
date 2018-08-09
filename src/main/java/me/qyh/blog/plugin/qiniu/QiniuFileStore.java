@@ -173,9 +173,6 @@ public class QiniuFileStore implements FileStore {
 		if (ImageHelper.isSystemAllowedImage(extension)) {
 			try {
 				ImageInfo ii = this.readImage(vkey);
-
-				cf.setWidth(ii.getWidth());
-				cf.setHeight(ii.getHeight());
 				cf.setExtension(ii.getExtension());
 			} catch (IOException e) {
 				LOGGER.debug(e.getMessage(), e);

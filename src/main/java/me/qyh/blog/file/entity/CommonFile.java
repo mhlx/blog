@@ -37,9 +37,6 @@ public class CommonFile extends BaseEntity {
 	private int store;// 文件存储器
 	private String originalFilename;// 原始文件名
 
-	private Integer width;// 图片等文件
-	private Integer height;// 图片等文件
-
 	/**
 	 * default
 	 */
@@ -53,8 +50,6 @@ public class CommonFile extends BaseEntity {
 		this.store = cf.store;
 		this.id = cf.id;
 		this.originalFilename = cf.originalFilename;
-		this.width = cf.width;
-		this.height = cf.height;
 	}
 
 	public long getSize() {
@@ -79,22 +74,6 @@ public class CommonFile extends BaseEntity {
 
 	public void setOriginalFilename(String originalFilename) {
 		this.originalFilename = originalFilename;
-	}
-
-	public Integer getWidth() {
-		return width;
-	}
-
-	public void setWidth(Integer width) {
-		this.width = width;
-	}
-
-	public Integer getHeight() {
-		return height;
-	}
-
-	public void setHeight(Integer height) {
-		this.height = height;
 	}
 
 	public int getStore() {

@@ -37,7 +37,8 @@ public class LastNewsDataTagProcessor extends DataTagProcessor<List<News>> {
 
 	@Override
 	protected List<News> query(Attributes attributes) throws LogicException {
-		return newsService.queryLastNews(getLimit(attributes));
+		return newsService.queryLastNews(getLimit(attributes),
+				attributes.getString("queryLock").map(Boolean::parseBoolean).orElse(false));
 	}
 
 	private int getLimit(Attributes attributes) {

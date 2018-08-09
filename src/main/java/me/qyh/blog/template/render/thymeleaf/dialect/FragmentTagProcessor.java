@@ -27,6 +27,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.util.FastStringWriter;
 
 import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.template.render.Fragments;
 import me.qyh.blog.template.validator.FragmentValidator;
 
@@ -46,6 +47,7 @@ public class FragmentTagProcessor extends DefaultAttributesTagProcessor {
 	private static final String TAG_NAME = "fragment";
 	private static final int PRECEDENCE = 1000;
 	private static final String NAME = "name";
+	private static final String MODE = "mode";
 
 	public FragmentTagProcessor(String dialectPrefix, ApplicationContext ctx) {
 		super(TemplateMode.HTML, // This processor will apply only to HTML mode
@@ -71,12 +73,21 @@ public class FragmentTagProcessor extends DefaultAttributesTagProcessor {
 				return;
 			}
 
+			/**
+			 * @since 6.6
+			 */
+			String mode = attMap.get(MODE);
+			TemplateMode templateMode = TemplateMode.HTML;
+			if (!Validators.isEmptyOrNull(mode, true)) {
+				templateMode = TemplateMode.parse(mode);
+			}
+
 			String templateName = Fragments.getCurrentTemplateName(name);
 
 			Writer writer = new FastStringWriter(200);
 
 			context.getConfiguration().getTemplateManager()
-					.parseAndProcess(new TemplateSpec(templateName, TemplateMode.HTML), context, writer);
+					.parseAndProcess(new TemplateSpec(templateName, templateMode), context, writer);
 			structureHandler.replaceWith(writer.toString(), false);
 			return;
 		}

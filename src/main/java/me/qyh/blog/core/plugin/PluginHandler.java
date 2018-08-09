@@ -237,4 +237,13 @@ public interface PluginHandler extends Ordered {
 		return 0;
 	}
 
+	/**
+	 * 注册模板渲染后的内容处理器
+	 * 
+	 * @param registry
+	 */
+	default void addTemplateRenderHandler(TemplateRenderHandlerRegistry registry) {
+
+	}
+
 }

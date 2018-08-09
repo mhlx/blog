@@ -15,6 +15,7 @@
  */
 package me.qyh.blog.file.store;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -38,9 +39,13 @@ public class ProcessUtils {
 		}
 
 		try {
-			if (!process.waitFor(time, unit)) {
-				destory(process);
-				throw new ProcessException("操作超时:" + builder.command());
+			if (time == -1) {
+				process.waitFor();
+			} else {
+				if (!process.waitFor(time, unit)) {
+					destory(process);
+					throw new ProcessException("操作超时:" + builder.command());
+				}
 			}
 		} catch (InterruptedException e) {
 			destory(process);
@@ -51,8 +56,18 @@ public class ProcessUtils {
 		int status = process.exitValue();
 		if (status != 0) {
 			try (InputStream error = process.getErrorStream()) {
+				StringBuilder errorMsg = new StringBuilder();
+				try (InputStream is = process.getInputStream()) {
+					if (is != null) {
+						errorMsg.append(Resources.read(is));
+						errorMsg.append(System.lineSeparator());
+					}
+				} catch (IOException e) {
+					throw new ProcessException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
+				}
 				if (error != null) {
-					String msg = Resources.read(error);
+					errorMsg.append(Resources.read(error));
+					String msg = errorMsg.toString();
 					if (!Validators.isEmptyOrNull(msg, true)) {
 						throw new ProcessException("操作异常：" + builder.command() + "错误信息：" + msg);
 					}
@@ -62,19 +77,36 @@ public class ProcessUtils {
 			}
 			throw new ProcessException("操作异常：" + builder.command() + "，未正确执行操作，状态码:" + status);
 		}
-		InputStream is = process.getInputStream();
-		if (is != null) {
-			try (is) {
+		try (InputStream is = process.getInputStream()) {
+			if (is != null) {
 				return Optional.of(Resources.read(is));
-			} catch (IOException e) {
-				throw new ProcessException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
 			}
+		} catch (IOException e) {
+			throw new ProcessException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
 		}
 		return Optional.empty();
 	}
 
 	public static Optional<String> runProcess(List<String> command, long time, TimeUnit unit) throws ProcessException {
 		ProcessBuilder builder = new ProcessBuilder(command);
+		return runProcess(builder, time, unit);
+	}
+
+	public static Optional<String> runProcess(List<String> command) throws ProcessException {
+		ProcessBuilder builder = new ProcessBuilder(command);
+		return runProcess(builder, -1, TimeUnit.SECONDS);
+	}
+
+	public static Optional<String> runProcess(List<String> command, File directory) throws ProcessException {
+		ProcessBuilder builder = new ProcessBuilder(command);
+		builder.directory(directory);
+		return runProcess(builder, -1, TimeUnit.SECONDS);
+	}
+
+	public static Optional<String> runProcess(List<String> command, long time, TimeUnit unit, File directory)
+			throws ProcessException {
+		ProcessBuilder builder = new ProcessBuilder(command);
+		builder.directory(directory);
 		return runProcess(builder, time, unit);
 	}
 

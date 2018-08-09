@@ -60,7 +60,7 @@ public class CaptchaController implements InitializingBean, CaptchaValidator {
 	@GetMapping(value = "captcha", produces = MediaType.IMAGE_JPEG_VALUE)
 	public byte[] draw(HttpSession session) {
 		String capText = cage.getTokenGenerator().next();
-		session.setAttribute(VALIDATE_CODE_SESSION_KEY, "??");
+		session.setAttribute(VALIDATE_CODE_SESSION_KEY, capText);
 		BufferedImage bi = cage.drawImage(capText);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {

@@ -2,7 +2,8 @@
 <html>
 <head th:fragment="head(title)">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="_csrf" th:content="${_csrf.token}" />
 <meta name="_csrf_header" th:content="${_csrf.headerName}" />
@@ -20,10 +21,10 @@
 	<![endif]-->
 <title>动态管理</title>
 <style>
-.media-body img{
+.media-body img {
 	display: block;
-    max-width: 200px;
-    height: auto;
+	max-width: 200px;
+	height: auto;
 }
 </style>
 </head>
@@ -33,7 +34,15 @@
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-md-8 col-md-offset-2">
-					<a class="btn btn-primary" th:href="@{/mgr/news/write}">新增</a>
+
+					<form class="form-inline" th:action="@{/mgr/news/index}">
+						<div class="form-group">
+							<label class="sr-only">动态内容</label> <input type="text"
+								class="form-control" placeholder="动态内容" name="content" th:value="${param.content}">
+						</div>
+						<button type="submit" class="btn btn-default">搜索</button>
+						<a class="btn btn-primary" th:href="@{/mgr/news/write}">新增</a>
+					</form>
 				</div>
 			</div>
 			<div class="row" style="margin-top: 10px">
@@ -43,7 +52,7 @@
 					<form style="display: none" th:action="@{/mgr/news/index}"
 						id="pageForm">
 						<input type="hidden" th:value="${page.currentPage}"
-							name="currentPage" id="currentPage"/>
+							name="currentPage" id="currentPage" />
 					</form>
 					<div class="alert alert-info" th:if="${#lists.isEmpty(page.datas)}"
 						style="margin-top: 10px">当前没有任何动态</div>
@@ -58,8 +67,9 @@
 							<div class="media-body">
 								<h6 class="media-heading">
 									<span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>
-									<span class="glyphicon glyphicon-fire" aria-hidden="true" style="margin-left: 5px">[[${news.hits}]]</span>
-									<a href="javascript:void(0)" th:data-del="${news.id}"
+									<span class="glyphicon glyphicon-fire" aria-hidden="true"
+										style="margin-left: 5px">[[${news.hits}]]</span> <a
+										href="javascript:void(0)" th:data-del="${news.id}"
 										style="margin-left: 5px">删除</a> <a
 										th:href="@{/mgr/news/update/}+${news.id}"
 										style="margin-left: 5px">更新</a>
@@ -87,7 +97,7 @@
 
 	<script type="text/javascript">
 		$(function() {
-			$("[data-page]").click(function(){
+			$("[data-page]").click(function() {
 				$("#currentPage").val($(this).attr('data-page'));
 				$("#pageForm").submit();
 			});

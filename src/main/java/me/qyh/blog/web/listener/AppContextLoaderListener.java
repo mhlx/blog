@@ -43,6 +43,7 @@ public class AppContextLoaderListener extends ContextLoaderListener {
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		super.contextInitialized(event);
+		
 		WebApplicationContext ctx = getCurrentWebApplicationContext();
 		UrlHelper helper = ctx.getBean(UrlHelper.class);
 		ServletContext sc = event.getServletContext();

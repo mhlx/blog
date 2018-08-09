@@ -52,4 +52,9 @@ public class EmptyCommentServer implements CommentServer {
 		return new CommentStatistics();
 	}
 
+	@Override
+	public void deleteComments(String module, Integer moduleId) {
+
+	}
+
 }

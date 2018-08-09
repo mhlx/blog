@@ -135,7 +135,7 @@ public class ArticleServiceImpl
 		if (optionalArticle.isPresent()) {
 
 			Article article = optionalArticle.get();
-			article.setComments(commentServer.queryCommentNum(COMMENT_MODULE_TYPE, article.getId()).orElse(0));
+			article.setComments(commentServer.queryCommentNum(COMMENT_MODULE_NAME, article.getId()).orElse(0));
 
 			String content = article.getContent();
 
@@ -329,16 +329,17 @@ public class ArticleServiceImpl
 		Set<String> indexTags = new HashSet<>();
 		if (!CollectionUtils.isEmpty(tags)) {
 			for (Tag tag : tags) {
-				Tag tagDb = tagDao.selectByName(cleanTag(tag.getName()));
+				String tagName = cleanTag(tag.getName());
+				Tag tagDb = tagDao.selectByName(tagName);
 				ArticleTag articleTag = new ArticleTag();
 				articleTag.setArticle(article);
 				if (tagDb == null) {
 					// 插入标签
 					tag.setCreate(Timestamp.valueOf(LocalDateTime.now()));
-					tag.setName(tag.getName().trim());
+					tag.setName(tagName);
 					tagDao.insert(tag);
 					articleTag.setTag(tag);
-					indexTags.add(tag.getName());
+					indexTags.add(tagName);
 					rebuildIndexWhenTagChange = true;
 				} else {
 					articleTag.setTag(tagDb);
@@ -385,7 +386,7 @@ public class ArticleServiceImpl
 		List<Article> datas = page.getDatas();
 		if (!CollectionUtils.isEmpty(datas)) {
 			List<Integer> ids = datas.stream().map(Article::getId).collect(Collectors.toList());
-			Map<Integer, Integer> countsMap = commentServer.queryCommentNums(COMMENT_MODULE_TYPE, ids);
+			Map<Integer, Integer> countsMap = commentServer.queryCommentNums(COMMENT_MODULE_NAME, ids);
 			Map<Integer, String> htmlMap = markdown2Html
 					.toHtmls(datas.stream().filter(article -> Editor.MD.equals(article.getEditor()))
 							.collect(Collectors.toMap(Article::getId, Article::getSummary)));
@@ -486,6 +487,7 @@ public class ArticleServiceImpl
 		// 删除博客的引用
 		articleTagDao.deleteByArticle(article);
 		articleDao.deleteById(id);
+		commentServer.deleteComments(COMMENT_MODULE_NAME, id);
 
 		applicationEventPublisher.publishEvent(new ArticleDelEvent(this, List.of(article), false));
 	}

@@ -64,7 +64,8 @@ public interface NewsDao {
 	 * @param queryPrivate
 	 * @return
 	 */
-	List<News> selectLast(@Param("limit") int limit, @Param("queryPrivate") boolean queryPrivate);
+	List<News> selectLast(@Param("limit") int limit, @Param("queryPrivate") boolean queryPrivate,
+			@Param("queryLock") boolean queryLock);
 
 	void insert(News news);
 
@@ -89,7 +90,8 @@ public interface NewsDao {
 	 * @param queryPrivate
 	 * @return
 	 */
-	News getPreviousNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate);
+	News getPreviousNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate,
+			@Param("queryLock") boolean queryLock);
 
 	/**
 	 * 查询下一条动态
@@ -98,7 +100,8 @@ public interface NewsDao {
 	 * @param queryPrivate
 	 * @return
 	 */
-	News getNextNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate);
+	News getNextNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate,
+			@Param("queryLock") boolean queryLock);
 
 	/**
 	 * 获取动态的点击数
@@ -117,5 +120,13 @@ public interface NewsDao {
 	 *            <strong>当前的</strong>点击量
 	 */
 	void updateHits(@Param("id") Integer id, @Param("hits") int currentHits);
+
+	/**
+	 * 删除锁
+	 * 
+	 * @since 6.6
+	 * @param id
+	 */
+	void deleteLock(String id);
 
 }

@@ -59,6 +59,7 @@ import me.qyh.blog.file.store.FileStore;
 import me.qyh.blog.file.store.ImageHelper;
 import me.qyh.blog.file.vo.BlogFileCount;
 import me.qyh.blog.file.vo.BlogFilePageResult;
+import me.qyh.blog.file.vo.BlogFileProperties;
 import me.qyh.blog.file.vo.BlogFileQueryParam;
 import me.qyh.blog.file.vo.BlogFileUpload;
 import me.qyh.blog.file.vo.ExpandedCommonFile;
@@ -350,33 +351,28 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Map<String, Object> getBlogFileProperty(Integer id) throws LogicException {
+	public BlogFileProperties getBlogFileProperties(Integer id) throws LogicException {
 		BlogFile file = blogFileDao.selectById(id);
 		if (file == null) {
 			throw new LogicException(NOT_EXISTS);
 		}
-		Map<String, Object> proMap = new HashMap<>();
+		Map<String, Object> base = new HashMap<>();
+		base.put("type", file.getType());
 		if (file.isDir()) {
-			proMap.put("counts", blogFileDao.selectSubBlogFileCount(file));
-			proMap.put("totalSize", blogFileDao.selectSubBlogFileSize(file));
-		} else {
-			CommonFile cf = file.getCf();
-			if (cf != null) {
-				String key = getFilePath(file);
-				FileStore fs = getFileStore(cf);
-				proMap.put("url", fs.getUrl(key));
-				proMap.put("thumbUrl", fs.getThumbnailUrl(key));
-				proMap.put("totalSize", cf.getSize());
-				if (cf.getWidth() != null) {
-					proMap.put("width", cf.getWidth());
-				}
-				if (cf.getHeight() != null) {
-					proMap.put("height", cf.getHeight());
-				}
-			}
+			base.put("counts", blogFileDao.selectSubBlogFileCount(file));
+			base.put("size", blogFileDao.selectSubBlogFileSize(file));
+			return new BlogFileProperties(base);
 		}
-		proMap.put("type", file.getType());
-		return proMap;
+		CommonFile cf = file.getCf();
+		if (cf != null) {
+			String key = getFilePath(file);
+			FileStore fs = getFileStore(cf);
+			base.put("url", fs.getUrl(key));
+			base.put("thumbUrl", fs.getThumbnailUrl(key));
+			base.put("size", cf.getSize());
+			return new BlogFileProperties(base, fs.getProperties(key));
+		}
+		return new BlogFileProperties(base);
 	}
 
 	@Override

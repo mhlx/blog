@@ -27,7 +27,7 @@ import me.qyh.blog.core.vo.PageResult;
 
 public interface NewsService {
 
-	static final String COMMENT_MODULE_TYPE = "news";
+	static final String COMMENT_MODULE_NAME = "news";
 
 	/**
 	 * 分页查询动态
@@ -76,7 +76,7 @@ public interface NewsService {
 	 * @param limit
 	 * @return
 	 */
-	List<News> queryLastNews(int limit);
+	List<News> queryLastNews(int limit, boolean queryLock);
 
 	/**
 	 * 查询动态统计
@@ -92,7 +92,7 @@ public interface NewsService {
 	 *            当前动态ID
 	 * @return
 	 */
-	Optional<NewsNav> getNewsNav(Integer id);
+	Optional<NewsNav> getNewsNav(Integer id, boolean queryLock);
 
 	/**
 	 * 
@@ -112,6 +112,6 @@ public interface NewsService {
 	 *            当前动态
 	 * @return
 	 */
-	Optional<NewsNav> getNewsNav(News news);
+	Optional<NewsNav> getNewsNav(News news, boolean queryLock);
 
 }

@@ -324,9 +324,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		blog_space sp
 		ON art.space_id = sp.id
 		WHERE art.art_status = 0
-		AND
-		art.pubDate  <![CDATA[ < ]]>
-		#{article.pubDate}
+		AND (art.pubDate  <![CDATA[ < ]]> #{article.pubDate} OR (art.pubDate = #{article.pubDate} AND art.id <![CDATA[ < ]]> #{article.id}))
 		<choose>
 			<when test="article.space != null">
 				AND art.space_id = #{article.space.id}
@@ -359,9 +357,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		blog_space sp
 		ON art.space_id = sp.id
 		WHERE art.art_status = 0
-		AND
-		art.pubDate >
-		#{article.pubDate}
+		AND (art.pubDate > #{article.pubDate} OR (art.pubDate = #{article.pubDate} AND art.id > #{article.id}))
 		<choose>
 			<when test="article.space != null">
 				AND art.space_id = #{article.space.id}

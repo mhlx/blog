@@ -108,9 +108,9 @@
 		destroy-method="destroy">
 		<property name="errorHandler" ref="loggingErrorHandler" />
 		<property name="poolSize" value="10" />
-		<property name="awaitTerminationSeconds" value="60" />
+<!-- 		<property name="awaitTerminationSeconds" value="60" /> -->
 		<property name="waitForTasksToCompleteOnShutdown"
-			value="true" />
+			value="false" />
 	</bean>
 
 	<task:annotation-driven executor="taskExecutor"

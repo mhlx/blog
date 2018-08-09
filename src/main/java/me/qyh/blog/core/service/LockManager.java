@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import me.qyh.blog.core.config.Constants;
@@ -35,6 +34,7 @@ import me.qyh.blog.core.exception.LockException;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.plugin.LockProviderRegistry;
+import me.qyh.blog.core.vo.UnlockResult;
 
 /**
  * 锁管理器
@@ -52,12 +52,12 @@ public class LockManager implements LockProviderRegistry {
 	/**
 	 * 解锁
 	 * 
-	 * @param lockResource
-	 *            锁资源
+	 * @param lockId
+	 *            锁ID，可以为null
 	 * @throws LockException
 	 *             解锁失败
 	 */
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = true)
 	public void openLock(String lockId) throws LockException {
 		if (lockId == null) {
 			return;
@@ -79,6 +79,25 @@ public class LockManager implements LockProviderRegistry {
 	}
 
 	/**
+	 * 解锁
+	 * 
+	 * @param lockId
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public UnlockResult openLockQuietly(String lockId) {
+		UnlockResult result = new UnlockResult();
+		try {
+			openLock(lockId);
+			result.setUnlocked(true);
+		} catch (LockException e) {
+			result.setError(e.getError());
+			result.setLock(e.getLock());
+		}
+		return result;
+	}
+
+	/**
 	 * 确保锁可用
 	 *
 	 * @param lockId
@@ -86,7 +105,7 @@ public class LockManager implements LockProviderRegistry {
 	 * @throws LogicException
 	 *             锁不可用(不存在)
 	 */
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = true)
 	public void ensureLockAvailable(String lockId) throws LogicException {
 		if (lockId != null && !findLock(lockId).isPresent()) {
 			throw new LogicException("lock.notexists", "锁不存在");
@@ -98,14 +117,14 @@ public class LockManager implements LockProviderRegistry {
 	 * 
 	 * @return 所有的锁
 	 */
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = true)
 	public List<Lock> allLock() {
 		return providers.stream().map(LockProvider::getAllLocks).flatMap(List::stream)
 				.collect(Collectors.toUnmodifiableList());
 
 	}
 
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = true)
 	public Optional<Lock> findLock(String id) {
 		return providers.stream().map(provider -> provider.getLock(id)).filter(Optional::isPresent).map(Optional::get)
 				.findFirst();

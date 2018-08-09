@@ -63,6 +63,12 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Space addSpace(Space space) throws LogicException {
+
+		if (space.getIsPrivate()) {
+			space.setLockId(null);
+		} else {
+			lockManager.ensureLockAvailable(space.getLockId());
+		}
 		lockManager.ensureLockAvailable(space.getLockId());
 
 		if (spaceDao.selectByAlias(space.getAlias()) != null) {

@@ -21,20 +21,30 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.message.Message;
+import me.qyh.blog.plugin.comment.dao.CommentDao;
 import me.qyh.blog.plugin.comment.entity.Comment;
+import me.qyh.blog.plugin.comment.entity.CommentModule;
 
 public abstract class CommentModuleHandler {
 
+	protected static final Message PROTECTED_COMMENT_MD = new Message("comment.protected", "\\*\\*\\*\\*\\*\\*");
+	protected static final Message PROTECTED_COMMENT_HTML = new Message("comment.protected", "******");
+
+	@Autowired
+	protected CommentDao commentDao;
+
 	// 模块类型
 	private final Message name;
-	private final String type;
+	private final String moduleName;
 
-	public CommentModuleHandler(Message name, String type) {
+	public CommentModuleHandler(Message name, String moduleName) {
 		super();
-		this.type = type;
+		this.moduleName = moduleName;
 		this.name = name;
 	}
 
@@ -42,8 +52,8 @@ public abstract class CommentModuleHandler {
 		return name;
 	}
 
-	public String getType() {
-		return type;
+	public String getModuleName() {
+		return moduleName;
 	}
 
 	/**
@@ -120,4 +130,14 @@ public abstract class CommentModuleHandler {
 	 * @return
 	 */
 	public abstract Optional<String> getUrl(Integer id);
+
+	/**
+	 * 删除评论
+	 * 
+	 * @param id
+	 */
+	public void deleteComments(Integer id) {
+		CommentModule module = new CommentModule(moduleName, id);
+		commentDao.deleteByModule(module);
+	}
 }

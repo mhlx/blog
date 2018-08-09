@@ -41,6 +41,10 @@ public class News extends BaseEntity {
 	 * @since 6.4
 	 */
 	private int hits;
+	/**
+	 * @since 6.6
+	 */
+	private String lockId;
 
 	public String getContent() {
 		return content;
@@ -96,6 +100,18 @@ public class News extends BaseEntity {
 
 	public void setHits(int hits) {
 		this.hits = hits;
+	}
+
+	public String getLockId() {
+		return lockId;
+	}
+
+	public void setLockId(String lockId) {
+		this.lockId = lockId;
+	}
+
+	public boolean hasLock() {
+		return lockId != null;
 	}
 
 }

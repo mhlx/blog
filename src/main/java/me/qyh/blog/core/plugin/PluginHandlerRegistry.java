@@ -146,6 +146,7 @@ public class PluginHandlerRegistry
 		pluginHandler.addTemplateRenderModal(applicationContext.getBean(TemplateRenderModelRegistry.class));
 		pluginHandler.addResourceHttpRequestHandlerMapping(
 				applicationContext.getBean(ResourceHttpRequestHandlerMappingRegistry.class));
+		pluginHandler.addTemplateRenderHandler(applicationContext.getBean(TemplateRenderHandlerRegistry.class));
 	}
 
 	@Override

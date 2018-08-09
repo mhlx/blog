@@ -62,8 +62,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			file_size,
 			file_store,
 			file_originalname,
-			file_width,
-			file_height,
 			file_path
 		FROM 
 			blog_file  bf
@@ -152,7 +150,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		SELECT 
 			bf.id,
 			file_type,
-			file_createDate,
+			<choose>
+				<when test="ignorePaging">
+					file_createDate,
+				</when>
+				<otherwise>
+					(SELECT MAX(file_createDate) FROM blog_file WHERE file_lft >=bf.file_lft AND file_rgt <![CDATA[ <= ]]> bf.file_rgt) AS file_createDate,
+				</otherwise>
+			</choose>
 			file_lft,
 			file_rgt,
 			file_parent ,
@@ -161,8 +166,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			file_size,
 			file_store,
 			file_originalname,
-			file_width,
-			file_height,
 			file_path
 		FROM 
 			blog_file  bf
@@ -244,8 +247,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			file_size,
 			file_store,
 			file_originalname,
-			file_width,
-			file_height,
 			file_path
 		FROM 
 			blog_file  bf

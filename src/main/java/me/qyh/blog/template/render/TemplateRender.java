@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +38,7 @@ import me.qyh.blog.core.exception.RuntimeLogicException;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.message.Messages;
 import me.qyh.blog.core.plugin.MenuRegistry;
+import me.qyh.blog.core.plugin.TemplateRenderHandlerRegistry;
 import me.qyh.blog.core.plugin.TemplateRenderModelRegistry;
 import me.qyh.blog.core.security.AuthencationException;
 import me.qyh.blog.core.service.LockManager;
@@ -57,7 +57,8 @@ import me.qyh.blog.web.Webs;
  * @author Administrator
  *
  */
-public final class TemplateRender implements InitializingBean, TemplateRenderModelRegistry {
+public final class TemplateRender
+		implements InitializingBean, TemplateRenderModelRegistry, TemplateRenderHandlerRegistry {
 
 	@Autowired
 	private PlatformTransactionManager transactionManager;
@@ -76,17 +77,18 @@ public final class TemplateRender implements InitializingBean, TemplateRenderMod
 
 	private Map<String, Object> pros = new HashMap<>();
 
-	private List<TemplateRenderHandler> renderHandlers = new ArrayList<>();
+	private final List<TemplateRenderHandler> renderHandlers = new ArrayList<>();
 
 	public String doRender(String templateName, Map<String, ?> model, HttpServletRequest request,
 			ReadOnlyResponse response, ParseConfig config) throws Exception {
 		ParseContextHolder.getContext().setConfig(config);
 		try {
 			String content = doRender(templateName, model, request, response);
+			String contentType = config.getContentType();
 			if (!renderHandlers.isEmpty()) {
 				for (TemplateRenderHandler handler : renderHandlers) {
-					if (handler.match(templateName)) {
-						handler.afterRender(content, request);
+					if (handler.match(templateName, request, contentType)) {
+						content = handler.afterRender(content, request, contentType);
 					}
 				}
 			}
@@ -182,11 +184,6 @@ public final class TemplateRender implements InitializingBean, TemplateRenderMod
 		this.pros = pros;
 	}
 
-	public void setRenderHandlers(List<TemplateRenderHandler> renderHandlers) {
-		Objects.requireNonNull(renderHandlers);
-		this.renderHandlers = renderHandlers;
-	}
-
 	public final class Gravatars {
 		private final GravatarUrlGenerator generator;
 
@@ -228,6 +225,12 @@ public final class TemplateRender implements InitializingBean, TemplateRenderMod
 	@Override
 	public TemplateRenderModelRegistry registry(String key, Object value) throws Exception {
 		pros.putIfAbsent(key, value);
+		return this;
+	}
+
+	@Override
+	public TemplateRenderHandlerRegistry register(TemplateRenderHandler handler) {
+		renderHandlers.add(handler);
 		return this;
 	}
 

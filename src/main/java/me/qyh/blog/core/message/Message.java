@@ -83,4 +83,18 @@ public class Message implements MessageSourceResolvable, Serializable {
 		return "Message [code=" + code + ", arguments=" + Arrays.toString(arguments) + ", defaultMessage="
 				+ defaultMessage + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(code);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (Validators.baseEquals(this, obj)) {
+			Message rhs = (Message) obj;
+			return Objects.equals(code, rhs.code);
+		}
+		return false;
+	}
 }
