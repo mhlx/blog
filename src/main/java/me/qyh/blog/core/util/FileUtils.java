@@ -29,6 +29,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.exception.SystemException;
@@ -495,5 +496,17 @@ public class FileUtils {
 		int exp = (int) (Math.log(bytes) / Math.log(unit));
 		String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
 		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+	}
+
+	public static Stream<Path> quietlyWalk(Path dir) {
+		return quietlyWalk(dir, Integer.MAX_VALUE);
+	}
+
+	public static Stream<Path> quietlyWalk(Path dir, int maxDepth) {
+		try {
+			return Files.walk(dir, maxDepth);
+		} catch (IOException e) {
+			throw new SystemException(e.getMessage(), e);
+		}
 	}
 }

@@ -15,11 +15,23 @@
  */
 package me.qyh.blog.core.plugin;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -49,6 +61,8 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 import me.qyh.blog.core.exception.SystemException;
+import me.qyh.blog.core.util.FileUtils;
+import me.qyh.blog.core.util.Validators;
 
 public class PluginHandlerRegistry
 		implements ResourceLoaderAware, ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -72,6 +86,15 @@ public class PluginHandlerRegistry
 	private final PluginProperties pluginProperties = PluginProperties.getInstance();
 
 	private final MybatisConfigurer mybatisConfigurer = new MybatisConfigurer();
+
+	/**
+	 * @since 6.6
+	 */
+	private static final Path PLUGIN_DIR = FileUtils.HOME_DIR.resolve("blog/plugins");
+
+	static {
+		FileUtils.forceMkdir(PLUGIN_DIR);
+	}
 
 	@EventListener
 	@Order(value = Ordered.LOWEST_PRECEDENCE)
@@ -234,24 +257,100 @@ public class PluginHandlerRegistry
 		} catch (IOException e) {
 			resources = null;
 		}
-		for (Resource res : resources) {
-			Class<?> handlerClass;
-			try {
-				MetadataReader reader = metadataReaderFactory.getMetadataReader(res);
-				handlerClass = Class.forName(reader.getClassMetadata().getClassName());
-			} catch (ClassNotFoundException | IOException e) {
-				throw new SystemException(e.getMessage(), e);
-			}
-			if (PluginHandler.class.isAssignableFrom(handlerClass)) {
-				PluginHandler newInstance;
+		if (!Validators.isEmpty(resources)) {
+			for (Resource res : resources) {
+				Class<?> handlerClass;
 				try {
-					newInstance = (PluginHandler) handlerClass.getConstructor().newInstance();
-					handlerInstances.add(newInstance);
-				} catch (Exception e) {
-					logger.error("创建插件失败", e);
+					MetadataReader reader = metadataReaderFactory.getMetadataReader(res);
+					handlerClass = Class.forName(reader.getClassMetadata().getClassName());
+				} catch (ClassNotFoundException | IOException e) {
+					throw new SystemException(e.getMessage(), e);
+				}
+				if (PluginHandler.class.isAssignableFrom(handlerClass)) {
+					PluginHandler newInstance;
+					try {
+						newInstance = (PluginHandler) handlerClass.getConstructor().newInstance();
+						addHandlerInstance(newInstance);
+					} catch (Exception e) {
+						logger.error("创建插件失败", e);
+					}
 				}
 			}
 		}
+
+		// load ${user.home}/blog/plugins dir
+		if (FileUtils.exists(PLUGIN_DIR)) {
+
+			// 文件夹搜索
+			List<URL> urls = new ArrayList<>();
+			Set<String> pluginHandlerNames = new HashSet<>();
+			FileUtils.quietlyWalk(PLUGIN_DIR, 1).filter(p -> (!p.equals(PLUGIN_DIR) && FileUtils.isDirectory(p)))
+					.map(p -> {
+						try {
+							return p.toUri().toURL();
+						} catch (MalformedURLException e) {
+							throw new SystemException(e.getMessage(), e);
+						}
+					}).forEach(url -> {
+						Optional<String> pluginHandlerOptional = findPluginHandlerNameFromDir(url);
+						if (pluginHandlerOptional.isPresent()) {
+							urls.add(url);
+							if (!pluginHandlerNames.add(pluginHandlerOptional.get())) {
+								throw new SystemException("插件:" + pluginHandlerOptional.get() + "存在重复");
+							}
+						}
+					});
+			// jar搜索
+			FileUtils.quietlyWalk(PLUGIN_DIR, 1)
+					.filter(p -> FileUtils.isRegularFile(p) && p.getFileName().toString().endsWith(".jar")).map(p -> {
+						try {
+							return p.toUri().toURL();
+						} catch (MalformedURLException e) {
+							throw new SystemException(e.getMessage(), e);
+						}
+					}).forEach(url -> {
+						Optional<String> pluginHandlerOptional = findPluginHandlerNameFromJar(url);
+						if (pluginHandlerOptional.isPresent()) {
+							urls.add(url);
+							if (!pluginHandlerNames.add(pluginHandlerOptional.get())) {
+								throw new SystemException("插件:" + pluginHandlerOptional.get() + "存在重复");
+							}
+						}
+					});
+
+			if (!pluginHandlerNames.isEmpty()) {
+				@SuppressWarnings("resource")
+				// 不关闭URLClassLoader，因为如果关闭了无法再加载其他类
+				URLClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]),
+						Thread.currentThread().getContextClassLoader());
+				for (String className : pluginHandlerNames) {
+					Class<?> handlerClass;
+					try {
+						handlerClass = cl.loadClass(className);
+					} catch (ClassNotFoundException e) {
+						throw new SystemException(e.getMessage(), e);
+					}
+					if (PluginHandler.class.isAssignableFrom(handlerClass)) {
+						PluginHandler newInstance;
+						try {
+							newInstance = (PluginHandler) handlerClass.getConstructor().newInstance();
+							addHandlerInstance(newInstance);
+						} catch (Exception e) {
+							logger.error("创建插件失败", e);
+						}
+					}
+				}
+			}
+		}
+
+	}
+
+	private Path getPluginNamePath(Path classPath) {
+		Path p = classPath;
+		while (!p.getParent().equals(PLUGIN_DIR)) {
+			p = p.getParent();
+		}
+		return p;
 	}
 
 	private void sortPlugins() {
@@ -262,7 +361,46 @@ public class PluginHandlerRegistry
 			int order2 = pluginProperties.get("plugin.order." + p2Name).map(Integer::parseInt).orElse(p2.getOrder());
 			return (order1 < order2) ? -1 : (order1 > order2) ? 1 : 0;
 		});
-
 	}
 
+	private Optional<String> findPluginHandlerNameFromDir(URL dirUrl) {
+		return FileUtils.quietlyWalk(Paths.get(toURI(dirUrl))).filter(p -> {
+			return Files.isRegularFile(p) && p.getFileName().toString().endsWith("PluginHandler.class");
+		}).map(p -> {
+			String fullClassName = getPluginNamePath(p).relativize(p).toString().replace(File.separatorChar, '.');
+			return fullClassName.substring(0, fullClassName.length() - 6);
+		}).findAny();
+	}
+
+	private Optional<String> findPluginHandlerNameFromJar(URL jarUrl) {
+		try (FileSystem fs = FileSystems.newFileSystem(Paths.get(toURI(jarUrl)), null)) {
+			Path root = fs.getPath("/");
+			return FileUtils.quietlyWalk(root).filter(
+					p -> FileUtils.isRegularFile(p) && p.getFileName().toString().endsWith("PluginHandler.class"))
+					.map(p -> {
+						String fullClassName = root.relativize(p).toString().replace('/', '.');
+						return fullClassName.substring(0, fullClassName.length() - 6);
+					}).findAny();
+		} catch (IOException e) {
+			throw new SystemException(e.getMessage(), e);
+		}
+	}
+
+	private URI toURI(URL url) {
+		try {
+			return url.toURI();
+		} catch (URISyntaxException e) {
+			throw new SystemException(e.getMessage(), e);
+		}
+	}
+
+	private void addHandlerInstance(PluginHandler pluginHandler) {
+		String className = pluginHandler.getClass().getName();
+		for (PluginHandler p : handlerInstances) {
+			if (p.getClass().getName().endsWith(className)) {
+				throw new SystemException("已经存在插件" + getPluginName(pluginHandler.getClass()) + "了");
+			}
+		}
+		handlerInstances.add(pluginHandler);
+	}
 }
