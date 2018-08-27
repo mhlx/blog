@@ -7,7 +7,7 @@ while(!广电.ISDEAD)
 ```
 
 
-版本：6.5 RELEASE
+版本：6.6 RELEASE
 
 重型博客
 
