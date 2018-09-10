@@ -21,6 +21,7 @@ var inner_bar = (function(editor,config){
                             '<i class="fas fa-search" data-search style="cursor: pointer;margin-right:20px"></i>' +
                             '<i class="fas fa-times" data-remove style="cursor: pointer;margin-right:20px"></i>' +
                             '<i class="fas fa-bullseye" data-cursor style="cursor: pointer;margin-right:20px"></i>' +
+                            '<i class="fas fa-mouse-pointer" data-selectAll style="cursor: pointer;margin-right:20px"></i>'+
                             '</div>');
 		
 			$inner_bar.appendTo($('body'));
@@ -268,6 +269,11 @@ var inner_bar = (function(editor,config){
             $inner_bar.on('click', '[data-down]', function() {
                 editor.focus();
                 editor.execCommand("goLineDown");
+            });
+
+            $inner_bar.on('click', '[data-selectAll]', function() {
+                editor.focus();
+                editor.execCommand("selectAll");
             });
 
             $inner_bar.on('click', '[data-h]', function() {

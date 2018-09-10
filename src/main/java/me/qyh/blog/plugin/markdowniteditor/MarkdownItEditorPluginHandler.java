@@ -2,6 +2,7 @@ package me.qyh.blog.plugin.markdowniteditor;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,12 +107,13 @@ public class MarkdownItEditorPluginHandler extends PluginHandlerSupport {
 
 	@Override
 	protected void registerBean(BeanRegistry registry) {
-		String url = pluginProperties.get(URL_KEY).orElseThrow();
-		serviceAvailable = isServiceAvailable(url);
+		Optional<String> opUrl = pluginProperties.get(URL_KEY);
+		serviceAvailable = opUrl.isPresent() ? isServiceAvailable(opUrl.get()) : false;
 		if (serviceAvailable) {
 			registry.register(MarkdownItMarkdown2Html.class.getName(),
 					BeanDefinitionBuilder.genericBeanDefinition(MarkdownItMarkdown2Html.class)
-							.setScope(BeanDefinition.SCOPE_SINGLETON).addConstructorArgValue(url).getBeanDefinition());
+							.setScope(BeanDefinition.SCOPE_SINGLETON).addConstructorArgValue(opUrl.get())
+							.getBeanDefinition());
 		}
 	}
 

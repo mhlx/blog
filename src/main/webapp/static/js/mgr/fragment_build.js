@@ -54,6 +54,9 @@ $(document).ready(function() {
 					return true;
 				});
 				break;
+			case 'selectAll':
+				editor.execCommand('selectAll');
+				break;
 			case 'localFile':
 				sfq.show();
 				break;

@@ -54,6 +54,9 @@ $(document).ready(function() {
 			case 'localFile':
 				sfq.show();
 				break;
+			case 'selectAll':
+				editor.execCommand('selectAll');
+				break;
 			case 'clear':
 				bootbox.confirm("确定要清空吗？",function(result){
 					if(result){

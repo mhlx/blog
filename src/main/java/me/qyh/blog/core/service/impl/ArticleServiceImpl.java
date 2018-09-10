@@ -397,6 +397,9 @@ public class ArticleServiceImpl
 					article.setSummary(htmlMap.get(article.getId()));
 				}
 			});
+			if (!Environment.isLogin()) {
+				datas.stream().filter(Article::hasLock).forEach(art -> art.setSummary(null));
+			}
 		}
 		return page;
 	}

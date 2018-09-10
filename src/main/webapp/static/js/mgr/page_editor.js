@@ -72,6 +72,9 @@ var createEditor = function(editorId,keys){
 			},
 			setValue : function(str){
 				editor.setValue(str);
+			},
+			execCommand :function(command){ editor.focus();
+				editor.execCommand(command);
 			}
 		}
 	};

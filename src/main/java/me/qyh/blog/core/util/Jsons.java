@@ -224,7 +224,7 @@ public class Jsons {
 		try {
 			return readJsonForExecutors(reader.read(url));
 		} catch (IOException e) {
-			return new ExpressionExecutors(toJsonArray(JsonNull.INSTANCE), e);
+			return new ExpressionExecutors(new JsonArray(0), e);
 		}
 	}
 
@@ -671,4 +671,5 @@ public class Jsons {
 		array.add(ele);
 		return array;
 	}
+
 }

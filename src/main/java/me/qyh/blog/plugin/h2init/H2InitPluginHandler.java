@@ -105,7 +105,7 @@ public class H2InitPluginHandler implements PluginHandler {
 
 	@Override
 	public boolean enable() {
-		return pros.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(false);
+		return pros.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(true);
 	}
 
 }
