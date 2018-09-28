@@ -42,12 +42,12 @@ public final class Validators {
 	 * 
 	 * @param str
 	 *            字符串
-	 * @param trim
-	 *            是否trim
+	 * @param strip
+	 *            是否strip
 	 * @return 如果为null|空 返回true,否则返回false
 	 */
-	public static boolean isEmptyOrNull(String str, boolean trim) {
-		return str == null || (trim ? str.trim().isEmpty() : str.isEmpty());
+	public static boolean isEmptyOrNull(String str, boolean strip) {
+		return str == null || (strip ? str.strip().isEmpty() : str.isEmpty());
 	}
 
 	public static boolean isEmpty(Object[] array) {

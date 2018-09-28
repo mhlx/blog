@@ -36,7 +36,7 @@ public class PluginSqlSessionFactoryBean extends SqlSessionFactoryBean {
 	public PluginSqlSessionFactoryBean(List<Resource> mapperLocations, List<Resource> typeAliasResources)
 			throws IOException {
 		if (!CollectionUtils.isEmpty(mapperLocations)) {
-			super.setMapperLocations(mapperLocations.toArray(new Resource[mapperLocations.size()]));
+			super.setMapperLocations(mapperLocations.toArray(Resource[]::new));
 		}
 		if (!CollectionUtils.isEmpty(typeAliasResources)) {
 			Set<Class<?>> classSet = new HashSet<>();
@@ -58,7 +58,7 @@ public class PluginSqlSessionFactoryBean extends SqlSessionFactoryBean {
 				}
 			}
 			if (!classSet.isEmpty()) {
-				super.setTypeAliases(classSet.toArray(new Class<?>[classSet.size()]));
+				super.setTypeAliases(classSet.toArray(Class[]::new));
 			}
 		}
 	}

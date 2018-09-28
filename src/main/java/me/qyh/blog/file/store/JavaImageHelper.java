@@ -54,13 +54,6 @@ import me.qyh.blog.core.util.FileUtils;
  * <b>这个类仅供测试使用，请勿在实际项目中使用</b>
  * </p>
  * 
- * <p>
- * <b>BUG</b>
- * <ul>
- * <li>图像缩放时旋转90度问题(可能是由于exif信息丢失)</li>
- * </ul>
- * </p>
- * 
  * @see GraphicsMagickImageHelper
  * @author Administrator
  *

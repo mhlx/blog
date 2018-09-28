@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -377,7 +378,8 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 	@Override
 	public List<FileStore> allStorableStores() {
-		return fileManager.getAllStores().stream().filter(store -> !store.readOnly()).collect(Collectors.toList());
+		return fileManager.getAllStores().stream().filter(Predicate.not(FileStore::readOnly))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -609,7 +611,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 		BlogFile parent = blogFileDao.selectRoot();
 		String cleanedPath =
 				// since 5.7
-				path == null ? "" : FileUtils.cleanPath(path.trim());
+				path == null ? "" : FileUtils.cleanPath(path.strip());
 		if (cleanedPath.isEmpty()) {
 			param.setParentFile(parent);
 		} else {
@@ -685,7 +687,8 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 	private String getFilePath(BlogFile bf) {
 		List<BlogFile> files = blogFileDao.selectPath(bf);
-		return files.stream().map(BlogFile::getPath).filter(path -> !path.isEmpty()).collect(Collectors.joining("/"));
+		return files.stream().map(BlogFile::getPath).filter(Predicate.not(String::isEmpty))
+				.collect(Collectors.joining("/"));
 	}
 
 	@Override

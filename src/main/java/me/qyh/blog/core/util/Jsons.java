@@ -507,7 +507,7 @@ public class Jsons {
 			if (indexStr != null) {
 				try {
 					int index = Integer.parseInt(indexStr);
-					String _expression = expression.substring(0, expression.indexOf('[')).trim();
+					String _expression = expression.substring(0, expression.indexOf('[')).strip();
 					if (!_expression.isEmpty()) {
 						return new ArrayExpression(_expression, index);
 					}
@@ -641,7 +641,7 @@ public class Jsons {
 		@Override
 		public Timestamp deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 				throws JsonParseException {
-			return toTimestamp(json.getAsString().trim());
+			return toTimestamp(json.getAsString().strip());
 		}
 
 		private Timestamp toTimestamp(String str) {

@@ -82,7 +82,7 @@ abstract class DefaultAttributesTagProcessor extends AbstractElementTagProcessor
 
 			final String newAttributeName = attribute.getAttributeCompleteName().substring(3);
 
-			if (newAttributeName.trim().isEmpty()) {
+			if (newAttributeName.strip().isEmpty()) {
 				return;
 			}
 

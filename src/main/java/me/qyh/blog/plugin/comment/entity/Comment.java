@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import com.google.gson.annotations.Expose;
 
@@ -128,7 +129,7 @@ public class Comment extends BaseEntity {
 
 	public void setParentPath(String parentPath) {
 		if (!"/".equals(parentPath)) {
-			Arrays.stream(parentPath.split("/")).filter(path -> !path.isEmpty())
+			Arrays.stream(parentPath.split("/")).filter(Predicate.not(String::isEmpty))
 					.forEach(path -> this.parents.add(Integer.parseInt(path)));
 		}
 		this.parentPath = parentPath;

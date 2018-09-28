@@ -348,7 +348,7 @@ public class ArticleServiceImpl
 			}
 		}
 		if (!indexTags.isEmpty()) {
-			Transactions.afterCommit(() -> articleIndexer.addTags(indexTags.toArray(new String[indexTags.size()])));
+			Transactions.afterCommit(() -> articleIndexer.addTags(indexTags.toArray(String[]::new)));
 		}
 		return rebuildIndexWhenTagChange;
 	}
@@ -671,7 +671,7 @@ public class ArticleServiceImpl
 	 * @return
 	 */
 	protected String cleanTag(String tag) {
-		return tag.trim().toLowerCase();
+		return tag.strip().toLowerCase();
 	}
 
 	public void setRebuildIndex(boolean rebuildIndex) {

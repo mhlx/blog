@@ -505,8 +505,7 @@ public class TemplateMapping {
 				patternSet.addAll(condition.getPatterns());
 			}
 		}
-		PatternsRequestCondition condition = new PatternsRequestCondition(
-				patternSet.toArray(new String[patternSet.size()]));
+		PatternsRequestCondition condition = new PatternsRequestCondition(patternSet.toArray(String[]::new));
 
 		String lookupPath = "/" + path;
 		return !condition.getMatchingPatterns(lookupPath).isEmpty();

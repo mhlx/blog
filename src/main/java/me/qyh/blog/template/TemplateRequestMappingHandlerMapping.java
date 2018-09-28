@@ -258,7 +258,7 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 	@Override
 	public HandlerInterceptorRegistry register(HandlerInterceptor handlerInterceptor) {
 		interceptors.add(handlerInterceptor);
-		this.interceptorArray = interceptors.toArray(new HandlerInterceptor[interceptors.size()]);
+		this.interceptorArray = interceptors.toArray(HandlerInterceptor[]::new);
 		return this;
 	}
 

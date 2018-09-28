@@ -55,12 +55,12 @@ public class SimpleCommentChecker implements CommentChecker {
 		if (user.getName().equalsIgnoreCase(name) || config.getNickname().equalsIgnoreCase(name)) {
 			throw new LogicException("comment.nickname.invalid", "昵称不被允许");
 		}
-		if (disallowUsernamePatterns != null && PatternMatchUtils.simpleMatch(disallowUsernamePatterns, name.trim())) {
+		if (disallowUsernamePatterns != null && PatternMatchUtils.simpleMatch(disallowUsernamePatterns, name.strip())) {
 			throw new LogicException("comment.username.invalid", "用户名不被允许");
 		}
 
 		if (email != null && disallowEmailPatterns != null
-				&& PatternMatchUtils.simpleMatch(disallowEmailPatterns, email.trim())) {
+				&& PatternMatchUtils.simpleMatch(disallowEmailPatterns, email.strip())) {
 			throw new LogicException("comment.email.invalid", "邮箱不被允许");
 		}
 		if (website != null) {

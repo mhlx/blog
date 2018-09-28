@@ -28,7 +28,7 @@ public class StaticFileMgrPluginHandler extends PluginHandlerSupport {
 		if (opLocation.isPresent() && opPrefix.isPresent()) {
 			String location = opLocation.get();
 			String prefix = opPrefix.get();
-			if (!location.trim().isEmpty() && !prefix.trim().isEmpty()) {
+			if (!location.strip().isEmpty() && !prefix.strip().isEmpty()) {
 				registry.register(EditablePathResourceHttpRequestHandler.class.getName(),
 						BeanDefinitionBuilder.genericBeanDefinition(EditablePathResourceHttpRequestHandler.class)
 								.addConstructorArgValue(location).addConstructorArgValue(prefix)

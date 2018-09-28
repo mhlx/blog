@@ -30,9 +30,9 @@ import org.springframework.validation.Validator;
 
 import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.entity.Article;
+import me.qyh.blog.core.entity.Article.ArticleStatus;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.Tag;
-import me.qyh.blog.core.entity.Article.ArticleStatus;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.util.Validators;
 
@@ -70,7 +70,7 @@ public class ArticleValidator implements Validator {
 			return;
 		}
 		title = Jsoup.clean(title, Whitelist.none());
-		if (title.trim().isEmpty()) {
+		if (title.strip().isEmpty()) {
 			errors.reject("article.title.blank", "文章标题不能为空");
 			return;
 		}
@@ -162,7 +162,7 @@ public class ArticleValidator implements Validator {
 		}
 		String alias = article.getAlias();
 		if (alias != null) {
-			alias = alias.trim().toLowerCase();
+			alias = alias.strip().toLowerCase();
 			if (alias.isEmpty()) {
 				article.setAlias(null);
 			} else {

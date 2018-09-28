@@ -702,7 +702,7 @@ public class EditablePathResourceHttpRequestHandler extends CustomResourceHttpRe
 			}
 			FileContent fc = new FileContent();
 			try {
-				fc.setContent(new String(Files.readAllBytes(file), Constants.CHARSET));
+				fc.setContent(FileUtils.toString(file));
 			} catch (IOException e) {
 				if (FileUtils.exists(file)) {
 					logger.error(e.getMessage(), e);
@@ -1058,7 +1058,7 @@ public class EditablePathResourceHttpRequestHandler extends CustomResourceHttpRe
 				}
 
 				if (FileUtils.isDirectory(p)) {
-					Files.walk(p).filter(_p -> !FileUtils.isDirectory(_p)).forEach(_p -> {
+					Files.walk(p).filter(Predicate.not(FileUtils::isDirectory)).forEach(_p -> {
 						ZipEntry zipEntry = new ZipEntry(p.relativize(_p).toString());
 						try {
 							putInEntry(zs, zipEntry, _p);

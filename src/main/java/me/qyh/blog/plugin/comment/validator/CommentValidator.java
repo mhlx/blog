@@ -55,7 +55,7 @@ public class CommentValidator implements Validator {
 		if (!Environment.isLogin()) {
 			String email = comment.getEmail();
 			if (email != null) {
-				email = email.trim();
+				email = email.strip();
 				if (!email.isEmpty()) {
 					if (email.length() > UserValidator.MAX_EMAIL_LENGTH) {
 						errors.reject("comment.email.toolong", new Object[] { UserValidator.MAX_EMAIL_LENGTH },
@@ -94,7 +94,7 @@ public class CommentValidator implements Validator {
 							"网址不能超过" + MAX_WEBSITE_LENGTH + "位");
 					return;
 				}
-				website = website.trim();
+				website = website.strip();
 				if (!validWebsite(website)) {
 					errors.reject("comment.website.invalid", "网址不被允许");
 					return;

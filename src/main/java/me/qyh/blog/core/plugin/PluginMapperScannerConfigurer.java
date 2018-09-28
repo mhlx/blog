@@ -16,7 +16,7 @@ public class PluginMapperScannerConfigurer extends MapperScannerConfigurer {
 	public PluginMapperScannerConfigurer(List<String> basePackages) {
 		super();
 		addBasePackage("me.qyh.blog.core.dao", "me.qyh.blog.file.dao", "me.qyh.blog.template.dao");
-		addBasePackage(basePackages.toArray(new String[basePackages.size()]));
+		addBasePackage(basePackages.toArray(String[]::new));
 	}
 
 	private void addBasePackage(String... basePackages) {

@@ -575,8 +575,8 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				}
 			}
 			// 清空template 缓存
-			evitPageCache(pageEvitKeySet.toArray(new String[pageEvitKeySet.size()]));
-			evitFragmentCache(fragmentEvitKeySet.toArray(new String[fragmentEvitKeySet.size()]));
+			evitPageCache(pageEvitKeySet.toArray(String[]::new));
+			evitFragmentCache(fragmentEvitKeySet.toArray(String[]::new));
 			return records;
 		} catch (Throwable e) {
 			LOGGER.error(e.getMessage(), e);
@@ -965,7 +965,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				}
 			}
 			this.applicationEventPublisher
-					.publishEvent(new TemplateEvitEvent(this, templateNames.toArray(new String[templateNames.size()])));
+					.publishEvent(new TemplateEvitEvent(this, templateNames.toArray(String[]::new)));
 		});
 	}
 
@@ -1426,7 +1426,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 	private Map<String, Boolean> readCallableMap() {
 		try {
-			String content = new String(Files.readAllBytes(DATA_CONFIG), Constants.CHARSET);
+			String content = FileUtils.toString(DATA_CONFIG);
 			if (!Validators.isEmptyOrNull(content, false)) {
 				Type type = new TypeToken<Map<String, Boolean>>() {
 				}.getType();

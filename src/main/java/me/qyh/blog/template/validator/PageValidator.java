@@ -118,7 +118,7 @@ public class PageValidator implements Validator {
 			return "";
 		}
 
-		String cleanedAlias = FileUtils.cleanPath(alias).trim();
+		String cleanedAlias = FileUtils.cleanPath(alias).strip();
 
 		if (cleanedAlias.isEmpty()) {
 			return "";

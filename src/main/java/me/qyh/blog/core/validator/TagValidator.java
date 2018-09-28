@@ -42,7 +42,7 @@ public class TagValidator implements Validator {
 			errors.reject("tag.name.blank", "文章标签名不能为空");
 			return;
 		}
-		name = Jsoup.clean(name, Whitelist.none()).trim();
+		name = Jsoup.clean(name, Whitelist.none()).strip();
 		if (name.isEmpty()) {
 			errors.reject("tag.name.blank", "文章标签名不能为空");
 			return;

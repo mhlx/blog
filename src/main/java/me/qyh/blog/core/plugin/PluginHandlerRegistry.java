@@ -321,7 +321,7 @@ public class PluginHandlerRegistry
 			if (!pluginHandlerNames.isEmpty()) {
 				@SuppressWarnings("resource")
 				// 不关闭URLClassLoader，因为如果关闭了无法再加载其他类
-				URLClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]),
+				URLClassLoader cl = new URLClassLoader(urls.toArray(URL[]::new),
 						Thread.currentThread().getContextClassLoader());
 				for (String className : pluginHandlerNames) {
 					Class<?> handlerClass;

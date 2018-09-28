@@ -436,7 +436,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	}
 
 	protected Optional<Query> buildMultiFieldQuery(String query) {
-		String escaped = MultiFieldQueryParser.escape(query.trim());
+		String escaped = MultiFieldQueryParser.escape(query.strip());
 		MultiFieldQueryParser parser = new MultiFieldQueryParser(new String[] { TAG, TITLE, ALIAS, SUMMARY, CONTENT },
 				analyzer, qboostMap);
 		parser.setAutoGeneratePhraseQueries(true);
@@ -474,7 +474,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 			}
 			fields.add(new SortField(ID, SortField.Type.STRING, true));
 		}
-		return new Sort(fields.toArray(new SortField[] {}));
+		return new Sort(fields.toArray(SortField[]::new));
 	}
 
 	/**

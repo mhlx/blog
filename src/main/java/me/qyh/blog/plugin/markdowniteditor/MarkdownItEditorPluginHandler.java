@@ -128,10 +128,11 @@ public class MarkdownItEditorPluginHandler extends PluginHandlerSupport {
 
 	private boolean isServiceAvailable(String url) {
 		try {
-			String json = Https.post(url, Jsons.write(Map.of(1, "# test 你好")));
+			String json = Https.getIns().post(url, Jsons.write(Map.of(1, "# test 你好")));
 			Jsons.readValue(JsonResult.class, json);
 			return true;
 		} catch (IOException e) {
+			e.printStackTrace();
 			logger.warn("尝试转化markdown失败：" + e.getMessage(), e);
 			return false;
 		}

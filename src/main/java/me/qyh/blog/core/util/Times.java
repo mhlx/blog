@@ -102,7 +102,7 @@ public class Times {
 	 */
 	public static Optional<LocalDateTime> parse(String text) {
 		Objects.requireNonNull(text);
-		String trim = text.trim();
+		String trim = text.strip();
 		int len = trim.length();
 		for (DateTimeFormatterWrapper wrapper : DATE_FORMATTERS) {
 			if (wrapper.length == len) {
@@ -279,7 +279,7 @@ public class Times {
 		DateTimeFormatterWrapper(String pattern) {
 			super();
 			Objects.requireNonNull(pattern);
-			this.pattern = pattern.trim();
+			this.pattern = pattern.strip();
 			this.length = this.pattern.length();
 			this.formatter = DateTimeFormatter.ofPattern(this.pattern);
 			this.isDate = this.pattern.indexOf(' ') == -1;

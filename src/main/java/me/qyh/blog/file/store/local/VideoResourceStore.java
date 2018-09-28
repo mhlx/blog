@@ -37,14 +37,14 @@ import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.util.FileUtils;
-import me.qyh.blog.core.util.Jsons;
-import me.qyh.blog.core.util.Jsons.ExpressionExecutor;
-import me.qyh.blog.core.util.Jsons.ExpressionExecutors;
 import me.qyh.blog.file.entity.CommonFile;
 import me.qyh.blog.file.store.ProcessUtils;
 
 /**
  * FFMPEG 4.0+
+ * <p>
+ * <b>use {@code VideoResourceStore2} instead of</b>
+ * </p>
  * 
  * @author wwwqyhme
  *
@@ -55,7 +55,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 
 	private Integer maxSize;// 视频最大尺寸
 	private final int timeoutSecond;
-	private static final int DEFAULT_CRF = 24;
+	private static final int DEFAULT_CRF = 30;
 	private Integer crf = DEFAULT_CRF;
 
 	public VideoResourceStore(String urlPatternPrefix, String[] allowExtensions, int timeoutSecond) {
@@ -64,8 +64,12 @@ public class VideoResourceStore extends ThumbnailSupport {
 		this.timeoutSecond = timeoutSecond;
 	}
 
+	public VideoResourceStore(String urlPatternPrefix) {
+		this(urlPatternPrefix, new String[] { "mp4", "mov" }, 120);
+	}
+
 	public VideoResourceStore() {
-		this("video", new String[] { "mp4", "mov" }, 60);
+		this("video");
 	}
 
 	@Override
@@ -126,9 +130,9 @@ public class VideoResourceStore extends ThumbnailSupport {
 		try {
 			synchronized (this) {
 				if (needCompress()) {
-					compress(getVideoSize(dest), dest);
+					compress(getVideoInfo(dest), dest, dest);
 				}
-				getVideoSize(dest);
+				getVideoInfo(dest);
 				extraPoster(dest, getPoster(key));
 			}
 		} catch (Exception e) {
@@ -147,7 +151,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 	}
 
 	@Override
-	protected Optional<Resource> handleOriginalFile(Path path, HttpServletRequest request) {
+	protected Optional<Resource> handleOriginalFile(String key, Path path, HttpServletRequest request) {
 		return Optional.of(new PathResource(path));
 	}
 
@@ -165,9 +169,10 @@ public class VideoResourceStore extends ThumbnailSupport {
 		Optional<Path> op = super.getFile(key);
 		if (op.isPresent()) {
 			try {
-				VideoInfo info = this.getVideoSize(op.get());
-				return Map.of(new Message("video.width", "视频宽度"), info.width, new Message("video.height", "视频高度"),
-						info.height, new Message("video.duration", "视频长度"), info.duration);
+				VideoInfo info = this.getVideoInfo(op.get());
+				return Map.of(new Message("video.width", "视频宽度"), String.valueOf(info.width),
+						new Message("video.height", "视频高度"), String.valueOf(info.height),
+						new Message("video.duration", "视频长度"), String.valueOf(info.duration) + "s");
 			} catch (ProcessException e) {
 				return Map.of();
 			}
@@ -176,63 +181,67 @@ public class VideoResourceStore extends ThumbnailSupport {
 		return super.getProperties(key);
 	}
 
-	protected void compress(VideoInfo info, Path original) throws Exception {
+	protected void compress(VideoInfo info, Path original, Path dest) throws Exception {
 		Path temp = FileUtils.appTemp(FileUtils.getFileExtension(original));
 		List<String> cmdList = new ArrayList<>(
 				Arrays.asList("ffmpeg", "-i", original.toString(), "-loglevel", "error", "-y"));
-		if (Integer.parseInt(info.width) > maxSize || Integer.parseInt(info.height) > maxSize) {
+		if (info.width > maxSize || info.height > maxSize) {
 			cmdList.add("-vf");
 			cmdList.add("scale=w=" + maxSize + ":h=" + maxSize + ":force_original_aspect_ratio=decrease");
 		}
-		cmdList.addAll(Arrays.asList("-crf", String.valueOf(crf), "-max_muxing_queue_size", "9999", "-vcodec", "h264",
-				"-acodec", "aac", temp.toString()));
+		cmdList.addAll(Arrays.asList("-crf", String.valueOf(crf), "-max_muxing_queue_size", "9999", "-c:v", "h264",
+				"-c:a", "aac", "-map_metadata", "-1", temp.toString()));
 		ProcessUtils.runProcess(cmdList, timeoutSecond, TimeUnit.SECONDS);
-		if (!FileUtils.deleteQuietly(original)) {
-			throw new SystemException("删除原文件失败");
-		}
-		FileUtils.move(temp, original);
+		FileUtils.move(temp, dest);
 	}
 
 	protected class VideoInfo {
-		private final String width;
-		private final String height;
-		private final String duration;
+		private final int width;
+		private final int height;
+		private final int duration;
 
-		public VideoInfo(String width, String height, String duration) {
+		public VideoInfo(int width, int height, int duration) {
 			super();
-			this.duration = duration;
 			this.width = width;
 			this.height = height;
+			this.duration = duration;
 		}
 
-		public String getDuration() {
-			return duration;
-		}
-
-		public String getWidth() {
+		public int getWidth() {
 			return width;
 		}
 
-		public String getHeight() {
+		public int getHeight() {
 			return height;
 		}
+
+		public int getDuration() {
+			return duration;
+		}
+
 	}
 
-	private VideoInfo getVideoSize(Path video) throws ProcessException {
-		String[] cmdArray = new String[] { "ffprobe", "-v", "error", "-print_format", "json", "-show_streams",
-				video.toString() };
-		String result = ProcessUtils.runProcess(cmdArray, 10, TimeUnit.SECONDS)
+	protected VideoInfo getVideoInfo(Path video) throws ProcessException {
+		// https://trac.ffmpeg.org/wiki/FFprobeTips
+		String[] cmdArray = new String[] { "ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+				"stream=width,height,duration", "-of", "default=noprint_wrappers=1:nokey=1", video.toString() };
+		String result = ProcessUtils.runProcess(cmdArray, timeoutSecond, TimeUnit.SECONDS)
 				.orElseThrow(() -> new SystemException("没有返回预期的尺寸信息"));
-		ExpressionExecutors executors = Jsons.readJson(result).executeForExecutors("streams");
-		for (ExpressionExecutor executor : executors) {
-			if (executor.execute("codec_type").get().equals("video")) {
-				String width = executor.execute("width").get();
-				String height = executor.execute("height").get();
-				String duration = formatDuration(Double.parseDouble(executor.execute("duration").get()));
-				return new VideoInfo(width, height, duration);
-			}
+		String[] lines = result.split(System.lineSeparator());
+		if (lines.length != 3) {
+			throw new SystemException("获取视频信息失败:" + result);
 		}
-		throw new SystemException("无法获取视频信息:" + result);
+		int width = Integer.parseInt(lines[0]);
+		int height = Integer.parseInt(lines[1]);
+		try {
+			return new VideoInfo(width, height, (int) Math.round(Double.parseDouble(lines[2])));
+		} catch (NumberFormatException e) {
+			String[] _cmdArray = new String[] { "ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+					"default=noprint_wrappers=1:nokey=1", video.toString() };
+			String _result = ProcessUtils.runProcess(_cmdArray, timeoutSecond, TimeUnit.SECONDS)
+					.orElseThrow(() -> new SystemException("没有返回预期的时长信息"));
+			return new VideoInfo(width, height, (int) Math.round(Double.parseDouble(_result)));
+		}
 	}
 
 	public void setMaxSize(Integer maxSize) {
@@ -243,33 +252,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 		this.crf = Objects.requireNonNull(crf);
 	}
 
-	private boolean needCompress() {
+	protected final boolean needCompress() {
 		return maxSize != null;
 	}
-
-	private static String formatDuration(double duration) {
-		int h = -1;
-		int m = -1;
-		int s = 0;
-		double rst = duration;
-		if (rst > 3600) {
-			h = (int) Math.floor(rst / 3600);
-			rst = rst - h * 3600;
-		}
-		if (rst > 60) {
-			m = (int) Math.floor(rst / 60);
-			rst = rst - m * 60;
-		}
-		s = (int) Math.rint(rst);
-		StringBuilder sb = new StringBuilder();
-		if (h > -1) {
-			sb.append(h).append("h");
-		}
-		if (m > -1) {
-			sb.append(m).append("m");
-		}
-		sb.append(s).append("s");
-		return sb.toString();
-	}
-
 }

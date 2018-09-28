@@ -133,7 +133,7 @@ public final class StringUtils {
 		if (list.isEmpty()) {
 			return EMPTY_ARRAY;
 		}
-		return list.toArray(new String[list.size()]);
+		return list.toArray(String[]::new);
 	}
 
 	/**
@@ -143,25 +143,5 @@ public final class StringUtils {
 	 */
 	public static String uuid() {
 		return UUID.randomUUID().toString().replace("-", "");
-	}
-
-	/**
-	 * 清除字符串开头的空格
-	 * 
-	 * @param str
-	 * @return
-	 */
-	public static String trimBegin(String str) {
-		if (str == null) {
-			return null;
-		}
-		int len = str.length();
-		int st = 0;
-		char[] val = str.toCharArray();
-
-		while ((st < len) && (val[st] <= ' ')) {
-			st++;
-		}
-		return ((st > 0) || (len < str.length())) ? str.substring(st, len) : str;
 	}
 }

@@ -15,9 +15,14 @@ class ArticleEditorAspect {
 	public Object write(ProceedingJoinPoint joinPoint) throws Throwable {
 		Editor editor = (Editor) joinPoint.getArgs()[0];
 		Object proceed = joinPoint.proceed();
-		if (editor.equals(Editor.MD)) {
+		/**
+		 * @since 6.7
+		 */
+		Model model = (Model) joinPoint.getArgs()[2];
+		if (model.asMap().get("article") != null && editor.equals(Editor.MD)) {
 			return "plugin/markdowniteditor/new_md";
 		}
+
 		return proceed;
 	}
 

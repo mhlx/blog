@@ -138,7 +138,7 @@ public class ImageResourceStore extends ThumbnailSupport {
 	}
 
 	@Override
-	protected Optional<Resource> handleOriginalFile(Path path, HttpServletRequest request) {
+	protected Optional<Resource> handleOriginalFile(String key, Path path, HttpServletRequest request) {
 		String ext = FileUtils.getFileExtension(path);
 		if (ImageHelper.isGIF(ext)) {
 

@@ -65,9 +65,6 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 
 	/**
 	 * 如果为true，那么将会以渐进的方式显示出来，但在有些浏览器，例如EDGE则会先显示空白后再显示图片
-	 * <p>
-	 * 该选项会使图片增大
-	 * </p>
 	 */
 	private boolean doInterlace = false;
 

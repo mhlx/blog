@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.core.io.Resource;
@@ -37,7 +38,8 @@ public final class Resources {
 	 * @throws IOException
 	 */
 	public static String readResourceToString(Resource resource) throws IOException {
-		return applyResource(resource, Resources::read);
+		InputStream is = resource.getInputStream();
+		return read(is).orElse("");
 	}
 
 	/**
@@ -77,17 +79,13 @@ public final class Resources {
 		void accept(InputStream is) throws IOException;
 	}
 
-	/**
-	 * InputStream to string
-	 * <p>
-	 * <b>not close is!!!</b>
-	 * </p>
-	 * 
-	 * @param is
-	 * @return
-	 */
-	public static String read(InputStream is) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is, Constants.CHARSET));
-		return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+	public static Optional<String> read(InputStream in) throws IOException {
+		if (in == null) {
+			return Optional.empty();
+		}
+		try (InputStream _in = in;
+				BufferedReader reader = new BufferedReader(new InputStreamReader(_in, Constants.CHARSET))) {
+			return Optional.of(reader.lines().collect(Collectors.joining(System.lineSeparator())));
+		}
 	}
 }

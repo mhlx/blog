@@ -399,7 +399,7 @@ public class QiniuFileStore implements FileStore {
 			}
 
 			Batch batch = new Batch();
-			batch.delete(bucket, keys.toArray(new String[] {}));
+			batch.delete(bucket, keys.toArray(String[]::new));
 			return bucketManager.batch(batch).isOK();
 		} catch (QiniuException e) {
 			// 捕获异常信息

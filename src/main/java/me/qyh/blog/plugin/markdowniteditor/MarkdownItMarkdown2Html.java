@@ -25,7 +25,7 @@ class MarkdownItMarkdown2Html implements Markdown2Html {
 			return "";
 		}
 		try {
-			String json = Https.post(url, Jsons.write(Map.of(1, markdown)));
+			String json = Https.getIns().post(url, Jsons.write(Map.of(1, markdown)));
 			JsonResult result = Jsons.readValue(JsonResult.class, json);
 			if (result.isSuccess()) {
 				return Objects.toString(((Map<?, ?>) result.getData()).get("1"), "");
@@ -39,7 +39,7 @@ class MarkdownItMarkdown2Html implements Markdown2Html {
 	@Override
 	public Map<Integer, String> toHtmls(Map<Integer, String> markdownMap) {
 		try {
-			String json = Https.post(url, Jsons.write(markdownMap));
+			String json = Https.getIns().post(url, Jsons.write(markdownMap));
 			JsonResult result = Jsons.readValue(JsonResult.class, json);
 			if (result.isSuccess()) {
 				Map<Integer, String> map = new HashMap<>();

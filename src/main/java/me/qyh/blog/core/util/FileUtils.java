@@ -393,7 +393,7 @@ public class FileUtils {
 	 * @return
 	 */
 	public static String toString(Path path) throws IOException {
-		return new String(Files.readAllBytes(path), Constants.CHARSET);
+		return Files.readString(path, Constants.CHARSET);
 	}
 
 	/**

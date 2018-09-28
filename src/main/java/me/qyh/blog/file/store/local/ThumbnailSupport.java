@@ -123,11 +123,9 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 	/**
 	 * 当访问路径指向原始文件时，处理这个原始文件
 	 * 
-	 * @param path
-	 *            原始文件 不为null
 	 * @return 向客户端返回的资源
 	 */
-	protected abstract Optional<Resource> handleOriginalFile(Path path, HttpServletRequest request);
+	protected abstract Optional<Resource> handleOriginalFile(String key, Path path, HttpServletRequest request);
 
 	/**
 	 * 获取文件的封面
@@ -141,7 +139,7 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 		// 判断是否是原图
 		Optional<Path> optionaLocalFile = super.getFile(path);
 		if (optionaLocalFile.isPresent()) {
-			return handleOriginalFile(optionaLocalFile.get(), request);
+			return handleOriginalFile(path, optionaLocalFile.get(), request);
 		}
 
 		// 原图不存在，从链接中获取缩放信息
@@ -412,7 +410,7 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 	private Optional<String> getThumbPath(String sourceExt, String path, HttpServletRequest request) {
 		boolean supportWebp = supportWebp(request);
 		String ext = FileUtils.getFileExtension(path);
-		boolean extEmpty = ext.trim().isEmpty();
+		boolean extEmpty = ext.strip().isEmpty();
 		if (extEmpty) {
 			return Optional.of(path + "." + (supportWebp ? ImageHelper.WEBP : ImageHelper.JPEG));
 		} else {

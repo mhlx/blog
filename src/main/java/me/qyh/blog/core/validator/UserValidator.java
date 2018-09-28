@@ -57,7 +57,7 @@ public class UserValidator implements Validator {
 		}
 		String email = user.getEmail();
 		if (email != null) {
-			email = email.trim();
+			email = email.strip();
 			if (!email.isEmpty()) {
 				if (email.length() > MAX_EMAIL_LENGTH) {
 					errors.reject("user.email.toolong", new Object[] { MAX_EMAIL_LENGTH },
