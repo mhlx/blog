@@ -23,7 +23,6 @@ import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.security.AttemptLogger;
 import me.qyh.blog.core.security.EnsureLogin;
 import me.qyh.blog.core.security.GoogleAuthenticator;
-import me.qyh.blog.core.util.FileUtils;
 
 @EnsureLogin
 @Controller
@@ -76,9 +75,8 @@ public class SqlDumpController {
 								"attachment;filename=" + productName.toLowerCase() + ".sql");
 						response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
 						try {
-							FileUtils.write(is, response.getOutputStream());
+							is.transferTo(response.getOutputStream());
 						} catch (IOException e) {
-							// throw new SystemException(e.getMessage(), e);
 						}
 					});
 					return null;

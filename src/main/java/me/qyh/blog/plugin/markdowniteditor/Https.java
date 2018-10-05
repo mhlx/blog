@@ -1,15 +1,15 @@
 package me.qyh.blog.plugin.markdowniteditor;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpClient.Version;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 
-import me.qyh.blog.core.exception.SystemException;
+import me.qyh.blog.core.util.Resources;
 
 /**
  * 
@@ -18,34 +18,23 @@ import me.qyh.blog.core.exception.SystemException;
  */
 class Https {
 
-	private final HttpClient client;
-
-	private static final Https INS = new Https();
-
-	static Https getIns() {
-		return INS;
-	}
-
-	public String post(String uri, String data) throws IOException {
-		URI _uri;
-		try {
-			_uri = new URI(uri);
-		} catch (URISyntaxException e) {
-			throw new SystemException(e.getMessage(), e);
+	static String post(String uri, String data) throws IOException {
+		URL url = new URL(uri);
+		URLConnection con = url.openConnection();
+		HttpURLConnection http = (HttpURLConnection) con;
+		http.setRequestMethod("POST");
+		http.setDoOutput(true);
+		try (OutputStream os = http.getOutputStream();
+				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os))) {
+			bw.write(data);
 		}
-		HttpRequest req = HttpRequest.newBuilder().uri(_uri).version(Version.HTTP_1_1)
-				.POST(BodyPublishers.ofString(data)).build();
-		try {
-			return client.send(req, BodyHandlers.ofString()).body();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new SystemException(e.getMessage(), e);
+		try (InputStream is = http.getInputStream()) {
+			return Resources.read(is);
 		}
 	}
 
 	private Https() {
 		super();
-		this.client = HttpClient.newHttpClient();
 	}
 
 }

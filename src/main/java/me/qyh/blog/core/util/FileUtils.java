@@ -17,8 +17,6 @@ package me.qyh.blog.core.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -262,32 +260,6 @@ public class FileUtils {
 	public static void move(Path source, Path target) throws IOException {
 		forceMkdir(target.getParent());
 		Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
-	}
-
-	/**
-	 * is write to os
-	 * 
-	 * @param source
-	 * @param sink
-	 * @throws IOException
-	 */
-	// copied from Files
-	public static void write(InputStream source, OutputStream sink) throws IOException {
-		Objects.requireNonNull(source);
-		Objects.requireNonNull(sink);
-		try {
-			byte[] buf = new byte[8192];
-			int n;
-			while ((n = source.read(buf)) > 0) {
-				sink.write(buf, 0, n);
-			}
-			sink.flush();
-		} finally {
-			try {
-				source.close();
-			} catch (IOException e) {
-			}
-		}
 	}
 
 	/**

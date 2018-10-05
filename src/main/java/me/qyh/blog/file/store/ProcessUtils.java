@@ -47,17 +47,13 @@ public class ProcessUtils {
 		if (status != 0) {
 			StringBuilder errorMsg = new StringBuilder();
 			try {
-				Resources.read(process.getInputStream()).ifPresent(s -> {
-					errorMsg.append(s);
-					errorMsg.append(System.lineSeparator());
-				});
+				errorMsg.append(Resources.read(process.getInputStream()));
+				errorMsg.append(System.lineSeparator());
 			} catch (IOException e) {
 				throw new ProcessException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
 			}
 			try {
-				Resources.read(process.getErrorStream()).ifPresent(s -> {
-					errorMsg.append(s);
-				});
+				errorMsg.append(Resources.read(process.getErrorStream()));
 			} catch (IOException e) {
 				throw new ProcessException("操作异常：" + builder.command() + "，读取错误信息失败：" + e.getMessage(), e);
 			}
@@ -68,7 +64,7 @@ public class ProcessUtils {
 			throw new ProcessException("操作异常：" + builder.command() + "，未正确执行操作，状态码:" + status);
 		}
 		try {
-			return Resources.read(process.getInputStream());
+			return Optional.of(Resources.read(process.getInputStream()));
 		} catch (IOException e) {
 			throw new ProcessException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
 		}
