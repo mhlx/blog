@@ -315,10 +315,7 @@ public class Article extends BaseEntity {
 		if (lockId != null) {
 			return true;
 		}
-		if (space != null && space.hasLock()) {
-			return true;
-		}
-		return false;
+		return space != null && space.hasLock();
 	}
 
 	/**

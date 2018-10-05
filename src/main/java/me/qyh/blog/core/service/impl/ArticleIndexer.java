@@ -143,7 +143,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	private Formatter summaryFormatter;
 
 	private Map<String, Float> boostMap = new HashMap<>();
-	private Map<String, Float> qboostMap = new HashMap<>();
+	private final Map<String, Float> qboostMap = new HashMap<>();
 
 	/**
 	 * 最大查询数量
@@ -506,10 +506,8 @@ public abstract class ArticleIndexer implements InitializingBean {
 		if (tags != null && tags.length > 0) {
 			for (String tag : tags) {
 				Optional<Tag> optionalTag = article.getTag(tag);
-				optionalTag.ifPresent(tag1 -> {
-					getHightlight(new Highlighter(tagFormatter, new QueryScorer(query)), TAG, tag1.getName())
-							.ifPresent(tag1::setName);
-				});
+				optionalTag.ifPresent(tag1 -> getHightlight(new Highlighter(tagFormatter, new QueryScorer(query)), TAG,
+						tag1.getName()).ifPresent(tag1::setName));
 			}
 		}
 

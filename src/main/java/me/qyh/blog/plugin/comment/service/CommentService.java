@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +135,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 
 	private CommentConfig config;
 
-	private Map<String, CommentModuleHandler> handlerMap = new HashMap<>();
+	private final Map<String, CommentModuleHandler> handlerMap = new HashMap<>();
 
 	@Autowired(required = false)
 	private BlacklistHandler blacklistHandler;
@@ -830,19 +829,14 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 				List<String> list = new ArrayList<>(blacklist);
 				String ip = param.getIp();
 				if (!Validators.isEmptyOrNull(ip, true)) {
-					for (Iterator<String> it = list.iterator(); it.hasNext();) {
-						String ban = it.next();
-						if (!ban.contains(ip)) {
-							it.remove();
-						}
-					}
+					list.removeIf(ban -> !ban.contains(ip));
 				}
 				int size = list.size();
 				if (offset >= size) {
 					return new PageResult<>(param, size, new ArrayList<>());
 				}
 				int end = offset + param.getPageSize();
-				return new PageResult<String>(param, size, list.subList(offset, Math.min(end, size)));
+				return new PageResult<>(param, size, list.subList(offset, Math.min(end, size)));
 			} finally {
 				lock.unlockRead(stamp);
 			}

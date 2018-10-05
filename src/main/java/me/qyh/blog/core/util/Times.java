@@ -43,7 +43,7 @@ public class Times {
 	private static final DateTimeFormatterWrapper[] DATE_FORMATTERS = new DateTimeFormatterWrapper[PATTERNS.length];
 
 	private static final LoadingCache<String, DateTimeFormatterWrapper> DATE_TIME_FORMATTER_CACHE = Caffeine
-			.newBuilder().build(key -> new DateTimeFormatterWrapper(key));
+			.newBuilder().softValues().build(DateTimeFormatterWrapper::new);
 
 	static {
 		for (int i = 0; i < PATTERNS.length; i++) {

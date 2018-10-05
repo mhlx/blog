@@ -133,24 +133,23 @@ public class DataTagProcessor extends DefaultAttributesTagProcessor {
 
 			Optional<DataBind> optional = queryDataBind(dataTag);
 			optional.ifPresent(dataBind -> {
-				DataBind bind = dataBind;
 				if (hasAlias) {
-					bind.setDataName(alias);
+					dataBind.setDataName(alias);
 				}
-				if (request.getAttribute(bind.getDataName()) != null) {
-					throw new TemplateProcessingException("属性" + bind.getDataName() + "已经存在于request中");
+				if (request.getAttribute(dataBind.getDataName()) != null) {
+					throw new TemplateProcessingException("属性" + dataBind.getDataName() + "已经存在于request中");
 				}
 				if (Boolean.parseBoolean(attMap.get(LAZY))) {
-					request.setAttribute(bind.getDataName(), new LazyContextVariable<Object>() {
+					request.setAttribute(dataBind.getDataName(), new LazyContextVariable<Object>() {
 
 						@Override
 						protected Object loadValue() {
-							return getData(bind);
+							return getData(dataBind);
 						}
 
 					});
 				} else {
-					request.setAttribute(bind.getDataName(), getData(bind));
+					request.setAttribute(dataBind.getDataName(), getData(dataBind));
 				}
 			});
 		} finally {

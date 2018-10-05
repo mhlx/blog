@@ -133,11 +133,11 @@ public class FileUtils {
 	 */
 	public static boolean deleteQuietly(Path path, final Predicate<Path> filter) {
 		Objects.requireNonNull(filter);
-		if (path == null || !exists(path)) {
+		if (!exists(path)) {
 			return true;
 		}
 		try {
-			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+			Files.walkFileTree(path, new SimpleFileVisitor<>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					if (filter.test(file)) {

@@ -226,7 +226,7 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 			commentServer = EmptyCommentServer.INSTANCE;
 		}
 		if (hitsStrategy == null) {
-			hitsStrategy = new HitsStrategy<News>() {
+			hitsStrategy = new HitsStrategy<>() {
 
 				@Override
 				public void hit(News news) {

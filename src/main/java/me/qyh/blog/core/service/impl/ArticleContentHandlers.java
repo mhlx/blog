@@ -34,7 +34,7 @@ import me.qyh.blog.core.service.ArticleContentHandler;
 @Component
 public class ArticleContentHandlers implements ArticleContentHandler, ArticleContentHandlerRegistry {
 
-	private List<ArticleContentHandler> handlers = new ArrayList<>();
+	private final List<ArticleContentHandler> handlers = new ArrayList<>();
 
 	@Override
 	public String handle(String content) {

@@ -244,7 +244,7 @@ public class Fragment extends BaseEntity implements Template {
 	}
 
 	public static Optional<String> getOriginalTemplateFromPreviewTemplateName(String templateName) {
-		return PreviewTemplate.getOriginalTemplateName(templateName).filter(name -> isFragmentTemplate(name));
+		return PreviewTemplate.getOriginalTemplateName(templateName).filter(Fragment::isFragmentTemplate);
 	}
 
 }

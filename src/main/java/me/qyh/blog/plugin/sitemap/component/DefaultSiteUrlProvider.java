@@ -44,7 +44,7 @@ public class DefaultSiteUrlProvider implements SiteUrlProvider {
 	@Autowired
 	private SpaceDao spaceDao;
 
-	private Map<String, SpaceUrls> urlsCache = new HashMap<>();
+	private final Map<String, SpaceUrls> urlsCache = new HashMap<>();
 
 	@Override
 	public List<SiteUrl> provide() {

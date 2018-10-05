@@ -55,7 +55,7 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 	@Autowired
 	private ArticleIndexer articleIndexer;
 
-	private List<Space> cache = new CopyOnWriteArrayList<>();
+	private final List<Space> cache = new CopyOnWriteArrayList<>();
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
@@ -87,9 +87,7 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 
 		this.applicationEventPublisher.publishEvent(new SpaceCreateEvent(this, space));
 
-		Transactions.afterCommit(() -> {
-			cache.add(space);
-		});
+		Transactions.afterCommit(() -> cache.add(space));
 
 		return space;
 	}

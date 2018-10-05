@@ -113,16 +113,14 @@ public class PluginHandlerSupport implements PluginHandler {
 			doAddBeanFactoryPostProcessor(registry -> {
 				ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(registry);
 				String[] basePackages = Arrays.stream(relativePackages)
-						.map(relativePackage -> rootPackage + relativePackage).toArray(i -> new String[i]);
+						.map(relativePackage -> rootPackage + relativePackage).toArray(String[]::new);
 				scanner.scan(basePackages);
 			});
 			return this;
 		}
 
 		public BeanRegistry register(String beanName, BeanDefinition definition) {
-			doAddBeanFactoryPostProcessor(registry -> {
-				registry.registerBeanDefinition(beanName, definition);
-			});
+			doAddBeanFactoryPostProcessor(registry -> registry.registerBeanDefinition(beanName, definition));
 			return this;
 		}
 
@@ -163,7 +161,7 @@ public class PluginHandlerSupport implements PluginHandler {
 		public void addBasePackages(String... relativePackages) {
 			if (!Validators.isEmpty(relativePackages)) {
 				String[] basePackages = Arrays.stream(relativePackages)
-						.map(relativePackage -> rootPackage + relativePackage).toArray(i -> new String[i]);
+						.map(relativePackage -> rootPackage + relativePackage).toArray(String[]::new);
 				this.configurer.addBasePackages(basePackages);
 			}
 		}
@@ -171,8 +169,7 @@ public class PluginHandlerSupport implements PluginHandler {
 		public void addRelativeMapperLocations(String... mapperRelativeLocations) {
 			if (!Validators.isEmpty(mapperRelativeLocations)) {
 				Resource[] resources = Arrays.stream(mapperRelativeLocations)
-						.map(relativePath -> new ClassPathResource(rootPath + relativePath))
-						.toArray(i -> new Resource[i]);
+						.map(relativePath -> new ClassPathResource(rootPath + relativePath)).toArray(Resource[]::new);
 				this.configurer.addMapperLocations(resources);
 			}
 		}
@@ -187,8 +184,7 @@ public class PluginHandlerSupport implements PluginHandler {
 		public void addRelativeTypeAliasLocations(String... typeAliasRelativeResources) {
 			if (!Validators.isEmpty(typeAliasRelativeResources)) {
 				Resource[] resources = Arrays.stream(typeAliasRelativeResources)
-						.map(relativePath -> new ClassPathResource(rootPath + relativePath))
-						.toArray(i -> new Resource[i]);
+						.map(relativePath -> new ClassPathResource(rootPath + relativePath)).toArray(Resource[]::new);
 				this.configurer.addTypeAliasResources(resources);
 			}
 		}

@@ -10,9 +10,9 @@ import me.qyh.blog.core.util.Validators;
 
 public class MybatisConfigurer {
 
-	private List<String> basePackages = new ArrayList<>();
-	private List<Resource> mapperLocations = new ArrayList<>();
-	private List<Resource> typeAliasResources = new ArrayList<>();
+	private final List<String> basePackages = new ArrayList<>();
+	private final List<Resource> mapperLocations = new ArrayList<>();
+	private final List<Resource> typeAliasResources = new ArrayList<>();
 
 	MybatisConfigurer() {
 		super();

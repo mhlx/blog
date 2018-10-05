@@ -74,7 +74,7 @@ public class HitsHistoryLogger implements InitializingBean, ArticleHitHandler {
 		}
 		this.max = max;
 
-		articles = new LinkedHashMap<Integer, HitsHistory>() {
+		articles = new LinkedHashMap<>() {
 
 			/**
 			 * 

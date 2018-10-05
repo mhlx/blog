@@ -5,7 +5,7 @@ import me.qyh.blog.core.plugin.PluginProperties;
 
 public class SiteMapPluginHandler extends PluginHandlerSupport {
 
-	private PluginProperties pluginProperties = PluginProperties.getInstance();
+	private final PluginProperties pluginProperties = PluginProperties.getInstance();
 	private final boolean enable = pluginProperties.get("plugin.sitemap.enable").map(Boolean::parseBoolean)
 			.orElse(true);
 

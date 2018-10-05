@@ -28,9 +28,8 @@ import me.qyh.blog.core.util.FileUtils;
 
 public class H2InitPluginHandler implements PluginHandler {
 
-	private Path config = FileUtils.HOME_DIR.resolve("blog/app.properties");
-
-	private PluginProperties pros = PluginProperties.getInstance();
+	private final Path config = FileUtils.HOME_DIR.resolve("blog/app.properties");
+	private final PluginProperties pros = PluginProperties.getInstance();
 
 	private static final String ENABLE_KEY = "plugin.h2init.enable";
 	private static final String PORT_DETECT_KEY = "plugin.h2init.detectPort";

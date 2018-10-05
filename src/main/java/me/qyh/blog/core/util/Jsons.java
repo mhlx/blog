@@ -610,7 +610,7 @@ public class Jsons {
 		@Override
 		public Iterator<ExpressionExecutor> iterator() {
 			final Iterator<JsonElement> it = array.iterator();
-			return new Iterator<Jsons.ExpressionExecutor>() {
+			return new Iterator<>() {
 
 				@Override
 				public ExpressionExecutor next() {

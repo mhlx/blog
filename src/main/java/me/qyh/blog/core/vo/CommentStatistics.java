@@ -24,7 +24,7 @@ import me.qyh.blog.template.service.TemplateService;
 
 public class CommentStatistics {
 
-	private List<CommentModuleStatistics> modules = new ArrayList<>();
+	private final List<CommentModuleStatistics> modules = new ArrayList<>();
 
 	public void addModule(CommentModuleStatistics st) {
 		this.modules.add(st);

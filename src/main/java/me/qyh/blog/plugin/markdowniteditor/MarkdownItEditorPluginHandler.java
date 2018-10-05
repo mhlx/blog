@@ -108,7 +108,7 @@ public class MarkdownItEditorPluginHandler extends PluginHandlerSupport {
 	@Override
 	protected void registerBean(BeanRegistry registry) {
 		Optional<String> opUrl = pluginProperties.get(URL_KEY);
-		serviceAvailable = opUrl.isPresent() ? isServiceAvailable(opUrl.get()) : false;
+		serviceAvailable = opUrl.filter(this::isServiceAvailable).isPresent();
 		if (serviceAvailable) {
 			registry.register(MarkdownItMarkdown2Html.class.getName(),
 					BeanDefinitionBuilder.genericBeanDefinition(MarkdownItMarkdown2Html.class)

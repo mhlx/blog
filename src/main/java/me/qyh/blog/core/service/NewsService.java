@@ -27,7 +27,7 @@ import me.qyh.blog.core.vo.PageResult;
 
 public interface NewsService {
 
-	static final String COMMENT_MODULE_NAME = "news";
+	String COMMENT_MODULE_NAME = "news";
 
 	/**
 	 * 分页查询动态

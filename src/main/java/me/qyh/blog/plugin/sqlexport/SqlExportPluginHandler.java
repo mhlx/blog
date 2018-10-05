@@ -21,7 +21,7 @@ import me.qyh.blog.core.security.GoogleAuthenticator;
 
 public class SqlExportPluginHandler extends PluginHandlerSupport {
 
-	private List<SqlDump> dumps = new ArrayList<>();
+	private final List<SqlDump> dumps = new ArrayList<>();
 
 	private HikariDataSource dataSource;
 	private GoogleAuthenticator ga;
@@ -33,7 +33,7 @@ public class SqlExportPluginHandler extends PluginHandlerSupport {
 
 	private final PluginProperties pluginProperties = PluginProperties.getInstance();
 
-	private boolean enable = pluginProperties.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(false);
+	private final boolean enable = pluginProperties.get(ENABLE_KEY).map(Boolean::parseBoolean).orElse(false);
 
 	@Override
 	public void init(ApplicationContext applicationContext) throws Exception {

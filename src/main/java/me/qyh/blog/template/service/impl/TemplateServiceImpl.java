@@ -155,7 +155,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	/**
 	 * 系统默认模板片段
 	 */
-	private List<Fragment> fragments = new ArrayList<>();
+	private final List<Fragment> fragments = new ArrayList<>();
 
 	private Map<String, SystemTemplate> defaultTemplates;
 
@@ -163,7 +163,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 	private String previewIp;
 
-	private List<Fragment> previewFragments = new ArrayList<>();
+	private final List<Fragment> previewFragments = new ArrayList<>();
 
 	private static final Path DATA_CONFIG = FileUtils.HOME_DIR.resolve("blog/data_config.json");
 
@@ -388,10 +388,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		if (onlyCallable) {
 			processor = processor.filter(DataTagProcessor::isCallable);
 		}
-		if (processor.isPresent()) {
-			return Optional.of(processor.get().getData(dataTag.getAttrs()));
-		}
-		return Optional.empty();
+		return processor.map(dataTagProcessor -> dataTagProcessor.getData(dataTag.getAttrs()));
 	}
 
 	@Override
@@ -1064,7 +1061,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	 */
 	private final class PageRequestMappingRegisterHelper {
 
-		private List<Runnable> rollBackActions = new ArrayList<>();
+		private final List<Runnable> rollBackActions = new ArrayList<>();
 
 		public PageRequestMappingRegisterHelper() {
 			super();
@@ -1244,7 +1241,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			}
 			SystemTemplate template = defaultTemplates.get(path);
 			if (template != null) {
-				template = (SystemTemplate) template.cloneTemplate();
+				template = template.cloneTemplate();
 			}
 			return template;
 		}
@@ -1261,7 +1258,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		public Template getTemplate(String templateName) {
 			Template template = null;
 			Optional<String> op = Page.getOriginalTemplateFromPreviewTemplateName(templateName);
-			String originalTemplateName = op.isPresent() ? op.get() : templateName;
+			String originalTemplateName = op.orElse(templateName);
 			if (op.isPresent()) {
 				template = templateMapping.getPreviewTemplateMapping().getPreviewTemplate(originalTemplateName)
 						.orElse(null);
@@ -1284,7 +1281,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		@Override
 		public Template getTemplate(String templateName) {
 			Optional<String> op = Fragment.getOriginalTemplateFromPreviewTemplateName(templateName);
-			String originalTemplateName = op.isPresent() ? op.get() : templateName;
+			String originalTemplateName = op.orElse(templateName);
 			if (op.isPresent()) {
 				synchronized (TemplateServiceImpl.this) {
 					if (!previewFragments.isEmpty()) {
@@ -1347,7 +1344,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 					throw new SystemException(
 							"DataTagProcessor数据名称:" + processor.getName() + "或者" + processor.getDataName() + "存在重复");
 				});
-		;
 		Boolean callable = readCallableMap().get(processor.getDataName());
 		if (callable != null) {
 			processor.setCallable(callable);
@@ -1392,7 +1388,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 	@Override
 	public List<SystemTemplate> getSystemTemplates() {
-		return Collections.unmodifiableList(new ArrayList<>(defaultTemplates.values()));
+		return List.copyOf(new ArrayList<>(defaultTemplates.values()));
 	}
 
 	@Override

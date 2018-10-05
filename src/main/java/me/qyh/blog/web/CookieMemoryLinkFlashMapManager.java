@@ -23,7 +23,7 @@ public class CookieMemoryLinkFlashMapManager extends AbstractFlashMapManager {
 	private UrlHelper urlHelper;
 
 	private static final String MESSAGE_ID = "messageId";
-	private Map<String, List<FlashMap>> map = new ConcurrentHashMap<>();
+	private final Map<String, List<FlashMap>> map = new ConcurrentHashMap<>();
 
 	@Override
 	protected List<FlashMap> retrieveFlashMaps(HttpServletRequest request) {

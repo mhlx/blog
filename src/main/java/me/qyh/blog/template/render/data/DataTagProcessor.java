@@ -35,8 +35,8 @@ import me.qyh.blog.template.vo.DataBind;
 
 public abstract class DataTagProcessor<T> {
 
-	private String name;// 数据名，唯一
-	private String dataName;// 默认数据绑定名，唯一
+	private final String name;// 数据名，唯一
+	private final String dataName;// 默认数据绑定名，唯一
 	private boolean callable;// 是否可以被ajax调用
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(DataTagProcessor.class);

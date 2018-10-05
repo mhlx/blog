@@ -44,9 +44,7 @@ class MarkdownItMarkdown2Html implements Markdown2Html {
 			if (result.isSuccess()) {
 				Map<Integer, String> map = new HashMap<>();
 				Map<?, ?> resultMap = (Map<?, ?>) result.getData();
-				resultMap.forEach((k, v) -> {
-					map.put(Integer.parseInt(k.toString()), Objects.toString(v, ""));
-				});
+				resultMap.forEach((k, v) -> map.put(Integer.parseInt(k.toString()), Objects.toString(v, "")));
 				return map;
 			}
 			throw new SystemException("转化markdown失败:" + result);

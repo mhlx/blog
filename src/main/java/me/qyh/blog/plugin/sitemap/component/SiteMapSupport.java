@@ -50,7 +50,7 @@ public class SiteMapSupport implements InitializingBean {
 
 	private ScheduledFuture<?> future;
 
-	private List<SiteUrlProvider> providers = new ArrayList<>();
+	private final List<SiteUrlProvider> providers = new ArrayList<>();
 
 	private static final String[] VALID_FREQS = { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" };
 	private static final String CRON_KEY = "plugin.sitemap.refreshCron";

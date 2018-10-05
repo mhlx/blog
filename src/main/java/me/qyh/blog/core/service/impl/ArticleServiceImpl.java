@@ -119,7 +119,7 @@ public class ArticleServiceImpl
 	@Autowired(required = false)
 	private Markdown2Html markdown2Html;
 
-	private List<ArticleHitHandler> hitHandlers = new ArrayList<>();
+	private final List<ArticleHitHandler> hitHandlers = new ArrayList<>();
 
 	/**
 	 * @since 6.5
@@ -444,9 +444,7 @@ public class ArticleServiceImpl
 		article.setStatus(ArticleStatus.DELETED);
 		articleDao.update(article);
 
-		Transactions.afterCommit(() -> {
-			articleIndexer.deleteDocument(id);
-		});
+		Transactions.afterCommit(() -> articleIndexer.deleteDocument(id));
 
 		applicationEventPublisher.publishEvent(new ArticleDelEvent(this, List.of(article), true));
 
@@ -768,9 +766,7 @@ public class ArticleServiceImpl
 					int hits = articleDao.selectHits(id) + 1;
 					articleDao.updateHits(id, hits);
 
-					Transactions.afterCommit(() -> {
-						articleIndexer.updateHits(Map.of(id, hits));
-					});
+					Transactions.afterCommit(() -> articleIndexer.updateHits(Map.of(id, hits)));
 				});
 			}
 		}

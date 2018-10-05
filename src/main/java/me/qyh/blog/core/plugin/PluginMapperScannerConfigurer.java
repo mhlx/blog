@@ -11,7 +11,7 @@ import me.qyh.blog.core.util.Validators;
 
 public class PluginMapperScannerConfigurer extends MapperScannerConfigurer {
 
-	private List<String> basePackages = new ArrayList<>();
+	private final List<String> basePackages = new ArrayList<>();
 
 	public PluginMapperScannerConfigurer(List<String> basePackages) {
 		super();

@@ -449,7 +449,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 		}
 		int index = path.lastIndexOf('/');
 		String folderPath = index == -1 ? "" : path.substring(0, index);
-		String fileName = index == -1 ? path : path.substring(index + 1, path.length());
+		String fileName = index == -1 ? path : path.substring(index + 1);
 
 		validateSlashPath(fileName);
 

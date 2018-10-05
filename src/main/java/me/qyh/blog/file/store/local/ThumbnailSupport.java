@@ -345,7 +345,7 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 					baseName = baseName.substring(0, baseName.length() - 1);
 				}
 				if (baseName.startsWith(Character.toString(CONCAT_CHAR))) {
-					baseName = baseName.substring(1, baseName.length());
+					baseName = baseName.substring(1);
 					Integer h = Integer.valueOf(baseName);
 					resize = new Resize();
 					resize.setHeight(h);

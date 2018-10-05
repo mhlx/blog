@@ -38,8 +38,8 @@ import org.springframework.util.CollectionUtils;
  */
 public class CommonMarkdown2Html implements Markdown2Html {
 
-	private Parser parser;
-	private HtmlRenderer renderer;
+	private final Parser parser;
+	private final HtmlRenderer renderer;
 
 	private static final List<Extension> BASE_EXTENSIONS = List.of(AutolinkExtension.create(), TablesExtension.create(),
 			StrikethroughExtension.create(), HeadingAnchorExtension.create());

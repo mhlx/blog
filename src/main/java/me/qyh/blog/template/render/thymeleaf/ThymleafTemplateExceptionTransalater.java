@@ -46,20 +46,12 @@ public class ThymleafTemplateExceptionTransalater implements TemplateExceptionTr
 		if (e instanceof TemplateProcessingException) {
 			boolean preview = PreviewTemplate.isPreviewTemplate(templateName);
 			if (!preview) {
-				preview = isPreview(ParseContextHolder.getContext().getLastChain());
+				preview = ParseContextHolder.getContext().getLastChain().filter(this::isPreview).isPresent();
 			}
 			return Optional.of(new TemplateRenderException(templateName,
 					fromException((TemplateProcessingException) e, templateName), e, preview));
 		}
 		return Optional.empty();
-	}
-
-	private boolean isPreview(Optional<ParsedTemplate> op) {
-		if (op.isPresent()) {
-			return isPreview(op.get());
-		} else {
-			return false;
-		}
 	}
 
 	private boolean isPreview(ParsedTemplate chain) {

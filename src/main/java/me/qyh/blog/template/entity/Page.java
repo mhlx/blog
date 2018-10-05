@@ -236,7 +236,6 @@ public class Page extends BaseEntity implements PathTemplate {
 	}
 
 	public static Optional<String> getOriginalTemplateFromPreviewTemplateName(String templateSign) {
-		return PreviewTemplate.getOriginalTemplateName(templateSign)
-				.filter(templateName -> isPageTemplate(templateName));
+		return PreviewTemplate.getOriginalTemplateName(templateSign).filter(Page::isPageTemplate);
 	}
 }

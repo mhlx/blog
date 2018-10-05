@@ -52,7 +52,7 @@ public class FixedNumCaptchaController implements InitializingBean, CaptchaValid
 
 	private Cage cage;
 
-	private Map<String, String> fifoMap = new LinkedHashMap<String, String>() {
+	private final Map<String, String> fifoMap = new LinkedHashMap<>() {
 
 		/**
 		 * 

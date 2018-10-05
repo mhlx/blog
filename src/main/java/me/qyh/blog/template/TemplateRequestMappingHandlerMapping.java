@@ -76,7 +76,7 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 
 	private RequestMappingInfo.BuilderConfiguration config;
 
-	private List<HandlerInterceptor> interceptors = new ArrayList<>();
+	private final List<HandlerInterceptor> interceptors = new ArrayList<>();
 
 	private HandlerInterceptor[] interceptorArray;
 

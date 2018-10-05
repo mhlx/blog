@@ -70,7 +70,7 @@ public final class Validators {
 	 * @return
 	 */
 	public static boolean isAlpha(String str) {
-		return !isEmptyOrNull(str, false) && str.chars().allMatch(i -> Character.isLetter(i));
+		return !isEmptyOrNull(str, false) && str.chars().allMatch(Character::isLetter);
 	}
 
 	/**

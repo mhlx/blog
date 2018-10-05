@@ -23,7 +23,7 @@ public class MenuRegistry {
 
 	private static final MenuRegistry REGISTRY = new MenuRegistry();
 
-	private List<Menu> menus = new ArrayList<>();
+	private final List<Menu> menus = new ArrayList<>();
 
 	private MenuRegistry() {
 		super();

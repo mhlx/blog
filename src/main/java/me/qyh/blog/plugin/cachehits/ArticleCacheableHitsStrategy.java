@@ -38,9 +38,7 @@ class ArticleCacheableHitsStrategy extends CacheableHitsStrategy<Article> {
 	@Override
 	protected void doFlush(Map<Integer, Integer> hitsMap, boolean contextClose) {
 		if (!contextClose) {
-			Transactions.afterCommit(() -> {
-				articleIndexer.updateHits(hitsMap);
-			});
+			Transactions.afterCommit(() -> articleIndexer.updateHits(hitsMap));
 		}
 
 		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false)) {

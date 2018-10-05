@@ -29,7 +29,7 @@ public final class PreviewTemplate implements Template {
 	/**
 	 * 预览模板前缀
 	 */
-	private static String TEMPLATE_PREVIEW_PREFIX = TEMPLATE_PREFIX + "Preview" + SPLITER;
+	private static final String TEMPLATE_PREVIEW_PREFIX = TEMPLATE_PREFIX + "Preview" + SPLITER;
 
 	public Template getOriginalTemplate() {
 		return template;

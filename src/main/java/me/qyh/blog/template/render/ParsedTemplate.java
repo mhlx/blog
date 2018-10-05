@@ -16,8 +16,7 @@ public class ParsedTemplate {
 	private final String templateName;
 	private final boolean preview;
 	private final boolean callable;
-
-	private List<ParsedTemplate> children = new ArrayList<>();
+	private final List<ParsedTemplate> children = new ArrayList<>();
 
 	public ParsedTemplate(String templateName, boolean preview, boolean callable) {
 		super();

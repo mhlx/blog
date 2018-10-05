@@ -75,7 +75,7 @@ public class ThymeleafCacheManager extends AbstractCacheManager implements Appli
 
 		public TemplateCache() {
 			super();
-			this.cache = Caffeine.newBuilder().build();
+			this.cache = Caffeine.newBuilder().softValues().build();
 		}
 
 		@Override
@@ -84,12 +84,12 @@ public class ThymeleafCacheManager extends AbstractCacheManager implements Appli
 			ITemplateResource resource = templateData.getTemplateResource();
 			if (resource instanceof TemplateResource) {
 				// @since 6.0
-//				if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
-//					return;
-//				}
-//				if (key.getOwnerTemplate() != null) {
-//					return;
-//				}
+				// if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
+				// return;
+				// }
+				// if (key.getOwnerTemplate() != null) {
+				// return;
+				// }
 				final Template template = ((TemplateResource) resource).getTemplate();
 				String templateName = templateData.getTemplate();
 				tpe.execute(() ->
@@ -138,8 +138,7 @@ public class ThymeleafCacheManager extends AbstractCacheManager implements Appli
 
 	private final class ExpressionCache implements ICache<ExpressionCacheKey, Object> {
 
-		private final Cache<ExpressionCacheKey, Object> cache = Caffeine.newBuilder()
-				.expireAfterAccess(30, TimeUnit.MINUTES).build();
+		private final Cache<ExpressionCacheKey, Object> cache = Caffeine.newBuilder().softValues().build();
 
 		public ExpressionCache() {
 			super();

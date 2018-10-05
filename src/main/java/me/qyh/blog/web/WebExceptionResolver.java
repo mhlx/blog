@@ -495,15 +495,15 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 	}
 
-	public static final String getFullUrl(HttpServletRequest request) {
+	public static String getFullUrl(HttpServletRequest request) {
 		return UrlUtils.buildFullRequestUrl(request);
 	}
 
-	public static final ModelAndView getErrorForward(HttpServletRequest request, ErrorInfo error) {
+	public static ModelAndView getErrorForward(HttpServletRequest request, ErrorInfo error) {
 		return getErrorForward(request, error, Webs.getSpaceFromRequest(request));
 	}
 
-	public static final ModelAndView getErrorForward(HttpServletRequest request, ErrorInfo error, String space) {
+	public static ModelAndView getErrorForward(HttpServletRequest request, ErrorInfo error, String space) {
 		Map<String, Object> model = new HashMap<>();
 
 		/**
