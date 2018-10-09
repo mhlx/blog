@@ -15,7 +15,9 @@
  */
 package me.qyh.blog.template.render;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.transaction.TransactionStatus;
@@ -31,6 +33,7 @@ public class ParseContext {
 	private TransactionStatus transactionStatus;
 	private ParseConfig config;
 	private ParsedTemplate root;
+	private final Map<String, Map<String, String>> namedRenderHandlers = new LinkedHashMap<>();
 
 	ParseContext() {
 		super();
@@ -62,6 +65,10 @@ public class ParseContext {
 
 	public void setRoot(ParsedTemplate root) {
 		this.root = root;
+	}
+
+	public Map<String, Map<String, String>> getNamedRenderHandlers() {
+		return namedRenderHandlers;
 	}
 
 	public Optional<ParsedTemplate> getLastChain() {

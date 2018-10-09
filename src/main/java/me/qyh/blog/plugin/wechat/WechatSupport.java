@@ -33,9 +33,8 @@ public class WechatSupport {
 	private static final long TOKEN_EXPIRE_SEC = 7100 * 1000L;// 实际7200s
 	private static final long TICKET_EXPIRE_SEC = 7100 * 1000L;// 实际7200s
 
-	// TODO
-	private final String tokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
-	private final String ticketUrl = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi";
+	private static final String TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
+	private static final String TICKET_URL = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi";
 
 	private Token token;
 	private Ticket ticket;
@@ -53,7 +52,7 @@ public class WechatSupport {
 			if (token != null && !token.overtime()) {
 				return;
 			}
-			String tokenUrl = String.format(this.tokenUrl, appid, appsecret);
+			String tokenUrl = String.format(TOKEN_URL, appid, appsecret);
 			ExpressionExecutor executor = read(tokenUrl);
 			String token = executor.execute("access_token")
 					.orElseThrow(() -> new SystemException("获取access_token失败：" + executor.toString()));
@@ -70,7 +69,7 @@ public class WechatSupport {
 			if (ticket != null && !ticket.overtime()) {
 				return;
 			}
-			String ticketUrl = String.format(this.ticketUrl, token.getToken());
+			String ticketUrl = String.format(TICKET_URL, token.getToken());
 			ExpressionExecutor executor = read(ticketUrl);
 			String ticket = executor.execute("ticket").orElseThrow(
 					() -> new SystemException("获取ticket失败，失败信息：" + executor.toString() + "，token :" + token));

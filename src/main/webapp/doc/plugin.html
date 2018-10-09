@@ -67,9 +67,9 @@ me.qyh.blog.plugin.comment.entity.CommentModule</pre>
 									对应的别名分别为Comment、CommentStatus和CommentModule，如果需要别的别名，可以在类上加@Alias标记，具体请见
 									<code>org.apache.ibatis.type.TypeAliasRegistry#registerAlias(Class&lt;?&gt;
 										type)</code>
-								<p>
-								<b>这个方法会在enable之后，initialize之前调用！！</b>
-								</p>
+									<p>
+										<b>这个方法会在enable之后，initialize之前调用！！</b>
+									</p>
 								</td>
 							</tr>
 							<tr>
@@ -146,15 +146,29 @@ me.qyh.blog.plugin.comment.entity.CommentModule</pre>
 								<td>添加锁提供器</td>
 							</tr>
 							<tr>
-								<td>default void
-									addSuccessfulLoginHandler(SuccessfulLoginHandlerRegistry
-									registry)</td>
-								<td>添加登录成功后的处理器</td>
+								<td>void addHitHandler(ArticleHitHandlerRegistry registry)</td>
+								<td>添加文件点击事件处理器，<b>不应该在处理器内改变文章的点击数，如果需要改变点击数，可以通过<code>HitsStrategy</code>来处理
+								</b></td>
 							</tr>
 							<tr>
-								<td>default void addLogoutHandler(LogoutHandlerRegistry
+								<td>void addTemplateRenderModal(TemplateRenderModelRegistry
 									registry)</td>
-								<td>添加注销后的处理器</td>
+								<td>增加模板渲染时的辅助对象，<b>这个方法不会覆盖系统本来的辅助对象！</b></td>
+							</tr>
+							<tr>
+								<td>addResourceHttpRequestHandlerMapping(ResourceHttpRequestHandlerMappingRegistry
+									registry)</td>
+								<td>用于注册静态资源处理器</td>
+							</tr>
+							<tr>
+								<td>int getOrder()</td>
+								<td>用于指定插件的加载顺序，数值越小，越先加载，<b>如果在plugin.properties文件中明确的指定了某个插件的加载顺序，那么getOrder()将不会起作用</b></td>
+							</tr>
+							<tr>
+								<td>void
+									addTemplateRenderHandler(TemplateRenderHandlerRegistry
+									registry)</td>
+								<td>用于注册模板渲染完成之后，处理模板内容的处理器</td>
 							</tr>
 						</table>
 					</div>

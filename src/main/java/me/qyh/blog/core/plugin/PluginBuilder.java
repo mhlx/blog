@@ -66,6 +66,8 @@ public class PluginBuilder {
 		copyDir(_root, root, "WEB-INF/templates/plugin/" + name);
 		copyDir(_root, root, "static/plugin/" + name);
 
+		System.out.println("插件" + name + "构建完成");
+
 	}
 
 	private static void copyDir(Path source, Path dest, String resolvePath) throws IOException {
@@ -91,7 +93,7 @@ public class PluginBuilder {
 	}
 
 	public static void main(String[] args) throws Exception {
-		build("comment", Paths.get("F:\\workspace\\blog"), Paths.get("f:/plugin"));
+		build("imagevideolazyload", Paths.get("F:\\workspace\\blog"), Paths.get("f:/plugin"));
 	}
 
 }

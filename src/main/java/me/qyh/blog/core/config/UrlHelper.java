@@ -244,6 +244,17 @@ public class UrlHelper {
 			return url + "/news/" + news.getId();
 		}
 
+		/**
+		 * 根据相对地址获取完整的地址
+		 * 
+		 * @since 6.7
+		 * @param relativeUrl
+		 * @return
+		 */
+		public String getUrl(String relativeUrl) {
+			return url + "/" + FileUtils.cleanPath(relativeUrl);
+		}
+
 		public NewsUrlHelper getNewsUrlHelper() {
 			return new NewsUrlHelper(url, "news");
 		}

@@ -288,13 +288,13 @@ var modal = '<div class="modal" id="fileSelectModal" tabindex="-1"';
 		$("#fileSelectModal").on('click','a[data-extension][data-url][data-description]',function(){
 			$("#fileSelectModal").modal('hide');
 			var me = $(this);
-			var ext = me.attr("data-extension");var url = me.attr('data-url');
+			var ext = me.attr("data-extension").toLowerCase();var url = me.attr('data-url');
 			if(isImage(ext)){
 				$('#content').summernote('insertImage', url, function ($image) {
 				  $image.addClass('img-responsive');
 				});
 			} else {
-				if(ext == "mp4"){
+				if(ext == "mp4" || ext == "mov" || ext == "flv" || ext == "avi"){
 					bootbox.prompt({
 						title:'请输入视频封面',
 						value:url,

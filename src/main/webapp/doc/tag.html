@@ -255,6 +255,39 @@ body {
 	&lt;h2&gt;[[${articlePage}]]&lt;/h2&gt;
 &lt;/markdown&gt;		</pre>
 					</div>
+
+
+					<h2 id="handler">handler标签</h2>
+					<p>该标签主要用于指定模板渲染后的内容处理器，基本的使用形式为&lt;handler name=""
+						&gt;&lt;/handler&gt;，标签接受以下参数</p>
+
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>属性</th>
+									<th>可以省略</th>
+									<th>默认值</th>
+									<th>说明</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>name</td>
+									<td>否</td>
+									<th></th>
+									<td>处理器的名称，处理器必须通过插件注册</td>
+								</tr>
+								<tr>
+									<td>*</td>
+									<td>是</td>
+									<th></th>
+									<td>其他属性，比如&lt;handler name="" th:att1="att1v"
+										&gt;&lt;/handler&gt;标签，name用于查找处理器，而att1键值将会被放入map中，传递给处理器</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>

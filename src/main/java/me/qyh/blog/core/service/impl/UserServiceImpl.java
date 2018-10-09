@@ -52,8 +52,7 @@ public class UserServiceImpl implements UserService, InitializingBean {
 	/**
 	 * admin，防止user.properties文件为空时自动登陆失败
 	 */
-	// TODO
-	private final String DEFAULT_PASSWORD = "$2a$10$DZ/KQVvyKGQrI8rlRmE95uIBAPj6RcfThGTxXOhRDpFMA5zAvHeq.";
+	private static final String DEFAULT_PASSWORD = "$2a$10$DZ/KQVvyKGQrI8rlRmE95uIBAPj6RcfThGTxXOhRDpFMA5zAvHeq.";
 
 	private static final Properties pros;
 	private User user;

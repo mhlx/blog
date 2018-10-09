@@ -78,6 +78,7 @@ public final class TemplateRender
 	private Map<String, Object> pros = new HashMap<>();
 
 	private final List<TemplateRenderHandler> renderHandlers = new ArrayList<>();
+	private final Map<String, NamedTemplateRenderHandler> namedRenderHandlers = new HashMap<>();
 
 	public String doRender(String templateName, Map<String, ?> model, HttpServletRequest request,
 			ReadOnlyResponse response, ParseConfig config) throws Exception {
@@ -92,6 +93,19 @@ public final class TemplateRender
 					}
 				}
 			}
+			/**
+			 * @since 6.7
+			 */
+			Map<String, Map<String, String>> namedRenderHandlers = ParseContextHolder.getContext()
+					.getNamedRenderHandlers();
+			for (Map.Entry<String, Map<String, String>> it : namedRenderHandlers.entrySet()) {
+				String namedRenderHandler = it.getKey();
+				NamedTemplateRenderHandler handler = this.namedRenderHandlers.get(namedRenderHandler);
+				if (handler != null) {
+					content = handler.afterRender(content, request, contentType, it.getValue());
+				}
+			}
+
 			return content;
 		} catch (Throwable e) {
 			markRollBack();
@@ -231,6 +245,13 @@ public final class TemplateRender
 	@Override
 	public TemplateRenderHandlerRegistry register(TemplateRenderHandler handler) {
 		renderHandlers.add(handler);
+		return this;
+	}
+
+	@Override
+	public TemplateRenderHandlerRegistry register(NamedTemplateRenderHandler handler) {
+		NamedTemplateRenderHandler namedTemplateRenderHandler = (NamedTemplateRenderHandler) handler;
+		namedRenderHandlers.put(namedTemplateRenderHandler.name(), namedTemplateRenderHandler);
 		return this;
 	}
 
