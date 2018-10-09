@@ -28,6 +28,7 @@ public class ImageVideoLazyLoadTemplateRenderHandler implements NamedTemplateRen
 		}
 		String containerClass = attrs.getOrDefault("containerClass", "lazy-container");
 		String lazyClass = attrs.getOrDefault("lazyClass", "lazy");
+		String versionNum = attrs.get("version");
 		Document doc = Jsoup.parse(content);
 		doc.select("." + containerClass).forEach(c -> {
 			c.select("img[src]").forEach(i -> {
@@ -51,6 +52,9 @@ public class ImageVideoLazyLoadTemplateRenderHandler implements NamedTemplateRen
 			});
 		});
 		String scriptUrl = urlHelper.getUrls().getUrl("/static/plugin/imagevideolazyload/lazyload.min.js");
+		if (versionNum != null) {
+			scriptUrl += "?version=" + versionNum;
+		}
 		doc.body().append("<script src=\"" + scriptUrl + "\" type=\"text/javascript\"></script>");
 		doc.body()
 				.append("<script>\r\n" + "		  (function () {\r\n" + "				new LazyLoad({\r\n"

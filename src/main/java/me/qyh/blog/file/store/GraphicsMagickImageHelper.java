@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -63,10 +64,7 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 
 	private static final boolean WINDOWS = File.separatorChar == '\\';
 
-	/**
-	 * 如果为true，那么将会以渐进的方式显示出来，但在有些浏览器，例如EDGE则会先显示空白后再显示图片
-	 */
-	private boolean doInterlace = false;
+	private boolean doInterlace;
 
 	/**
 	 * <p>
@@ -74,6 +72,15 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 	 * </p>
 	 */
 	private double quality = 75d;
+
+	/**
+	 * 设置pngQuant的根目录路径(windows)，用于压缩PNG图片
+	 * 
+	 * @since 6.7
+	 */
+	private String pngQuantDirPath;
+
+	private boolean pngQuantEnable;
 
 	@Override
 	protected void doResize(Resize resize, Path src, Path dest) throws IOException {
@@ -85,24 +92,22 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		if (!maybeTransparentBg(ext)) {
 			setWhiteBg(op);
 		}
-		if (interlace(dest)) {
+		boolean interlace = interlace(dest);
+		if (interlace) {
 			op.interlace("Line");
 		}
 		/**
 		 * @since 5.9 防止某些图片旋转90度
 		 */
 		op.autoOrient();
-		addCompressOp(op, ext);
+		if (isJPEG(ext)) {
+			op.quality(quality);
+		}
 		op.addImage();
 
 		Path temp = FileUtils.appTemp(ext);
 		try {
 			run(op, src.toAbsolutePath().toString(), temp.toAbsolutePath().toString());
-			// windows下，如果多个线程move到同一文件
-			// 会出现 java.nio.file.AccessDeniedException异常
-			synchronized (this) {
-				FileUtils.move(temp, dest);
-			}
 		} catch (IOException e) {
 			// 如果原图是gif图像
 			if (isGIF(FileUtils.getFileExtension(src))) {
@@ -110,6 +115,12 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 			} else {
 				throw e;
 			}
+		}
+		compress(temp, ext);
+		// windows下，如果多个线程move到同一文件
+		// 会出现 java.nio.file.AccessDeniedException异常
+		synchronized (this) {
+			FileUtils.move(temp, dest);
 		}
 	}
 
@@ -142,15 +153,14 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		}
 	}
 
-	protected void addCompressOp(IMOperation op, String ext) {
-		if (isJPEG(ext)) {
-			op.interlace("Plane");
-			op.quality(quality);
-		}
-		if (isPNG(ext)) {
-			op.define("png:compression-filter=2");
-			op.define("png:compression-level=9");
-			op.define("png:compression-strategy=1");
+	protected void compress(Path dest, String ext) throws IOException {
+		if (isPNG(ext) && pngQuantEnable) {
+			try {
+				String cmdPath = WINDOWS ? new File(pngQuantDirPath, "pngquant").getCanonicalPath() : "pngquant";
+				ProcessUtils.runProcess(Arrays.asList(cmdPath, "-f", "-o", dest.toString(), dest.toString()));
+			} catch (ProcessException e) {
+				throw new IOException(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -159,8 +169,18 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		if (quality < 0 || quality > 100) {
 			throw new SystemException("图片质量应该在(0~100]之间");
 		}
-		if (WINDOWS && !Validators.isEmptyOrNull(magickPath, true)) {
-			ProcessStarter.setGlobalSearchPath(magickPath);
+		if (WINDOWS) {
+			if (!Validators.isEmptyOrNull(magickPath, true)) {
+				ProcessStarter.setGlobalSearchPath(magickPath);
+			}
+			pngQuantEnable = !Validators.isEmptyOrNull(pngQuantDirPath, true);
+		} else {
+			try {
+				ProcessUtils.runProcess(Arrays.asList("pngquant", "--version"));
+				pngQuantEnable = true;
+			} catch (ProcessException e) {
+				pngQuantEnable = false;
+			}
 		}
 	}
 
@@ -168,8 +188,9 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		if (!doInterlace) {
 			return false;
 		}
+		// https://stackoverflow.com/questions/13449314/when-to-interlace-an-image
 		String ext = FileUtils.getFileExtension(dest);
-		return isGIF(ext) || isPNG(ext) || isJPEG(ext);
+		return isJPEG(ext);
 	}
 
 	private void setWhiteBg(IMOperation op) {
@@ -334,4 +355,7 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		ProcessUtils.runProcess(command, sec, TimeUnit.SECONDS);
 	}
 
+	public void setPngQuantDirPath(String pngQuantDirPath) {
+		this.pngQuantDirPath = pngQuantDirPath;
+	}
 }
