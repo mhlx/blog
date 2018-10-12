@@ -26,6 +26,7 @@ import me.qyh.blog.core.vo.JsonResult;
  * npm install markdown-it-sup --save
  * npm install markdown-it-sub --save
  * npm install markdown-it-abbr --save
+ * npm i markdown-it-anchor
  * </pre>
  * 
  * 启动：
@@ -52,6 +53,7 @@ var md = require('markdown-it')({
 .use(require('markdown-it-sup'))
 .use(require('markdown-it-sub'))
 .use(require('markdown-it-abbr'))
+.use(require('markdown-it-anchor'))
 ;
 
 const server = http.createServer((req, res) => {
@@ -61,10 +63,14 @@ const server = http.createServer((req, res) => {
 		body += data;
 	});
 	req.on('end', function () {
-		body = md.render(body,{});
+		body = JSON.parse(body);
+		var result = {};
+		for(let i in body){
+			result[i] = md.render(body[i],{});
+		}
 		var json = JSON.stringify({ 
 			success: true, 
-			data: body
+			data: result
 		});
 		
 		res.writeHead(200, {'Content-Type': 'application/json'});

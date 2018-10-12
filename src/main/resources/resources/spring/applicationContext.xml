@@ -88,7 +88,7 @@
 	<bean id="articleIndexer"
 		class="me.qyh.blog.core.service.impl.JcsegArticleIndexer">
 		<constructor-arg index="0" value="SEARCH" />
-		<property name="useRAMDirectory" value="true"/>
+		<property name="useRAMDirectory" value="true" />
 	</bean>
 
 	<!-- 文章缓存 -->
@@ -108,7 +108,7 @@
 		destroy-method="destroy">
 		<property name="errorHandler" ref="loggingErrorHandler" />
 		<property name="poolSize" value="10" />
-<!-- 		<property name="awaitTerminationSeconds" value="60" /> -->
+		<!-- <property name="awaitTerminationSeconds" value="60" /> -->
 		<property name="waitForTasksToCompleteOnShutdown"
 			value="false" />
 	</bean>
@@ -127,7 +127,11 @@
 	</task:scheduled-tasks>
 
 	<!-- 文件管理 -->
-	<bean class="me.qyh.blog.file.store.JavaImageHelper" />
+	<bean class="me.qyh.blog.file.store.GraphicsMagickImageHelper">
+		<property name="magickPath"
+			value="C:/Program Files/GraphicsMagick-1.3.30-Q16" />
+		<property name="pngQuantDirPath" value="f:/pngquant" />
+	</bean>
 	<bean class="me.qyh.blog.file.store.DefaultFileManager" />
 
 	<bean class="me.qyh.blog.core.plugin.PluginHandlerRegistry" />
