@@ -117,8 +117,6 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 			}
 		}
 		compress(temp, ext);
-		// windows下，如果多个线程move到同一文件
-		// 会出现 java.nio.file.AccessDeniedException异常
 		synchronized (this) {
 			FileUtils.move(temp, dest);
 		}
@@ -143,8 +141,6 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 			return new ImageInfo(Integer.parseInt(it.next()), Integer.parseInt(it.next()), it.next());
 
 		} catch (IOException e) {
-			// 如果是GIF，尝试采用java读取
-			// 如果原图是gif图像
 			if (isGIF(FileUtils.getFileExtension(file))) {
 				return readGif(file);
 			} else {

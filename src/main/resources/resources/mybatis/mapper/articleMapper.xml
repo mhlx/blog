@@ -107,14 +107,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		GROUP BY art.id
 	</select>
 	
-	<select id="selectByIds" resultMap="ArticleDetail">
-		<include refid="articleDetailSql"></include>
-		WHERE art.id IN
-		<foreach collection="collection" item="id" open="(" close=")"
-			separator=",">#{id}</foreach>
-		GROUP BY art.id
-	</select>
-
 	<select id="selectByAlias" resultMap="ArticleDetail">
 		<include refid="articleDetailSql"></include>
 		WHERE

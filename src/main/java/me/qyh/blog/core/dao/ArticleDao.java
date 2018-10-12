@@ -27,7 +27,6 @@ import me.qyh.blog.core.vo.ArticleQueryParam;
 import me.qyh.blog.core.vo.ArticleSpaceStatistics;
 import me.qyh.blog.core.vo.ArticleStatistics;
 
-
 /**
  * 
  * @author Administrator
@@ -102,17 +101,8 @@ public interface ArticleDao {
 	 * @param ids
 	 *            文章id集合
 	 * @return id集合对应的文章集合
-	 * @see #selectByIds(Collection)
 	 */
 	List<Article> selectPageByIds(Collection<Integer> ids);
-
-	/**
-	 * 根据ID集合查询文章
-	 * 
-	 * @param ids
-	 * @return
-	 */
-	List<Article> selectByIds(Collection<Integer> ids);
 
 	/**
 	 * 根据指定id集合查询对应的文章，只会查询一些构建访问链接等必要的信息

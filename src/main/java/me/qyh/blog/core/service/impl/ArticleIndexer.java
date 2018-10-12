@@ -305,14 +305,17 @@ public abstract class ArticleIndexer implements InitializingBean {
 			if (Validators.isEmpty(ids)) {
 				return null;
 			}
-			articleDao.selectByIds(List.of(ids)).stream().filter(Article::isPublished).forEach(art -> {
-				try {
-					doDeleteDocument(art.getId());
-					oriWriter.addDocument(buildDocument(art));
-				} catch (IOException e) {
-					throw new SystemException(e.getMessage(), e);
+			for (Integer id : ids) {
+				Article article = articleDao.selectById(id);
+				if (article != null && article.isPublished()) {
+					try {
+						doDeleteDocument(article.getId());
+						oriWriter.addDocument(buildDocument(article));
+					} catch (IOException e) {
+						throw new SystemException(e.getMessage(), e);
+					}
 				}
-			});
+			}
 			return null;
 		});
 	}

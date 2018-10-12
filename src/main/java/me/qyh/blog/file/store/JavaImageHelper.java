@@ -50,9 +50,6 @@ import me.qyh.blog.core.util.FileUtils;
 
 /**
  * 基于java的图片处理
- * <p>
- * <b>这个类仅供测试使用，请勿在实际项目中使用</b>
- * </p>
  * 
  * @see GraphicsMagickImageHelper
  * @author Administrator
