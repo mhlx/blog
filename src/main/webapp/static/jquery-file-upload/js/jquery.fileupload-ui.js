@@ -6,7 +6,7 @@
  * https://blueimp.net
  *
  * Licensed under the MIT license:
- * http://www.opensource.org/licenses/MIT
+ * https://opensource.org/licenses/MIT
  */
 
 /* jshint nomen:false */
@@ -18,7 +18,7 @@
         // Register as an anonymous AMD module:
         define([
             'jquery',
-            'tmpl',
+            'blueimp-tmpl',
             './jquery.fileupload-image',
             './jquery.fileupload-audio',
             './jquery.fileupload-video',
@@ -28,7 +28,11 @@
         // Node/CommonJS:
         factory(
             require('jquery'),
-            require('tmpl')
+            require('blueimp-tmpl'),
+            require('./jquery.fileupload-image'),
+            require('./jquery.fileupload-audio'),
+            require('./jquery.fileupload-video'),
+            require('./jquery.fileupload-validate')
         );
     } else {
         // Browser globals:
@@ -83,21 +87,8 @@
 
             // Callback to retrieve the list of files from the server response:
             getFilesFromResponse: function (data) {
-                if (data.result ) {
-                	if($.isArray(data.result.data)){
-                		return data.result.data;
-                	} else {
-                		var files = data.files;
-                		var result = [];
-                		for(var i=0;i<files.length;i++){
-                			files[i].error = data.result.message;
-                			result[i] = files[i];
-                		}
-                		return result;
-                	}
-                }
-                
-                return [];
+            	data = $.parseJSON(data.jqXHR.responseText);
+            	return data;
             },
 
             // The add callback is invoked as soon as files are added to the fileupload

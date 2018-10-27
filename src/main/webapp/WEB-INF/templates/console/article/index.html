@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="mgr/base/head :: head('博客管理')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="mgr/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="mgr/base/sidebar"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+
+				<div class="alert alert-danger">没有</div>
+
+				<div class="card mb-3">
+					<div class="card-header">
+						<i class="fas fa-table"></i>
+					</div>
+					<div class="card-body">
+						<form class="form-inline justify-content-left">
+
+							<div class="input-group mx-0 mx-md-3">
+								<select id="spaces" class="custom-select">
+								</select>
+
+								<div class="input-group-append">
+									<button class="btn btn-red" type="submit">Go</button>
+								</div>
+							</div>
+
+						</form>
+						<div class="table-responsive">
+							<table class="table table-bordered" id="articleTable"
+								width="100%" cellspacing="0">
+								<thead>
+									<tr>
+										<th>标题</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+			<footer class="sticky-footer">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright © Your Website 2018</span>
+					</div>
+				</div>
+			</footer>
+
+		</div>
+		<!-- /.content-wrapper -->
+
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Bootstrap core JavaScript-->
+
+	<div th:replace="mgr/base/foot"></div>
+
+	<script>
+		$.extend($.fn.dataTable.defaults, {
+			searching : false,
+			ordering : false,
+			bLengthChange : false,
+			bInfo : false
+		});
+		$(document).ready(function() {
+			$.ajax({
+				url : root + 'console/spaces'
+			}).done(function(data) {
+				if (data.length == 0) {
+
+				} else {
+
+				}
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				Swal('获取空间失败', 'Something went wrong!', 'error')
+			});
+			var table = $('#articleTable').DataTable({
+				"ajax" : function(data, callback, settings) {
+					$.ajax({
+						url : root + 'console/articles'
+					}).done(function(data) {
+						table.page.len(data.pageSize);
+						callback({
+							recordsTotal : data.totalRow,
+							data : data.datas
+						})
+					}).fail(function(jqXHR, textStatus, errorThrown) {
+						console.log(jqXHR)
+					});
+				},
+				'columns' : [ {
+					"data" : "title",
+					"render" : function(data, type, row) {
+						return data;
+					}
+				} ]
+			});
+		});
+	</script>
+
+</body>
+
+</html>

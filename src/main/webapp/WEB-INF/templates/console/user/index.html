@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('用户信息管理','')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('user')"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+				<div class="row" style="margin-bottom: 10px">
+					<div class="col-md-8 offset-md-2">
+						<form>
+							<div class="form-group">
+								<label for="newName">用户名</label> <input name="name"
+									class="form-control" placeholder="新用户名" id="name">
+							</div>
+							<div class="form-group">
+								<label for="newEmail">邮箱</label> <input name="email"
+									class="form-control" placeholder="新邮箱" id="email">
+							</div>
+							<div class="form-group">
+								<label for="newPwd">新密码</label> <input name="password"
+									id="password" type="password" class="form-control"
+									placeholder="密码">
+							</div>
+							<div class="form-group">
+								<label for="renewPwd">再次输入新密码</label> <input type="password"
+									id="renewPwd" class="form-control" placeholder="再次输入新密码">
+							</div>
+							<div class="form-group">
+								<label for="oldPwd">旧密码</label> <input id="oldPassword"
+									type="password" class="form-control" placeholder="密码">
+							</div>
+							<div class="form-group" th:if="${otpRequired}">
+								<label>动态口令</label> <input id="otpCode" type="text"
+									class="form-control" placeholder="动态口令">
+							</div>
+							<button type="button" class="btn btn-primary" id="update">更新</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+			<footer class="sticky-footer">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright © Your Website 2018</span>
+					</div>
+				</div>
+			</footer>
+
+		</div>
+		<!-- /.content-wrapper -->
+
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Bootstrap core JavaScript-->
+
+	<div th:replace="console/base/foot"></div>
+	<script>
+		$(function() {
+			$.ajax({
+				type : 'GET',
+				url : root + 'api/console/user',
+				success : function(data) {
+					$("#name").val(data.name);
+					$("#email").val(data.email);
+				},
+				error : function(jqXHR, textStatus, errorThrown) {
+					var data = $.parseJSON(jqXHR.responseText);
+					swal('获取用户信息失败', data.error, 'error');
+				}
+			})
+			$("#update").click(function() {
+				var me = $(this);
+				var url = root + 'api/console/user?oldPassword='+$("#oldPassword").val();
+				if($("#otpCode").length > 0){
+					url += '&code='+$("#otpCode").val();
+				}
+				$.ajax({
+					type : "PUT",
+					data : JSON.stringify({
+						name : $("#name").val(),
+						password : $("#password").val(),
+						email : $("#email").val()
+					}),
+					dataType : "json",
+					contentType : 'application/json',
+					url : url,
+					success : function() {
+						me.prop("disabled", false);
+						swal('更新成功', '', 'success');
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						me.prop("disabled", false);
+						var data = $.parseJSON(jqXHR.responseText);
+						swal('更新失败', data.error, 'error');
+					}
+				});
+			});
+		});
+	</script>
+
+</body>
+
+</html>

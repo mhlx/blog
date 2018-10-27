@@ -23,14 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.View;
 
-import me.qyh.blog.core.vo.JsonResult;
 import me.qyh.blog.web.Webs;
 
-public class JsonView implements View {
+public class JsonView<T> implements View {
 
-	private final JsonResult result;
+	private final T result;
 
-	public JsonView(JsonResult result) {
+	public JsonView(T result) {
 		super();
 		this.result = result;
 	}

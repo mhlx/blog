@@ -15,7 +15,6 @@
  */
 package me.qyh.blog.web.controller.front;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
@@ -26,16 +25,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.SystemException;
-import me.qyh.blog.core.vo.JsonResult;
 import me.qyh.blog.template.render.Fragments;
 import me.qyh.blog.template.render.ParseConfig;
 import me.qyh.blog.template.render.ReadOnlyResponse;
@@ -45,9 +44,9 @@ import me.qyh.blog.template.service.TemplateService;
 import me.qyh.blog.template.validator.FragmentValidator;
 import me.qyh.blog.template.vo.DataBind;
 import me.qyh.blog.template.vo.DataTag;
-import me.qyh.blog.web.Webs;
 
-@Controller
+@RestController
+@RequestMapping("api")
 public class OtherController {
 
 	@Autowired
@@ -56,8 +55,7 @@ public class OtherController {
 	private TemplateService templateService;
 
 	@GetMapping({ "data/{tagName}", "space/{alias}/data/{tagName}" })
-	@ResponseBody
-	public JsonResult queryData(@PathVariable("tagName") String tagName,
+	public ResponseEntity<Map<String, Object>> queryData(@PathVariable("tagName") String tagName,
 			@RequestParam Map<String, String> allRequestParams, HttpServletRequest request,
 			HttpServletResponse response) throws LogicException {
 		try {
@@ -70,33 +68,33 @@ public class OtherController {
 		if (op.isPresent()) {
 			DataBind bind = op.get();
 			Object data = bind.getData();
-			return new JsonResult(true, Map.of("dataName", bind.getDataName(), "data", data));
-		} else {
-			return new JsonResult(false);
+			if (data == null) {
+				return ResponseEntity.ok(Map.of("dataName", bind.getDataName()));
+			} else {
+				return ResponseEntity.ok(Map.of("dataName", bind.getDataName(), "data", data));
+			}
 		}
+		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping({ "fragment/{fragment}", "space/{alias}/fragment/{fragment}" })
-	public void queryFragment(@PathVariable("fragment") String fragment,
+	public ResponseEntity<String> queryFragment(@PathVariable("fragment") String fragment,
 			@RequestParam Map<String, String> allRequestParams, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response) throws LogicException, TemplateRenderException {
 		try {
 			fragment = FragmentValidator.validName(fragment, true);
 		} catch (LogicException e) {
-			Webs.writeInfo(response, new JsonResult(false, e.getLogicMessage()));
-			return;
+			throw new LogicException("data.name.undecode", "无法解码的数据名称");
 		}
 		try {
 
 			String templateName = Fragments.getCurrentTemplateName(fragment);
-
 			String content = templateRender.doRender(templateName, null, request, new ReadOnlyResponse(response),
 					new ParseConfig(true));
-
-			Webs.writeInfo(response, new JsonResult(true, content));
+			return ResponseEntity.ok(content);
 
 		} catch (TemplateRenderException e) {
-			Webs.writeInfo(response, new JsonResult(false, e.getRenderErrorDescription()));
+			throw e;
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;

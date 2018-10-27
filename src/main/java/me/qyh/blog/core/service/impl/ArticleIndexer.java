@@ -392,7 +392,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 			Query query = builder.build();
 
 			TopDocs tds = searcher.search(query, MAX_RESULTS, sort);
-			int total = tds.totalHits;
+			int total = (int) tds.totalHits;
 			int offset = param.getOffset();
 			Map<Integer, Document> datas = new LinkedHashMap<>();
 			if (offset < total) {
@@ -442,6 +442,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 		String escaped = MultiFieldQueryParser.escape(query.strip());
 		MultiFieldQueryParser parser = new MultiFieldQueryParser(new String[] { TAG, TITLE, ALIAS, SUMMARY, CONTENT },
 				analyzer, qboostMap);
+		parser.setSplitOnWhitespace(true);
 		parser.setAutoGeneratePhraseQueries(true);
 		parser.setPhraseSlop(0);
 		try {

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('自定以页面管理','')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('page')"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+
+				<div class="card mb-3">
+					<div class="card-header">
+						<i class="fas fa-table"></i>
+					</div>
+					<div class="card-body">
+						<a class="btn btn-primary" th:href="@{/console/template/page/new}">新页面</a>
+						<div class="table-responsive" style="margin-top: 10px">
+							<table class="table table-bordered" id="pageTable" width="100%"
+								cellspacing="0">
+								<thead>
+									<tr>
+										<th data-bind="xx1">ID</th>
+										<th data-bind="name">名称</th>
+										<th data-bind="alias">路径</th>
+										<th data-bind="space">空间</th>
+										<th data-bind="createDate">创建日期</th>
+										<th data-bind="id">操作</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+						<div id="pageTable_paging"></div>
+					</div>
+				</div>
+
+			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+			<footer class="sticky-footer">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright © Your Website 2018</span>
+					</div>
+				</div>
+			</footer>
+
+		</div>
+		<!-- /.content-wrapper -->
+
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+
+	<div th:replace="console/base/foot"></div>
+	<script th:src="@{/static/console/js/page.js}"></script>
+
+</body>
+
+</html>

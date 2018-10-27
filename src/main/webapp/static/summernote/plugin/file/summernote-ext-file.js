@@ -23,16 +23,54 @@
       // ui has renders to build ui elements.
       //  - you can create a button with `ui.button`
       var ui = $.summernote.ui;
+      var imageExtensions = ["jpg","jpeg","png","gif"];
+      var videoExtensions = ["mp4","mov"];
+      var isImage = function(ext){
+    	  return $.inArray(ext.toLowerCase(),imageExtensions) != -1;
+      }
+      var isVideo = function(ext){
+    	  return $.inArray(ext.toLowerCase(),videoExtensions) != -1;
+      }
 
       // add file button
       context.memo('button.file', function() {
         // create button
         var button = ui.button({
           contents: '文件',
+          container: false,  //add option
           tooltip: '文件',
           click: function() {
-        	  fileSelectPageQuery(1,'');
-	          $("#fileSelectModal").modal("show");
+        	  fileChooser.choose(function(data){
+        		  if(data.length > 0){
+        			  for(var i=0;i<data.length;i++){
+        				  var f = data[i];
+        				  var cf = f.cf;
+        				  if(isImage(cf.extension)){
+        					  context.invoke('editor.pasteHTML', '<img src="'+cf.url+'"/>');
+        				  }
+        				  if(isVideo(cf.extension)){
+        					  (async function getPath () {
+    							const {value: path} = await swal({
+    							  title: '插入视频',
+    							  input: 'text',
+    							  inputValue: cf.url,
+    							  inputPlaceholder:'请输入视频封面地址',
+    							  showCancelButton: true,
+    							  confirmButtonText:'确定',
+    							  cancelButtonText:'取消'
+    							})
+
+    							if (path) {
+    								context.invoke('editor.pasteHTML', '<video controls="" poster="'+path+'"  src="'+cf.url+'" width="100%" ></video><p></p>');
+    							} else {
+    								context.invoke('editor.pasteHTML', '<video controls=""  src="'+cf.url+'" width="100%" ></video><p></p>');
+    							}
+
+    						})()
+        				  }
+        			  }
+        		  }
+        	  })
           }
         });
 

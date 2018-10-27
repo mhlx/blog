@@ -1,70 +1,78 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
-<head th:replace="mgr/base/head :: head('锁管理')"></head>
-<body>
-	<nav th:replace="mgr/base/nav :: active('lock')"></nav>
-	<div id="page-wrapper" style="padding: 10px">
-		<div class="container-fluid">
-			<div class="row" style="padding: 5px">
-				<div class="col-md-8 col-md-offset-2">
-					<div class="alert alert-info">锁可以被加在空间或博客上面，如果用户需要访问被加锁的资源，需要先解锁</div>
-					<div th:if="${#lists.isEmpty(locks)}">
-						<p>当前还没有任何锁可供使用</p>
-						<div style="margin-top: 5px">
-							<button class="btn btn-default" data-toggle="modal"
-								data-target="#lockModal">创建我的第一把锁</button>
-						</div>
+
+<head th:replace="console/base/head :: head('系统锁管理','')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('syslock')"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+
+				<div class="card mb-3">
+					<div class="card-header">
+						<i class="fas fa-table"></i>
 					</div>
-					<div th:unless="${#lists.isEmpty(locks)}">
-						<button class="btn btn-default" data-toggle="modal"
-							data-target="#lockModal">创建锁</button>
-						<div class="table-responsive">
-							<table class="table">
+					<div class="card-body">
+						<button class="btn btn-primary" data-create>新的系统锁</button>
+						<div class="table-responsive" style="margin-top: 10px">
+							<table class="table table-bordered" id="syslockTable"
+								width="100%" cellspacing="0">
 								<thead>
 									<tr>
-										<th>锁名称</th>
-										<th>锁类型</th>
-										<th>创建时间</th>
-										<th>操作</th>
+										<th data-bind="name">锁名</th>
+										<th data-bind="type">类型</th>
+										<th data-bind="createDate">创建日期</th>
+										<th data-bind="id">操作</th>
 									</tr>
 								</thead>
 								<tbody>
-									<tr th:each="lock : ${locks}">
-										<td><a th:title="${lock.name}" data-toggle="tooltip"
-											th:text="${#strings.length(lock.name) > 5  ? #strings.substring(lock.name,0,5)+'...' : lock.name}"></a></td>
-										<td><span th:switch="${lock.type.name()}" th:remove="tag">
-												<span th:case="PASSWORD" th:text="'密码锁'"></span> <span
-												th:case="QA" th:text="'问答锁'"></span>
-										</span></td>
-										<td
-											th:text="${#dates.format(lock.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-										<td><a href="###" th:data-id="${lock.id}"
-											data-action="update"><span
-												class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-											&nbsp;&nbsp;<a href="###" th:data-id="${lock.id}"
-											data-action="remove"><span
-												class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-										</td>
-									</tr>
 								</tbody>
 							</table>
 						</div>
 					</div>
 				</div>
+
 			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+			<footer class="sticky-footer">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright © Your Website 2018</span>
+					</div>
+				</div>
+			</footer>
+
 		</div>
+		<!-- /.content-wrapper -->
+
 	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
 
 	<div class="modal fade" id="lockModal" tabindex="-1" role="dialog"
 		aria-labelledby="lockModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
+					<h4 class="modal-title" id="lockModalLabel">锁</h4>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title" id="lockModalLabel">新的锁</h4>
 				</div>
 				<div class="modal-body">
 					<div class="alert alert-warning">
@@ -74,7 +82,7 @@
 					<form autocomplete="off">
 						<div class="form-group">
 							<label for="name" class="control-label">锁名称(1-20个字符):</label> <input
-								type="text" class="form-control" name="name">
+								type="text" class="form-control" name="name" id="name">
 						</div>
 						<div class="form-group">
 							<label for="type" class="control-label">锁类型:</label> <select
@@ -93,154 +101,30 @@
 						<div data-for="QA" style="display: none">
 							<div class="form-group">
 								<label for="question" class="control-label">问题:</label>
-								<textarea name="question" class="form-control" rows="4"></textarea>
+								<textarea name="question" id="question" class="form-control"
+									rows="4"></textarea>
 							</div>
 							<div class="form-group">
 								<label for="answers" class="control-label">答案:</label> <input
-									type="text" name="answers" class="form-control" />
+									type="text" name="answers" id="answers" class="form-control" />
 							</div>
 						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" id="create">创建</button>
+					<button type="button" class="btn btn-primary" id="create">提交</button>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div th:replace="base/foot_source"></div>
 
-	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
-	<script type="text/javascript" th:inline="javascript">
-		/*<![CDATA[*/
-		$(document).ready(function() {
-			$("#lockModal").on("show.bs.modal",function(){
-				$(this).find("form")[0].reset();
-			})
-			$('[data-toggle="tooltip"]').tooltip();
-			$("#lockModal").on("show.bs.modal",function(){
-				$("#lockModal").find("form").find("input[name='password']").val("");
-			})
-			$("#typeSelector").change(function(){
-				var v = $(this).val();
-				$('div[data-for]').hide();	
-				$('div[data-for="'+v+'"]').show();
-			});
-			$("#create").click(function() {
-				clearTip();
-				$("#create").prop("disabled",true);
-				var data = $("#lockModal").find("form").serializeObject();
-				$.ajax({
-					type : "post",
-					url : basePath+"/mgr/lock/sys/"+data.type.toLowerCase()+"/add",
-					data : JSON.stringify(data),
-					dataType : "json",
-					contentType : 'application/json',
-					success : function(data){
-						if(data.success){
-							success(data.message);
-							setTimeout(function(){
-								window.location.reload();
-							},500)
-						} else {
-							error(data.message);
-						}
-					},
-					complete:function(){
-						$("#create").prop("disabled",false);
-					}
-				});
-			});
-			
-			$("a[data-action='remove']").click(function(){
-				var me = $(this);
-				bootbox.confirm("确定要删除吗？",function(result){
-					$.ajax({
-						type : "post",
-						url : basePath+"/mgr/lock/sys/delete",
-						data : {"id":me.attr("data-id")},
-						success : function(data){
-							if(data.success){
-								success(data.message);
-								setTimeout(function(){
-									window.location.reload();
-								},500)
-							} else {
-								error(data.message);
-							}
-						},
-						complete:function(){
-						}
-					});
-				});
-			});
-			
-			$("a[data-action='update']").click(function(){
-				var me = $(this);
-				$.get(basePath+"/mgr/lock/sys/get/"+me.attr("data-id"),{},function callBack(data){
-					if(data.success){
-						var lock = data.data;
-						if(lock == null){
-							bootbox.alert("要更新的锁不存在");
-						} else {
-							var  formHtml = '<div class="tip"></div>';
-							formHtml += '<form id="updateForm" autocomplete="off">';
-							formHtml += '<div class="form-group"><label for="name" class="control-label">锁名称(1-20个字符):</label> <input type="text" class="form-control" name="name" value="'+lock.name+'"></div>';
-							if(lock.type == "PASSWORD"){
-								formHtml += '<div class="form-group"><label for="type" class="control-label">锁类型(1-20个字符):</label> <select class="form-control" name="type" readonly="readonly"><option value="PASSWORD" selected="selected">密码锁</option></select></div>';
-								formHtml += '<div class="form-group"><label for="password" class="control-label">密码:</label> <input type="password" class="form-control" name="password" value="" autocomplete="off"></div>';
-							}
-							if(lock.type == "QA"){
-								formHtml += '<div class="form-group"><label for="type" class="control-label">锁类型(1-20个字符):</label> <select class="form-control" name="type" readonly="readonly"><option value="QA" selected="selected">问答锁</option></select></div>';
-								formHtml += '<div class="form-group"><label for="question" class="control-label">问题:</label> <textarea class="form-control" name="question" rows="5">'+lock.question+'</textarea></div>';
-								formHtml += '<div class="form-group"><label for="question" class="control-label">答案:</label> <input type="text" class="form-control" name="answers" value="'+lock.answers+'"></div>';
-							}
-							formHtml += '</form>';
-							bootbox.dialog({
-				                title: "更新锁",
-				                message: formHtml,
-				                buttons: {
-				                    success: {
-				                        label: "更新",
-				                        className: "btn-success",
-				                        callback: function () {
-					                    	var data = $("#updateForm").serializeObject();
-					                    	data.id = lock.id;
-					                    	$.ajax({
-					        					type : "post",
-					        					url : basePath+"/mgr/lock/sys/"+data.type.toLowerCase()+"/update",
-					        					data : JSON.stringify(data),
-					        					dataType : "json",
-					        					contentType : 'application/json',
-					        					success : function(data){
-					        						if(data.success){
-					        							success(data.message);
-					        							setTimeout(function(){
-					        								window.location.reload();
-					        							},500)
-					        						} else {
-					        							error(data.message);
-					        						}
-					        					},
-					        					complete:function(){
-					        						$("#create").prop("disabled",false);
-					        					}
-					        				});
-					                    	return false;
-				                        }
-				                    }
-				                }
-							});
-						}
-					}else{
-						bootbox.alert(data.data);
-					}
-				})
-			});
-		});
-		
-		/*]]>*/
-	</script>
+
+	<!-- Bootstrap core JavaScript-->
+
+	<div th:replace="console/base/foot"></div>
+	<script th:src="@{/static/console/js/syslock.js}"></script>
+
 </body>
+
 </html>

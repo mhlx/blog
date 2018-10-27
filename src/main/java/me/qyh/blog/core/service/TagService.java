@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.core.service;
 
+import java.util.Optional;
+
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.Tag;
 import me.qyh.blog.core.exception.LogicException;
@@ -77,5 +79,13 @@ public interface TagService {
 	 * @return
 	 */
 	TagStatistics queryTagStatistics();
+
+	/**
+	 * 根据ID查询指定标签
+	 * 
+	 * @param id
+	 * @return
+	 */
+	Optional<Tag> getTag(Integer id);
 
 }

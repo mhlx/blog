@@ -1,0 +1,70 @@
+<ul class="sidebar navbar-nav" th:fragment="active(menu)">
+	<li class="nav-item"
+		th:classappend="${menu == 'user'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/user}"> <i
+			class="fas fa-fw fa-user"></i> <span>我的信息</span>
+	</a></li>
+	<li class="nav-item"
+		th:classappend="${menu == 'space'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/space}"> <i
+			class="fab  fa-fw fa-skype"></i> <span>空间</span>
+	</a></li>
+
+
+	<li class="nav-item"
+		th:classappend="${menu == 'news'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/news}"> <i
+			class="fas fa-fw fa-newspaper"></i> <span>动态</span>
+	</a></li>
+
+
+
+	<li class="nav-item"
+		th:classappend="${menu == 'file'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/file}"> <i
+			class="fas  fa-fw fa-file"></i> <span>文件</span>
+	</a></li>
+
+	<li class="nav-item"
+		th:classappend="${menu == 'template'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/template}"> <i
+			class="fas fa-fw fa-text-height"></i> <span>模板管理</span>
+	</a></li>
+
+
+	<li class="nav-item"
+		th:classappend="${menu == 'page'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/template/page}"> <i
+			class="far fa-fw fa-file-powerpoint"></i> <span>页面</span>
+	</a></li>
+
+	<li class="nav-item"
+		th:classappend="${menu == 'fragment'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/template/fragment}"><i
+			class="fas fa-fw fa-pound-sign"></i> <span>模板片段</span> </a></li>
+
+	<li class="nav-item"
+		th:classappend="${menu == 'data'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/template/data}"><i
+			class="fas fa-fw fa-database"></i><span>模板数据</span> </a></li>
+
+
+	<li class="nav-item"
+		th:classappend="${menu == 'tag'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/tag}"> <i
+			class="fas fa-fw fa-tags"></i> <span>标签</span>
+	</a></li>
+	<li class="nav-item"
+		th:classappend="${menu == 'stat'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/statistics}"> <i
+			class="fas fa-fw fa-chart-bar"></i> <span>统计</span>
+	</a></li>
+
+
+	<li class="nav-item"
+		th:classappend="${menu == 'config'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/config}"> <i
+			class="fas fa-fw fa-cog"></i> <span>配置</span>
+	</a></li>
+
+</ul>

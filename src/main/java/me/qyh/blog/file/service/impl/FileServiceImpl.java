@@ -40,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.exception.ResourceNotFoundException;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.service.impl.Sync;
@@ -355,7 +356,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	public BlogFileProperties getBlogFileProperties(Integer id) throws LogicException {
 		BlogFile file = blogFileDao.selectById(id);
 		if (file == null) {
-			throw new LogicException(NOT_EXISTS);
+			throw new ResourceNotFoundException(NOT_EXISTS);
 		}
 		Map<String, Object> base = new HashMap<>();
 		base.put("type", file.getType());
@@ -388,7 +389,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	public void copy(Integer sourceId, String folderPath) throws LogicException {
 		BlogFile source = blogFileDao.selectById(sourceId);
 		if (source == null) {
-			throw new LogicException(NOT_EXISTS);
+			throw new ResourceNotFoundException(NOT_EXISTS);
 		}
 		if (!source.isFile()) {
 			throw new LogicException("file.copy.onlyFile", "只有文件才能被拷贝");
@@ -432,37 +433,24 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	public void move(Integer sourceId, String newPath) throws LogicException {
 		BlogFile db = blogFileDao.selectById(sourceId);
 		if (db == null) {
-			throw new LogicException(NOT_EXISTS);
+			throw new ResourceNotFoundException(NOT_EXISTS);
 		}
 		if (!db.isFile()) {
 			throw new LogicException("file.move.onlyFile", "只有文件才能被移动");
 		}
 		String oldPath = FileUtils.cleanPath(getFilePath(db));
 		String path = FileUtils.cleanPath(newPath);
-		// 需要更新路径
-		// 这里只允许文件更新，文件夹更新无法保证文件夹内文件全部移动成功
-		// oss存储没有文件夹的概念
-		String ext = FileUtils.getFileExtension(oldPath);
-		// 不能更改后缀
-		if (!Validators.isEmptyOrNull(ext, true)) {
-			path = path + "." + ext;
-		}
-		int index = path.lastIndexOf('/');
-		String folderPath = index == -1 ? "" : path.substring(0, index);
-		String fileName = index == -1 ? path : path.substring(index + 1);
-
-		validateSlashPath(fileName);
 
 		// 先删除节点
 		blogFileDao.delete(db);
 		blogFileDao.updateWhenDelete(db);
 
 		// 如果目标文件夹待删除，立即删除
-		deleteImmediatelyIfNeed(folderPath);
+		deleteImmediatelyIfNeed(path);
 
 		// 创建文件夹，如果不存在
-		BlogFile parent = createFolder(folderPath);
-		BlogFile checked = blogFileDao.selectByParentAndPath(parent, fileName);
+		BlogFile parent = createFolder(newPath);
+		BlogFile checked = blogFileDao.selectByParentAndPath(parent, db.getPath());
 		// 路径上存在文件
 		if (checked != null) {
 			throw new LogicException("file.path.exists", "文件已经存在");
@@ -477,7 +465,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 		bf.setLft(parent.getLft() + 1);
 		bf.setRgt(parent.getLft() + 2);
 		bf.setParent(parent);
-		bf.setPath(fileName);
+		bf.setPath(db.getPath());
 		bf.setType(BlogFileType.FILE);
 
 		// 插入新节点
@@ -485,7 +473,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 		// 移动实际文件
 		FileStore fs = getFileStore(db.getCf());
-		if (!fs.move(oldPath, path)) {
+		if (!fs.move(oldPath, path + "/" + db.getPath())) {
 			throw new LogicException("file.move.fail", "文件移动失败");
 		}
 	}
@@ -496,7 +484,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	public void rename(Integer id, String newName) throws LogicException {
 		BlogFile db = blogFileDao.selectById(id);
 		if (db == null) {
-			throw new LogicException(NOT_EXISTS);
+			throw new ResourceNotFoundException(NOT_EXISTS);
 		}
 		if (!db.isFile()) {
 			throw new LogicException("file.rename.onlyFile", "只有文件才能被重命名");
@@ -551,7 +539,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	public void delete(Integer id) throws LogicException {
 		BlogFile db = blogFileDao.selectById(id);
 		if (db == null) {
-			throw new LogicException(NOT_EXISTS);
+			throw new ResourceNotFoundException(NOT_EXISTS);
 		}
 		if (db.getParent() == null) {
 			throw new LogicException("file.root.canNotDelete", "根节点不能删除");

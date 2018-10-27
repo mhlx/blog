@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import me.qyh.blog.core.entity.Article;
+import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.security.AuthencationException;
@@ -89,7 +90,7 @@ public interface ArticleService {
 	 *            文章id
 	 * @throws LogicException
 	 */
-	Article logicDeleteArticle(Integer id) throws LogicException;
+	Article putArticleInRecycleBin(Integer id) throws LogicException;
 
 	/**
 	 * 从回收站中恢复
@@ -117,15 +118,6 @@ public interface ArticleService {
 	 * @return 当前点击数
 	 */
 	void hit(Integer id);
-
-	/**
-	 * 发布草稿
-	 * 
-	 * @param id
-	 *            草稿id
-	 * @throws LogicException
-	 */
-	Article publishDraft(Integer id) throws LogicException;
 
 	/**
 	 * 上一篇，下一篇文章
@@ -167,7 +159,7 @@ public interface ArticleService {
 	 * @param article
 	 *            预览文章
 	 */
-	void preparePreview(Article article);
+	String createPreviewContent(Editor editor, String content);
 
 	/**
 	 * 得到一篇随机文章

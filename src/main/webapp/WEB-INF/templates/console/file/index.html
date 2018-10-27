@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('文件管理','console/file/head')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('file')"></ul>
+
+		<div id="content-wrapper">
+			<div class="container-fluid">
+
+				<div class="card mb-3">
+					<div class="card-header">
+						<i class="fas fa-table"></i>
+					</div>
+					<div class="card-body">
+						<button class="btn btn-primary" data-create-folder>创建文件夹</button>
+						<button class="btn btn-primary" data-upload>上传</button>
+						<a href="###" data-prev style="display: none; float: right"><i
+							class="fas fa-level-up-alt"></i></a>
+						<div style="margin-top: 10px">
+							<form class="form-inline justify-content-left">
+
+								<div class="btn-group btn-group-toggle" data-toggle="buttons"
+									style="margin-right: 10px">
+									<label class="btn btn-warning active"> <input
+										type="radio" name="queryType" autocomplete="off" checked
+										value=""> 全部
+									</label> <label class="btn btn-warning"> <input type="radio"
+										name="queryType" autocomplete="off" value="DIRECTORY">
+										文件夹
+									</label> <label class="btn btn-warning"> <input type="radio"
+										name="queryType" autocomplete="off" value="FILE"> 文件
+									</label>
+								</div>
+								<div class="form-group form-check" style="margin-right: 10px">
+									<input type="checkbox" class="form-check-input"
+										id="querySubDir"> <label class="form-check-label">查询子文件夹</label>
+								</div>
+								<div class="input-group mx-0 mx-md-3">
+									<input type="text" class="form-control" placeholder="输入文件名"
+										id="queryName" />
+
+									<div class="input-group-append">
+										<button class="btn btn-red" type="button" id="query">查询</button>
+									</div>
+								</div>
+
+							</form>
+						</div>
+						<div class="table-responsive" style="margin-top: 10px">
+							<table class="table table-bordered" id="fileTable" width="100%"
+								cellspacing="0">
+								<thead>
+									<tr>
+										<th data-bind="path"></th>
+										<th data-bind="xx3">文件名</th>
+										<th data-bind="xx1">复制</th>
+										<th data-bind="xx2">文件大小</th>
+										<th data-bind="id">操作</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+						<div id="fileTable_paging"></div>
+					</div>
+				</div>
+				<!-- /.container-fluid -->
+
+				<!-- Sticky Footer -->
+				<footer class="sticky-footer">
+					<div class="container my-auto">
+						<div class="copyright text-center my-auto">
+							<span>Copyright © Your Website 2018</span>
+						</div>
+					</div>
+				</footer>
+
+			</div>
+			<!-- /.content-wrapper -->
+
+		</div>
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<div class="modal fade" id="folderModal" tabindex="-1" role="dialog"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">文件夹</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="alert alert-danger" role="alert">
+							<i class="fas fa-exclamation-triangle"></i>文件夹被创建后名称将无法被修改
+						</div>
+						<div class="form-group">
+							<label class="col-form-label">名称:</label> <input type="text"
+								class="form-control" id="folderName">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="create-folder">创建</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">文件上传</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="fileupload" class="form-horizontal" autocomplete="off"
+						action="/mgr/file/upload?v=1" method="POST"
+						enctype="multipart/form-data">
+						<div class="col-md-12" style="margin-bottom: 20px">
+							<label class="control-label">存储服务：</label> <select
+								class="form-control" name="store" id="store">
+							</select>
+						</div>
+						<div class="fileupload-buttonbar">
+							<div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+								<span class="btn btn-success fileinput-button"> <i
+									class="glyphicon glyphicon-plus"></i> <span>添加文件</span> <input
+									type="file" name="files" multiple="">
+								</span>
+								<button type="submit" class="btn btn-primary start">
+									<i class="glyphicon glyphicon-upload"></i> <span>文件上传</span>
+								</button>
+								<button type="reset" class="btn btn-warning cancel">
+									<i class="glyphicon glyphicon-ban-circle"></i> <span>取消</span>
+								</button>
+								<span class="fileupload-process"></span>
+							</div>
+						</div>
+						<div style="margin-top: 10px">
+							<div
+								class="fileupload-progress fade col-lg-12 col-sm-12 col-md-12 col-xs-12">
+								<!-- The global progress bar -->
+								<div class="progress progress-striped active" role="progressbar"
+									aria-valuemin="0" aria-valuemax="100">
+									<div class="progress-bar progress-bar-success"
+										style="width: 0%;"></div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+							<div class="table-responsive">
+								<table role="presentation" class="table table-striped"
+									style="text-align: center">
+									<tbody class="files"></tbody>
+								</table>
+							</div>
+						</div>
+					</form>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="console/base/foot"></div>
+	<script type="text/javascript"
+		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/js/canvas-to-blob.min.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
+	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
+
+	<script th:src="@{/static/console/js/table.js}"></script>
+	<script th:src="@{/static/console/js/file.js}"></script>
+</body>
+
+</html>

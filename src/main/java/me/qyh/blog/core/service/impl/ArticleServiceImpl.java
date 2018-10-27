@@ -57,6 +57,7 @@ import me.qyh.blog.core.event.ArticleUpdateEvent;
 import me.qyh.blog.core.event.LockDelEvent;
 import me.qyh.blog.core.event.SpaceDelEvent;
 import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.exception.ResourceNotFoundException;
 import me.qyh.blog.core.exception.RuntimeLogicException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.plugin.ArticleHitHandlerRegistry;
@@ -181,7 +182,7 @@ public class ArticleServiceImpl
 		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
 		Article articleDb = articleDao.selectById(article.getId());
 		if (articleDb == null) {
-			throw new LogicException("article.notExists", "文章不存在");
+			throw new ResourceNotFoundException("article.notExists", "文章不存在");
 		}
 		if (articleDb.isDeleted()) {
 			throw new LogicException("article.deleted", "文章已经被删除");
@@ -304,25 +305,6 @@ public class ArticleServiceImpl
 		return article;
 	}
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public Article publishDraft(Integer id) throws LogicException {
-		Article article = articleDao.selectById(id);
-		if (article == null) {
-			throw new LogicException("article.notExists", "文章不存在");
-		}
-		if (!article.isDraft()) {
-			throw new LogicException("article.notDraft", "文章已经被删除");
-		}
-		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-		article.setPubDate(article.isSchedule() ? now : article.getPubDate() != null ? article.getPubDate() : now);
-		article.setStatus(ArticleStatus.PUBLISHED);
-		articleDao.update(article);
-		Transactions.afterCommit(() -> articleIndexer.addOrUpdateDocument(id));
-		applicationEventPublisher.publishEvent(new ArticlePublishEvent(this, List.of(article)));
-		return article;
-	}
-
 	private boolean insertTags(Article article) {
 		Set<Tag> tags = article.getTags();
 		boolean rebuildIndexWhenTagChange = false;
@@ -433,13 +415,13 @@ public class ArticleServiceImpl
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public Article logicDeleteArticle(Integer id) throws LogicException {
+	public Article putArticleInRecycleBin(Integer id) throws LogicException {
 		Article article = articleDao.selectById(id);
 		if (article == null) {
-			throw new LogicException("article.notExists", "文章不存在");
+			throw new ResourceNotFoundException("article.notExists", "文章不存在");
 		}
 		if (article.isDeleted()) {
-			throw new LogicException("article.deleted", "文章已经被删除");
+			throw new LogicException("article.deleted", "文章已经在回收站中了");
 		}
 		article.setStatus(ArticleStatus.DELETED);
 		articleDao.update(article);
@@ -456,7 +438,7 @@ public class ArticleServiceImpl
 	public Article recoverArticle(Integer id) throws LogicException {
 		Article article = articleDao.selectById(id);
 		if (article == null) {
-			throw new LogicException("article.notExists", "文章不存在");
+			throw new ResourceNotFoundException("article.notExists", "文章不存在");
 		}
 		if (!article.isDeleted()) {
 			throw new LogicException("article.undeleted", "文章未删除");
@@ -480,10 +462,10 @@ public class ArticleServiceImpl
 	public void deleteArticle(Integer id) throws LogicException {
 		Article article = articleDao.selectById(id);
 		if (article == null) {
-			throw new LogicException("article.notExists", "文章不存在");
+			throw new ResourceNotFoundException("article.notExists", "文章不存在");
 		}
 		if (!article.isDraft() && !article.isDeleted()) {
-			throw new LogicException("article.undeleted", "文章未删除");
+			throw new LogicException("article.undeleted", "只有草稿或者回收站中的文章才能被删除");
 		}
 		// 删除博客的引用
 		articleTagDao.deleteByArticle(article);
@@ -579,15 +561,14 @@ public class ArticleServiceImpl
 	}
 
 	@Override
-	public void preparePreview(Article article) {
-		String content = article.getContent();
-		if (Editor.MD.equals(article.getEditor())) {
-			content = markdown2Html.toHtml(content);
+	public String createPreviewContent(Editor editor, String content) {
+		if (Editor.MD.equals(editor)) {
+			return markdown2Html.toHtml(content);
 		}
 		if (articleContentHandler != null) {
-			content = articleContentHandler.handlePreview(content);
+			return articleContentHandler.handlePreview(content);
 		}
-		article.setContent(content);
+		return content;
 	}
 
 	@EventListener

@@ -48,7 +48,7 @@ var files = (function(editor) {
     		 var cf = data.cf;
              var ext = cf.extension.toLowerCase();
              if ($.inArray(ext, ['jpeg', 'jpg', 'png', 'gif']) == -1) {
-                 if (ext == 'mp4') {
+                 if (ext == 'mp4' || ext == 'mov') {
                      showVideoModal(cf.url);
                      $video.find('.modal-footer button').eq(1).unbind('click').bind('click',function() {
                          var content = $video.find('textarea').val();

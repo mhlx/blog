@@ -93,4 +93,5 @@ public interface TagDao {
 	 *            标签id
 	 */
 	void deleteById(Integer id);
+	
 }

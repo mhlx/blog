@@ -54,6 +54,7 @@ import me.qyh.blog.core.config.UrlHelper;
 import me.qyh.blog.core.entity.Lock;
 import me.qyh.blog.core.exception.LockException;
 import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.exception.ResourceNotFoundException;
 import me.qyh.blog.core.exception.RuntimeLogicException;
 import me.qyh.blog.core.exception.SpaceNotFoundException;
 import me.qyh.blog.core.exception.SystemException;
@@ -69,6 +70,7 @@ import me.qyh.blog.template.render.MissLockException;
 import me.qyh.blog.template.render.RedirectException;
 import me.qyh.blog.template.render.TemplateRenderException;
 import me.qyh.blog.web.security.csrf.CsrfException;
+import me.qyh.blog.web.view.EmptyView;
 import me.qyh.blog.web.view.JsonView;
 
 public class WebExceptionResolver implements HandlerExceptionResolver, ExceptionHandlerRegistry {
@@ -91,17 +93,20 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 	public static final Message ERROR_MISS_LOCK = new Message("error.missLock", "锁不存在");
 	public static final Message ERROR_NO_ERROR_MAPPING = new Message("error.noErrorMapping", "发生了一个错误，但是没有可供显示的错误页面");
 
+	private static final Message UNLOCK_REQUIRE = new Message("unlock.require", "需要解锁资源才能操作");
+	private static final Message SPACE_NOT_FOUND = new Message("space.notExists", "空间不存在");
+
 	private final List<ExceptionHandler> handlers;
 
 	public WebExceptionResolver() {
 		handlers = new ArrayList<>(Arrays.asList(new AuthencationExceptionHandler(),
 				new TemplateRenderExceptionHandler(), new RedirectExceptionHandler(), new LockExceptionHandler(),
-				new LogicExceptionHandler(), new RuntimeLogicExceptionHandler(), new SpaceNotFoundExceptionHandler(),
-				new InvalidParamExceptionHandler(), new MethodArgumentNotValidExceptionHandler(),
-				new HttpRequestMethodNotSupportedExceptionHandler(), new HttpMediaTypeNotAcceptableExceptionHandler(),
-				new HttpMediaTypeNotSupportedExceptionHandler(), new MaxUploadSizeExceededExceptionHandler(),
-				new MultipartExceptionHandler(), new NoHandlerFoundExceptionHandler(), new MissLockExceptionHandler(),
-				new CsrfExceptionHandler()));
+				new ResourceNotFoundExceptionHandler(), new LogicExceptionHandler(), new RuntimeLogicExceptionHandler(),
+				new SpaceNotFoundExceptionHandler(), new InvalidParamExceptionHandler(),
+				new MethodArgumentNotValidExceptionHandler(), new HttpRequestMethodNotSupportedExceptionHandler(),
+				new HttpMediaTypeNotAcceptableExceptionHandler(), new HttpMediaTypeNotSupportedExceptionHandler(),
+				new MaxUploadSizeExceededExceptionHandler(), new MultipartExceptionHandler(),
+				new NoHandlerFoundExceptionHandler(), new MissLockExceptionHandler(), new CsrfExceptionHandler()));
 	}
 
 	@Override
@@ -127,8 +132,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		if (response.isCommitted()) {
 			return new ModelAndView();
 		}
+		if (Webs.isRestful(request)) {
+			return restfulView(new RestfulError(ERROR_500), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		if (Webs.isAjaxRequest(request)) {
-			return new ModelAndView(new JsonView(new JsonResult(false, ERROR_500)));
+			return jsonResultView(new JsonResult(false, ERROR_500));
 		}
 		return getErrorForward(request, new ErrorInfo(ERROR_500, 500));
 	}
@@ -142,8 +150,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+			if (Webs.isRestful(request)) {
+				return restfulView(new RestfulError(ERROR_403), HttpStatus.FORBIDDEN);
+			}
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_403)));
+				return jsonResultView(new JsonResult(false, ERROR_403));
 			}
 			String authUrl = null;
 			// 将链接放入
@@ -168,8 +179,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 			if (!tre.isFromPreview()) {
 				LOGGER.error("[" + UrlUtils.buildFullRequestUrl(request) + "]" + ex.getMessage(), ex);
 			}
+			if (Webs.isRestful(request)) {
+				return emptyView(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, tre.getRenderErrorDescription())));
+				return jsonResultView(new JsonResult(false, tre.getRenderErrorDescription()));
 			}
 			Map<String, Object> model = new HashMap<>();
 			model.put("description", tre.getRenderErrorDescription());
@@ -197,9 +211,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 			 * @since 6.1
 			 */
 			// response.reset();
-
+			if (Webs.isRestful(request)) {
+				return restfulView(new RedirectInfo(re.getUrl(), re.isPermanently()), HttpStatus.OK);
+			}
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new RedirectJsonResult(re.getUrl(), re.isPermanently())));
+				return jsonResultView(new RedirectJsonResult(new RedirectInfo(re.getUrl(), re.isPermanently())));
 			}
 			if (re.isPermanently()) {
 				// 301
@@ -226,9 +242,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
+			if (Webs.isRestful(request)) {
+				return restfulView(new RestfulError(UNLOCK_REQUIRE), HttpStatus.FORBIDDEN);
+			}
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(
-						new JsonView(new JsonResult(false, new Message("unlock.require", "需要解锁资源才能操作"))));
+				return jsonResultView(new JsonResult(false, UNLOCK_REQUIRE));
 			}
 			LockException ex = (LockException) e;
 			Lock lock = ex.getLock();
@@ -241,6 +259,21 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		}
 	}
 
+	private final class ResourceNotFoundExceptionHandler implements ExceptionHandler {
+
+		@Override
+		public boolean match(Exception ex) {
+			return ex instanceof ResourceNotFoundException;
+		}
+
+		@Override
+		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
+			ResourceNotFoundException ex = (ResourceNotFoundException) e;
+			return handlerLogicException(ex, request, HttpStatus.NOT_FOUND);
+		}
+
+	}
+
 	private final class LogicExceptionHandler implements ExceptionHandler {
 
 		@Override
@@ -251,11 +284,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 			LogicException ex = (LogicException) e;
-			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ex.getLogicMessage())));
-			}
-
-			return getErrorForward(request, new ErrorInfo(ex.getLogicMessage(), 200));
+			return handlerLogicException(ex, request, HttpStatus.CONFLICT);
 		}
 
 	}
@@ -269,12 +298,21 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-			RuntimeLogicException ex = (RuntimeLogicException) e;
-			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ex.getLogicException().getLogicMessage())));
-			}
-			return getErrorForward(request, new ErrorInfo(ex.getLogicException().getLogicMessage(), 200));
+			LogicException ex = ((RuntimeLogicException) e).getLogicException();
+			return handlerLogicException(ex, request, HttpStatus.CONFLICT);
 		}
+	}
+
+	private ModelAndView handlerLogicException(LogicException ex, HttpServletRequest request,
+			HttpStatus restfulStatus) {
+		if (Webs.isRestful(request)) {
+			return restfulView(new RestfulError(ex.getLogicMessage()), restfulStatus);
+		}
+		if (Webs.isAjaxRequest(request)) {
+			return jsonResultView(new JsonResult(false, ex.getLogicMessage()));
+		}
+
+		return getErrorForward(request, new ErrorInfo(ex.getLogicMessage(), 200));
 	}
 
 	private final class SpaceNotFoundExceptionHandler implements ExceptionHandler {
@@ -286,7 +324,13 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-			return new ModelAndView("redirect:" + urlHelper.getUrl());
+			if (Webs.isRestful(request)) {
+				return restfulView(new RestfulError(SPACE_NOT_FOUND), HttpStatus.NOT_FOUND);
+			}
+			if (Webs.isAjaxRequest(request)) {
+				return jsonResultView(new JsonResult(false, SPACE_NOT_FOUND));
+			}
+			return getErrorForward(request, new ErrorInfo(ERROR_404, 404), null);
 		}
 	}
 
@@ -308,8 +352,13 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
 			LOGGER.debug(ex.getMessage(), ex);
+
+			if (Webs.isRestful(request)) {
+				return restfulView(new RestfulError(ERROR_400), HttpStatus.BAD_REQUEST);
+			}
+
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_400)));
+				return jsonResultView(new JsonResult(false, ERROR_400));
 			}
 
 			return getErrorForward(request, new ErrorInfo(ERROR_400, 400));
@@ -328,13 +377,16 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 			MethodArgumentNotValidException ex = (MethodArgumentNotValidException) e;
 			BindingResult result = ex.getBindingResult();
-			Optional<JsonResult> validateError = Webs.getFirstError(result);
+			Optional<Message> validateError = Webs.getFirstError(result);
 			if (validateError.isPresent()) {
-				return new ModelAndView(new JsonView(validateError.get()));
+				if (Webs.isRestful(request)) {
+					return restfulView(new RestfulError(validateError.get()), HttpStatus.CONFLICT);
+				} else {
+					return jsonResultView(new JsonResult(false, validateError.get()));
+				}
 			}
 			throw new SystemException("抛出了MethodArgumentNotValidException，但没有发现任何错误");
 		}
-
 	}
 
 	private final class HttpRequestMethodNotSupportedExceptionHandler implements ExceptionHandler {
@@ -346,8 +398,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+			if (Webs.isRestful(request)) {
+				return emptyView(HttpStatus.METHOD_NOT_ALLOWED);
+			}
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_405)));
+				return jsonResultView(new JsonResult(false, ERROR_405));
 			}
 			return getErrorForward(request, new ErrorInfo(ERROR_405, 405));
 		}
@@ -363,8 +418,12 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+			if (Webs.isRestful(request)) {
+				return restfulView(new RestfulError(ERROR_406), HttpStatus.NOT_ACCEPTABLE);
+			}
+
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_406)));
+				return jsonResultView(new JsonResult(false, ERROR_406));
 			}
 
 			return getErrorForward(request, new ErrorInfo(ERROR_406, 406));
@@ -381,8 +440,12 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+			if (Webs.isRestful(request)) {
+				return restfulView(new RestfulError(ERROR_415), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+			}
+
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_415)));
+				return jsonResultView(new JsonResult(false, ERROR_415));
 			}
 
 			return getErrorForward(request, new ErrorInfo(ERROR_415, 415));
@@ -400,12 +463,10 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 			MaxUploadSizeExceededException ex = (MaxUploadSizeExceededException) e;
-			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, new Message("upload.overlimitsize",
-						"超过允许的最大上传文件大小：" + ex.getMaxUploadSize() + "字节", ex.getMaxUploadSize()))));
-			}
-			return getErrorForward(request, new ErrorInfo(new Message("upload.overlimitsize",
-					"超过允许的最大上传文件大小：" + ex.getMaxUploadSize() + "字节", ex.getMaxUploadSize()), 200));
+			return handlerLogicException(
+					new LogicException(new Message("upload.overlimitsize",
+							"超过允许的最大上传文件大小：" + ex.getMaxUploadSize() + "字节", ex.getMaxUploadSize())),
+					request, HttpStatus.CONFLICT);
 		}
 
 	}
@@ -419,9 +480,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-
+			if (Webs.isRestful(request)) {
+				return emptyView(HttpStatus.NOT_FOUND);
+			}
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_404)));
+				return jsonResultView(new JsonResult(false, ERROR_404));
 			}
 
 			// 防止找不到错误页面重定向
@@ -447,7 +510,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 				forwardMapping = "/error";
 			}
 			if (forwardMapping.equals(mapping)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_NO_ERROR_MAPPING)));
+				return jsonResultView(new JsonResult(false, ERROR_NO_ERROR_MAPPING));
 			} else {
 				return getErrorForward(request, new ErrorInfo(ERROR_404, 404), space);
 			}
@@ -472,6 +535,12 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+			if (Webs.isRestful(request)) {
+				return restfulView(new RestfulError(ERROR_400), HttpStatus.BAD_REQUEST);
+			}
+			if (Webs.isAjaxRequest(request)) {
+				return jsonResultView(new JsonResult(false, ERROR_400));
+			}
 			return new ModelAndView();
 		}
 
@@ -486,13 +555,34 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+
+			if (Webs.isRestful(request)) {
+				return restfulView(ERROR_MISS_LOCK, HttpStatus.NOT_FOUND);
+			}
+
 			if (Webs.isAjaxRequest(request)) {
-				return new ModelAndView(new JsonView(new JsonResult(false, ERROR_MISS_LOCK)));
+				return jsonResultView(new JsonResult(false, ERROR_MISS_LOCK));
 			}
 
 			return new ModelAndView("redirect:" + urlHelper.getUrl());
 		}
 
+	}
+
+	private static <T> ModelAndView restfulView(T obj, HttpStatus status) {
+		ModelAndView mav = new ModelAndView(new JsonView<T>(obj));
+		mav.setStatus(status);
+		return mav;
+	}
+
+	private static ModelAndView jsonResultView(JsonResult result) {
+		return new ModelAndView(new JsonView<JsonResult>(result));
+	}
+
+	private static ModelAndView emptyView(HttpStatus status) {
+		ModelAndView mav = new ModelAndView(EmptyView.VIEW);
+		mav.setStatus(status);
+		return mav;
 	}
 
 	public static String getFullUrl(HttpServletRequest request) {
@@ -569,13 +659,12 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 	}
 
-	public static final class RedirectJsonResult extends JsonResult {
-
+	public static final class RedirectInfo {
 		private final String url;
 		private final boolean permanently;
 
-		private RedirectJsonResult(String url, boolean permanently) {
-			super(true);
+		private RedirectInfo(String url, boolean permanently) {
+			super();
 			this.url = url;
 			this.permanently = permanently;
 		}
@@ -589,10 +678,38 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		}
 	}
 
+	public static final class RedirectJsonResult extends JsonResult {
+
+		private final RedirectInfo info;
+
+		public RedirectJsonResult(RedirectInfo info) {
+			super(true);
+			this.info = info;
+		}
+
+		public RedirectInfo getInfo() {
+			return info;
+		}
+
+	}
+
 	@Override
 	public ExceptionHandlerRegistry register(ExceptionHandler exceptionHandler) {
 		this.handlers.add(exceptionHandler);
 		return this;
+	}
+
+	public final class RestfulError {
+		private final Message error;
+
+		public RestfulError(Message error) {
+			super();
+			this.error = error;
+		}
+
+		public Message getError() {
+			return error;
+		}
 	}
 
 }

@@ -115,33 +115,7 @@ $(document).ready(function() {
 		editor.replaceSelection('<fragment name="'+name+'"/>');
 		$("#lookupModal").modal('hide')
 	}
-	function preview() {
-		var data = $("#previewModal form").serializeObject();
-		var space = data.space;
-		delete data['space'];
-		if(space != ''){
-			data.space = {"id":space};
-		}
-		data.global = $("#previewModal form input[type=checkbox]").eq(0).prop("checked");
-		data.callable = $("#previewModal form input[type=checkbox]").eq(1).prop("checked");
-		data.tpl = editor.getValue();
-		$.ajax({
-			type : "post",
-			url : basePath + '/mgr/template/fragment/preview',
-			data : JSON.stringify(data),
-			dataType : "json",
-			contentType : 'application/json',
-			success : function(data){
-				if (data.success) {
-					bootbox.alert("预览成功，请自行访问拥有该模板片段的页面预览效果");
-				} else {
-					bootbox.alert(data.message);
-				}
-			},
-			complete:function(){
-			}
-		});
-	}
+	
 	function showLock(){
 		$.get(basePath + '/mgr/lock/all',{},function(data){
 			var oldLock = $("#oldLock").val();
@@ -271,76 +245,7 @@ $(document).ready(function() {
 	}
 	
 	
-	var fragment_storage = (function() {
-		
-		var current_tpl;
-		
-		var getKey = function(){
-			var key = $("#fragmentKey").val();
-			if($.trim(key) == ''){
-				key = "fragment_"+$.now();
-				$("#fragmentKey").val(key);
-			}
-			return key;
-		}
-		
-		setInterval(function(){
-			if(saveFlag) return ;
-			var content = editor.getValue();
-			if($.trim(content) != ''){
-				
-				if(!preEditorContent || content != preEditorContent){
-					var time = $.now();
-					local_storage.store(getKey(),JSON.stringify({"id":getKey(),"content":content,"time":time}));
-					$("#auto-save-timer").html("最近备份："+new Date(time).format('yyyy-mm-dd HH:MM:ss'))
-					preEditorContent = content;
-				}
-			}
-			else
-				fragment_storage.removeCurrent();
-		},15000);
-		
-		var v = local_storage.get(getKey());
-		if(v != null){
-			v = $.parseJSON(v);
-			current_tpl = editor.getValue();
-			bootbox.confirm("系统发现在"+new Date(v.time).format('yyyy-mm-dd HH:MM:ss')+"留有备份，是否加载？",function(result){
-				if(result){
-					editor.setValue(v.content);
-					preEditorContent= v.content;
-				}
-			})
-		}
-		
-		return {
-			listAll:function(){
-				var arr = [];
-				local_storage.each(function(key,v){
-					if(key.indexOf('fragment_') > -1){
-						arr.push({'key':key,"value":v});
-					}
-				});
-				arr.sort(function(x,y){
-					var v1 = $.parseJSON(x.value);
-					var v2 = $.parseJSON(y.value);
-					return  -v1.time + v2.time;
-				})
-				return arr;
-			},
-			get:function(key){
-				return local_storage.get(key);
-			},
-			remove:function(key){
-				local_storage.remove(key);
-			},
-			removeCurrent:function(){
-				var key = $("#fragmentKey").val();
-				if($.trim(key) != ''){
-					local_storage.remove(key);
-				}
-			}
-		}
-	}());
+	
 	
 	function loadBak(key){
 		bootbox.confirm("确定要加载吗",function(result){
@@ -379,57 +284,7 @@ $(document).ready(function() {
 		})
 	}
 	
-	function save(quick){
-		var data = $("#previewModal form").serializeObject();
-		var space = data.space;
-		delete data['space'];
-		if(space != ''){
-			data.space = {"id":space};
-		}
-		data.global = $("#previewModal form input[type=checkbox]").eq(0).prop("checked");
-		data.callable = $("#previewModal form input[type=checkbox]").eq(1).prop("checked");
-		data.tpl = editor.getValue();
-		
-		var id = $("#fragmentId").val();
-		var isSave = true;
-		var url = basePath + "/mgr/template/fragment/create";
-		if(id != ''){
-			isSave = false;
-			url = basePath + "/mgr/template/fragment/update";
-		}
-		if(!isSave){
-			data.id = id;
-		}
-		saveFlag = true;
-		$.ajax({
-			type : "post",
-			url : url,
-			data : JSON.stringify(data),
-			dataType : "json",
-			contentType : 'application/json',
-			success : function(data) {
-				if (data.success) {
-					bootbox.alert("保存成功");
-					fragment_storage.removeCurrent();
-					$("#fragmentId").val(data.data.id);
-					$("#fragmentKey").val("fragment_"+data.data.id)
-					if(!quick){
-						$("#previewModal").modal('hide');
-					}
-				} else {
-					if(quick){
-						$("#previewModal").modal('show');
-						setTimeout(function(){
-							bootbox.alert(data.message);
-						})
-					}
-				}
-			},
-			complete : function() {
-				saveFlag = false;
-			}
-		});
-	}
+	
 
 	function loadHistoryTemplate(){
 		var id = $("#fragmentId").val();

@@ -20,7 +20,10 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -31,9 +34,7 @@ import me.qyh.blog.core.config.UrlHelper;
 import me.qyh.blog.core.entity.Lock;
 import me.qyh.blog.core.entity.LockKey;
 import me.qyh.blog.core.exception.LogicException;
-import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.service.LockManager;
-import me.qyh.blog.core.vo.JsonResult;
 import me.qyh.blog.web.LockHelper;
 import me.qyh.blog.web.Webs;
 import me.qyh.blog.web.security.CaptchaValidator;
@@ -72,18 +73,19 @@ public class LockController {
 	}
 
 	@IgnoreSpaceLock
-	@PostMapping(value = { "space/{alias}/unlock", "/unlock" }, headers = "x-requested-with=XMLHttpRequest")
+	@PostMapping(value = { "api/space/{alias}/lock/{lockId}/key", "api/lock/{lockId}/key" })
 	@ResponseBody
-	public JsonResult unlock(HttpServletRequest request, @RequestParam("lockId") String lockId) throws LogicException {
+	public ResponseEntity<Void> unlock(HttpServletRequest request, @PathVariable("lockId") String lockId)
+			throws LogicException {
 		Optional<Lock> op = lockManager.findLock(lockId);
 		if (!op.isPresent()) {
-			return new JsonResult(false, new Message("lock.miss", "锁缺失"));
+			return ResponseEntity.notFound().build();
 		}
 		captchaValidator.doValidate(request);
 		Lock lock = op.get();
 		LockKey key = lock.getKeyFromRequest(request);
 		lock.tryOpen(key);
 		LockHelper.addKey(request, key);
-		return new JsonResult(true);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 }

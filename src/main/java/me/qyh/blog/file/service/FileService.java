@@ -130,7 +130,7 @@ public interface FileService {
 	 * @param sourceId
 	 *            原文件id
 	 * @param newPath
-	 *            新路径，该路径指向一个文件
+	 *            新路径，该路径指向一个文件夹
 	 * @throws LogicException
 	 */
 	void move(Integer sourceId, String newPath) throws LogicException;

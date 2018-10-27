@@ -33,7 +33,6 @@ import me.qyh.blog.core.util.ExceptionUtils;
 import me.qyh.blog.core.util.Jsons;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.core.validator.SpaceValidator;
-import me.qyh.blog.core.vo.JsonResult;
 
 public class Webs {
 
@@ -89,7 +88,7 @@ public class Webs {
 	 * @param result
 	 * @throws IOException
 	 */
-	public static void writeInfo(HttpServletResponse response, JsonResult result) throws IOException {
+	public static void writeInfo(HttpServletResponse response, Object result) throws IOException {
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding(Constants.CHARSET.name());
 		Jsons.write(result, response.getWriter());
@@ -210,12 +209,23 @@ public class Webs {
 	 * @param result
 	 * @return
 	 */
-	public static Optional<JsonResult> getFirstError(BindingResult result) {
+	public static Optional<Message> getFirstError(BindingResult result) {
 		if (result.hasErrors()) {
 			ObjectError error = result.getAllErrors().get(0);
-			return Optional.of(new JsonResult(false,
-					new Message(error.getCode(), error.getDefaultMessage(), error.getArguments())));
+			return Optional.of(new Message(error.getCode(), error.getDefaultMessage(), error.getArguments()));
 		}
 		return Optional.empty();
+	}
+
+	/**
+	 * 判断是否是restful请求
+	 * 
+	 * @param request
+	 * @return
+	 * @since 6.7
+	 */
+	public static boolean isRestful(HttpServletRequest request) {
+		String path = request.getRequestURI().substring(request.getContextPath().length());
+		return path.startsWith("/api/");
 	}
 }

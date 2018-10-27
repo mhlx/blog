@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('配置管理','')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('config')"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+				<div class="row" style="margin-bottom:10px">
+					<div class="col-md-8 offset-md-2">
+						<form>
+							<div class="form-group">
+								<label>文件分页数目</label> <input type="number" class="form-control"
+									id="filePageSize">
+							</div>
+							<div class="form-group">
+								<label>用户模板片段分页数目</label> <input type="number"
+									class="form-control" id="fragmentPageSize">
+							</div>
+							<div class="form-group">
+								<label>用户页面分页数目</label> <input type="number"
+									class="form-control" id="pagePageSize">
+							</div>
+							<div class="form-group">
+								<label>文章分页数目</label> <input type="number" class="form-control"
+									id="articlePageSize">
+							</div>
+							<div class="form-group">
+								<label>动态分页数目</label> <input type="number" class="form-control"
+									id="newsPageSize">
+							</div><div class="form-group">
+								<label>标签分页数目</label> <input type="number" class="form-control"
+									id="tagPageSize">
+							</div>
+							<button type="button" class="btn btn-primary" id="update" >更新</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+			<footer class="sticky-footer">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright © Your Website 2018</span>
+					</div>
+				</div>
+			</footer>
+
+		</div>
+		<!-- /.content-wrapper -->
+
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Bootstrap core JavaScript-->
+
+	<div th:replace="console/base/foot"></div>
+	<script>
+		$(function(){
+			 $.ajax({
+				type : 'GET',
+				url : root + 'api/console/config',
+				success:function(data) {
+					$("#pagePageSize").val(data.pagePageSize);
+					$("#articlePageSize").val(data.articlePageSize);
+					$("#newsPageSize").val(data.newsPageSize);
+					$("#fragmentPageSize").val(data.fragmentPageSize);
+					$("#filePageSize").val(data.filePageSize);
+					$("#tagPageSize").val(data.tagPageSize);
+				},
+				error:function(jqXHR, textStatus, errorThrown) {
+					var data = $.parseJSON(jqXHR.responseText);
+					swal('获取配置失败',data.error,'error');
+				}
+			  })
+			$("#update").click(function(){
+				var me = $(this);
+				$.ajax({
+					type : "PUT",
+					data : JSON.stringify({
+						articlePageSize : $("#articlePageSize").val(),
+						newsPageSize : $("#newsPageSize").val(),
+						filePageSize : $("#filePageSize").val(),
+						fragmentPageSize : $("#fragmentPageSize").val(),
+						pagePageSize : $("#pagePageSize").val(),
+						tagPageSize : $("#tagPageSize").val()
+					}),
+					dataType : "json",
+					contentType : 'application/json',
+					url : root + 'api/console/config',
+					success : function(){
+						me.prop("disabled",false);
+						swal('更新成功','配置已经被更新','success');
+					},
+					error : function(jqXHR, textStatus, errorThrown){
+						me.prop("disabled",false);
+						var data = $.parseJSON(jqXHR.responseText);
+						swal('更新失败',data.error,'error');
+					}
+				});
+			});
+		});
+	</script>
+
+</body>
+
+</html>

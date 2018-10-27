@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('动态管理','console/news/head')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('news')"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+				<div class="card mb-3" id="tableContainer">
+					<div class="card-header">
+						<i class="fas fa-table"></i>
+					</div>
+					<div class="card-body">
+						<form class="form-inline justify-content-left">
+							<div class="form-group" style="margin-right: 10px">
+								<label class="sr-only">动态内容</label> <input type="text"
+									class="form-control" placeholder="动态内容" id="queryContent">
+							</div>
+							<button class="btn btn-primary" type="button" id="query"
+								style="margin-right: 10px">查询</button>
+							<button class="btn btn-primary" type="button" id="createNews">新动态</button>
+						</form>
+						<div class="table-responsive" style="margin-top: 10px">
+							<table class="table table-bordered" id="newsTable" width="100%"
+								cellspacing="0">
+								<thead>
+									<tr>
+										<th data-bind="content">动态</th>
+										<th data-bind="hits">点击数</th>
+										<th data-bind="allowComment">允许评论</th>
+										<th data-bind="lockId">访问锁</th>
+										<th data-bind="id">操作</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+						<div id="newsTable_paging"></div>
+					</div>
+				</div>
+				<div id="editorContainer" style="display: none">
+					<div class="row">
+						<div class="col-md-8 offset-md-2">
+							<div style="margin-bottom: 10px">
+								<button class="btn btn-primary" id="closeEditor">关闭</button>
+								<button class="btn btn-primary" id="saveNews">保存</button>
+							</div>
+							<form id="editForm">
+								<div class="form-group">
+									<label>内容</label>
+									<textarea id="newsEditor" style="display: none"></textarea>
+								</div>
+								<div class="form-group">
+									<label>时间</label> <input type="text" class="form-control"
+										id="time">
+								</div>
+								<div class="form-group">
+									<label>访问锁</label> <select id="lock" class="form-control">
+										<option value="">无</option>
+									</select>
+								</div>
+
+								<div class="form-check">
+									<input class="form-check-input" type="checkbox"
+										id="allowComment" checked="checked"> <label
+										class="form-check-label"> 允许评论 </label>
+								</div>
+								<div class="form-check">
+									<input class="form-check-input" type="checkbox" id="isPrivate">
+									<label class="form-check-label"> 私人 </label>
+								</div>
+								<input style="display: none" type="text" id="id">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+			<footer class="sticky-footer">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright © Your Website 2018</span>
+					</div>
+				</div>
+			</footer>
+
+		</div>
+		<!-- /.content-wrapper -->
+
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Bootstrap core JavaScript-->
+
+	<div th:replace="console/base/foot"></div>
+	<script type="text/javascript"
+		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
+	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/summernote/dist/summernote-bs4.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/summernote/dist/lang/summernote-zh-CN.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/summernote/plugin/file/summernote-ext-file.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/file.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/summernote/plugin/file/summernote-ext-file.js}"></script>
+	<script type="text/javascript" th:src="@{/static/console/js/news.js}"></script>
+	<script>
+		var mode = 'write';
+		$(function(){
+			 
+			 $("#newsTable").on("click","[data-delete]",function(){
+				var id = $(this).data('delete');
+				swal({
+				  title: '你确定吗？',
+				  text: "这个操作无法被撤销",
+				  type: 'warning',
+				  showCancelButton: true,
+				  confirmButtonColor: '#3085d6',
+				  cancelButtonColor: '#d33',
+				  confirmButtonText: '删除!',
+				  cancelButtonText: '取消'
+				}).then((result) => {
+				  if (result.value) {
+					  $.ajax({
+						type : 'DELETE',
+						url : root + 'api/console/news/'+id,
+						success:function(data) {
+							table.reload();
+							swal('删除成功','动态已经被删除','success');
+						},
+						error:function(jqXHR, textStatus, errorThrown) {
+							var data = $.parseJSON(jqXHR.responseText);
+							swal('删除失败',data.error,'error');
+						}
+					  })
+				  }
+				});
+			});
+			 
+			 $("#newsTable").on("click","[data-edit]",function(){
+				var id = $(this).data('edit');
+			 	$.ajax({
+					url : root + 'api/console/news/'+id,
+					success:function(data) {
+						mode = 'update';
+						$("#time").val(moment(data.write).format("YYYY-MM-DD HH:mm"));
+						$("#newsEditor").summernote('code',data.content);
+						$("#id").val(id);
+						$("#isPrivate").prop('checked',data.isPrivate);
+						$("#lock").val(data.lockId?data.lockId : '');
+						$("#allowComment").prop('checked',data.allowComment);
+						toEditor();
+					},
+					error:function(jqXHR, textStatus, errorThrown) {
+						var data = $.parseJSON(jqXHR.responseText);
+						swal('获取动态内容失败',data.error,'error');
+					}
+				  })
+			});
+			 $('#newsEditor').summernote({
+					lang: 'zh-CN',
+					toolbar:[
+						['custom', ['file']],
+						['style', ['style']],
+			            ['font', ['bold', 'underline', 'clear']],
+			            ['fontname', ['fontname']],
+			            ['para', ['ul', 'ol']],
+			            ['insert', ['link']],
+			            ['view', ['fullscreen', 'codeview']]
+					]
+				});
+			 
+			 $("#createNews").click(function(){
+				mode = 'write';
+				toEditor();
+			 });
+			 $("#closeEditor").click(function(){
+				 closeEditor(false);
+			 });
+			 
+			 var toEditor = function(){
+				 $("#tableContainer").hide();
+				 $('.dataTable').hide();
+				 $("#editorContainer").show();
+				 if(mode == 'write'){
+					 $("#editForm")[0].reset();
+					 $("#newsEditor").summernote('code','');
+					 $("#time").val(moment().format("YYYY-MM-DD HH:mm"));
+				 }
+			 }
+			 
+			 var closeEditor = function(clear){
+				 $("#editorContainer").hide();
+				 $("#tableContainer").show();
+				 $('.dataTable').show();
+				 if(clear){
+					 $('#newsEditor').summernote('reset');
+					 table.reload();
+				 }
+			 }
+			 
+			 $.ajax({
+				type : 'GET',
+				url : root + 'api/console/locks',
+				success:function(data) {
+					$.each(data, function(index, v) {
+						$("#lock").append('<option value="'+v.id+'">'+ v.name + '</option>');
+					});
+				},
+				error:function(jqXHR, textStatus, errorThrown) {
+					var data = $.parseJSON(jqXHR.responseText);
+					swal('获取访问锁失败',data.error,'error');
+				}
+			  });
+			 
+			 $("#saveNews").click(function(){
+				var me = $(this);
+				me.prop('disabled',true);
+				var content = $("#newsEditor").summernote('code');
+				var news = {};
+				news.content = content;
+				var lockId = $("#lock").val();
+				if(lockId != '')
+					news.lockId = lockId;
+				news.write = $("#time").val();
+				news.allowComment = $("#allowComment").is(":checked");
+				news.isPrivate = $("#isPrivate").is(":checked");
+				if(mode == 'update'){
+					news.id = $("#id").val();
+				}
+				if(mode == 'write'){
+					$.ajax({
+						type : "post",
+						url : root+"api/console/news",
+			            contentType:"application/json",
+						data : JSON.stringify(news),
+						complete : function(jqXHR, textStatus, errorThrown){
+							var code = jqXHR.status;
+							if(code == 201){
+								me.prop("disabled",false);
+								swal('动态添加成功','','success');
+								closeEditor(true);
+							} else {
+								me.prop("disabled",false);
+								var data = $.parseJSON(jqXHR.responseText);
+								swal('添加失败',data.error,'error');
+							}
+						}
+					});
+				} else {
+					$.ajax({
+						type : "PUT",
+						url : root+"api/console/news/"+news.id,
+			            contentType:"application/json",
+						data : JSON.stringify(news),
+						success:function(data){
+							me.prop("disabled",false);
+							swal('动态更新成功','','success');closeEditor(true);
+						},
+						error : function(jqXHR, textStatus, errorThrown){
+							me.prop("disabled",false);
+							var data = $.parseJSON(jqXHR.responseText);
+							swal('更新失败',data.error,'error');
+						}
+					});
+				}
+			});
+			 
+			 $("#query").click(function(){
+				 table.reload({currentPage:1,content : $("#queryContent").val()})
+			 });
+		});
+		
+	</script>
+
+</body>
+
+</html>

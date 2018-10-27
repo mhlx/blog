@@ -45,11 +45,6 @@ public class Base64FileUploadValidator implements Validator {
 			errors.reject("base64File.upload.base64.blank", "图片内容不能为空");
 			return;
 		}
-
-		if (upload.getStore() == null) {
-			errors.reject("base64File.upload.store.blank", "文件存储器为空");
-			return;
-		}
 	}
 
 }

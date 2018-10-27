@@ -47,7 +47,7 @@ import me.qyh.blog.plugin.staticfile.vo.StaticFileQueryParam;
 import me.qyh.blog.plugin.staticfile.vo.StaticFileUpload;
 import me.qyh.blog.plugin.staticfile.vo.UnzipConfig;
 import me.qyh.blog.web.Webs;
-import me.qyh.blog.web.controller.back.BaseMgrController;
+import me.qyh.blog.web.controller.console.BaseMgrController;
 
 @EnsureLogin
 @Controller
@@ -116,7 +116,7 @@ public class StaticFileMgrController extends BaseMgrController {
 	@PostMapping("upload")
 	@ResponseBody
 	public JsonResult upload(@Validated StaticFileUpload staticFileUpload, BindingResult result) throws LogicException {
-		Optional<JsonResult> validateError = Webs.getFirstError(result);
+		Optional<JsonResult> validateError = Webs.getFirstError(result).map(msg -> new JsonResult(false, msg));
 		if (validateError.isPresent()) {
 			return validateError.get();
 		}

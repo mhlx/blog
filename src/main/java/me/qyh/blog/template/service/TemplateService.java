@@ -22,7 +22,6 @@ import java.util.function.Consumer;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.vo.PageResult;
-import me.qyh.blog.template.PathTemplate;
 import me.qyh.blog.template.PreviewTemplate;
 import me.qyh.blog.template.SystemTemplate;
 import me.qyh.blog.template.Template;
@@ -209,7 +208,7 @@ public interface TemplateService {
 	 * @throws LogicException
 	 *             注册失败
 	 */
-	void registerPreview(PathTemplate template) throws LogicException;
+	void registerPreview(Page page) throws LogicException;
 
 	/**
 	 * 清空预览页面，删除mapping
@@ -264,16 +263,18 @@ public interface TemplateService {
 	 * 
 	 * @param id
 	 * @return
+	 * @throws LogicException
 	 */
-	List<HistoryTemplate> queryPageHistory(Integer id);
+	List<HistoryTemplate> queryPageHistory(Integer id) throws LogicException;
 
 	/**
 	 * 查询某个模板片段的历史模板
 	 * 
 	 * @param id
 	 * @return
+	 * @throws LogicException
 	 */
-	List<HistoryTemplate> queryFragmentHistory(Integer id);
+	List<HistoryTemplate> queryFragmentHistory(Integer id) throws LogicException;
 
 	/**
 	 * 查询历史模板详情
