@@ -104,16 +104,14 @@ public class FileConsole extends BaseMgrController {
 		return fileService.queryBlogFiles(blogFileQueryParam);
 	}
 
-	@PostMapping(name = "store/{id}/files", params = { "base64" })
+	@PostMapping(value = "store/{id}/files", params = { "base64Upload" })
 	public ResponseEntity<List<UploadedFile>> uploadWithBase64(@Validated Base64FileUpload base64FileUpload,
 			@PathVariable("id") Integer id, BindingResult result) throws LogicException {
 		Optional<Message> validateError = Webs.getFirstError(result);
 		if (validateError.isPresent()) {
 			throw new LogicException(validateError.get());
 		}
-
 		base64FileUpload.setStore(id);
-
 		String newName = rename(base64FileUpload);
 		Base64MultipareFile file = new Base64MultipareFile(newName, base64FileUpload.getBase64());
 		BlogFileUpload upload = new BlogFileUpload();

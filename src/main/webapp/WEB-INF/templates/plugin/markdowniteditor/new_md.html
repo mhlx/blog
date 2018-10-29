@@ -22,17 +22,8 @@
 	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css}">
 <link rel="stylesheet" th:href="@{/static/css/markdown.css}">
 <link rel="stylesheet" th:href="@{/static/prettify/github-v2.min.css}">
-<link rel="stylesheet"
-	href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
-	integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
-	crossorigin="anonymous">
-
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
 <style>
 #toolbar {
 	background-color: #f9f9f7;
@@ -98,9 +89,6 @@
 	margin-bottom: 5px
 }
 
-.modal {
-	z-index: 9999999
-}
 
 #stat {
 	position: fixed;
@@ -154,16 +142,15 @@ body {
 	</div>
 
 
-	<div class="modal fade" id="helpModal" tabindex="-1" role="dialog"
-		style="z-index: 9999999">
+	<div class="modal fade" id="helpModal" tabindex="-1" role="dialog">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
+				<h4 class="modal-title">编辑器说明</h4>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title">编辑器说明</h4>
 				</div>
 				<div class="modal-body">
 					<h3>基础</h3>
@@ -314,16 +301,15 @@ public static void main(String [] args){
 
 
 
-	<div class="modal fade" id="baseModal" tabindex="-1" role="dialog"
-		style="z-index: 9999999">
+	<div class="modal fade" id="baseModal" tabindex="-1" role="dialog">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
+					<h4 class="modal-title">基本信息</h4>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title">基本信息</h4>
 				</div>
 				<div class="modal-body">
 					<div class="alert alert-danger" id="error-tip"
@@ -340,9 +326,7 @@ public static void main(String [] args){
 								maxlength="200" id="alias" th:value="${article.alias}" />
 						</div>
 						<div class="form-group">
-							<label>摘要 </label> <a href="javascript:void(0)"><span
-								onclick="previewSummary($(this))"
-								class="glyphicon glyphicon-eye-open icon"></span></a>
+							<label>摘要 </label> <a href="javascript:void(0)"><i onclick="previewSummary($(this))" class="fas fa-eye icon"></i></a>
 							<div id="summary-content"
 								style="position: relative; height: 310px">
 								<textarea class="form-control" cols="8" rows="8"
@@ -437,7 +421,7 @@ public static void main(String [] args){
 		th:value="${article.space == null ? '' : article.space.id}"
 		id="oldSpace" style="display: none" />
 
-	<div th:replace="base/foot_source"></div>
+	<div th:replace="console/base/foot"></div>
 	<script th:src="@{/static/codemirror/lib/codemirror.js?v=3}"></script>
 	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
 	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
@@ -475,11 +459,9 @@ public static void main(String [] args){
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/editor_file.js?v=1}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/dirChooser.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/emoji.js}"></script>
-	<script th:src="@{/static/js/modal.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/file.js?v=1}"></script>
+	<script type="text/javascript" th:src="@{/static/console/js/dirChooser.js}"></script>
+	<script type="text/javascript" th:src="@{/static/console/js/emoji.js}"></script>
 	<script th:src="@{/static/plugin/markdowniteditor/md.js?v=3}"></script>
 	<script th:src="@{/static/plugin/markdowniteditor/markdown/turndown.js}"></script>
 	<script th:src="@{/static/plugin/markdowniteditor/markdown/turndown-plugin-gfm.js}"></script>

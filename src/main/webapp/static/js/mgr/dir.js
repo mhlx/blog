@@ -5,11 +5,11 @@ var dirChooser = (function(){
 	modal += '<div class="modal-dialog modal-lg" role="document">';
 	modal += '<div class="modal-content">';
 	modal += '<div class="modal-header">';
+	modal += '<h4 class="modal-title">文件夹选择</h4>';
 	modal += '<button type="button" class="close" data-dismiss="modal"';
 	modal += 'aria-label="Close">';
 	modal += '<span aria-hidden="true">&times;</span>';
 	modal += '</button>';
-	modal += '<h4 class="modal-title">文件夹选择</h4>';
 	modal += '</div>';
 	modal += '<div class="modal-body">';
 	modal += '<div class="container-fluid"><div class="row"><select class="form-control"></select></div><div class="row" id="fc_current" style="margin-top:10px"></div><div id="fc_main" class="row" ></div></div>';

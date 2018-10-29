@@ -13,9 +13,9 @@ var base64Upload = function(f) {
 				$("#upload-loading").remove();
 				$('body')
 						.append(
-								"<div id='upload-loading'><div class='modal-backdrop in' style='z-index: 1040;'></div><img src='"
+								"<div id='upload-loading'><div class='modal-backdrop show' style='z-index: 1040;'></div><img src='"
 										+ basePath
-										+ "/static/img/loading.gif' style='position:absolute;top:"
+										+ "static/img/loading.gif' style='position:absolute;top:"
 										+ top
 										+ "px;left:"
 										+ left
@@ -23,59 +23,60 @@ var base64Upload = function(f) {
 				reader.onload = (function(theFile) {
 					return function(e) {
 						var base64 = e.target.result;
-						$
-								.post(
-										basePath + '/mgr/file/uploadWithBase64',
-										{
-											parent : dir.id,
-											store : store,
-											name : f.name,
-											base64 : base64
-										},
-										function(data) {
-											$("#upload-loading").remove();
-											if (data.success) {
-												var result = data.data[0];
-												if (result.error) {
-													bootbox.alert(result.error);
-												} else {
-													var name = result.name;
-													var ext = name.split('.')
-															.pop()
-															.toLowerCase();
-													if (ext == 'jpg'
-															|| ext == 'jpeg'
-															|| ext == 'png'
-															|| ext == 'gif') {
-														var middle = result.thumbnailUrl ? result.thumbnailUrl.middle
-																: result.url;
-														var large = result.thumbnailUrl ? result.thumbnailUrl.large
-																: result.url;
-														var md = '[!['
-																+ result.name
-																+ '](' + middle
-																+ ' "'
-																+ result.name
-																+ '")]('
-																+ large + ' "'
-																+ result.name
-																+ '")';
-														editor
-																.replaceSelection(md);
-													} else {
-														var md = '['
-																+ result.name
-																+ ']('
-																+ result.url
-																+ ')';
-														editor
-																.replaceSelection(md);
-													}
-												}
-											} else {
-												bootbox.alert(data.message);
-											}
-										})
+						console.log(base64);
+						$.ajax({
+							url : basePath + 'api/console/store/'+store+'/files?base64Upload',
+							type : 'post',
+							data:{
+								parent : dir.id,
+								name : f.name,
+								base64 : base64
+							},
+							error : function(jqXHR){
+								$("#upload-loading").remove();
+								swal("上传失败",$.parseJSON(jqXHR.responseText).error,'error');
+							},
+							success:function(data){
+								$("#upload-loading").remove();
+								var result = data[0];
+								if (result.error) {
+									swal("上传失败",result.error,'error');
+								} else {
+									var name = result.name;
+									var ext = name.split('.')
+											.pop()
+											.toLowerCase();
+									if (ext == 'jpg'
+											|| ext == 'jpeg'
+											|| ext == 'png'
+											|| ext == 'gif') {
+										var middle = result.thumbnailUrl ? result.thumbnailUrl.middle
+												: result.url;
+										var large = result.thumbnailUrl ? result.thumbnailUrl.large
+												: result.url;
+										var md = '[!['
+												+ result.name
+												+ '](' + middle
+												+ ' "'
+												+ result.name
+												+ '")]('
+												+ large + ' "'
+												+ result.name
+												+ '")';
+										editor
+												.replaceSelection(md);
+									} else {
+										var md = '['
+												+ result.name
+												+ ']('
+												+ result.url
+												+ ')';
+										editor
+												.replaceSelection(md);
+									}
+								}
+							}
+						})
 					};
 				})(f);
 				reader.readAsDataURL(f);
@@ -158,6 +159,7 @@ editor.on('paste', function(editor, evt) {
 	var clipboardData, pastedData;
 	clipboardData = evt.clipboardData || window.clipboardData;
 	var files = clipboardData.files;
+	console.log(clipboardData);
 	if (files.length > 0) {
 		var f = files[0];// 上传第一张
 		var type = f.type;

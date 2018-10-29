@@ -15,6 +15,9 @@ function datatable(id, config) {
 	var _params = {};
 
 	var load = function() {
+		var tbody = $("#" + id).find('tbody');
+		tbody.html('<tr ><td class="text-center" colspan="'
+				+ binds.length + '">正在加载...</td></tr>');
 		$
 				.ajax({
 					type : 'GET',
@@ -29,9 +32,6 @@ function datatable(id, config) {
 							page = data;
 							data = data.datas;
 						}
-						var tbody = $("#" + id).find('tbody');
-						tbody.html('<tr ><td class="text-center" colspan="'
-								+ binds.length + '">正在加载...</td></tr>');
 
 						var body_template = "";
 						for (var i = 0; i < data.length; i++) {

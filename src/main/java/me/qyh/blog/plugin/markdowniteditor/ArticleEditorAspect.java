@@ -6,32 +6,30 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.ui.Model;
 
 import me.qyh.blog.core.entity.Article;
-import me.qyh.blog.core.entity.Editor;
 
 @Aspect
 class ArticleEditorAspect {
 
-	@Around("execution(* me.qyh.blog.web.controller.back.ArticleMgrController.write(me.qyh.blog.core.entity.Editor,..))")
+	@Around("execution(* me.qyh.blog.web.controller.console.ArticleMgrController.write(..))")
 	public Object write(ProceedingJoinPoint joinPoint) throws Throwable {
-		Editor editor = (Editor) joinPoint.getArgs()[0];
 		Object proceed = joinPoint.proceed();
 		/**
 		 * @since 6.7
 		 */
-		Model model = (Model) joinPoint.getArgs()[2];
-		if (model.asMap().get("article") != null && editor.equals(Editor.MD)) {
+		Model model = (Model) joinPoint.getArgs()[1];
+		if (model.asMap().get("article") != null) {
 			return "plugin/markdowniteditor/new_md";
 		}
 
 		return proceed;
 	}
 
-	@Around("execution(* me.qyh.blog.web.controller.back.ArticleMgrController.update(Integer,..))")
+	@Around("execution(* me.qyh.blog.web.controller.console.ArticleMgrController.update(Integer,..))")
 	public Object update(ProceedingJoinPoint joinPoint) throws Throwable {
 		Model model = (Model) joinPoint.getArgs()[2];
 		Object proceed = joinPoint.proceed();
 		Article article = (Article) model.asMap().get("article");
-		if (article != null && Editor.MD.equals(article.getEditor())) {
+		if (article != null) {
 			return "plugin/markdowniteditor/new_md";
 		}
 		return proceed;

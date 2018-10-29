@@ -21,12 +21,9 @@
 	th:href="@{/static/codemirror/addon/dialog/dialog.css}">
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css}">
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
 <style>
 #in {
 	position: fixed;
@@ -67,6 +64,7 @@
 
 .CodeMirror-scroll {
 	padding: 30px;
+	padding-top:40px;
 	box-sizing: border-box;
 	overflow-x: hidden !important;
 }
@@ -74,28 +72,21 @@
 .icon {
 	margin-top: 5px;
 	cursor: pointer;
-	z-index: 999999;
-	font-size: 16px;
+	font-size: 30px;
 	margin-right: 20px;
-	margin-bottom: 5px
+	margin-bottom: 5px;
 }
 
-.modal {
-	z-index: 9999999
-}
 </style>
 </head>
 <body>
 	<div class="container-fluid">
 		<div class="col-md-6">
-			<div id="toolbar">
-				<span class="glyphicon glyphicon-pencil icon" style="color: red"
-					title="基本信息" onclick="showBase()"></span> <span
-					class="glyphicon glyphicon-file icon" title="文件"
-					onclick="openFile()"></span> <span class="icon glyphicon"
-					title="emoji" onclick="emoji.show()">😀</span> <span
-					class="glyphicon glyphicon-cog icon" title="预览样式设置"
-					onclick="openSettingModal()"></span>
+			<div id="toolbar" style="position:fixed;z-index: 999999;">
+				<i class="fas fa-pencil-alt icon" onclick="showBase()" title="基本信息"></i>
+				<i class="fas fa-file icon" onclick="openFile()" title="文件"></i>
+				<i class="fas fa-cog icon" onclick="openSettingModal()" title="设置预览样式"></i>
+				<i class="far fa-grin icon" title="emoji" onclick="emoji.show()"></i>
 			</div>
 			<div id="in" style="display: none">
 				<textarea id="code" style="width: 100%; height: 100%"
@@ -105,23 +96,22 @@
 		<div class="col-md-6" id="out">
 			<div class="embed-responsive">
 				<iframe class="embed-responsive-item"
-					th:src="@{/mgr/article/write/mdPreview}"></iframe>
+					th:src="@{/console/article/new/preview}"></iframe>
 			</div>
 		</div>
 	</div>
 
 
 
-	<div class="modal fade" id="settingModal" tabindex="-1" role="dialog"
-		style="z-index: 9999999">
+	<div class="modal fade" id="settingModal" tabindex="-1" role="dialog">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
+					<h4 class="modal-title">预览样式设置</h4>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title">预览样式设置</h4>
 				</div>
 				<div class="modal-body">
 					<form>
@@ -163,16 +153,15 @@
 
 
 
-	<div class="modal fade" id="baseModal" tabindex="-1" role="dialog"
-		style="z-index: 9999999">
+	<div class="modal fade" id="baseModal" tabindex="-1" role="dialog">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
+				<h4 class="modal-title">基本信息</h4>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<h4 class="modal-title">基本信息</h4>
 				</div>
 				<div class="modal-body">
 					<div class="alert alert-danger" id="error-tip"
@@ -277,7 +266,7 @@
 		th:value="${article.space == null ? '' : article.space.id}"
 		id="oldSpace" style="display: none" />
 
-	<div th:replace="base/foot_source"></div>
+	<div th:replace="console/base/foot"></div>
 	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
 	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
 	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
@@ -315,11 +304,9 @@
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/editor_file.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/dirChooser.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/common.js}"></script>
-	<script type="text/javascript" th:src="@{/static/js/mgr/emoji.js}"></script>
-	<script th:src="@{/static/js/modal.js}"></script>
+	<script type="text/javascript" th:src="@{/static/console/js/emoji.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/file.js}"></script>
+	<script type="text/javascript" th:src="@{/static/js/dir.js}"></script>
 	<script type="text/javascript">
 	
 		var autoParse = true;
@@ -349,20 +336,6 @@
 					render();
 				$(".embed-responsive").height($("#out").height());
 				
-				document.addEventListener('drop', function(e){
-				      e.preventDefault();
-				      e.stopPropagation(); var reader = new FileReader();
- 						var file = e.dataTransfer.files[0];
-				      if(file.name.indexOf('.md') == -1){
-				    	  base64Upload(file);
-				      } else {
-					      reader.onload = function(e){
-					        editor.setValue(e.target.result);
-					      };
-					      reader.readAsText(file);
-				      }
-				 }, false);
-				
 			}
 		}
 		detect();
@@ -389,26 +362,6 @@
 		$("#baseModal .CodeMirror").css({"position":"static","height":"300px"});
 		$("#baseModal .CodeMirror-scroll").css({"padding":"5px"});
 		
-		editor.on('paste',function(editor,evt){
-			var clipboardData, pastedData;
-// 		    evt.stopPropagation();
-// 		    evt.preventDefault();
-		    clipboardData = evt.clipboardData || window.clipboardData;
-		    console.log(clipboardData.getData('text/html'))
-		    var files = clipboardData.files;
-		    if(files.length > 0){
-		    	var f = files[0];//上传第一张
-		    	var type = f.type;
-		    	if(type.indexOf('image/') == -1){
-		    		bootbox.alert("只能上传图片文件");
-		    		return ;
-		    	}
-		    	
-		    	base64Upload(f);
-		    	
-		    }
-		})
-		
 		CodeMirror.keyMap.default["Shift-Tab"] = "indentLess";
 		CodeMirror.keyMap.default["Tab"] = "indentMore";
 		
@@ -433,7 +386,7 @@
 			$(".icon").show();
 			$("#toolbar")
 					.append(
-							'<span onclick="toPreview()" class="glyphicon glyphicon-eye-open icon" id="preview-icon" title="预览"></span>');
+							'<i class="fas fa-eye icon" id="preview-icon" onclick="toPreview()"></i>');
 		}
 
 		function toPreview() {
@@ -449,7 +402,7 @@
 			$(".icon").hide();
 			$("#toolbar")
 					.append(
-							'<span onclick="toEditor()" class="glyphicon glyphicon-eye-close icon" id="editor-icon" title="取消预览"></span>');
+							'<i class="fas fa-eye-slash icon" onclick="toEditor()" id="editor-icon"></i>');
 		}
 		var renderTimer;
 		var render = function() {
@@ -461,51 +414,14 @@
 				$.ajax({
 					type : "post",
 					async:false,
-					url : basePath + '/mgr/article/write/preview',
-					contentType : "application/json",
-					data : JSON.stringify({
-						editor : 'MD',
-						content : toParse
-					}),
+					url : root + 'api/console/article/preview',
+					data:{content:toParse},
 					success : function(data) {
-						var parsed;
-						if (data.success) {
-							parsed = data.data;
-						} else {
-							parsed = '';
-						}
-						var preview = $("#out iframe").contents().find(
-								'#preview');
-						try {
-							
-						 	var out = preview[0];
-					        var old = out.cloneNode(true);
-					        $("#out iframe")[0].contentWindow.setPreview(parsed);
-					        
-					        var allold = old.getElementsByTagName("*");
-					        if (allold === undefined) return;
-
-					        var allnew = out.getElementsByTagName("*");
-					        if (allnew === undefined) return;
-
-					        for (var i = 0, max = Math.max(allold.length, allnew.length); i < max; i++) {
-					            var _old = allold[i];
-					            var _new = allnew[i]
-					            if(_new === undefined){
-					            	//delete
-					            	return ;
-					            }
-					            if(_old === undefined || !_old.isEqualNode(_new)){
-						        	$('#out iframe').contents().scrollTop(allnew[i].offsetTop);
-						        	return ;
-					            }
-					        }
-							
-						} catch (e) {
-							console.log(e);
-						}
+				        $("#out iframe")[0].contentWindow.setPreview(data);
 					},
-					complete : function() {
+					error : function(jqXHR) {
+						var error = $.parseJSON(jqXHR.responseText).error;
+						swal('预览失败',error,'error');
 					}
 				});
 
@@ -527,17 +443,20 @@
 
 		function openFile() {
 			fileChooser.choose(function(data){
-			    var cf = data.cf;
-				var ext = cf.extension.toLowerCase();
-				if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
-					editor.replaceSelection('['+cf.originalFilename+']('+cf.url+')')
-				} else {
-					var thumb = cf.thumbnailUrl;
-					if(thumb){
-						editor.replaceSelection('[!['+cf.originalFilename+']('+thumb.middle+')]('+thumb.large+')')
-					} else {
-						editor.replaceSelection('!['+cf.originalFilename+']('+cf.url+')')
-					}
+				for(var i=0;i<data.length;i++){
+					var f = data[i];
+					  var cf = f.cf;
+						var ext = cf.extension.toLowerCase();
+						if($.inArray(ext,['jpeg','jpg','png','gif']) == -1){
+							editor.replaceSelection('['+cf.originalFilename+']('+cf.url+')')
+						} else {
+							var thumb = cf.thumbnailUrl;
+							if(thumb){
+								editor.replaceSelection('[!['+cf.originalFilename+']('+thumb.middle+')]('+thumb.large+')')
+							} else {
+								editor.replaceSelection('!['+cf.originalFilename+']('+cf.url+')')
+							}
+						}
 				}
 			   return true;
 		 });
@@ -572,10 +491,10 @@
 				});
 			});
 			
-			$.get(basePath + '/mgr/lock/all',{},function(data){
-				var oldLock = $("#oldLock").val();
-				if(data.success){
-					var locks = data.data;
+			$.ajax({
+				url : root + 'api/console/locks',
+				success:function(data){
+					var locks = data;
 					if(locks.length > 0){
 						var html = '';
 						html += '<div class="form-group">'
@@ -594,10 +513,11 @@
 						html += '</div>';
 						$("#lock_container").html(html);
 					}
-				}else{
-					console.log(data.data);
+				},
+				error : function(jqXHR){
+					swal('获取锁失败',$.parseJSON(jqXHR.responseText).error,'error');
 				}
-			});
+			})
 			
 			
 			$("#status").change(function() {
@@ -643,26 +563,28 @@
 				var article = getArticle();
 				me.prop("disabled",true);
 				var url = "";
+				var type ;
 				if(article.id && article.id != null){
-					url = basePath+"/mgr/article/update";
+					url = root+"api/console/article/"+article.id;
+					type = 'put';
 				}else{
-					url = basePath+"/mgr/article/write";
+					url = root+"api/console/article";
+					type = 'post';
 				}
 				$.ajax({
-					type : "post",
+					type : type,
 					url : url,
 		            contentType:"application/json",
 					data : JSON.stringify(article),
 					success : function(data){
-						if(data.success){
-							bootbox.alert("保存成功");
-							setTimeout(function(){
-								window.location.href = basePath+'/mgr/article/index';
-							},500)
-						} else {
-							$("#error-tip").html(data.message).show();
-							publishing = false;
-						}
+						swal("保存成功");
+						setTimeout(function(){
+							window.location.href = root+'console/article';
+						},500)
+					},
+					error:function(jqXHR){
+						var error = $.parseJSON(jqXHR.responseText).error;
+						swal('保存文章失败',error,'error');
 					},
 					complete:function(){
 						me.prop("disabled",false);
@@ -677,7 +599,6 @@
 			$("#baseModal").on("shown.bs.modal",function(){
 				summaryEditor.refresh();
 			});
-			
 		});
 		
 		function _addTag(){
@@ -730,22 +651,29 @@
 				return ;
 			}
 			var url = "";
+			var type = '';
 			if(article.id && article.id != null){
-				url = basePath+"/mgr/article/update";
+				type = 'put';
+				url = root+"api/console/article/"+article.id;
 			}else{
-				url = basePath+"/mgr/article/write";
+				url = root+"api/console/article";
+				type = 'post';
 			}
 			publishing = true;
 			$.ajax({
-				type : "post",
+				type : type,
 				url : url,
 				async:false,
 	            contentType:"application/json",
 				data : JSON.stringify(article),
 				success : function(data){
-					if(data.success){
-						$("#id").val(data.data.id);
+					if(data.id){
+						$("#id").val(data.id);
 					}
+				},
+				error:function(jqXHR){
+					var error = $.parseJSON(jqXHR.responseText).error;
+					swal('保存文章失败',error,'error');
 				},
 				complete:function(){
 					publishing = false;
@@ -820,23 +748,29 @@
 				return ;
 			}
 			var url = "";
+			var type ;
 			if(article.id && article.id != null){
-				url = basePath+"/mgr/article/update";
+				type = 'put';
+				url = root+"api/console/article/"+article.id;
 			}else{
-				url = basePath+"/mgr/article/write";
+				type = 'post'
+				url = root+"api/article/article";
 			}
 			publishing = true;
 			$.ajax({
-				type : "post",
+				type : type,
 				url : url,
 				async:false,
 	            contentType:"application/json",
 				data : JSON.stringify(article),
 				success : function(data){
-					if(data.success){
-						$("#id").val(data.data.id);
-						//showAutoSaveTip(new Date());
+					if(data.id){
+						$("#id").val(data.id);
 					}
+				},
+				error : function(jqXHR) {
+					var error = $.parseJSON(jqXHR.responseText).error;
+					swal('预览失败',error,'error');
 				},
 				complete:function(){
 					publishing = false;
@@ -880,51 +814,6 @@
 			setTimeout(function(){
 				$("#auto-save-tip").remove();
 			},1500);
-		}
-		
-		function base64Upload(f){
-			//show pick up
-			if(f.size == 0){
-				bootbox.alert('不能上传空文件或者文件夹');
-				return;
-			}
-	    	var reader = new FileReader();
-	    	
-	    	dirChooser.choose(function(dir,store){
-	    		var left = $(window).width()/2 - 64;
-	    		var top = $(window).height()/2 - 64;
-	    		$("#upload-loading").remove();
-	    		$('body').append("<div id='upload-loading'><div class='modal-backdrop in' style='z-index: 1040;'></div><img src='"+basePath+"/static/img/loading.gif' style='position:absolute;top:"+top+"px;left:"+left+"px' /></div>");
-	    		reader.onload = (function(theFile) {
-		            return function(e) {
-		            	var base64 = e.target.result;
-		            	$.post(basePath+'/mgr/file/uploadWithBase64',{parent:dir.id,store:store,name:f.name,base64:base64},function(data){
-				    		$("#upload-loading").remove();
-		            		if(data.success){
-		            			var result = data.data[0];
-		            			if(result.error){
-		            				bootbox.alert(result.error);
-		            			} else {
-		            				var name = result.name;
-		            				var ext = name.split('.').pop().toLowerCase();
-		            				if(ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif'){
-		            					var middle = result.thumbnailUrl ? result.thumbnailUrl.middle : result.url;
-			            				var large = result.thumbnailUrl ? result.thumbnailUrl.large : result.url;
-			            				var md = '[!['+result.name+']('+middle+' "'+result.name+'")]('+large+' "'+result.name+'")';
-			            				editor.replaceSelection(md);
-		            				} else {
-		            					var md = '['+result.name+']('+result.url+')';
-		            					editor.replaceSelection(md);
-		            				}
-		            			}
-		            		}else{
-		            			bootbox.alert(data.message);
-		            		}
-		            	})
-		            };
-		          })(f);
-		         reader.readAsDataURL(f);
-	    	});
 		}
 	</script>
 </body>

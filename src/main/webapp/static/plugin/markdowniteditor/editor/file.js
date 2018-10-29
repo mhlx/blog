@@ -3,8 +3,8 @@ var files = (function(editor) {
     videoModal += '<div class="modal-dialog" role="document">';
     videoModal += '<div class="modal-content">';
     videoModal += '<div class="modal-header">';
-    videoModal += '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
     videoModal += '<h4 class="modal-title">插入视频</h4>';
+    videoModal += '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
     videoModal += '</div>';
     videoModal += '<div class="modal-body">';
     videoModal += '<input type="text" class="form-control" placeholder="" onclick="var me = this;setTimeout(function(){me.setSelectionRange(0, 9999);},1);">';
@@ -77,7 +77,7 @@ var files = (function(editor) {
     }
     return {
         get: function() {
-            fileChooser.choose(function(datas) {
+        	fileChooser.choose(function(datas) {
                handleFiles(datas);
             });
         }

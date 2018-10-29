@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import me.qyh.blog.core.entity.Article;
+import me.qyh.blog.core.entity.Article.ArticleStatus;
 import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
@@ -82,24 +83,6 @@ public interface ArticleService {
 	 * @throws LogicException
 	 */
 	Article writeArticle(Article article) throws LogicException;
-
-	/**
-	 * 将博客放入回收站
-	 * 
-	 * @param id
-	 *            文章id
-	 * @throws LogicException
-	 */
-	Article putArticleInRecycleBin(Integer id) throws LogicException;
-
-	/**
-	 * 从回收站中恢复
-	 * 
-	 * @param id
-	 *            文章id
-	 * @throws LogicException
-	 */
-	Article recoverArticle(Integer id) throws LogicException;
 
 	/**
 	 * 删除博客
@@ -204,5 +187,14 @@ public interface ArticleService {
 	 * @return
 	 */
 	ArticleStatistics queryArticleStatistics();
+
+	/**
+	 * 更改文章的状态
+	 * 
+	 * @param id
+	 * @param status
+	 * @throws LogicException
+	 */
+	void changeStatus(Integer id, ArticleStatus status) throws LogicException;
 
 }

@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -342,7 +343,11 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 				/**
 				 * @since 6.0
 				 */
-				ServletRequestBindingException.class };
+				ServletRequestBindingException.class,
+				/**
+				 * @since 6.7
+				 */
+				InvalidPropertyException.class };
 
 		@Override
 		public boolean match(Exception ex) {

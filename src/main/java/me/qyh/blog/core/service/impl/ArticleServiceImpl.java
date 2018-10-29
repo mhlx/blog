@@ -18,6 +18,7 @@ package me.qyh.blog.core.service.impl;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -415,46 +416,47 @@ public class ArticleServiceImpl
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public Article putArticleInRecycleBin(Integer id) throws LogicException {
+	public void changeStatus(Integer id, ArticleStatus status) throws LogicException {
 		Article article = articleDao.selectById(id);
 		if (article == null) {
 			throw new ResourceNotFoundException("article.notExists", "文章不存在");
 		}
-		if (article.isDeleted()) {
-			throw new LogicException("article.deleted", "文章已经在回收站中了");
+
+		if (article.getStatus().equals(status)) {
+			return;
 		}
-		article.setStatus(ArticleStatus.DELETED);
-		articleDao.update(article);
 
-		Transactions.afterCommit(() -> articleIndexer.deleteDocument(id));
-
-		applicationEventPublisher.publishEvent(new ArticleDelEvent(this, List.of(article), true));
-
-		return article;
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public Article recoverArticle(Integer id) throws LogicException {
-		Article article = articleDao.selectById(id);
-		if (article == null) {
-			throw new ResourceNotFoundException("article.notExists", "文章不存在");
-		}
-		if (!article.isDeleted()) {
-			throw new LogicException("article.undeleted", "文章未删除");
-		}
 		Article old = new Article(article);
-		ArticleStatus status = ArticleStatus.PUBLISHED;
-		if (article.getPubDate().after(Timestamp.valueOf(LocalDateTime.now()))) {
-			status = ArticleStatus.SCHEDULED;
+		if (ArticleStatus.DELETED.equals(status)) {
+			article.setStatus(ArticleStatus.DELETED);
+			articleDao.update(article);
+			Transactions.afterCommit(() -> articleIndexer.deleteDocument(id));
+			applicationEventPublisher.publishEvent(new ArticleDelEvent(this, List.of(article), true));
 		}
-		article.setStatus(status);
-		articleDao.update(article);
+		if (ArticleStatus.DRAFT.equals(status)) {
+			article.setStatus(status);
+			articleDao.update(article);
+			Transactions.afterCommit(() -> articleIndexer.addOrUpdateDocument(id));
+			applicationEventPublisher.publishEvent(new ArticleUpdateEvent(this, old, article));
+		}
+		if (ArticleStatus.PUBLISHED.equals(status)) {
+			Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+			article.setPubDate(article.isSchedule() ? now : article.getPubDate() != null ? article.getPubDate() : now);
+			article.setStatus(status);
+			articleDao.update(article);
+			Transactions.afterCommit(() -> articleIndexer.addOrUpdateDocument(id));
+			applicationEventPublisher.publishEvent(new ArticlePublishEvent(this, List.of(article)));
+		}
+		if (ArticleStatus.SCHEDULED.equals(status)) {
+			if (old.getPubDate() == null || old.getPubDate().before(new Date())) {
+				throw new LogicException("article.scheduleDate.invalid", "无效的发布计划日期");
+			}
+			article.setStatus(status);
+			articleDao.update(article);
+			Transactions.afterCommit(() -> articleIndexer.addOrUpdateDocument(id));
+			applicationEventPublisher.publishEvent(new ArticleUpdateEvent(this, old, article));
+		}
 
-		Transactions.afterCommit(() -> articleIndexer.addOrUpdateDocument(id));
-
-		applicationEventPublisher.publishEvent(new ArticleUpdateEvent(this, old, article));
-		return article;
 	}
 
 	@Override

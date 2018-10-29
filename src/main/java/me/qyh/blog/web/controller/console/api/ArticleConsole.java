@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
@@ -111,10 +112,9 @@ public class ArticleConsole extends BaseMgrController {
 	}
 
 	@PostMapping("article/preview")
-	public ResponseEntity<String> createPreviewContent(@RequestParam("editor") Editor editor,
-			@RequestParam("content") String content) throws LogicException {
-		String previewContent = articleService.createPreviewContent(editor, content);
-		return ResponseEntity.status(HttpStatus.CREATED).body(previewContent);
+	public ResponseEntity<String> createPreviewContent(@RequestParam("content") String content) throws LogicException {
+		String previewContent = articleService.createPreviewContent(Editor.MD, content);
+		return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(previewContent);
 	}
 
 	@DeleteMapping("article/{id}")
@@ -123,19 +123,9 @@ public class ArticleConsole extends BaseMgrController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@PatchMapping(name = "article/{id}")
+	@PatchMapping("article/{id}")
 	public ResponseEntity<Void> update(@PathVariable("id") Integer id, ArticleStatus status) throws LogicException {
-		switch (status) {
-		case PUBLISHED:
-			articleService.recoverArticle(id);
-			break;
-		case DELETED:
-			articleService.putArticleInRecycleBin(id);
-			break;
-		default:
-			// TODO
-			throw new LogicException("");
-		}
+		articleService.changeStatus(id, status);
 		return ResponseEntity.noContent().build();
 	}
 
