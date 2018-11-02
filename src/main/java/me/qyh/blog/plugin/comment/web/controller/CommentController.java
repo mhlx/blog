@@ -15,108 +15,48 @@
  */
 package me.qyh.blog.plugin.comment.web.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import me.qyh.blog.core.config.UrlHelper;
-import me.qyh.blog.core.context.Environment;
-import me.qyh.blog.core.exception.LogicException;
-import me.qyh.blog.core.security.AttemptLogger;
-import me.qyh.blog.core.security.AttemptLoggerManager;
-import me.qyh.blog.core.vo.JsonResult;
-import me.qyh.blog.plugin.comment.entity.Comment;
+import me.qyh.blog.core.security.EnsureLogin;
 import me.qyh.blog.plugin.comment.entity.CommentModule;
-import me.qyh.blog.plugin.comment.service.CommentConfig;
 import me.qyh.blog.plugin.comment.service.CommentService;
-import me.qyh.blog.plugin.comment.validator.CommentValidator;
-import me.qyh.blog.web.security.CaptchaValidator;
 
-@RestController
-@RequestMapping("api")
-public class CommentController implements InitializingBean {
+@Controller
+public class CommentController {
 
 	@Autowired
 	private CommentService commentService;
 	@Autowired
-	private CommentValidator commentValidator;
-	@Autowired
-	private CaptchaValidator captchaValidator;
-	@Autowired
-	private AttemptLoggerManager attemptLoggerManager;
-	@Autowired
 	private UrlHelper urlHelper;
 
-	@Value("${comment.attempt.count:5}")
-	private int attemptCount;
-
-	@Value("${comment.attempt.maxCount:50}")
-	private int maxAttemptCount;
-
-	@Value("${comment.attempt.sleepSec:300}")
-	private int sleepSec;
-
-	private AttemptLogger attemptLogger;
-
-	@InitBinder(value = "comment")
-	protected void initCommentBinder(WebDataBinder binder) {
-		binder.setValidator(commentValidator);
+	@EnsureLogin
+	@GetMapping("console/comment")
+	public String index() {
+		return "plugin/comment/all";
 	}
 
-	@GetMapping("commentConfig")
-	public CommentConfig getConfig() {
-		return commentService.getCommentConfig();
+	@EnsureLogin
+	@GetMapping("console/comment/blacklist")
+	public String blacklist() {
+		return "plugin/comment/blacklist";
 	}
 
-	@PostMapping({ "space/{alias}/{type}/{id}/comment", "{type}/{id}/comment" })
-	public ResponseEntity<Void> addComment(@RequestBody @Validated Comment comment, @PathVariable("type") String type,
-			@PathVariable("id") Integer moduleId, HttpServletRequest req) throws LogicException {
-		if (!Environment.isLogin() && attemptLogger.log(Environment.getIP())) {
-			captchaValidator.doValidate(req);
-		}
-		comment.setCommentModule(new CommentModule(type, moduleId));
-		comment.setIp(Environment.getIP());
-		commentService.insertComment(comment);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+	@EnsureLogin
+	@GetMapping("console/comment/config")
+	public String config(Model model) {
+		model.addAttribute("config", commentService.getCommentConfig());
+		return "plugin/comment/config";
 	}
 
-	@GetMapping({ "space/{alias}/{type}/{id}/comment/{commentId}/conversation",
-			"{type}/{id}/comment/{commentId}/conversation" })
-	public JsonResult queryConversations(@PathVariable("type") String type, @PathVariable("id") Integer moduleId,
-			@PathVariable("commentId") Integer commentId) throws LogicException {
-		return (JsonResult) commentService.queryConversations(new CommentModule(type, moduleId), commentId);
-	}
-
-	// TODO
 	@GetMapping("comment/link/{module}/{id}")
-	public String jumpToArticle(@PathVariable("module") String module, @PathVariable("id") Integer id) {
-		String url = commentService.queryCommentModuleUrl(new CommentModule(module, id)).orElse(urlHelper.getUrl());
-		return "redirect:" + url;
+	public String getCommentUrl(@PathVariable("module") String module, @PathVariable("id") Integer id) {
+		return "redirect:"
+				+ commentService.queryCommentModuleUrl(new CommentModule(module, id)).orElse(urlHelper.getUrl());
 	}
 
-	// TODO
-	@GetMapping("comment/needCaptcha")
-	@ResponseBody
-	public boolean needCaptcha() {
-		return !Environment.isLogin() && attemptLogger.reach(Environment.getIP());
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		this.attemptLogger = attemptLoggerManager.createAttemptLogger(attemptCount, maxAttemptCount, sleepSec);
-	}
 }

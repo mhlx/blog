@@ -163,8 +163,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		 LIMIT 0,1
 	</select>
 		
-	<update id="updateStatusToNormal">
-		UPDATE blog_comment SET comment_status = 0 WHERE id = #{id}
+	<update id="updateStatus">
+		UPDATE blog_comment SET comment_status = #{status,javaType=CommentStatus,typeHandler=EnumOrdinalTypeHandler} WHERE id = #{id}
 	</update>
 	
 	<delete id="deleteByModule">
@@ -192,24 +192,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		GROUP BY a.module_type,a.module_id
 	</select>
 	
-	<select id="queryUncheckCommentsCount" resultType="int">
-		SELECT COUNT(id) FROM blog_comment 
-		WHERE comment_status = 1
-	</select>
-	
-	<select id="queryUncheckComments" resultMap="CommentDetail">
-		 SELECT 
-		  a.id,a.parent_id,a.parent_path,a.content,a.module_id,a.module_type,a.comment_editor,
-		  a.comment_date,a.comment_status,a.comment_nickname,a.comment_email,a.comment_ip,a.comment_admin,a.comment_gravatar,a.comment_website,
-		  p.comment_editor AS p_comment_edtior,p.comment_nickname AS p_comment_nickname,p.comment_email AS p_comment_email,p.comment_ip AS p_comment_ip,p.comment_admin AS p_comment_admin,p.comment_gravatar AS p_comment_gravatar,p.module_id AS p_module_id,p.module_type AS p_module_type
-		FROM 
-		  blog_comment a 
-		LEFT OUTER JOIN blog_comment p ON a.parent_id = p.id
-		WHERE a.comment_status = 1
-	    ORDER BY a.comment_date DESC,id DESC
-		LIMIT #{offset},#{pageSize}
-	</select>
-	
 	<select id="checkExistsByGravatar" resultType="boolean">
 		SELECT EXISTS(SELECT 1 FROM blog_comment WHERE comment_gravatar = #{gravatar})
 	</select>
@@ -219,6 +201,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<where>
 			<if test="begin != null and end != null">
 				comment_date BETWEEN #{begin} AND #{end}
+			</if>
+			<if test="status != null">
+			   AND comment_status = #{status,javaType=CommentStatus,typeHandler=EnumOrdinalTypeHandler}
 			</if>
 		</where>
 	</select>
@@ -232,6 +217,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<where>
 			<if test="begin != null and end != null">
 				comment_date BETWEEN #{begin} AND #{end}
+			</if>
+			<if test="status != null">
+			   AND comment_status = #{status,javaType=CommentStatus,typeHandler=EnumOrdinalTypeHandler}
 			</if>
 		</where> 
 		ORDER BY comment_date DESC,id DESC

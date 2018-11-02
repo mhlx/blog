@@ -107,12 +107,6 @@ public class NewsCommentModuleHandler extends CommentModuleHandler {
 	}
 
 	@Override
-	public Map<Integer, Object> getReferences(Collection<Integer> ids) {
-		List<News> pages = newsDao.selectByIds(ids);
-		return pages.stream().collect(Collectors.toMap(News::getId, p -> p));
-	}
-
-	@Override
 	public List<Comment> queryLastComments(Space space, int limit, boolean queryPrivate, boolean queryAdmin) {
 		if (space == null) {
 			List<Comment> comments = newsCommentDao.selectLastComments(limit, queryPrivate, queryAdmin);

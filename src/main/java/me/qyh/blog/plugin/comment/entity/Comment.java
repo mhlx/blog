@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import com.google.gson.annotations.Expose;
-
 import me.qyh.blog.core.entity.BaseEntity;
 import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.message.Message;
@@ -51,9 +49,7 @@ public class Comment extends BaseEntity {
 
 	private String website;
 	private String nickname;
-	@Expose(serialize = false)
 	private String email;
-	@Expose(serialize = false)
 	private String ip;
 	private Boolean admin;// 是否是管理员
 

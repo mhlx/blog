@@ -10,6 +10,11 @@
 			class="fab  fa-fw fa-skype"></i> <span>空间</span>
 	</a></li>
 
+	<li class="nav-item"
+		th:classappend="${menu == 'article'} ? 'article' : null"><a
+		class="nav-link" th:href="@{/console/article}"> <i
+			class="fas fa-fw fa-book"></i><span>文章</span>
+	</a></li>
 
 	<li class="nav-item"
 		th:classappend="${menu == 'news'} ? 'active' : null"><a
@@ -25,28 +30,31 @@
 			class="fas  fa-fw fa-file"></i> <span>文件</span>
 	</a></li>
 
-	<li class="nav-item"
-		th:classappend="${menu == 'template'} ? 'active' : null"><a
-		class="nav-link" th:href="@{/console/template}"> <i
+	<li class="nav-item dropdown"><a class="nav-link dropdown-toggle"
+		href="#" id="pagesDropdown" role="button" data-toggle="dropdown"
+		aria-haspopup="true" aria-expanded="false"> <i
 			class="fas fa-fw fa-text-height"></i> <span>模板管理</span>
-	</a></li>
+	</a>
+		<div class="dropdown-menu" aria-labelledby="pagesDropdown">
+			<a class="dropdown-item"
+				th:classappend="${menu == 'template'} ? 'active' : null"
+				th:href="@{/console/template}">导入导出</a> <a class="dropdown-item"
+				th:classappend="${menu == 'page'} ? 'active' : null"
+				th:href="@{/console/template/page}">页面</a> <a class="dropdown-item"
+				th:classappend="${menu == 'fragment'} ? 'active' : null"
+				th:href="@{/console/template/fragment}">模板片段</a><a
+				class="dropdown-item"
+				th:classappend="${menu == 'data'} ? 'active' : null"
+				th:href="@{/console/template/data}">模板数据</a>
+		</div></li>
+
+
 
 
 	<li class="nav-item"
-		th:classappend="${menu == 'page'} ? 'active' : null"><a
-		class="nav-link" th:href="@{/console/template/page}"> <i
-			class="far fa-fw fa-file-powerpoint"></i> <span>页面</span>
-	</a></li>
-
-	<li class="nav-item"
-		th:classappend="${menu == 'fragment'} ? 'active' : null"><a
-		class="nav-link" th:href="@{/console/template/fragment}"><i
-			class="fas fa-fw fa-pound-sign"></i> <span>模板片段</span> </a></li>
-
-	<li class="nav-item"
-		th:classappend="${menu == 'data'} ? 'active' : null"><a
-		class="nav-link" th:href="@{/console/template/data}"><i
-			class="fas fa-fw fa-database"></i><span>模板数据</span> </a></li>
+		th:classappend="${menu == 'plugin'} ? 'active' : null"><a
+		class="nav-link" th:href="@{/console/plugin}"><i
+			class="fas fa-fw fa-cogs"></i><span>插件</span> </a></li>
 
 
 	<li class="nav-item"

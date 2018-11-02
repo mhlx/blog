@@ -121,12 +121,6 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 	}
 
 	@Override
-	public Map<Integer, Object> getReferences(Collection<Integer> ids) {
-		List<Article> articles = articleDao.selectSimpleByIds(ids);
-		return articles.stream().collect(Collectors.toMap(Article::getId, art -> art));
-	}
-
-	@Override
 	public List<Comment> queryLastComments(Space space, int limit, boolean queryPrivate, boolean queryAdmin) {
 
 		User user = Environment.getUser();

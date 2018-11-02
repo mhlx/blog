@@ -30,18 +30,3 @@ jQuery.prototype.serializeObject=function(){
     });  
     return obj;  
 }; 
-
-function wrap(html,eleh){
-	var ele = $('<div style="display:none">'+html+'</div>');
-	if(eleh){
-		try{
-			eleh.call(this,ele);
-		}catch(e){
-			console.log(e);
-		}finally{
-			ele.remove();
-		}
-	}else{
-		ele.remove();
-	}
-}

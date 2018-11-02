@@ -75,7 +75,6 @@ import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.core.vo.CommentModuleStatistics;
 import me.qyh.blog.core.vo.CommentStatistics;
 import me.qyh.blog.core.vo.Limit;
-import me.qyh.blog.core.vo.PageQueryParam;
 import me.qyh.blog.core.vo.PageResult;
 import me.qyh.blog.plugin.comment.dao.CommentDao;
 import me.qyh.blog.plugin.comment.entity.Comment;
@@ -153,17 +152,12 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 * @throws LogicException
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public Comment checkComment(Integer id) throws LogicException {
+	public void changeStatus(Integer id, CommentStatus status) throws LogicException {
 		Comment comment = commentDao.selectById(id);// 查询父评论
 		if (comment == null) {
 			throw new LogicException("comment.notExists", "评论不存在");
 		}
-		if (!comment.isChecking()) {
-			throw new LogicException("comment.checked", "评论审核过了");
-		}
-		commentDao.updateStatusToNormal(comment);
-
-		return comment;
+		commentDao.updateStatus(id, status);
 	}
 
 	/**
@@ -476,56 +470,6 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		return comments;
 	}
 
-	/**
-	 * 查询未审核评论的数目
-	 * 
-	 * @since 5.5.6
-	 * @return
-	 */
-	@Transactional
-	public int queryUncheckCommentCount() {
-		return commentDao.queryUncheckCommentsCount();
-	}
-
-	/**
-	 * 分页查询待审核评论
-	 * 
-	 * @param param
-	 * @return
-	 */
-	@Transactional(readOnly = true)
-	public PageResult<Comment> queryUncheckComments(PageQueryParam param) {
-		int count = commentDao.queryUncheckCommentsCount();
-		List<Comment> comments = commentDao.queryUncheckComments(param);
-		Map<String, List<CommentModule>> moduleMap = comments.stream().map(Comment::getCommentModule)
-				.collect(Collectors.groupingBy(CommentModule::getModule));
-		Map<CommentModule, Object> referenceMap = new HashMap<>();
-		CommentModuleHandler handler;
-		for (Map.Entry<String, List<CommentModule>> it : moduleMap.entrySet()) {
-			String key = it.getKey();
-			handler = handlerMap.get(key);
-			if (handler == null) {
-				throw new SystemException("无法找到CommentModuleHandler：" + key);
-			}
-			List<CommentModule> values = it.getValue();
-			if (!values.isEmpty()) {
-				Map<Integer, Object> references = handler
-						.getReferences(values.stream().map(CommentModule::getId).collect(Collectors.toSet()));
-				for (Map.Entry<Integer, Object> refIt : references.entrySet()) {
-					referenceMap.put(new CommentModule(key, refIt.getKey()), refIt.getValue());
-				}
-			}
-		}
-		for (Comment comment : comments) {
-			CommentModule module = comment.getCommentModule();
-			module.setObject(referenceMap.get(module));
-			handleComment(comment);
-		}
-		handleCommentsContent(comments);
-
-		return new PageResult<>(param, count, comments);
-	}
-
 	@Override
 	@Transactional(readOnly = true)
 	public OptionalInt queryCommentNum(String module, Integer moduleId) {
@@ -748,6 +692,11 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		String email = user.getEmail();
 		comment.setEmail(email);
 		comment.setGravatar(user.getGravatar());
+
+		if (!Environment.isLogin()) {
+			comment.setIp(null);
+			comment.setEmail(null);
+		}
 	}
 
 	private void loadConfig() {

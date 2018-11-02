@@ -73,7 +73,7 @@
         modal.on('show.bs.modal', function() {
             loadUserInfo();
             $.ajax({
-                url: basePath + '/comment/needCaptcha',
+                url: basePath + '/api/comment/captchaRequirement',
                 success: function(data) {
                     if (data) {
                     	$("#captchaContainer").show();
@@ -133,27 +133,26 @@
                     }
                     $.ajax({
                         type: "post",
-                        url: actPath + '/'+moduleType+'/' + moduleId + '/addComment?validateCode='+$("#comment-captcha").val(),
+                        url: actPath + '/api/'+moduleType+'/' + moduleId + '/comment?validateCode='+$("#comment-captcha").val(),
                         contentType: "application/json",
                         data: JSON.stringify(comment),
                         success: function(data) {
-                            if (data.success) {
-                            	 storeUserInfo(comment.nickname,
-                                         comment.email, comment.website);
-                            	 var check = data.data.status == 'CHECK';
-                            	 if(!check && commentFunction){
-                            		 commentFunction();
-                            	 }
-                                     $("#comment-modal").modal('hide');
-                                	if (check) {
-                                        doAlert('评论将会在审核通过后显示');
-                                        return;
-                                    }
-                               
-                            } else {
-                                $("#comment-error-tip").html(data.message)
-                                    .show();
-                            }
+                        	storeUserInfo(comment.nickname,
+                                    comment.email, comment.website);
+                       	 var check = data.status == 'CHECK';
+                       	 if(!check && commentFunction){
+                       		 commentFunction();
+                       	 }
+                                $("#comment-modal").modal('hide');
+                           	if (check) {
+                                   doAlert('评论将会在审核通过后显示');
+                                   return;
+                               }
+                        },
+                        error:function(jqXHR){
+                        	var error = $.parseJSON(jqXHR.responseText).error;
+                        	 $("#comment-error-tip").html(error)
+                             .show();
                         },
                         complete: function() {
                         	$("#captcha-img").attr('src',basePath+'/captcha?time='+$.now());
@@ -251,67 +250,65 @@
         
         
         var queryConversations = function(id, moduleId,moduleType) {
-            $.get(actPath + '/'+moduleType+'/' + moduleId + '/comment/' + id +
-                    '/conversations', {},
-                    function(data) {
-                        if (!data.success) {
-                            doAlert(data.message);
-                            return;
-                        }
-                        data = data.data;
-                        var html = '';
-                        for (var i = 0; i < data.length; i++) {
-                            var c = data[i];
-                            var p = i == 0 ? null : data[i - 1];
-                            html += '<div class="media">';
-                            html += '<img class="mr-3"  src="' +
-                                getAvatar(c) +
-                                '" data-holder-rendered="true" style="width: 32px; height: 32px;">';
-                            html += '<div class="media-body"  >';
-                            var username = getUsername(c);
-                            var user = '<strong>' + username +
-                                '</strong>';
-                            var p_username = getUsername(p);
-                            html += '<h6 class="mr-0">' + user +
-                                '</h6>';
-                            if (p) {
-                                var pnickname = getUsername(p);
-                                html += '<small style="margin-right:10px">回复' +
-                                    pnickname + ':</small>';
-                            }
-                            html += '<div class="media-content">'
-                            html += c.content;
-                            html += '</div>';
-                            html += '<p>' +
-                                new Date(c.commentDate)
-                                .format('yyyy-mm-dd HH:MM') +
-                                '&nbsp;&nbsp;&nbsp;</p>';
-                            html += '</div>';
-                            html += '</div>';
-                        }
-                        $("#conversationsBody").html(html);
-                        conversationsModal.modal('show');
-                    });
+        	$.ajax({
+        		url : actPath + '/api/'+moduleType+'/' + moduleId + '/comment/' + id +
+                '/conversation',
+                success:function(data){
+                	 var html = '';
+                     for (var i = 0; i < data.length; i++) {
+                         var c = data[i];
+                         var p = i == 0 ? null : data[i - 1];
+                         html += '<div class="media">';
+                         html += '<img class="mr-3"  src="' +
+                             getAvatar(c) +
+                             '" data-holder-rendered="true" style="width: 32px; height: 32px;">';
+                         html += '<div class="media-body"  >';
+                         var username = getUsername(c);
+                         var user = '<strong>' + username +
+                             '</strong>';
+                         var p_username = getUsername(p);
+                         html += '<h6 class="mr-0">' + user +
+                             '</h6>';
+                         if (p) {
+                             var pnickname = getUsername(p);
+                             html += '<small style="margin-right:10px">回复' +
+                                 pnickname + ':</small>';
+                         }
+                         html += '<div class="media-content">'
+                         html += c.content;
+                         html += '</div>';
+                         html += '<p>' +
+                             moment(c.commentDate)
+                             .format('YYYY-MM-DD HH:mm') +
+                             '&nbsp;&nbsp;&nbsp;</p>';
+                         html += '</div>';
+                         html += '</div>';
+                     }
+                     $("#conversationsBody").html(html);
+                     conversationsModal.modal('show');
+                },
+                error:function(jqXHR){
+                	var message = $.parseJSON(jqXHR.responseText).error;
+	             	swal('获取会话失败',message,'error');
+	            }
+        	})
         }
         
         var checkComment = function(id,callback){
         	doConfirm("确定要审核通过吗？", function() {
                  $.ajax({
-                     type: "post",
-                     url: basePath + "/mgr/comment/check?id=" + id,
-                     data: {
-                         id: id
-                     },
-                     xhrFields: {
-                         withCredentials: true
-                     },
+                     type: "patch",
+                     url: basePath + "/api/console/comment/" + id+"?status=NORMAL",
                      crossDomain: true,
                      success: function(data) {
                         if(callback){
                         	callback();
                         }
                      },
-                     complete: function() {}
+                     error:function(jqXHR){
+                     	var message = $.parseJSON(jqXHR.responseText).error;
+                     	swal('审核失败',message,'error');
+                     }
                  });
              });
         }
@@ -321,22 +318,19 @@
                     "确定要删除该评论吗？",
                     function() {
                         $.ajax({
-                            type: "post",
+                            type: "delete",
                             url: basePath +
-                                "/mgr/comment/delete?id=" +
+                                "/api/console/comment/" +
                                 id,
-                            contentType: "application/json",
-                            data: {},
-                            xhrFields: {
-                                withCredentials: true
-                            },
-                            crossDomain: true,
                             success: function(data) {
                                if(callback){
                             	   callback();
                                }
                             },
-                            complete: function() {}
+                            error:function(jqXHR){
+                            	var message = $.parseJSON(jqXHR.responseText).error;
+                            	swal('删除失败',message,'error');
+                            }
                         });
                     });
             }
@@ -348,20 +342,17 @@
                         $.ajax({
                             type: "post",
                             url: basePath +
-                                "/mgr/comment/ban?id=" +
+                                "/api/console/comment/blacklistItem?id=" +
                                 id,
-                            contentType: "application/json",
-                            data: {},
-                            xhrFields: {
-                                withCredentials: true
-                            },
-                            crossDomain: true,
                             success: function(data) {
                                if(callback){
                             	   callback();
                                }
                             },
-                            complete: function() {}
+                            error:function(jqXHR){
+                            	var message = $.parseJSON(jqXHR.responseText).error;
+                            	swal('禁止IP失败',message,'error');
+                            }
                         });
                     });
             }
@@ -414,7 +405,7 @@
             }
             var username = '';
             if (c.admin) {
-                username = '<span class="glyphicon glyphicon-user" style="color:red"  title="管理员"></span>&nbsp;' +
+                username = '<span style="display:inline-block;height:10px;width:10px;text-align:center;font-size:0.1em;border-radius:10px;background:red;" title="管理员"></span>&nbsp;' +
                     c.nickname
             } else {
                 username = c.nickname
@@ -433,112 +424,110 @@
             }
             var c = config.container;
             c.html('<img src="'+basePath+'/static/img/loading.gif" class="img-fluid mx-auto"/>')
-            $.get(actPath + '/data/commentPage', {
+            $.ajax({
+            	url : actPath + '/api/data/commentPage',
+            	data : {
                     moduleType: config.moduleType,
                     moduleId: config.moduleId,
                     currentPage: page,
                     pageSize: pageSize,
                     asc: config.asc
                 },
-                function(data) {
-                    if (data.success) {
-                        var page = data.data.data;
-                        config.pageSize = page.param.pageSize;
-                        config.currentPage = page.param.currentPage;
-                        var html = '';
-                        if (page.datas.length > 0) {
-                            for (var i = 0; i < page.datas.length; i++) {
-                                var data = page.datas[i];
-                                html += '<div class="media">';
-                                if(data.admin){
-                                	 html += '<a href="javascript:void(0)"> <img class="mr-3" src="' +
+                success:function(data){
+                	var page = data.data;
+                    config.pageSize = page.param.pageSize;
+                    config.currentPage = page.param.currentPage;
+                    var html = '';
+                    if (page.datas.length > 0) {
+                        for (var i = 0; i < page.datas.length; i++) {
+                            var data = page.datas[i];
+                            html += '<div class="media">';
+                            if(data.admin){
+                            	 html += '<a href="javascript:void(0)"> <img class="mr-3" src="' +
+                                 getAvatar(data) +
+                                 '" style="width:24px;height:24px"></a>';
+                            }else{
+                            	var website = data.website;
+                                if(website){
+                                	 html += '<a href="'+website+'" target="_blank" rel="external nofollow"> <img class="mr-3" src="' +
                                      getAvatar(data) +
                                      '" style="width:24px;height:24px"></a>';
                                 }else{
-                                	var website = data.website;
-                                    if(website){
-                                    	 html += '<a href="'+website+'" target="_blank" rel="external nofollow"> <img class="mr-3" src="' +
-                                         getAvatar(data) +
-                                         '" style="width:24px;height:24px"></a>';
-                                    }else{
-                                    	html += '<a href="javascript:void(0)"> <img class="mr-3" src="' +
-                                        getAvatar(data) +
-                                        '" style="width:24px;height:24px"></a>';
-                                    }
+                                	html += '<a href="javascript:void(0)"> <img class="mr-3" src="' +
+                                    getAvatar(data) +
+                                    '" style="width:24px;height:24px"></a>';
                                 }
-                                html += '<div class="media-body">';
-                                var time = new Date(data.commentDate)
-                                    .format('yyyy-mm-dd HH:MM');
-                                html += '<h6 class="mt-0">' +
-                                    getUsername(data) + '</h6>';
+                            }
+                            html += '<div class="media-body">';
+                            var time =  moment(data.commentDate)
+                            .format('YYYY-MM-DD HH:mm');
+                            html += '<h6 class="mt-0">' +
+                                getUsername(data) + '</h6>';
+                            if (data.parent) {
+                                var pnickname = getUsername(data.parent);
+                                html += '<small style="margin-right:10px">回复' +
+                                    pnickname + ':</small>';
+                            }
+                            html += '<div class="media-content">';
+                            html += data.content;
+                            html += '</div>'
+                            html += '<p><small>' + time +
+                                '</small>';
+                            if (isLogin) {
+                            	if(!data.admin && !data.ban){
+                                	html += '<a href="javascript:void(0)" data-ban="'+data.id+'" style="margin-left:10px">禁IP</a>';
+                            	}
+                                html += '<a href="javascript:void(0)" data-del="'+data.id+'"  style="margin-left:10px">删除</a>';
+                            }
+                            if (data.status == 'CHECK') {
+                                html += '<a href="javascript:void(0)" data-check="'+data.id+'"  style="margin-left:10px">审核</a>';
+                            } else {
+                            	if(config.allowComment || isLogin){
+                            		html += '<a href="javascript:void(0)" data-moduleId="'+config.moduleId+'" data-moduletype="'+config.moduleType+'" data-reply="'+data.id+'"   style="margin-left:10px">回复</a>';
+                            	}
                                 if (data.parent) {
-                                    var pnickname = getUsername(data.parent);
-                                    html += '<small style="margin-right:10px">回复' +
-                                        pnickname + ':</small>';
-                                }
-                                html += '<div class="media-content">';
-                                html += data.content;
-                                html += '</div>'
-                                html += '<p><small>' + time +
-                                    '</small>';
-                                if (isLogin) {
-                                	if(!data.admin && !data.ban){
-                                    	html += '<a href="javascript:void(0)" data-ban data-moduletype="'+config.moduleType+'" data-moduleId="'+config.moduleId+'" data-comment="'+data.id+'" style="margin-left:10px">禁IP</a>';
-                                	}
-                                    html += '<a href="javascript:void(0)" data-del data-moduletype="'+config.moduleType+'" data-moduleId="'+config.moduleId+'" data-comment="'+data.id+'" style="margin-left:10px">删除</a>';
-                                }
-                                if (data.status == 'CHECK') {
-                                    html += '<a href="javascript:void(0)" data-check data-moduletype="'+config.moduleType+'" data-moduleId="'+config.moduleId+'" data-comment="'+data.id+'"  style="margin-left:10px">审核</a>';
-                                } else {
-                                	if(config.allowComment || isLogin){
-                                		html += '<a href="javascript:void(0)" data-reply data-moduletype="'+config.moduleType+'" data-moduleId="'+config.moduleId+'" data-comment="'+data.id+'"   style="margin-left:10px">回复</a>';
-                                	}
-                                    if (data.parent) {
-                                        html += '<a href="javascript:void(0)" data-conversations data-moduletype="'+config.moduleType+'" data-moduleId="'+config.moduleId+'" data-comment="'+data.id+'" style="margin-left:10px">查看对话</a>';
-                                    }
-                                }
-                                html += '</p>';
-                                html += '</div>';
-                                html += '</div>';
-                            }
-                        }
-                        if (page.totalPage > 1) {
-                            html += '<nav >';
-                            html += '<ul  class="pagination">';
-                            html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="1"><span aria-hidden="true">&laquo;</span></a></li>';
-                            for (var j = page.listbegin; j < page.listend; j++) {
-                                if (j == page.currentPage) {
-                                    html += '<li class="page-item active"><a class="page-link" href="javascript:void(0)" >' +j + '</a></li>';
-                                } else {
-                                    html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="'+j+'">'+j+'</a></li>';
+                                    html += '<a href="javascript:void(0)" data-moduleId="'+config.moduleId+'" data-moduletype="'+config.moduleType+'" data-conversations="'+data.id+'" style="margin-left:10px">查看对话</a>';
                                 }
                             }
-                            html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="'+page.totalPage+'"><span aria-hidden="true">&raquo;</span></a></a></li>';
-                            html += '</ul>';
-                            html += '</nav>';
+                            html += '</p>';
+                            html += '</div>';
+                            html += '</div>';
                         }
-                        c.html(html);
-                        var afterLoad = config.afterLoad;
-                        if(afterLoad){
-                        	afterLoad(page);
-                        }
-                    } else {
-                        doAlert(data.message);
                     }
-                });
+                    if (page.totalPage > 1) {
+                        html += '<nav >';
+                        html += '<ul  class="pagination flex-wrap">';
+                        html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="1"><span aria-hidden="true">&laquo;</span></a></li>';
+                        for (var j = page.listbegin; j < page.listend; j++) {
+                            if (j == page.currentPage) {
+                                html += '<li class="page-item active"><a class="page-link" href="javascript:void(0)" >' +j + '</a></li>';
+                            } else {
+                                html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="'+j+'">'+j+'</a></li>';
+                            }
+                        }
+                        html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="'+page.totalPage+'"><span aria-hidden="true">&raquo;</span></a></a></li>';
+                        html += '</ul>';
+                        html += '</nav>';
+                    }
+                    c.html(html);
+                    var afterLoad = config.afterLoad;
+                    if(afterLoad){
+                    	afterLoad(page);
+                    }
+                },error:function(){
+                	doAlert('获取评论失败');
+                }
+            });
         }
         
         var commentConfig;
         
         $.ajax({
         	
-        	url : basePath + '/comment/config',
+        	url : basePath + '/api/commentConfig',
         	async : false,
         	success:function(data){
-        		
-        		if(data.success){
-        			commentConfig = data.data;
-        		}
+        		commentConfig = data;
         	}
         	
         });
@@ -581,31 +570,33 @@
                 	}
                 }
                 c.on("click","[data-page]",function(){
-                	config.page = parseInt($(this).attr('data-page'));
+                	config.page = parseInt($(this).data('page'));
                 	loadComment(config);
             	}); 
                 c.on('click',"[data-conversations]",function(){
-                	queryConversations($(this).data('comment'),$(this).data('moduleid'),$(this).data('moduletype'))
+                	queryConversations($(this).data('conversations'),$(this).data('moduleid'),$(this).data('moduletype'))
                 });
                 c.on('click',"[data-del]",function(){
-                	removeComment($(this).data('comment'),function(){
+                	removeComment($(this).data('del'),function(){
+                		swal('删除成功','','success');
                 		loadComment(config);
                 	});
                 });
                 c.on('click',"[data-check]",function(){
-                	checkComment($(this).data('comment'),function(){
+                	checkComment($(this).data('check'),function(){
                 		loadComment(config);
                 	});
                 });
                 
                 c.on('click','[data-ban]',function(){
-                	banComment($(this).data('comment'),function(){
+                	banComment($(this).data('ban'),function(){
+                		swal('禁止成功','','success');
                 		loadComment(config);
                 	});
                 });
                 
                 c.on('click',"[data-reply]",function(){
-                	parentId = $(this).data('comment');
+                	parentId = $(this).data('reply');
                 	moduleId = $(this).data('moduleid');
                 	moduleType = $(this).data('moduletype');
                 	commentFunction = function(){

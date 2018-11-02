@@ -1,0 +1,186 @@
+/*
+ * Copyright 2016 qyh.me
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package me.qyh.blog.plugin.comment.web.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import me.qyh.blog.core.config.Constants;
+import me.qyh.blog.core.context.Environment;
+import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.security.AttemptLogger;
+import me.qyh.blog.core.security.AttemptLoggerManager;
+import me.qyh.blog.core.security.EnsureLogin;
+import me.qyh.blog.core.vo.PageResult;
+import me.qyh.blog.plugin.comment.entity.Comment;
+import me.qyh.blog.plugin.comment.entity.Comment.CommentStatus;
+import me.qyh.blog.plugin.comment.entity.CommentModule;
+import me.qyh.blog.plugin.comment.service.CommentConfig;
+import me.qyh.blog.plugin.comment.service.CommentService;
+import me.qyh.blog.plugin.comment.validator.CommentConfigValidator;
+import me.qyh.blog.plugin.comment.validator.CommentValidator;
+import me.qyh.blog.plugin.comment.vo.IPQueryParam;
+import me.qyh.blog.plugin.comment.vo.PeriodCommentQueryParam;
+import me.qyh.blog.web.security.CaptchaValidator;
+
+@RestController
+@RequestMapping("api")
+public class CommentApi implements InitializingBean {
+
+	@Autowired
+	private CommentService commentService;
+	@Autowired
+	private CommentValidator commentValidator;
+	@Autowired
+	private CaptchaValidator captchaValidator;
+	@Autowired
+	private AttemptLoggerManager attemptLoggerManager;
+
+	@Autowired
+	private CommentConfigValidator commentConfigValidator;
+
+	@InitBinder(value = "commentConfig")
+	protected void initCommentConfigBinder(WebDataBinder binder) {
+		binder.setValidator(commentConfigValidator);
+	}
+
+	@Value("${comment.attempt.count:5}")
+	private int attemptCount;
+
+	@Value("${comment.attempt.maxCount:50}")
+	private int maxAttemptCount;
+
+	@Value("${comment.attempt.sleepSec:300}")
+	private int sleepSec;
+
+	private AttemptLogger attemptLogger;
+
+	@InitBinder(value = "comment")
+	protected void initCommentBinder(WebDataBinder binder) {
+		binder.setValidator(commentValidator);
+	}
+
+	@GetMapping("commentConfig")
+	public CommentConfig getConfig() {
+		return commentService.getCommentConfig();
+	}
+
+	@PostMapping({ "space/{alias}/{type}/{id}/comment", "{type}/{id}/comment" })
+	public ResponseEntity<Comment> addComment(@RequestBody @Validated Comment comment,
+			@PathVariable("type") String type, @PathVariable("id") Integer moduleId, HttpServletRequest req)
+			throws LogicException {
+		if (!Environment.isLogin() && attemptLogger.log(Environment.getIP())) {
+			captchaValidator.doValidate(req);
+		}
+		comment.setCommentModule(new CommentModule(type, moduleId));
+		comment.setIp(Environment.getIP());
+		Comment returned = commentService.insertComment(comment);
+		return ResponseEntity.status(HttpStatus.CREATED).body(returned);
+	}
+
+	@GetMapping({ "space/{alias}/{type}/{id}/comment/{commentId}/conversation",
+			"{type}/{id}/comment/{commentId}/conversation" })
+	public List<Comment> queryConversations(@PathVariable("type") String type, @PathVariable("id") Integer moduleId,
+			@PathVariable("commentId") Integer commentId) throws LogicException {
+		return commentService.queryConversations(new CommentModule(type, moduleId), commentId);
+	}
+
+	@GetMapping("comment/captchaRequirement")
+	public boolean needCaptcha() {
+		return !Environment.isLogin() && attemptLogger.reach(Environment.getIP());
+	}
+
+	@EnsureLogin
+	@DeleteMapping("console/comment/{id}")
+	public ResponseEntity<Void> remove(@PathVariable("id") Integer id) throws LogicException {
+		commentService.deleteComment(id);
+		return ResponseEntity.noContent().build();
+	}
+
+	@EnsureLogin
+	@PostMapping(value = "console/comment/blacklistItem")
+	public ResponseEntity<Void> ban(@RequestParam("id") Integer id) throws LogicException {
+		commentService.banIp(id);
+		return ResponseEntity.noContent().build();
+	}
+
+	@EnsureLogin
+	@DeleteMapping(value = "console/comment/blacklistItem/{ip:.+}")
+	public ResponseEntity<Void> removeBan(@PathVariable("ip") String ip) throws LogicException {
+		commentService.removeBan(ip);
+		return ResponseEntity.noContent().build();
+	}
+
+	@EnsureLogin
+	@GetMapping("console/comment/blacklist")
+	public PageResult<String> blacklist(IPQueryParam param) {
+		if (param.getCurrentPage() < 1) {
+			param.setCurrentPage(1);
+		}
+		param.setPageSize(Constants.DEFAULT_PAGE_SIZE);
+		return commentService.queryBlacklist(param);
+	}
+
+	@EnsureLogin
+	@PatchMapping("console/comment/{id}")
+	public ResponseEntity<Void> check(@PathVariable("id") Integer id, @RequestParam("status") CommentStatus status)
+			throws LogicException {
+		commentService.changeStatus(id, status);
+		return ResponseEntity.noContent().build();
+	}
+
+	@EnsureLogin
+	@PutMapping("console/commentConfig")
+	public ResponseEntity<Void> update(@RequestBody @Validated CommentConfig commentConfig) {
+		commentService.updateCommentConfig(commentConfig);
+		return ResponseEntity.noContent().build();
+	}
+
+	@EnsureLogin
+	@GetMapping("console/comments")
+	public PageResult<Comment> queryAll(PeriodCommentQueryParam param) {
+		if (param.getCurrentPage() < 1) {
+			param.setCurrentPage(1);
+		}
+		param.setPageSize(commentService.getCommentConfig().getPageSize());
+		return commentService.queryAllCommentsByPeriod(param);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		this.attemptLogger = attemptLoggerManager.createAttemptLogger(attemptCount, maxAttemptCount, sleepSec);
+	}
+}

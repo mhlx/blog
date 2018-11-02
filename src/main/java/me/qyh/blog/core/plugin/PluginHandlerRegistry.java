@@ -160,7 +160,7 @@ public class PluginHandlerRegistry
 		pluginHandler.addRequestHandlerMapping(applicationContext.getBean(RequestMappingRegistry.class));
 		pluginHandler.addExceptionHandler(applicationContext.getBean(ExceptionHandlerRegistry.class));
 		pluginHandler.addArticleContentHandler(articleContentHandlerRegistry);
-		pluginHandler.addMenu(MenuRegistry.getInstance());
+		pluginHandler.addIcon(IconRegistry.getInstance());
 		pluginHandler.addFileStore(fileStoreRegistry);
 		pluginHandler.addTemplateInterceptor(applicationContext.getBean(TemplateInterceptorRegistry.class));
 		pluginHandler.addHandlerInterceptor(applicationContext.getBean(HandlerInterceptorRegistry.class));

@@ -17,8 +17,6 @@ package me.qyh.blog.plugin.comment.service;
 
 import java.util.concurrent.TimeUnit;
 
-import com.google.gson.annotations.Expose;
-
 import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.vo.Limit;
 
@@ -31,14 +29,10 @@ import me.qyh.blog.core.vo.Limit;
 public class CommentConfig {
 
 	private Editor editor;// 编辑器
-	@Expose(serialize = false)
 	private Integer limitCount;
-	@Expose(serialize = false)
 	private Integer limitSec;
 	private Boolean check;// 审核
 	private int pageSize;
-
-	@Expose(serialize = false)
 	private String nickname;// 管理员的昵称
 
 	public CommentConfig() {

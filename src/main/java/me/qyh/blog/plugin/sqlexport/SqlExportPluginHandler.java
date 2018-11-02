@@ -11,8 +11,8 @@ import org.springframework.context.ApplicationContext;
 import com.zaxxer.hikari.HikariDataSource;
 
 import me.qyh.blog.core.message.Message;
-import me.qyh.blog.core.plugin.Menu;
-import me.qyh.blog.core.plugin.MenuRegistry;
+import me.qyh.blog.core.plugin.Icon;
+import me.qyh.blog.core.plugin.IconRegistry;
 import me.qyh.blog.core.plugin.PluginHandlerSupport;
 import me.qyh.blog.core.plugin.PluginProperties;
 import me.qyh.blog.core.security.AttemptLogger;
@@ -65,9 +65,10 @@ public class SqlExportPluginHandler extends PluginHandlerSupport {
 	}
 
 	@Override
-	public void addMenu(MenuRegistry registry) throws Exception {
+	public void addIcon(IconRegistry registry) throws Exception {
 		if (ga != null) {
-			registry.addMenu(new Menu(new Message("plugin.sqlexport.menu", "数据库导出"), "mgr/sqlExport"));
+			registry.addIcon(new Icon(new Message("plugin.sqlExport.iconName", "sql导出"),
+					"<i class=\"fas fa-file-export\"></i>", "console/sqlexport"));
 		}
 	}
 

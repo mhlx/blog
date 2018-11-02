@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('插件','')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('plugin')"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+				<div class="row" style="margin-bottom: 10px">
+					<div class="col-md-8 offset-md-2">
+						<div class="table-responsive">
+							<table class="table">
+								<tr>
+									<th></th>
+									<th>插件名</th>
+								</tr>
+								<tr th:each="icon : ${icons}" th:data-url="${icon.relativeUrl}" style="cursor:pointer">
+									<td><i th:utext="${icon.icon}" th:remove="tag"></i></td>
+									<td th:text="${messages.getMessage(icon.name)}"></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+			<footer class="sticky-footer">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright © Your Website 2018</span>
+					</div>
+				</div>
+			</footer>
+
+		</div>
+		<!-- /.content-wrapper -->
+
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Bootstrap core JavaScript-->
+
+	<div th:replace="console/base/foot"></div>
+	<script>
+		$(function() {
+			$('[data-url]').click(function() {
+				var url = $(this).data('url');
+				window.location.href = root + url;
+			})
+		})
+	</script>
+</body>
+
+</html>

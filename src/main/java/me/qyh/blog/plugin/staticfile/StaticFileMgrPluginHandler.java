@@ -6,8 +6,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
 import me.qyh.blog.core.message.Message;
-import me.qyh.blog.core.plugin.Menu;
-import me.qyh.blog.core.plugin.MenuRegistry;
+import me.qyh.blog.core.plugin.Icon;
+import me.qyh.blog.core.plugin.IconRegistry;
 import me.qyh.blog.core.plugin.PluginHandlerSupport;
 import me.qyh.blog.core.plugin.PluginProperties;
 
@@ -44,8 +44,9 @@ public class StaticFileMgrPluginHandler extends PluginHandlerSupport {
 	}
 
 	@Override
-	public void addMenu(MenuRegistry registry) throws Exception {
-		registry.addMenu(new Menu(new Message("plugin.staticfilemgr.menu.index", "静态资源管理"), "mgr/static/index"));
+	public void addIcon(IconRegistry registry) throws Exception {
+		registry.addIcon(new Icon(new Message("plugin.staticFile.iconName", "本地文件管理"), "<i class=\"far fa-file\"></i>",
+				"console/staticFile"));
 	}
 
 	@Override

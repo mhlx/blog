@@ -19,9 +19,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 import me.qyh.blog.core.message.Message;
+import me.qyh.blog.core.plugin.Icon;
+import me.qyh.blog.core.plugin.IconRegistry;
 import me.qyh.blog.core.plugin.LockProviderRegistry;
-import me.qyh.blog.core.plugin.Menu;
-import me.qyh.blog.core.plugin.MenuRegistry;
 import me.qyh.blog.core.plugin.PluginHandlerSupport;
 import me.qyh.blog.core.plugin.TemplateRegistry;
 import me.qyh.blog.core.util.Resources;
@@ -73,8 +73,8 @@ public class SysLockPluginHandler extends PluginHandlerSupport {
 	}
 
 	@Override
-	public void addMenu(MenuRegistry registry) {
-		registry.addMenu(new Menu(new Message("plugin.syslock.menu.mgr", "系统锁管理"), "mgr/lock/sys/index"));
+	public void addIcon(IconRegistry registry) {
+		registry.addIcon(new Icon(new Message("plugin.sysLock.iconName", "本地锁"), "<i class=\"fas fa-lock\"></i>",
+				"console/syslock"));
 	}
-
 }

@@ -37,7 +37,6 @@ import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.RuntimeLogicException;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.message.Messages;
-import me.qyh.blog.core.plugin.MenuRegistry;
 import me.qyh.blog.core.plugin.TemplateRenderHandlerRegistry;
 import me.qyh.blog.core.plugin.TemplateRenderModelRegistry;
 import me.qyh.blog.core.security.AuthencationException;
@@ -158,7 +157,6 @@ public final class TemplateRender
 		if (!CollectionUtils.isEmpty(pros)) {
 			_model.putAll(pros);
 		}
-		_model.put("menus", MenuRegistry.getInstance().getMenus());
 		_model.put("messages", messages);
 		_model.put("urls", Webs.getSpaceUrls(request));
 		_model.put("user", Environment.getUser());

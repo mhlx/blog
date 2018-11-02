@@ -102,11 +102,11 @@ public interface PluginHandler extends Ordered {
 	}
 
 	/**
-	 * 添加管理台菜单
+	 * 添加插件图标
 	 * 
 	 * @param registry
 	 */
-	default void addMenu(MenuRegistry registry) throws Exception {
+	default void addIcon(IconRegistry registry) throws Exception {
 
 	}
 

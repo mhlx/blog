@@ -101,14 +101,6 @@ public abstract class CommentModuleHandler {
 	public abstract int queryCommentNum(Space space, boolean queryPrivate);
 
 	/**
-	 * 根据项目ID查询项目明细
-	 * 
-	 * @param ids
-	 * @return key 項目ID，value 項目明細
-	 */
-	public abstract Map<Integer, Object> getReferences(Collection<Integer> ids);
-
-	/**
 	 * 查询最近的评论
 	 * 
 	 * @param space

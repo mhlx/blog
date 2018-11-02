@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import me.qyh.blog.core.vo.PageQueryParam;
 import me.qyh.blog.plugin.comment.entity.Comment;
+import me.qyh.blog.plugin.comment.entity.Comment.CommentStatus;
 import me.qyh.blog.plugin.comment.entity.CommentModule;
 import me.qyh.blog.plugin.comment.vo.CommentQueryParam;
 import me.qyh.blog.plugin.comment.vo.ModuleCommentCount;
@@ -137,12 +137,11 @@ public interface CommentDao {
 	Comment selectLast(Comment current);
 
 	/**
-	 * 将评论状态由审核变为普通
 	 * 
-	 * @param comment
-	 *            评论
+	 * 改变评论状态
+	 * 
 	 */
-	void updateStatusToNormal(Comment comment);
+	void updateStatus(@Param("id") Integer id, @Param("status") CommentStatus status);
 
 	/**
 	 * 查询模块评论数
@@ -160,21 +159,6 @@ public interface CommentDao {
 	 * @return 评论数
 	 */
 	ModuleCommentCount selectCommentCount(CommentModule module);
-
-	/**
-	 * 查询没有被审核的评论数目
-	 * 
-	 * @return
-	 */
-	int queryUncheckCommentsCount();
-
-	/**
-	 * 分页查询未审核的评论
-	 * 
-	 * @param param
-	 * @return
-	 */
-	List<Comment> queryUncheckComments(PageQueryParam param);
 
 	/**
 	 * @param gravatar
