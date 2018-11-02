@@ -28,7 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.StampedLock;
 
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
@@ -54,7 +54,7 @@ public class PluginProperties {
 		if (!FileUtils.exists(path)) {
 			FileUtils.createFile(path);
 		}
-		proResource = new EncodedResource(new PathResource(path), Constants.CHARSET);
+		proResource = new EncodedResource(new FileSystemResource(path), Constants.CHARSET);
 		try {
 			pros = PropertiesLoaderUtils.loadProperties(proResource);
 			doConvert();

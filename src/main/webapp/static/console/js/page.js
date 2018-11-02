@@ -71,6 +71,10 @@ $(function(){
 		});
 	});
 	
+	$("#query-btn").click(function(){
+		table.reload({query:$("#query").val(),currentPage:1});
+	});
+	
 	$("#pageTable").on("click","[data-edit]",function(){
 		var id = $(this).data('edit');
 		window.location.href = root + 'console/template/page/edit/'+id;

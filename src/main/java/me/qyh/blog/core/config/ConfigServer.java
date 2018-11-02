@@ -23,7 +23,7 @@ import java.util.Properties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +49,7 @@ public class ConfigServer implements InitializingBean {
 		FileUtils.createFile(RES_PATH);
 	}
 
-	private final Resource resource = new PathResource(RES_PATH);
+	private final Resource resource = new FileSystemResource(RES_PATH);
 
 	/**
 	 * 获取全局配置

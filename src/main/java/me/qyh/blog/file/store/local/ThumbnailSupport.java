@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -189,14 +189,14 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 				}
 
 				if (!FileUtils.isRegularFile(poster)) {
-					return Optional.of(new PathResource(local));
+					return Optional.of(new FileSystemResource(local));
 				}
 
 			}
 
 			try {
 				thumbnailator.doResize(poster, resize, file);
-				return FileUtils.exists(file) ? Optional.of(new PathResource(file)) : Optional.empty();
+				return FileUtils.exists(file) ? Optional.of(new FileSystemResource(file)) : Optional.empty();
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				return Optional.empty();
@@ -204,7 +204,7 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 
 		} else {
 			// 直接返回缩略图
-			return Optional.of(new PathResource(file));
+			return Optional.of(new FileSystemResource(file));
 		}
 	}
 
@@ -289,7 +289,8 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 			throw new SystemException("缩略图存储路径不能为null");
 		}
 
-		super.setLocations(List.of(new PathResource(Paths.get(thumbAbsPath)), new PathResource(Paths.get(absPath))));
+		super.setLocations(
+				List.of(new FileSystemResource(Paths.get(thumbAbsPath)), new FileSystemResource(Paths.get(absPath))));
 
 		if (!thumbnailator.supportWebp()) {
 			supportWebp = false;

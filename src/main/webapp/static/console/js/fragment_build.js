@@ -30,7 +30,9 @@
 				swal('获取访问锁失败',data.error,'error');
 			}
 		  })
-	    
+	    $("#beautiful").click(function(){
+	    	editor.format();
+	    })
 	    $("#file").click(
 	        function() {
 	            fileChooser

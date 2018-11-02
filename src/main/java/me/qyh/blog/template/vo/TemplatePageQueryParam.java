@@ -25,9 +25,8 @@ public class TemplatePageQueryParam extends PageQueryParam {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private String query;
 	private Space space;
-	private String alias;
 
 	public Space getSpace() {
 		return space;
@@ -37,20 +36,12 @@ public class TemplatePageQueryParam extends PageQueryParam {
 		this.space = space;
 	}
 
-	public String getName() {
-		return name;
+	public String getQuery() {
+		return query;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getAlias() {
-		return alias;
-	}
-
-	public void setAlias(String alias) {
-		this.alias = alias;
+	public void setQuery(String query) {
+		this.query = query;
 	}
 
 }

@@ -109,6 +109,7 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
 		registry.addResourceHandler("/favicon.ico").setCachePeriod(cacheSec)
 				.addResourceLocations("/static/img/favicon.ico");
 		registry.addResourceHandler("/doc/**").setCachePeriod(cacheSec).addResourceLocations("/doc/");
+		registry.addResourceHandler("/static/**").setCachePeriod(cacheSec).addResourceLocations("/static/");
 	}
 
 	@Override

@@ -48,7 +48,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,7 +129,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 */
 
 	private static final Path RES_PATH = Constants.CONFIG_DIR.resolve("commentConfig.properties");
-	private final Resource configResource = new PathResource(RES_PATH);
+	private final Resource configResource = new FileSystemResource(RES_PATH);
 	private final Properties pros = new Properties();
 
 	private CommentConfig config;
@@ -758,7 +758,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		DefaultBlacklistHandler() {
 			if (FileUtils.exists(json)) {
 				try {
-					String str = Resources.readResourceToString(new PathResource(json));
+					String str = Resources.readResourceToString(new FileSystemResource(json));
 					if (!Validators.isEmptyOrNull(str, false)) {
 						blacklist = new HashSet<>(Jsons.readList(String[].class, str));
 					}

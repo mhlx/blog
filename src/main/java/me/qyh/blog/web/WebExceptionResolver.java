@@ -203,21 +203,14 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
 			RedirectException re = (RedirectException) ex;
 
-			/**
-			 * tomcat 9.0.6+ 设置status不是200再重定向无法显示页面 ？？？
-			 * <p>
-			 * <b>这个bug在tomcat 9.0.9+中被修复了</b>
-			 * </p>
-			 * 
-			 * @since 6.1
-			 */
-			// response.reset();
 			if (Webs.isRestful(request)) {
 				return restfulView(new RedirectInfo(re.getUrl(), re.isPermanently()), HttpStatus.OK);
 			}
 			if (Webs.isAjaxRequest(request)) {
 				return jsonResultView(new RedirectJsonResult(new RedirectInfo(re.getUrl(), re.isPermanently())));
 			}
+
+			response.reset();
 			if (re.isPermanently()) {
 				// 301
 				response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -228,7 +221,9 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 				if (redirectMsg != null) {
 					RequestContextUtils.getOutputFlashMap(request).put("redirect_page_msg", redirectMsg);
 				}
-				return new ModelAndView("redirect:" + re.getUrl());
+				ModelAndView mav = new ModelAndView("redirect:" + re.getUrl());
+				mav.setStatus(HttpStatus.OK);
+				return mav;
 			}
 
 		}

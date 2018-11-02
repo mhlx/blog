@@ -25,8 +25,7 @@ import me.qyh.blog.template.vo.TemplatePageQueryParam;
 @Component
 public class TemplatePageQueryParamValidator implements Validator {
 
-	private static final int MAX_NAME_LENGTH = 20;
-	private static final int MAX_ALIAS_LENGTH = 255;
+	private static final int MAX_QUERY_LENGTH = 255;
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -39,14 +38,9 @@ public class TemplatePageQueryParamValidator implements Validator {
 		if (param.getCurrentPage() < 1) {
 			param.setCurrentPage(1);
 		}
-		String name = param.getName();
-		if (!Validators.isEmptyOrNull(name, true) && param.getName().length() > MAX_NAME_LENGTH) {
-			param.setName(param.getName().substring(0, MAX_NAME_LENGTH));
-		}
-
-		String alias = param.getAlias();
-		if (!Validators.isEmptyOrNull(alias, true) && param.getAlias().length() > MAX_ALIAS_LENGTH) {
-			param.setAlias(param.getAlias().substring(0, MAX_ALIAS_LENGTH));
+		String query = param.getQuery();
+		if (!Validators.isEmptyOrNull(query, true) && param.getQuery().length() > MAX_QUERY_LENGTH) {
+			param.setQuery(param.getQuery().substring(0, MAX_QUERY_LENGTH));
 		}
 	}
 }

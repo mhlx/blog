@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.HttpRequestHandler;
@@ -186,7 +186,8 @@ public abstract class LocalResourceRequestHandlerFileStore extends CustomResourc
 	}
 
 	protected Resource findResource(HttpServletRequest request) throws IOException {
-		return getPath(request).map(absFolder::resolve).filter(FileUtils::exists).map(PathResource::new).orElse(null);
+		return getPath(request).map(absFolder::resolve).filter(FileUtils::exists).map(FileSystemResource::new)
+				.orElse(null);
 	}
 
 	@Override

@@ -82,6 +82,9 @@
 	    $("#lock").click(function() {
 	        $("#lockModal").modal('show')
 	    });
+	    $("#beautiful").click(function(){
+	    	editor.format();
+	    })
 	    $("#page").click(function() {
 	        if (!defaultPages) {
 	            $.ajax({
@@ -465,3 +468,4 @@
 		editor.replaceSelection('<fragment name="'+name+'"/>');
 		$("#lookupModal").modal('hide')
 	}
+	

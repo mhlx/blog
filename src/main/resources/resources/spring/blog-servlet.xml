@@ -53,7 +53,7 @@
 		<property name="animatedWebpConfigure">
 			<bean class="me.qyh.blog.file.store.local.AnimatedWebpConfigure">
 				<constructor-arg index="0" value="1" />
-				<property name="sec" value="20"/>
+				<property name="sec" value="20" />
 			</bean>
 		</property>
 	</bean>
@@ -69,10 +69,10 @@
 		<property name="maxSize" value="960" />
 		<property name="readOnly" value="true" />
 	</bean>
-	
+
 	<bean class="me.qyh.blog.file.store.local.VideoResourceStore2"
 		parent="thumbnailSupport">
-		<constructor-arg index="0" value="960"/>
+		<constructor-arg index="0" value="960" />
 		<property name="absPath" value="/web/file/blog_video2/" />
 		<property name="id" value="5" />
 		<property name="thumbAbsPath"
@@ -138,8 +138,8 @@
 	<!-- class="me.qyh.blog.file.store.local.GravatarResourceHttpRequestHandler"> -->
 	<!-- <constructor-arg index="0" value="/web/file/gravatar" /> -->
 	<!-- </bean> -->
-	
-	
+
+
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 
 	<bean class="me.qyh.blog.web.interceptor.AppInterceptor" />
@@ -151,10 +151,10 @@
 
 	<bean class="me.qyh.blog.web.CookieMemoryLinkFlashMapManager"
 		name="flashMapManager" />
-		
+
 	<bean class="me.qyh.blog.web.RememberMeService">
-		<constructor-arg value="blog"/>
+		<constructor-arg value="blog" />
 	</bean>
-	
+
 
 </beans>

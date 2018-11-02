@@ -27,7 +27,7 @@ import java.util.concurrent.Semaphore;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -143,12 +143,12 @@ public class ImageResourceStore extends ThumbnailSupport {
 		if (ImageHelper.isGIF(ext)) {
 
 			if (!supportWebp(request)) {
-				return Optional.of(new PathResource(path));
+				return Optional.of(new FileSystemResource(path));
 			}
 
 			Path animated = getAnimatedWebpLocation(path);
 			if (FileUtils.exists(animated)) {
-				return Optional.of(new PathResource(animated));
+				return Optional.of(new FileSystemResource(animated));
 			}
 
 			if (animatedWebpConfigure != null && getImageHelper().supportAnimatedWebp()) {
@@ -162,20 +162,20 @@ public class ImageResourceStore extends ThumbnailSupport {
 				}
 				try {
 					getImageHelper().makeAnimatedWebp(animatedWebpConfigure.newAnimatedWebpConfig(), path, animated);
-					return Optional.of(new PathResource(animated));
+					return Optional.of(new FileSystemResource(animated));
 				} catch (IOException e) {
 					logger.debug(e.getMessage(), e);
-					return Optional.of(new PathResource(path));
+					return Optional.of(new FileSystemResource(path));
 				} finally {
 					semaphore.release();
 				}
 
 			} else {
-				return Optional.of(new PathResource(path));
+				return Optional.of(new FileSystemResource(path));
 			}
 		}
 		if (!sourceProtected) {
-			return Optional.of(new PathResource(path));
+			return Optional.of(new FileSystemResource(path));
 		}
 		return Optional.empty();
 	}

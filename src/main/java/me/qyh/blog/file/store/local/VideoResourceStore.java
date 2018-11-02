@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -152,7 +152,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 
 	@Override
 	protected Optional<Resource> handleOriginalFile(String key, Path path, HttpServletRequest request) {
-		return Optional.of(new PathResource(path));
+		return Optional.of(new FileSystemResource(path));
 	}
 
 	@Override

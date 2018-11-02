@@ -24,7 +24,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -101,11 +101,11 @@ public class VideoResourceStore2 extends VideoResourceStore {
 		}
 		Path compress = getCompress(key, path);
 		if (FileUtils.exists(compress)) {
-			return Optional.of(new PathResource(compress));
+			return Optional.of(new FileSystemResource(compress));
 		}
 		synchronized (this) {
 			if (FileUtils.exists(compress)) {
-				return Optional.of(new PathResource(compress));
+				return Optional.of(new FileSystemResource(compress));
 			}
 			try {
 				compress(getVideoInfo(path), path, compress);
@@ -114,7 +114,7 @@ public class VideoResourceStore2 extends VideoResourceStore {
 				return Optional.empty();
 			}
 		}
-		return Optional.of(new PathResource(compress));
+		return Optional.of(new FileSystemResource(compress));
 	}
 
 	@Override

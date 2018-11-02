@@ -91,11 +91,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 					</otherwise>
 				</choose>
 			</if>
-			<if test="name != null and name != ''">
-				AND page_name LIKE CONCAT('%', #{name},'%')
-			</if>
-			<if test="alias != null and alias != ''">
-				AND page_alias LIKE CONCAT('%', #{alias},'%')
+			<if test="query != null and query != ''">
+				AND (page_name LIKE CONCAT('%', #{query},'%') OR page_alias LIKE CONCAT('%', #{query},'%'))
 			</if>
 		</where>
 		ORDER BY page_create_date DESC,bpu.id DESC
@@ -118,11 +115,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 					</otherwise>
 				</choose>
 			</if>
-			<if test="name != null and name != ''">
-				AND page_name LIKE CONCAT('%', #{name},'%')
-			</if>
-			<if test="alias != null and alias != ''">
-				AND page_alias LIKE CONCAT('%', #{alias},'%')
+			<if test="query != null and query != ''">
+				AND (page_name LIKE CONCAT('%', #{query},'%') OR page_alias LIKE CONCAT('%', #{query},'%'))
 			</if>
 		</where>
 	</select>

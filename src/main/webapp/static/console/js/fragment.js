@@ -56,3 +56,7 @@ var table = datatable("fragmentTable", {
 		var id = $(this).data('edit');
 		window.location.href = root + 'console/template/fragment/edit/'+id;
 	});
+	
+	$("#query-btn").click(function(){
+		table.reload({name:$("#query").val(),currentPage:1});
+	});
