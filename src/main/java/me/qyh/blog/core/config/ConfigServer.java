@@ -40,6 +40,7 @@ public class ConfigServer implements InitializingBean {
 	private static final String PAGE_SIZE_ARICLE = "pagesize.article";
 	private static final String PAGE_SIZE_TAG = "pagesize.tag";
 	private static final String PAGE_SIZE_NEWS = "pagesize.news";
+	private static final String PAGE_SIZE_ARTICLE_ARCHIVE = "pagesize.articleArchive";
 
 	private final Properties config = new Properties();
 
@@ -65,7 +66,7 @@ public class ConfigServer implements InitializingBean {
 		config.setPagePageSize(getInt(PAGE_SIZE_USERPAGE, 5));
 		config.setFragmentPageSize(getInt(PAGE_SIZE_USERFRAGEMENT, 5));
 		config.setNewsPageSize(getInt(PAGE_SIZE_NEWS, 5));
-
+		config.setArticleArchivePageSize(getInt(PAGE_SIZE_ARTICLE_ARCHIVE, 5));
 		return config;
 	}
 

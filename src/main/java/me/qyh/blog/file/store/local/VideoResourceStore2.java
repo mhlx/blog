@@ -34,7 +34,7 @@ import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.file.entity.CommonFile;
 
 /**
- * @since 6.7
+ * @since 7.0
  * @author wwwqyhme
  *
  */

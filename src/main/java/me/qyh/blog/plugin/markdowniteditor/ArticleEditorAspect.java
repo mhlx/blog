@@ -14,7 +14,7 @@ class ArticleEditorAspect {
 	public Object write(ProceedingJoinPoint joinPoint) throws Throwable {
 		Object proceed = joinPoint.proceed();
 		/**
-		 * @since 6.7
+		 * @since 7.0
 		 */
 		Model model = (Model) joinPoint.getArgs()[1];
 		if (model.asMap().get("article") != null) {

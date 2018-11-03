@@ -76,7 +76,7 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 	/**
 	 * 设置pngQuant的根目录路径(windows)，用于压缩PNG图片
 	 * 
-	 * @since 6.7
+	 * @since 7.0
 	 */
 	private String pngQuantDirPath;
 

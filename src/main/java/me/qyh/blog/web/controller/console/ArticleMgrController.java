@@ -78,7 +78,7 @@ public class ArticleMgrController extends BaseMgrController {
 		model.addAttribute("editor", Editor.MD.name());
 		model.addAttribute("article", new Article());
 		/**
-		 * @since 6.7
+		 * @since 7.0
 		 */
 		// if (Editor.MD.equals(editor)) {
 		return "console/article/write/new_md";
@@ -106,7 +106,7 @@ public class ArticleMgrController extends BaseMgrController {
 		model.addAttribute("spaces", spaceService.querySpace(new SpaceQueryParam()));
 		model.addAttribute("editor", Editor.MD.name());
 		/**
-		 * @since 6.7
+		 * @since 7.0
 		 */
 		// if (Editor.MD.equals(article.getEditor())) {
 		return "console/article/write/new_md";

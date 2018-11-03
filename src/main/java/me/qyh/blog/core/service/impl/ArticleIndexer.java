@@ -607,7 +607,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 				int limit = getPageSize();
 				List<Article> articles;
 				List<Document> documents = new ArrayList<>();
-				while (!(articles = articleDao.selectPublishedPage(offset, limit)).isEmpty()) {
+				while (!(articles = articleDao.selectPublishedByPage(offset, limit)).isEmpty()) {
 					offset += limit;
 					for (Article article : articles) {
 						documents.add(buildDocument(article));

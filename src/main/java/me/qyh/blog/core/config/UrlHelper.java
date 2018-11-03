@@ -247,7 +247,7 @@ public class UrlHelper {
 		/**
 		 * 根据相对地址获取完整的地址
 		 * 
-		 * @since 6.7
+		 * @since 7.0
 		 * @param relativeUrl
 		 * @return
 		 */

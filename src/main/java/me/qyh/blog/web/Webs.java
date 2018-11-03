@@ -222,7 +222,7 @@ public class Webs {
 	 * 
 	 * @param request
 	 * @return
-	 * @since 6.7
+	 * @since 7.0
 	 */
 	public static boolean isRestful(HttpServletRequest request) {
 		String path = request.getRequestURI().substring(request.getContextPath().length());

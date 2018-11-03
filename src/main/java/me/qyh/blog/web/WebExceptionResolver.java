@@ -340,7 +340,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 				 */
 				ServletRequestBindingException.class,
 				/**
-				 * @since 6.7
+				 * @since 7.0
 				 */
 				InvalidPropertyException.class };
 

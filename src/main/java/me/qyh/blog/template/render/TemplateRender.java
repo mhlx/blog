@@ -93,7 +93,7 @@ public final class TemplateRender
 				}
 			}
 			/**
-			 * @since 6.7
+			 * @since 7.0
 			 */
 			Map<String, Map<String, String>> namedRenderHandlers = ParseContextHolder.getContext()
 					.getNamedRenderHandlers();

@@ -24,8 +24,8 @@ import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.security.AuthencationException;
-import me.qyh.blog.core.vo.ArticleArchiveTree;
-import me.qyh.blog.core.vo.ArticleArchiveTree.ArticleArchiveMode;
+import me.qyh.blog.core.vo.ArticleArchive;
+import me.qyh.blog.core.vo.ArticleArchivePageQueryParam;
 import me.qyh.blog.core.vo.ArticleDetailStatistics;
 import me.qyh.blog.core.vo.ArticleNav;
 import me.qyh.blog.core.vo.ArticleQueryParam;
@@ -169,9 +169,9 @@ public interface ArticleService {
 	 * 查询文章归档
 	 * 
 	 * @param
-	 * @return 年月日归档
+	 * @since 7.0
 	 */
-	ArticleArchiveTree selectArticleArchives(ArticleArchiveMode mode);
+	PageResult<ArticleArchive> selectArticleArchives(ArticleArchivePageQueryParam param);
 
 	/**
 	 * 统计某个空间下的文章
@@ -191,6 +191,7 @@ public interface ArticleService {
 	/**
 	 * 更改文章的状态
 	 * 
+	 * @since 7.0
 	 * @param id
 	 * @param status
 	 * @throws LogicException

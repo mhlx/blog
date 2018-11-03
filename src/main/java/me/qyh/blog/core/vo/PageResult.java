@@ -130,4 +130,13 @@ public class PageResult<T> {
 		countListbeginAndListend();
 	}
 
+	/**
+	 * @since 7.0
+	 * @param param
+	 * @return
+	 */
+	public static <T> PageResult<T> empty(PageQueryParam param) {
+		return new PageResult<>(param, 0, new ArrayList<>());
+	}
+
 }

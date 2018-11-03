@@ -5,7 +5,7 @@ package org.thymeleaf.standard.expression;
  * 禁用thymeleaf 3.0.10限制模式
  * </p>
  * 
- * @since 6.7
+ * @since 7.0
  * @author wwwqyhme
  *
  */

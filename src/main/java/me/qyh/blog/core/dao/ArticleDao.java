@@ -23,6 +23,7 @@ import org.apache.ibatis.annotations.Param;
 
 import me.qyh.blog.core.entity.Article;
 import me.qyh.blog.core.entity.Space;
+import me.qyh.blog.core.vo.ArticleArchivePageQueryParam;
 import me.qyh.blog.core.vo.ArticleQueryParam;
 import me.qyh.blog.core.vo.ArticleSpaceStatistics;
 import me.qyh.blog.core.vo.ArticleStatistics;
@@ -41,13 +42,6 @@ public interface ArticleDao {
 	 * @return 文章，如果id对应的文章不存在，返回null
 	 */
 	Article selectById(int id);
-
-	/**
-	 * 查询所有的文章
-	 * 
-	 * @return 文章<b>只保留了用于构造访问连接的基本信息，并且没有进行任何排序</b>
-	 */
-	List<Article> selectSimplePublished(@Param("space") Space space, @Param("queryPrivate") boolean queryPrivate);
 
 	/**
 	 * 查询截至日期前的待发布文章
@@ -276,6 +270,23 @@ public interface ArticleDao {
 	 * @param limit
 	 * @return
 	 */
-	List<Article> selectPublishedPage(@Param("offset") int offset, @Param("limit") int limit);
+	List<Article> selectPublishedByPage(@Param("offset") int offset, @Param("limit") int limit);
 
+	/**
+	 * 分页查询文章归档日期
+	 * 
+	 * @param param
+	 * @return
+	 * @since 7.0
+	 */
+	List<String> selectArchiveDays(ArticleArchivePageQueryParam param);
+
+	/**
+	 * 查询文章归档日期数
+	 * 
+	 * @param param
+	 * @return
+	 * @since 7.0
+	 */
+	int selectArchiveDaysCount(ArticleArchivePageQueryParam param);
 }

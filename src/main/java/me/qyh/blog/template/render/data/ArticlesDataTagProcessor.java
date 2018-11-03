@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.MapBindingResult;
 
 import me.qyh.blog.core.config.ConfigServer;
-import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.entity.Article;
 import me.qyh.blog.core.entity.Article.ArticleFrom;
 import me.qyh.blog.core.entity.Article.ArticleStatus;
@@ -97,9 +96,7 @@ public class ArticlesDataTagProcessor extends DataTagProcessor<PageResult<Articl
 
 		attributes.getBoolean("ignorePaging").ifPresent(param::setIgnorePaging);
 
-		if (Environment.isLogin()) {
-			param.setQueryPrivate(attributes.getBoolean("queryPrivate").orElse(true));
-		}
+		param.setQueryPrivate(attributes.getBoolean("queryPrivate").orElse(true));
 
 		param.setSpace(getCurrentSpace());
 		param.setStatus(ArticleStatus.PUBLISHED);

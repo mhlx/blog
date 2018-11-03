@@ -50,6 +50,8 @@ public class GlobalConfig {
 
 	private int newsPageSize;
 
+	private int articleArchivePageSize;
+
 	public int getFilePageSize() {
 		return filePageSize;
 	}
@@ -97,4 +99,13 @@ public class GlobalConfig {
 	public void setNewsPageSize(int newsPageSize) {
 		this.newsPageSize = newsPageSize;
 	}
+
+	public int getArticleArchivePageSize() {
+		return articleArchivePageSize;
+	}
+
+	public void setArticleArchivePageSize(int articleArchivePageSize) {
+		this.articleArchivePageSize = articleArchivePageSize;
+	}
+
 }

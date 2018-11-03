@@ -121,7 +121,7 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
 				toRemove = converter;
 				break;
 			}
-			// @since 6.7
+			// @since 7.0
 			if (converter instanceof StringHttpMessageConverter) {
 				StringHttpMessageConverter shmc = (StringHttpMessageConverter) converter;
 				shmc.setDefaultCharset(Constants.CHARSET);

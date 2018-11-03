@@ -216,7 +216,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			</otherwise>
 		</choose>
 		art.id DESC
-		<if test="pageSize > 0">
+		<if test="pageSize > 0 and !ignorePaging">
 			LIMIT #{offset},#{pageSize}
 		</if>
 	</select>
@@ -227,33 +227,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<foreach collection="collection" item="id" open="(" close=")"
 			separator=",">#{id}</foreach>
 		GROUP BY art.id
-	</select>
-
-	<select id="selectSimplePublished" resultMap="ArticleDetail">
-		SELECT
-		art.id AS art_id,
-		art.art_alias,
-		art.title,
-		art.hits,
-		art.pubDate,
-		art.lastModifyDate,
-		sp.space_alias,
-		
-		art.isPrivate,
-		art.art_lock,
-		space_lock,
-		sp.is_private AS space_is_private
-		
-		FROM blog_article art
-		LEFT OUTER JOIN blog_space sp ON art.space_id = sp.id
-		WHERE art.art_status = 0
-		<if test="space != null">
-			AND space_id = #{space.id}
-		</if>
-		<if test="!queryPrivate">
-			AND art.isPrivate = false
-			AND sp.is_private = false
-		</if>
 	</select>
 
 	<select id="selectScheduled" resultMap="ArticleDetail">
@@ -495,12 +468,41 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		GROUP BY space_id
 	</select>
 	
-	<select id="selectPublishedPage" resultMap="ArticleDetail">
+	<select id="selectPublishedByPage" resultMap="ArticleDetail">
 		<include refid="articleDetailSql"></include>
 		WHERE art.art_status = 0
 		GROUP BY art.id
 		ORDER BY art.id
 		LIMIT #{offset},#{limit}
+	</select>
+	
+	
+	<select id="selectArchiveDays" resultType="string">
+		select distinct(substr(pubDate,1,10)) as c from blog_article art LEFT OUTER JOIN blog_space sp
+		on art.space_id = sp.id
+		where art_status = 0
+		<if test="space != null">
+			AND art.space_id = #{space.id}
+		</if>
+		<if test="!queryPrivate">
+			AND art.isPrivate = false
+			AND sp.is_private = false
+		</if>
+		order by pubDate desc,art.id desc
+		LIMIT #{offset},#{pageSize}
+	</select>
+	
+	<select id="selectArchiveDaysCount" resultType="int">
+		select count(distinct(substr(pubDate,1,10)))  from blog_article art LEFT OUTER JOIN blog_space sp
+		on art.space_id = sp.id
+		where art_status = 0
+		<if test="space != null">
+			AND art.space_id = #{space.id}
+		</if>
+		<if test="!queryPrivate">
+			AND art.isPrivate = false
+			AND sp.is_private = false
+		</if>
 	</select>
 
 	<sql id="articleDetailSql">

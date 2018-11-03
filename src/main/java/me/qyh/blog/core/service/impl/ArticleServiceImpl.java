@@ -16,6 +16,7 @@
 package me.qyh.blog.core.service.impl;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,12 +71,14 @@ import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.Markdown2Html;
+import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.util.Validators;
-import me.qyh.blog.core.vo.ArticleArchiveTree;
-import me.qyh.blog.core.vo.ArticleArchiveTree.ArticleArchiveMode;
+import me.qyh.blog.core.vo.ArticleArchive;
+import me.qyh.blog.core.vo.ArticleArchivePageQueryParam;
 import me.qyh.blog.core.vo.ArticleDetailStatistics;
 import me.qyh.blog.core.vo.ArticleNav;
 import me.qyh.blog.core.vo.ArticleQueryParam;
+import me.qyh.blog.core.vo.ArticleQueryParam.Sort;
 import me.qyh.blog.core.vo.ArticleStatistics;
 import me.qyh.blog.core.vo.PageResult;
 import me.qyh.blog.core.vo.SpaceQueryParam;
@@ -529,9 +532,52 @@ public class ArticleServiceImpl
 
 	@Override
 	@Transactional(readOnly = true)
-	public ArticleArchiveTree selectArticleArchives(ArticleArchiveMode mode) {
-		List<Article> articles = articleDao.selectSimplePublished(Environment.getSpace(), Environment.isLogin());
-		return new ArticleArchiveTree(articles, mode == null ? ArticleArchiveMode.YMD : mode);
+	public PageResult<ArticleArchive> selectArticleArchives(ArticleArchivePageQueryParam param) {
+		if (param.isQueryPrivate()) {
+			param.setQueryPrivate(Environment.isLogin());
+		}
+		param.setSpace(Environment.getSpace());
+
+		int count = articleDao.selectArchiveDaysCount(param);
+		List<String> days = articleDao.selectArchiveDays(param);
+		Timestamp begin, end;
+		int size = days.size();
+		if (size == 0) {
+			return new PageResult<>(param, count, new ArrayList<>());
+		}
+		if (size == 1) {
+			String day = days.get(0);
+			LocalDate localDate = LocalDate.parse(day);
+			begin = Timestamp.valueOf(localDate.atStartOfDay());
+			end = Timestamp.valueOf(localDate.plusDays(1).atStartOfDay());
+		} else {
+			String max = days.get(0);
+			String min = days.get(size - 1);
+
+			begin = Timestamp.valueOf(LocalDate.parse(min).atStartOfDay());
+			end = Timestamp.valueOf(LocalDate.parse(max).plusDays(1).atStartOfDay());
+		}
+
+		ArticleQueryParam ap = new ArticleQueryParam();
+		ap.setIgnoreLevel(true);
+		ap.setIgnorePaging(true);
+		ap.setBegin(begin);
+		ap.setEnd(end);
+		ap.setQueryPrivate(param.isQueryPrivate());
+		ap.setSort(Sort.PUBDATE);
+		ap.setSpace(param.getSpace());
+		ap.setStatus(ArticleStatus.PUBLISHED);
+
+		List<Article> articles = articleDao.selectPage(ap);
+
+		Map<String, List<Article>> map = articles.stream().collect(Collectors.groupingBy(art -> {
+			Date pub = art.getPubDate();
+			return Times.format(pub, "yyyy-MM-dd");
+		}));
+
+		List<ArticleArchive> archives = days.stream().map(d -> new ArticleArchive(d, map.get(d)))
+				.collect(Collectors.toList());
+		return new PageResult<>(param, count, archives);
 	}
 
 	@Override
