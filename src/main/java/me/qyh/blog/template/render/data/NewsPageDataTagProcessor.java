@@ -15,20 +15,20 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.config.ConfigServer;
-import me.qyh.blog.core.context.Environment;
-import me.qyh.blog.core.entity.News;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.service.NewsService;
-import me.qyh.blog.core.util.Times;
-import me.qyh.blog.core.vo.NewsQueryParam;
+import me.qyh.blog.core.vo.NewsArchive;
+import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
 import me.qyh.blog.core.vo.PageResult;
 
-public class NewsPageDataTagProcessor extends DataTagProcessor<PageResult<News>> {
+public class NewsPageDataTagProcessor extends DataTagProcessor<PageResult<NewsArchive>> {
 
 	@Autowired
 	private NewsService newsService;
@@ -40,17 +40,18 @@ public class NewsPageDataTagProcessor extends DataTagProcessor<PageResult<News>>
 	}
 
 	@Override
-	protected PageResult<News> query(Attributes attributes) throws LogicException {
-		NewsQueryParam param = new NewsQueryParam();
-		String beginStr = attributes.getString("begin").orElse(null);
-		String endStr = attributes.getString("end").orElse(null);
-		if (beginStr != null && endStr != null) {
-			param.setBegin(Times.parseAndGetDate(beginStr));
-			param.setEnd(Times.parseAndGetDate(endStr));
+	protected PageResult<NewsArchive> query(Attributes attributes) throws LogicException {
+		NewsArchivePageQueryParam param = new NewsArchivePageQueryParam();
+		String ymd = attributes.getString("ymd").orElse(null);
+		if (ymd != null) {
+			try {
+				LocalDate.parse(ymd);
+			} catch (DateTimeParseException e) {
+				ymd = null;
+			}
 		}
-		if (Environment.isLogin()) {
-			param.setQueryPrivate(attributes.getBoolean("queryPrivate").orElse(true));
-		}
+		param.setYmd(ymd);
+		param.setQueryPrivate(attributes.getBoolean("queryPrivate").orElse(true));
 		attributes.getString("content").ifPresent(param::setContent);
 		param.setAsc(attributes.getBoolean("asc").orElse(false));
 		param.setPageSize(attributes.getInteger("pageSize").orElse(0));
@@ -65,11 +66,11 @@ public class NewsPageDataTagProcessor extends DataTagProcessor<PageResult<News>>
 			param.setPageSize(pageSize);
 		}
 
-		return newsService.queryNews(param);
+		return newsService.queryNewsArchive(param);
 	}
 
 	@Override
 	public List<String> getAttributes() {
-		return List.of("begin", "end", "queryPrivate", "asc", "pageSize", "currentPage");
+		return List.of("ymd", "queryPrivate", "asc", "pageSize", "currentPage");
 	}
 }

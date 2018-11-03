@@ -60,14 +60,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news WHERE id = #{id}
 	</select>
 
-	<select id="selectByIds" resultMap="NewsDetail">
-		SELECT
-		id,news_content,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
-		WHERE id IN
-		<foreach collection="collection" item="id" open="(" close=")"
-			separator=",">#{id}</foreach>
-	</select>
-	
 	<select id="selectPage" resultMap="NewsDetail">
 		SELECT id,news_content,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
 		<where>
@@ -86,13 +78,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</where>
 		<choose>
 			<when test="asc">
-				ORDER BY news_write
+				ORDER BY news_write,id
 			</when>
 			<otherwise>
 				ORDER BY news_write DESC,id DESC
 			</otherwise>
 		</choose>
-		LIMIT #{offset},#{pageSize}
+		<if test="!ignorePaging">
+			LIMIT #{offset},#{pageSize}
+		</if>
 	</select>
 	
 	<select id="selectCount" resultType="int">
@@ -185,4 +179,57 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		UPDATE blog_news SET news_lock = NULL WHERE
 		news_lock = #{lockId}
 	</update>
+	
+	<select id="selectNewsDaysCount" resultType="int">
+		select count(distinct(substr(news_write,1,10)))  from blog_news
+		<where>
+			<if test="!queryPrivate">
+				 news_private = false
+			</if>
+			<if test="content != null and content != ''">
+				AND news_content  LIKE CONCAT('%', #{content},'%')
+			</if>
+			<if test="ymd != null">
+				<choose>
+					<when test="asc">
+						AND substr(news_write,1,10) > #{ymd}
+					</when>
+					<otherwise>
+						AND substr(news_write,1,10) <![CDATA[ < ]]> #{ymd}
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectNewsDays" resultType="string">
+		select distinct(substr(news_write,1,10))  from blog_news
+		<where>
+			<if test="!queryPrivate">
+				 news_private = false
+			</if>
+			<if test="content != null and content != ''">
+				AND news_content  LIKE CONCAT('%', #{content},'%')
+			</if>
+			<if test="ymd != null">
+				<choose>
+					<when test="asc">
+						AND substr(news_write,1,10) > #{ymd}
+					</when>
+					<otherwise>
+						AND substr(news_write,1,10) <![CDATA[ < ]]> #{ymd}
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+		<choose>
+			<when test="asc">
+				ORDER BY news_write,id
+			</when>
+			<otherwise>
+				ORDER BY news_write DESC,id DESC
+			</otherwise>
+		</choose>
+		LIMIT #{offset},#{pageSize}
+	</select>
 </mapper>

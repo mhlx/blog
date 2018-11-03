@@ -15,12 +15,12 @@
  */
 package me.qyh.blog.core.dao;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
 import me.qyh.blog.core.entity.News;
+import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
 import me.qyh.blog.core.vo.NewsQueryParam;
 import me.qyh.blog.core.vo.NewsStatistics;
 
@@ -70,12 +70,6 @@ public interface NewsDao {
 	void insert(News news);
 
 	void update(News news);
-
-	/**
-	 * @param ids
-	 * @return
-	 */
-	List<News> selectByIds(Collection<Integer> ids);
 
 	/**
 	 * @since 6.1
@@ -128,5 +122,23 @@ public interface NewsDao {
 	 * @param id
 	 */
 	void deleteLock(String id);
+
+	/**
+	 * 分页查询动态归档日期
+	 * 
+	 * @param param
+	 * @return
+	 * @since 7.0
+	 */
+	List<String> selectNewsDays(NewsArchivePageQueryParam param);
+
+	/**
+	 * 查询动态归档日期数
+	 * 
+	 * @param param
+	 * @return
+	 * @since 7.0
+	 */
+	int selectNewsDaysCount(NewsArchivePageQueryParam param);
 
 }

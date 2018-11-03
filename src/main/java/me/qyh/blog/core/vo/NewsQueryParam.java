@@ -33,6 +33,7 @@ public class NewsQueryParam extends PageQueryParam {
 	private boolean asc;
 	private String content;
 	private boolean queryLock = true;
+	private boolean ignorePaging;
 
 	public NewsQueryParam() {
 		super();
@@ -92,6 +93,14 @@ public class NewsQueryParam extends PageQueryParam {
 
 	public void setQueryLock(boolean queryLock) {
 		this.queryLock = queryLock;
+	}
+
+	public boolean isIgnorePaging() {
+		return ignorePaging;
+	}
+
+	public void setIgnorePaging(boolean ignorePaging) {
+		this.ignorePaging = ignorePaging;
 	}
 
 }

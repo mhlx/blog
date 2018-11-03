@@ -1,16 +1,15 @@
 package me.qyh.blog.core.vo;
 
-import me.qyh.blog.core.entity.Space;
-
-public class ArticleArchivePageQueryParam extends PageQueryParam {
+public class NewsArchivePageQueryParam extends PageQueryParam {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private boolean queryPrivate;// 查询私人博客
-	private Space space;
+	private boolean queryPrivate;
+	private boolean asc;
+	private String content;
 	private String ymd;
 
 	public boolean isQueryPrivate() {
@@ -21,12 +20,20 @@ public class ArticleArchivePageQueryParam extends PageQueryParam {
 		this.queryPrivate = queryPrivate;
 	}
 
-	public Space getSpace() {
-		return space;
+	public boolean isAsc() {
+		return asc;
 	}
 
-	public void setSpace(Space space) {
-		this.space = space;
+	public void setAsc(boolean asc) {
+		this.asc = asc;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public String getYmd() {

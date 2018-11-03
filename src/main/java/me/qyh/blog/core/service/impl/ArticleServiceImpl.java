@@ -540,11 +540,11 @@ public class ArticleServiceImpl
 
 		int count = articleDao.selectArchiveDaysCount(param);
 		List<String> days = articleDao.selectArchiveDays(param);
-		Timestamp begin, end;
 		int size = days.size();
 		if (size == 0) {
 			return new PageResult<>(param, count, new ArrayList<>());
 		}
+		Timestamp begin, end;
 		if (size == 1) {
 			String day = days.get(0);
 			LocalDate localDate = LocalDate.parse(day);

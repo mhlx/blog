@@ -15,6 +15,8 @@
  */
 package me.qyh.blog.template.render.data;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,15 @@ public class ArticleArchivesDataTagProcessor extends DataTagProcessor<PageResult
 	@Override
 	protected PageResult<ArticleArchive> query(Attributes attributes) throws LogicException {
 		ArticleArchivePageQueryParam param = new ArticleArchivePageQueryParam();
+		String ymd = attributes.getString("ymd").orElse(null);
+		if (ymd != null) {
+			try {
+				LocalDate.parse(ymd);
+			} catch (DateTimeParseException e) {
+				ymd = null;
+			}
+		}
+		param.setYmd(ymd);
 		param.setQueryPrivate(attributes.getBoolean("queryPrivate").orElse(true));
 		param.setPageSize(attributes.getInteger("pageSize").orElse(0));
 		int pageSize = configServer.getGlobalConfig().getArticleArchivePageSize();
@@ -58,7 +69,7 @@ public class ArticleArchivesDataTagProcessor extends DataTagProcessor<PageResult
 
 	@Override
 	public List<String> getAttributes() {
-		return List.of("currentPage", "pageSize", "queryPrivate");
+		return List.of("currentPage", "pageSize", "queryPrivate", "ymd");
 	}
 
 }

@@ -488,6 +488,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			AND art.isPrivate = false
 			AND sp.is_private = false
 		</if>
+		<if test="ymd != null">
+			AND substr(pubDate,1,10) <![CDATA[ < ]]> #{ymd}
+		</if>
 		order by pubDate desc,art.id desc
 		LIMIT #{offset},#{pageSize}
 	</select>
@@ -502,6 +505,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<if test="!queryPrivate">
 			AND art.isPrivate = false
 			AND sp.is_private = false
+		</if>
+		<if test="ymd != null">
+			AND substr(pubDate,1,10) <![CDATA[ < ]]> #{ymd}
 		</if>
 	</select>
 

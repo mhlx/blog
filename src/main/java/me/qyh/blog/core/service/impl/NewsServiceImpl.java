@@ -16,6 +16,9 @@
 package me.qyh.blog.core.service.impl;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +48,8 @@ import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.service.NewsService;
 import me.qyh.blog.core.util.Times;
+import me.qyh.blog.core.vo.NewsArchive;
+import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
 import me.qyh.blog.core.vo.NewsNav;
 import me.qyh.blog.core.vo.NewsQueryParam;
 import me.qyh.blog.core.vo.NewsStatistics;
@@ -241,6 +246,58 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	@EventListener
 	public void handleLockDeleteEvent(LockDelEvent event) {
 		newsDao.deleteLock(event.getLock().getId());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResult<NewsArchive> queryNewsArchive(NewsArchivePageQueryParam param) {
+		if (param.isQueryPrivate()) {
+			param.setQueryPrivate(Environment.isLogin());
+		}
+
+		int count = newsDao.selectNewsDaysCount(param);
+		List<String> days = newsDao.selectNewsDays(param);
+		int size = days.size();
+		if (size == 0) {
+			return new PageResult<>(param, count, new ArrayList<>());
+		}
+		Timestamp begin, end;
+		if (size == 1) {
+			String day = days.get(0);
+			LocalDate localDate = LocalDate.parse(day);
+			begin = Timestamp.valueOf(localDate.atStartOfDay());
+			end = Timestamp.valueOf(localDate.plusDays(1).atStartOfDay());
+		} else {
+			String max, min;
+			if (param.isAsc()) {
+				max = days.get(size - 1);
+				min = days.get(0);
+			} else {
+				max = days.get(0);
+				min = days.get(size - 1);
+			}
+			begin = Timestamp.valueOf(LocalDate.parse(min).atStartOfDay());
+			end = Timestamp.valueOf(LocalDate.parse(max).plusDays(1).atStartOfDay());
+		}
+
+		NewsQueryParam np = new NewsQueryParam();
+		np.setIgnorePaging(true);
+		np.setBegin(begin);
+		np.setEnd(end);
+		np.setContent(param.getContent());
+		np.setAsc(param.isAsc());
+		np.setQueryPrivate(param.isQueryPrivate());
+
+		List<News> newses = newsDao.selectPage(np);
+		Map<String, List<News>> map = newses.stream().collect(Collectors.groupingBy(news -> {
+			Date date = news.getWrite();
+			return Times.format(date, "yyyy-MM-dd");
+		}));
+
+		List<NewsArchive> archives = days.stream().map(d -> new NewsArchive(d, map.get(d)))
+				.collect(Collectors.toList());
+
+		return new PageResult<>(param, count, archives);
 	}
 
 }

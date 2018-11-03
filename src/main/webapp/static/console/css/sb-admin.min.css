@@ -7,6 +7,17 @@ th{
 .template-upload .preview video{
 	max-height:100px;
 }
+.wrap{
+    -ms-word-break: break-all;
+    word-break: break-all;
+    /* Non standard for webkit */
+    word-break: break-word;
+
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+}
 /*!
  * Start Bootstrap - SB Admin v5.0.2 (https://startbootstrap.com/template-overviews/sb-admin)
  * Copyright 2013-2018 Start Bootstrap

@@ -36,9 +36,10 @@ import me.qyh.blog.core.config.ConfigServer;
 import me.qyh.blog.core.entity.News;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.service.NewsService;
-import me.qyh.blog.core.validator.NewsQueryParamValidator;
+import me.qyh.blog.core.validator.NewsArchivePageQueryParamValidator;
 import me.qyh.blog.core.validator.NewsValidator;
-import me.qyh.blog.core.vo.NewsQueryParam;
+import me.qyh.blog.core.vo.NewsArchive;
+import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
 import me.qyh.blog.core.vo.PageResult;
 import me.qyh.blog.web.controller.console.BaseMgrController;
 
@@ -50,7 +51,7 @@ public class NewsConsole extends BaseMgrController {
 	@Autowired
 	private NewsService newsService;
 	@Autowired
-	private NewsQueryParamValidator newsQueryParamValidator;
+	private NewsArchivePageQueryParamValidator newsArchivePageQueryParamValidator;
 	@Autowired
 	private ConfigServer configServer;
 
@@ -59,16 +60,16 @@ public class NewsConsole extends BaseMgrController {
 		binder.setValidator(newsValidator);
 	}
 
-	@InitBinder(value = "newsQueryParam")
+	@InitBinder(value = "newsArchivePageQueryParam")
 	protected void initQueryBinder(WebDataBinder binder) {
-		binder.setValidator(newsQueryParamValidator);
+		binder.setValidator(newsArchivePageQueryParamValidator);
 	}
 
 	@GetMapping("newses")
-	public PageResult<News> findNewses(@Validated NewsQueryParam newsQueryParam) {
-		newsQueryParam.setQueryPrivate(true);
-		newsQueryParam.setPageSize(configServer.getGlobalConfig().getNewsPageSize());
-		return newsService.queryNews(newsQueryParam);
+	public PageResult<NewsArchive> findNewses(@Validated NewsArchivePageQueryParam newsArchivePageQueryParam) {
+		newsArchivePageQueryParam.setQueryPrivate(true);
+		newsArchivePageQueryParam.setPageSize(configServer.getGlobalConfig().getNewsPageSize());
+		return newsService.queryNewsArchive(newsArchivePageQueryParam);
 	}
 
 	@GetMapping("news/{id}")

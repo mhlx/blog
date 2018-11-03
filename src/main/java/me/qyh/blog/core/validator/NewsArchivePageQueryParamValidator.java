@@ -15,13 +15,14 @@
  */
 package me.qyh.blog.core.validator;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import me.qyh.blog.core.vo.NewsQueryParam;
+import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
 
 /**
  * 
@@ -29,25 +30,28 @@ import me.qyh.blog.core.vo.NewsQueryParam;
  *
  */
 @Component
-public class NewsQueryParamValidator implements Validator {
+public class NewsArchivePageQueryParamValidator implements Validator {
+
 	private static final int MAX_CONTENT_LENGTH = 50;
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return NewsQueryParam.class.isAssignableFrom(clazz);
+		return NewsArchivePageQueryParam.class.isAssignableFrom(clazz);
 	}
 
 	@Override
 	public void validate(Object target, Errors errors) {
-		NewsQueryParam param = (NewsQueryParam) target;
+		NewsArchivePageQueryParam param = (NewsArchivePageQueryParam) target;
 		if (param.getCurrentPage() < 1) {
 			param.setCurrentPage(1);
 		}
-		Date begin = param.getBegin();
-		Date end = param.getEnd();
-		if (begin != null && end != null && begin.after(end)) {
-			param.setBegin(null);
-			param.setEnd(null);
+		String ymd = param.getYmd();
+		if (ymd != null) {
+			try {
+				LocalDate.parse(ymd);
+			} catch (DateTimeParseException e) {
+				param.setYmd(null);
+			}
 		}
 		String content = param.getContent();
 		if (content != null && content.length() > MAX_CONTENT_LENGTH) {

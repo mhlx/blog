@@ -31,7 +31,7 @@
 					  type : 'delete',
 					  url : root + 'api/console/tag/'+id,
 					  success:function(){
-						  swal('删除成功','','error');
+						  swal('删除成功','','success');
 						  table.reload();
 					  },
 					  error:function(jqXHR){
