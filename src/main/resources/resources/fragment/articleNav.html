@@ -1,4 +1,0 @@
-<div th:if="${articleNav != null }" class="alert alert-info">
-	<p th:if="${articleNav.previous != null}">上一篇:<a th:href="${urls.getUrl(articleNav.previous)}" th:text="${articleNav.previous.title}"></a></p>
-	<p th:if="${articleNav.next != null}">下一篇:<a th:href="${urls.getUrl(articleNav.next)}" th:text="${articleNav.next.title}"></a></p>
-</div>

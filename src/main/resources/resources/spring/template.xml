@@ -134,23 +134,9 @@
 				</bean>
 
 				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="上一篇下一篇" />
+					<constructor-arg index="0" value="顶部" />
 					<constructor-arg index="1"
-						value="classpath:resources/fragment/articleNav.html"
-						type="org.springframework.core.io.Resource" />
-				</bean>
-
-				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="标签集" />
-					<constructor-arg index="1"
-						value="classpath:resources/fragment/articleTags.html"
-						type="org.springframework.core.io.Resource" />
-				</bean>
-
-				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="顶部导航" />
-					<constructor-arg index="1"
-						value="classpath:resources/fragment/nav.html"
+						value="classpath:resources/fragment/top.html"
 						type="org.springframework.core.io.Resource" />
 				</bean>
 
@@ -161,33 +147,6 @@
 						type="org.springframework.core.io.Resource" />
 				</bean>
 
-				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="文章统计" />
-					<constructor-arg index="1"
-						value="classpath:resources/fragment/articleStatistics.html"
-						type="org.springframework.core.io.Resource" />
-				</bean>
-
-				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="标签统计" />
-					<constructor-arg index="1"
-						value="classpath:resources/fragment/tagStatistics.html"
-						type="org.springframework.core.io.Resource" />
-				</bean>
-
-				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="评论统计" />
-					<constructor-arg index="1"
-						value="classpath:resources/fragment/commentStatistics.html"
-						type="org.springframework.core.io.Resource" />
-				</bean>
-				
-				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="动态统计" />
-					<constructor-arg index="1"
-						value="classpath:resources/fragment/newsStatistics.html"
-						type="org.springframework.core.io.Resource" />
-				</bean>
 			</list>
 		</property>
 	</bean>

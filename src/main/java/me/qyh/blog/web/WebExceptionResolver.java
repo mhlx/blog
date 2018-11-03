@@ -308,7 +308,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 			return jsonResultView(new JsonResult(false, ex.getLogicMessage()));
 		}
 
-		return getErrorForward(request, new ErrorInfo(ex.getLogicMessage(), 200));
+		return getErrorForward(request, new ErrorInfo(ex.getLogicMessage(), restfulStatus.value()));
 	}
 
 	private final class SpaceNotFoundExceptionHandler implements ExceptionHandler {
