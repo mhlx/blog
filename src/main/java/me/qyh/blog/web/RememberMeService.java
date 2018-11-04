@@ -60,6 +60,9 @@ public class RememberMeService {
 			return Optional.empty();
 		}
 		String signature = cookie.getValue();
+		if (signature == null) {
+			return Optional.empty();
+		}
 		if (signature.isEmpty()) {
 			deleteRememberMe(request, response);
 			return Optional.empty();

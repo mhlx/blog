@@ -27,7 +27,6 @@ import org.springframework.validation.ObjectError;
 
 import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.config.UrlHelper.CurrentEnvUrls;
-import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.util.ExceptionUtils;
 import me.qyh.blog.core.util.Jsons;
@@ -145,7 +144,7 @@ public class Webs {
 	 */
 	public static String getSpaceFromPath(String path, int maxAliasLength) {
 		if (maxAliasLength < 1) {
-			throw new SystemException("maxAliasLength不能小于1");
+			return null;
 		}
 		if (Validators.isEmptyOrNull(path, true)) {
 			return null;
@@ -225,7 +224,14 @@ public class Webs {
 	 * @since 7.0
 	 */
 	public static boolean isRestful(HttpServletRequest request) {
-		String path = request.getRequestURI().substring(request.getContextPath().length());
-		return path.startsWith("/api/");
+		String path = request.getRequestURI().substring(request.getContextPath().length() + 1);
+		if (path.startsWith("api/")) {
+			return true;
+		}
+		String space = getSpaceFromPath(path, SpaceValidator.MAX_ALIAS_LENGTH + 1);
+		if (space != null) {
+			return path.startsWith("space/" + space + "/api");
+		}
+		return false;
 	}
 }

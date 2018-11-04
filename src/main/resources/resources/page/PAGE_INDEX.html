@@ -1,60 +1,108 @@
+<transaction:begin />
+<data name="myInfo" lazy="true" />
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<meta charset="utf-8">
 <meta name="viewport"
-	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<title>[[${space == null ? '主页' : space.name}]]</title>
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
+<!-- Bootstrap core CSS -->
 <link rel="stylesheet"
 	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
-<link rel="stylesheet"
-	th:href="@{/static/css/markdown.css}" />
-<link th:href="@{/static/css/blog.css}" rel="stylesheet">
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
-	  <script th:src="@{/static/js/respond.min.js}"></script>
-	<![endif]-->
-<title th:text="${space == null ? '主页' : space.name}"></title>
+<style>
+body {
+	padding-top: 54px;
+}
+
+@media ( min-width : 992px) {
+	body {
+		padding-top: 56px;
+	}
+}
+
+.media p {
+	word-break: break-all
+}
+
+.media-body img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	max-height: 200px;
+}
+
+.media-body video {
+	max-height: 200px;
+}
+
+.card-text img {
+	max-width: 100% !important;
+	height: auto !important;
+}
+
+.sticky-offset {
+	top: 56px;
+}
+</style>
+
 </head>
+
 <body>
-	<fragment name="顶部导航" />
+
+	<!-- Navigation -->
+	<fragment name="顶部" />
+
+	<!-- Page Content -->
 	<div class="container">
+
 		<div class="row">
-			<transaction:begin />
-			<data name="articleTags" />
-			<data name="articleStatistics" />
-			<data name="newsStatistics" />
-			<data name="commentStatistics" />
-			<div class="col-lg-8 col-md-8  col-sm-8 text" id="pjax-articles">
+
+			<!-- Blog Entries Column -->
+			<div class="col-md-8">
+
 				<fragment name="文章列表" />
+
 			</div>
 
-			<div class="col-lg-4 col-md-4 col-sm-4 text hidden-xs">
-				<fragment name="标签集" />
-				<fragment name="文章统计" />
-				<fragment name="动态统计" />
-				<fragment name="评论统计" />
+			<!-- Sidebar Widgets Column -->
+			<div class="col-md-4 d-none d-md-block d-sm-none">
+				<!-- Search Widget -->
+				<div class="card my-4 sticky-top sticky-offset">
+					<h5 class="card-header">搜索</h5>
+					<div class="card-body">
+						<form th:action="${urls.currentUrl}" id="searchForm">
+							<div class="input-group mb-3">
+								<input type="text" class="form-control" name="query"
+									th:value="${param.query}">
+								<div class="input-group-append">
+									<span class="input-group-text"><a href="###"
+										onclick="document.getElementById('searchForm').submit()">搜索</a></span>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
 			</div>
+			<!-- /.row -->
 		</div>
 	</div>
+	<!-- /.container -->
 
 	<fragment name="底部" />
-	<div th:replace="base/foot_source">&nbsp;</div>
-	<script th:src="@{/static/js/jquery.pjax.js}"></script>
-	<script>
-		$(function() {
-			if ($.support.pjax) {
-				$(document).on(
-						'pjax:beforeSend',
-						function(event, xhr, options) {
-							xhr.setRequestHeader('X-Fragment',
-									encodeURI('文章列表'));
-						});
-				$(document).pjax('#pjax-articles ul a', '#pjax-articles')
-			}
-		})
-	</script>
+
+	<!-- Bootstrap core JavaScript -->
+	<script th:src="@{/static/jquery/jquery.min.js}"></script>
+	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
+
 </body>
+
 </html>

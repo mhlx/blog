@@ -73,7 +73,7 @@ public class LockController {
 	}
 
 	@IgnoreSpaceLock
-	@PostMapping(value = { "api/space/{alias}/lock/{lockId}/key", "api/lock/{lockId}/key" })
+	@PostMapping(value = { "space/{alias}/api/lock/{lockId}/key", "api/lock/{lockId}/key" })
 	@ResponseBody
 	public ResponseEntity<Void> unlock(HttpServletRequest request, @PathVariable("lockId") String lockId)
 			throws LogicException {

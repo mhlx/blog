@@ -151,10 +151,7 @@
             });
 
             $("#verify-btn").click(function() {
-                var url = basePath + "login/otpVerify?code=" + $("#otpCode").val();
-                if ($("#validateCode").length > 0) {
-                    url += "&validateCode=" + $("#validateCode").val();
-                }
+                var url = rootPath + "login/otpVerify?code=" + $("#otpCode").val()+"&validateCode=" + $("#validateCode").val();
                 $.ajax({
                     type: "post",
                     url: url,
@@ -164,15 +161,13 @@
                         if (data.success) {
                             window.location.href = gotoUrl;
                         } else {
+                            swal(data.message, '', 'error');
                             if (data.code == 'validateCode.error') {
                                 $("#validate-btn").unbind('click').bind('click', function() {
-                                    $("#validateCodeModal").modal('hide');
-                                    $("#verify-btn").click();
+                                	$("#verify-btn").click();
                                 });
-                                $("#validateCodeModal").modal('show');
-                            } else {
-                                alert("??")
-                                swal(data.message, '', 'error');
+                                if (!show)
+                                    $("#validateCodeModal").modal('show')
                             }
                         }
                     },

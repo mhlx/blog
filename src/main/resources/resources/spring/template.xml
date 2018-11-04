@@ -119,12 +119,6 @@
 		</property>
 		<property name="fragments">
 			<list>
-				<bean class="me.qyh.blog.template.entity.Fragment">
-					<constructor-arg index="0" value="文章详情" />
-					<constructor-arg index="1"
-						value="classpath:resources/fragment/article.html"
-						type="org.springframework.core.io.Resource" />
-				</bean>
 
 				<bean class="me.qyh.blog.template.entity.Fragment">
 					<constructor-arg index="0" value="文章列表" />

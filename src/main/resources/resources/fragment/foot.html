@@ -1,10 +1,6 @@
-<div class="container">
-	<hr>
-	<footer>
-		<p>
-			<span class="glyphicon glyphicon-copyright-mark"></span>&nbsp;<span
-				th:text="${times.format(times.now(),'yyyy')}"></span>&nbsp;domain&nbsp;&nbsp;All
-			rights Reserved
-		</p>
-	</footer>
-</div>
+<footer class="py-5 bg-dark">
+	<div class="container">
+		<p class="m-0 text-center text-white">Copyright &copy;
+			[[${urls.domain}]] [[${times.format(times.now(),'yyyy')}]]</p>
+	</div>
+</footer>

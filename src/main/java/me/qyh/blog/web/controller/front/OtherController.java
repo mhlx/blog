@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,7 +45,6 @@ import me.qyh.blog.template.vo.DataBind;
 import me.qyh.blog.template.vo.DataTag;
 
 @RestController
-@RequestMapping("api")
 public class OtherController {
 
 	@Autowired
@@ -54,7 +52,7 @@ public class OtherController {
 	@Autowired
 	private TemplateService templateService;
 
-	@GetMapping({ "data/{tagName}", "space/{alias}/data/{tagName}" })
+	@GetMapping({ "api/data/{tagName}", "space/{alias}/api/data/{tagName}" })
 	public ResponseEntity<Map<String, Object>> queryData(@PathVariable("tagName") String tagName,
 			@RequestParam Map<String, String> allRequestParams, HttpServletRequest request,
 			HttpServletResponse response) throws LogicException {
@@ -77,7 +75,7 @@ public class OtherController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@GetMapping({ "fragment/{fragment}", "space/{alias}/fragment/{fragment}" })
+	@GetMapping({ "api/fragment/{fragment}", "space/{alias}/api/fragment/{fragment}" })
 	public ResponseEntity<String> queryFragment(@PathVariable("fragment") String fragment,
 			@RequestParam Map<String, String> allRequestParams, HttpServletRequest request,
 			HttpServletResponse response) throws LogicException, TemplateRenderException {

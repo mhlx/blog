@@ -1,58 +1,138 @@
-<transaction:begin />
 <data name="article" th:idOrAlias="${idOrAlias}" />
-<data name="articleNav" ref-article="article" />
-<transaction:end />
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="_csrf" th:content="${_csrf.token}" />
 <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 <meta name="description" th:content="${article.summary}" />
 <meta name="keywords" th:content="${article.tagStr}" />
+<title>[[${article.title}]]</title>
+
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
 <link rel="stylesheet"
 	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
-<link th:href="@{/static/css/blog.css}" rel="stylesheet">
-<link th:href="@{/static/css/markdown.css}" rel="stylesheet"
-	th:if="${article.editor.name() == 'MD'}">
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
-	  <script th:src="@{/static/js/respond.min.js}"></script>
-	<![endif]-->
-<title th:text="${article.title}">文章详情</title>
+<link rel="stylesheet" th:href="@{/static/css/markdown.css}" />
+<link rel="stylesheet" th:href="@{/static/prettify/github-v2.min.css}" />
+<style>
+body {
+	padding-top: 54px;
+}
+
+@media ( min-width : 992px) {
+	body {
+		padding-top: 56px;
+	}
+}
+
+.comment-btn {
+	cursor: pointer;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	display: none;
+}
+
+.sticky-offset {
+	top: 56px;
+}
+</style>
+
 </head>
+
 <body>
-	<fragment name="顶部导航" />
+
+	<fragment name="顶部" />
+
+	<!-- Page Content -->
 	<div class="container">
+
 		<div class="row">
-			<div class="col-lg-8 col-md-8  col-sm-8 text">
-				<fragment name="文章详情"></fragment>
-				<fragment name="上一篇下一篇"></fragment>
-				<div th:if="${article.allowComment}">
-					<a href="javascript:void(0)" data-cmt>评论这篇文章</a>
-				</div>
-				<div id="comments-container" style="margin-top: 10px"></div>
+
+			<!-- Post Content Column -->
+			<div class="col-lg-8">
+
+				<!-- Title -->
+				<h1 class="mt-4">[[${article.title}]]</h1>
+				<p class="lead" th:if="${!article.tags.isEmpty()}">
+					<i class="fas fa-tags" style="margin-right: 10px"></i><a
+						th:href="${urls.getUrl(tag)}" th:each="tag : ${article.tags}"
+						th:text="${tag.name}"></a>
+				</p>
+				<hr>
+
+				<!-- Date/Time -->
+				<p>发表于 [[${times.format(article.pubDate,'yyyy-MM-dd HH:mm')}]]</p>
+
+				<hr>
+
+				<div class="markdown-body" th:utext="${article.content}"></div>
+
+				<hr>
+
+				<div id="comments-container"></div>
+
+
 			</div>
+
+			<!-- Sidebar Widgets Column -->
+			<div class="col-md-4 d-none d-md-block d-sm-none">
+
+				<!-- Search Widget -->
+				<div class="card my-4 sticky-top sticky-offset">
+					<h5 class="card-header">搜索</h5>
+					<div class="card-body">
+						<form th:action="${urls.currentUrl}">
+							<div class="input-group mb-3">
+								<input type="text" class="form-control" name="query" value="">
+								<div class="input-group-append">
+									<span class="input-group-text"><a href="###"
+										onclick="document.getElementById('searchForm').submit()">搜索</a></span>
+								</div>
+							</div>
+						</form>
+
+					</div>
+				</div>
+
+			</div>
+
 		</div>
+		<!-- /.row -->
+
 	</div>
-	<input type="hidden" id="urlPrefix" th:value="${urls.currentUrl}" />
+	<!-- /.container -->
+
 	<fragment name="底部" />
-	<div th:replace="base/foot_source">&nbsp;</div>
-	<script th:inline="javascript">
-			$.post([[${urls.currentUrl}]] + "/article/hit/"
-					+ [[${article.id}]], {}, function(data) {
-			})
-        var config = {
+
+	<a href="javascript:void(0)" data-comment
+		class="btn btn-primary btn-lg comment-btn"
+		style="bottom: 64px; display: block" role="button" title="评论"
+		data-toggle="tooltip" data-placement="left"> <i
+		class="far fa-comment"></i>
+	</a>
+	<script th:src="@{/static/jquery/jquery.min.js}"></script>
+	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
+	<script type="text/javascript" th:src="@{/static/prettify/prettify.js}"></script>
+	<script th:src="@{/static/js/base.js}"></script>
+	<script th:src="@{/static/js/moment.min.js}"></script>
+	<script>
+      var basePath = '[[@{/}]]';
+      var actPath = '[[${urls.currentUrl}]]';
+      if(basePath == '/'){
+      	basePath = '';
+      }
+         var config = {
             isLogin: [[${user != null}]],
-            gravatarPrefix: [[${gravatars.getUrl('')}]]
+            gravatarPrefix: '[[${gravatars.getUrl('')}]]'
         };
-    </script>
-	<script th:inline="javascript">
-     	var c = $("#comments-container");
+      	var c = $("#comments-container");
      	var _config = {
          	 pageSize:10,
              page:1,
@@ -70,17 +150,38 @@
                }
              }
          }
-     </script>
-	<script th:src="@{/static/plugin/comment/js/new_comment.js}"></script>
+    </script>
+	<script th:src="@{/static/plugin/comment/js/new_comment_bs4.js}"></script>
 	<script>
-    	$(function(){
-    		cmt.renderComment(_config);
-    		$('[data-cmt]').click(function(){
+   $(function() {
+            var p = false;
+            $("pre").each(function() {
+                var me = $(this);
+                if (me.hasClass('prettyprint prettyprinted'))
+                    return;
+                if (me.find('code').length == 0)
+                    return;
+                else {
+                    p = true;
+                    me.addClass("prettyprint");
+                }
+            });
+            prettyPrint();
+     
+    		 cmt.renderComment(_config);
+    		$('[data-comment]').click(function(){
     	        	cmt.doComment(_config.moduleId,_config.moduleType,function(){
     	             cmt.renderComment(_config);
     	            });
     	        });
-    	})
-    </script>
+     
+     		$.ajax({
+            	method : 'PATCH',
+                url : '[[${urls.currentUrl}]]'+'/api/article/'+'[[${article.id}]]',
+              	data : {'hits':'+1'}
+            });
+        });
+  </script>
 </body>
+
 </html>

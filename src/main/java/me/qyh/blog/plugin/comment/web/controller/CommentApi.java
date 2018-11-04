@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,7 +56,6 @@ import me.qyh.blog.plugin.comment.vo.PeriodCommentQueryParam;
 import me.qyh.blog.web.security.CaptchaValidator;
 
 @RestController
-@RequestMapping("api")
 public class CommentApi implements InitializingBean {
 
 	@Autowired
@@ -93,12 +91,12 @@ public class CommentApi implements InitializingBean {
 		binder.setValidator(commentValidator);
 	}
 
-	@GetMapping("commentConfig")
+	@GetMapping("api/commentConfig")
 	public CommentConfig getConfig() {
 		return commentService.getCommentConfig();
 	}
 
-	@PostMapping({ "space/{alias}/{type}/{id}/comment", "{type}/{id}/comment" })
+	@PostMapping({ "space/{alias}/api/{type}/{id}/comment", "api/{type}/{id}/comment" })
 	public ResponseEntity<Comment> addComment(@RequestBody @Validated Comment comment,
 			@PathVariable("type") String type, @PathVariable("id") Integer moduleId, HttpServletRequest req)
 			throws LogicException {
@@ -111,41 +109,41 @@ public class CommentApi implements InitializingBean {
 		return ResponseEntity.status(HttpStatus.CREATED).body(returned);
 	}
 
-	@GetMapping({ "space/{alias}/{type}/{id}/comment/{commentId}/conversation",
-			"{type}/{id}/comment/{commentId}/conversation" })
+	@GetMapping({ "space/{alias}/api/{type}/{id}/comment/{commentId}/conversation",
+			"api/{type}/{id}/comment/{commentId}/conversation" })
 	public List<Comment> queryConversations(@PathVariable("type") String type, @PathVariable("id") Integer moduleId,
 			@PathVariable("commentId") Integer commentId) throws LogicException {
 		return commentService.queryConversations(new CommentModule(type, moduleId), commentId);
 	}
 
-	@GetMapping("comment/captchaRequirement")
+	@GetMapping("api/comment/captchaRequirement")
 	public boolean needCaptcha() {
 		return !Environment.isLogin() && attemptLogger.reach(Environment.getIP());
 	}
 
 	@EnsureLogin
-	@DeleteMapping("console/comment/{id}")
+	@DeleteMapping("api/console/comment/{id}")
 	public ResponseEntity<Void> remove(@PathVariable("id") Integer id) throws LogicException {
 		commentService.deleteComment(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@EnsureLogin
-	@PostMapping(value = "console/comment/blacklistItem")
+	@PostMapping(value = "api/console/comment/blacklistItem")
 	public ResponseEntity<Void> ban(@RequestParam("id") Integer id) throws LogicException {
 		commentService.banIp(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@EnsureLogin
-	@DeleteMapping(value = "console/comment/blacklistItem/{ip:.+}")
+	@DeleteMapping(value = "api/console/comment/blacklistItem/{ip:.+}")
 	public ResponseEntity<Void> removeBan(@PathVariable("ip") String ip) throws LogicException {
 		commentService.removeBan(ip);
 		return ResponseEntity.noContent().build();
 	}
 
 	@EnsureLogin
-	@GetMapping("console/comment/blacklist")
+	@GetMapping("api/console/comment/blacklist")
 	public PageResult<String> blacklist(IPQueryParam param) {
 		if (param.getCurrentPage() < 1) {
 			param.setCurrentPage(1);
@@ -155,7 +153,7 @@ public class CommentApi implements InitializingBean {
 	}
 
 	@EnsureLogin
-	@PatchMapping("console/comment/{id}")
+	@PatchMapping("api/console/comment/{id}")
 	public ResponseEntity<Void> check(@PathVariable("id") Integer id, @RequestParam("status") CommentStatus status)
 			throws LogicException {
 		commentService.changeStatus(id, status);
@@ -163,14 +161,14 @@ public class CommentApi implements InitializingBean {
 	}
 
 	@EnsureLogin
-	@PutMapping("console/commentConfig")
+	@PutMapping("api/console/commentConfig")
 	public ResponseEntity<Void> update(@RequestBody @Validated CommentConfig commentConfig) {
 		commentService.updateCommentConfig(commentConfig);
 		return ResponseEntity.noContent().build();
 	}
 
 	@EnsureLogin
-	@GetMapping("console/comments")
+	@GetMapping("api/console/comments")
 	public PageResult<Comment> queryAll(PeriodCommentQueryParam param) {
 		if (param.getCurrentPage() < 1) {
 			param.setCurrentPage(1);
