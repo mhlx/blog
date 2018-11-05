@@ -1,136 +1,147 @@
+<transaction:begin />
+<data name="news" th:id="${id}" />
+<data name="newsNav" ref-news="news" />
+<data name="myInfo" lazy="true" />
+<transaction:end />
 <!DOCTYPE html>
 <html>
 
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-    <link rel="stylesheet" th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
-    <link th:href="@{/static/css/blog.css}" rel="stylesheet">
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-	  <script th:src="@{/static/js/html5shiv.min.js}"></script>
-	  <script th:src="@{/static/js/respond.min.js}"></script>
-	<![endif]-->
     <title>动态</title>
-    	<style>
-     .media p{word-break:break-all}
-   .media-body:not(.media-left) img{
-	display: block;
-    max-width: 200px;
-    height: auto;
-}
-.media-body:not(.media-left) video{
-    max-width: 200px;
-    height: auto;
-}
-  </style>
+    <link th:href="@{/static/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/static/bootstrap/css/bootstrap.min.css?v=1}" />
+    <meta name="description" th:content="${jsoups.body(news.content).text()}" />
 </head>
+<style>
+    body {
+        padding-top: 54px;
+    }
+
+    @media (min-width: 992px) {
+        body {
+            padding-top: 56px;
+        }
+    }
+
+    .media-body video {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    .media-body img {
+        max-width: 100% ;
+        height: auto ;
+    }
+</style>
 
 <body>
-    <fragment name="顶部导航" />
+
+    <!-- Navigation -->
+    <fragment name="顶部" />
+
+    <!-- Page Content -->
     <div class="container">
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2" id="pjax-news">
-                <transaction:begin />
-                <data name="news" th:id="${id}" />
-                <data name="newsNav" ref-news="news" />
-                <transaction:end />
-                <data name="myInfo" />
-                <div id="pjax-root">
-                    <div class="media" th:data-news="${news.id}">
-                        <div class="media-left">
-                            <a href="#"> <img class="media-object"
-								th:src="${gravatars.getOptionalUrl(myInfo.gravatar).orElse('/static/img/guest.png')}"
-								style="width: 32px; height: 32px;">
-							</a>
-                        </div>
-                        <div class="media-body"  id="news-content">
-                            <h5 class="media-heading">
-                                <span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>
-                                <a href="javascript:void(0)" th:data-cmt="${news.id}" style="margin-left: 5px" th:if="${news.allowComment || user != null}"><span
-									class="glyphicon glyphicon-comment" aria-hidden="true"></span></a>
-                            </h5>
-                            <p th:utext="${news.content}"></p>
-                            <div id="comment-detail"></div>
-                            <div th:if="${newsNav != null}" id="newsNav">
-                                <a th:href="${urls.getUrl(newsNav.previous)}" th:if="${newsNav.previous != null}">上一条&nbsp;&nbsp;</a> <a th:href="${urls.getUrl(newsNav.next)}" th:if="${newsNav.next != null}">下一条&nbsp;&nbsp;</a>
-                            </div>
-                        </div>
-                    </div>
-                   <input type="hidden" th:value="${user != null}" id="isLogin" />
-                <input type="hidden" th:value="${gravatars.getUrl('')}" id="gravatarPrefix" />
-                <input type="hidden" th:value="${news.id}" id="moduleId" />
-                <input type="hidden" th:value="${news.allowComment}" id="allowComment" />
+        <div class="media my-4" th:data-news="${news.id}">
+            <img class="mr-3" th:src="${gravatars.getOptionalUrl(myInfo.gravatar).orElse('https://www.qyh.me/static/img/guest.png')}" id="gravatar" style="width: 32px; height: 32px;">
+
+            <div class="media-body">
+                <h5 class="mt-0">
+                    <span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>
+                    <a href="javascript:void(0)" th:data-cmt="${news.id}" style="margin-left: 5px" th:if="${news.allowComment || user != null}"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span></a>
+                </h5>
+                <div id="news-content" class="wrap">
+                    <div th:utext="${news.content}"></div>
                 </div>
+              	<div class="col-md-2" style="padding:0px">
+                  <button class="btn btn-block btn-primary" data-cmt>
+                 评论
+              	</button>
+              </div>
+              	<ul class="pagination mb-4 my-4" th:if="${newsNav != null}">
+                    <li class="page-item " th:classappend="${newsNav.previous  == null ?'disabled' : ''}">
+                        <a class="page-link" th:href="${urls.getUrl(newsNav.previous)}" th:if="${newsNav.previous != null}">&larr;
+                            上一条 </a>
+                        <a class="page-link" th:if="${newsNav.previous == null}">&larr;
+                            上一条 </a>
+                    </li>
+                    <li class="page-item" th:classappend="${newsNav.next == null ?'disabled' : ''}">
+                        <a class="page-link" th:href="${urls.getUrl(newsNav.next)}" th:if="${newsNav.next != null}">下一条&rarr;</a>
+                        <a class="page-link" th:if="${newsNav.next == null}">下一条&rarr;</a>
+                    </li>
+                </ul>
+                <div id="comment-detail"></div>
             </div>
         </div>
     </div>
 
     <fragment name="底部" />
-    <div th:replace="base/foot_source">&nbsp;</div>
-    <script>
-        var _config;
-        var config;
 
-        var refresh = function() {
-            _config = {
-                pageSize: 20,
-                page: 1,
-                moduleType: 'news',
-                moduleId: $("#moduleId").val(),
-                allowComment: $("#allowComment").val(),
-                asc: true,
-                container: $("#comment-detail"),
-                afterLoad: function(page) {
-                    if (page.totalRow > 0) {
-                        $("#comment-detail").show();
-                        $("#comment-detail").prepend('<hr>');
-                    } else {
-                        $("#comment-detail").hide();
-                    }
-                }
-            }
-            config = {
-                isLogin: $("#isLogin").val() == 'true',
-                gravatarPrefix: $("#gravatarPrefix").val()
-            }
-        }
-        refresh();
+    <script th:src="@{/static/jquery/jquery.min.js}"></script>
+	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
+	<script type="text/javascript" th:src="@{/static/prettify/prettify.js}"></script>
+	<script th:src="@{/static/js/base.js}"></script>
+	<script th:src="@{/static/js/moment.min.js}"></script>
+ 	<script>
+      var basePath = '[[@{/}]]';
+      var actPath = '[[${urls.currentUrl}]]';
+      if(basePath == '/'){
+      	basePath = '';
+      }
+         var config = {
+            isLogin: [[${user != null}]],
+            gravatarPrefix: '[[${gravatars.getUrl('')}]]'
+        };
+      	var c = $("#comment-detail");
+     	var _config = {
+         	 pageSize:10,
+             page:1,
+             moduleId:[[${news.id}]],
+             moduleType:'news',
+             asc:true,
+             container:c,
+             allowComment:[[${news.allowComment}]],
+             afterLoad:function(page){
+               if(page.totalRow>0){
+                  c.show();
+                  c.prepend('<hr>');
+               }else{
+               	  c.hide();
+               }
+             }
+         }
     </script>
-    <script th:src="@{/static/plugin/comment/js/new_comment.js}">
-    </script>
-    <script th:src="@{/static/js/jquery.pjax.js}"></script>
-    <script>
-        $(function() {
-            var $cmt = cmt;
-            $cmt.renderComment(_config);
+	<script th:src="@{/static/plugin/comment/js/new_comment_bs4.js}"></script>
+	<script>
+      var $cmt = cmt;
+      $cmt.renderComment(_config);
 
-            $(document).on('click', '[data-cmt]', function() {
-                var moduleId = $(this).data('cmt');
-                $cmt.doComment(moduleId, 'news', function() {
-                    $cmt.renderComment(_config);
+      $(document).on('click', '[data-cmt]', function() {
+        $cmt.doComment('[[${news.id}]]', 'news', function() {
+          $cmt.renderComment(_config);
+        });
+      });
+      
+      	if(window.location.hash) {
+      		var hash = window.location.hash.substring(1);
+          	if(hash == 'comment'){
+            	$cmt.doComment('[[${news.id}]]', 'news', function() {
+                  $cmt.renderComment(_config);
                 });
-            });
-
-            $.post(basePath + '/news/hit/' + _config.moduleId, {}, function() {
-
-            });
-            if ($.support.pjax) {
-                $(document).pjax('#newsNav a', '#pjax-news', {
-                    fragment: "#pjax-root"
-                });
-                $("#pjax-news").on('pjax:end', function() {
-                    refresh();
-                    $cmt.renderComment(_config);
-                    $.post(basePath + '/news/hit/' + _config.moduleId, {}, function() {
-
-                    });
-                })
             }
-        })
-    </script>
+  		}
+      	
+      	$.ajax({
+        	method : 'PATCH',
+            url : '[[${urls.url}]]'+'/api/news/'+'[[${news.id}]]',
+          	data : {'hits':'+1'}
+        });
+  	</script>
 </body>
+
+</html>

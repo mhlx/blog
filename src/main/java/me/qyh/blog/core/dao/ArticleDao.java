@@ -226,20 +226,6 @@ public interface ArticleDao {
 	Integer selectIdByAlias(String alias);
 
 	/**
-	 * 查询随机文章
-	 * 
-	 * @param space
-	 *            空间
-	 * @param queryPrivate
-	 *            是否查询私人文章
-	 * @param queryLock
-	 *            是否查询被锁保护的文章
-	 * @return
-	 */
-	Article selectRandom(@Param("space") Space space, @Param("queryPrivate") boolean queryPrivate,
-			@Param("queryLock") boolean queryLock);
-
-	/**
 	 * 查询某个空间下<b>所有文章</b>的数量
 	 * 
 	 * @param space

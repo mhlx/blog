@@ -65,7 +65,7 @@ public class CommentsDataTagProcessor extends DataTagProcessor<CommentPageResult
 			param.setPageSize(pageSize);
 		}
 
-		param.setStatus(!Environment.isLogin() ? CommentStatus.NORMAL : null);
+		param.setStatus(!Environment.hasAuthencated() ? CommentStatus.NORMAL : null);
 
 		return commentService.queryComment(param);
 	}

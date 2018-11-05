@@ -18,6 +18,14 @@ th{
     -ms-hyphens: auto;
     hyphens: auto;
 }
+@media ( max-width :768px) {
+	.sidebar{
+		display:none !important;
+	}
+	footer.sticky-footer {
+		width: 100% !important;
+	}
+}
 /*!
  * Start Bootstrap - SB Admin v5.0.2 (https://startbootstrap.com/template-overviews/sb-admin)
  * Copyright 2013-2018 Start Bootstrap

@@ -17,9 +17,9 @@ var fileChooser = (function(){
 	modal += '<div class="container-fluid"></div>';
 	modal += '</div>';
 	modal += '<div class="modal-footer">';
-	modal += '<button type="button" class="btn btn-default" data-create-folder>新建文件夹</button>';
-	modal += '<button type="button" class="btn btn-default" data-upload>上传</button>';
-	modal += '<button type="button" class="btn btn-default" data-choose>选择</button>';
+	modal += '<button type="button" class="btn btn-primary" data-create-folder>新建文件夹</button>';
+	modal += '<button type="button" class="btn btn-primary" data-upload>上传</button>';
+	modal += '<button type="button" class="btn btn-primary" data-choose>选择</button>';
 	modal += '</div>';
 	modal += '</div>';
 	modal += '</div>';
@@ -62,7 +62,7 @@ var fileChooser = (function(){
 		createFolderModal += '</form>';
 		createFolderModal += '</div>';
 		createFolderModal += '<div class="modal-footer">';
-		createFolderModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+		createFolderModal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
 		createFolderModal += '<button type="button" class="btn btn-primary" data-create>创建</button>';
 		createFolderModal += '</div>';
 		createFolderModal += '</div>';
@@ -210,7 +210,7 @@ var fileChooser = (function(){
 		uploadModal += '</form>';
 		uploadModal += '</div>';
 		uploadModal += '<div class="modal-footer">';
-		uploadModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+		uploadModal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
 		uploadModal += '</div>';
 		uploadModal += '</div>';
 		uploadModal += '</div>';

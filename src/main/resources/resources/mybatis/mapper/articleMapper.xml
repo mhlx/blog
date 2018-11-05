@@ -417,33 +417,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		blog_article WHERE art_alias = #{alias}
 	</select>
 
-	<select id="selectRandom" resultMap="ArticleDetail">
-		SELECT
-		art.id AS art_id,
-		art.art_alias,
-		art.title,
-		art.space_id,
-		art.feature_image,
-		sp.space_alias,
-		sp.space_name
-		FROM
-		blog_article art
-		LEFT OUTER JOIN
-		blog_space sp
-		ON art.space_id = sp.id
-		WHERE art.art_status = 0 <!-- PUBLISHED -->
-		<if test="!queryPrivate">
-			AND art.isPrivate = false
-			AND sp.is_private = false
-		</if>
-		<if test="!queryLock">
-			AND art.art_lock IS NULL
-			AND sp.space_lock IS NULL
-		</if>
-		ORDER BY RAND()
-		LIMIT 0,1
-	</select>
-
 	<select id="selectCountBySpace" resultType="int">
 		SELECT COUNT(id) FROM
 		blog_article WHERE space_id = #{id}
@@ -478,7 +451,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	
 	<select id="selectArchiveDays" resultType="string">
-		select distinct(substr(pubDate,1,10)) as c from blog_article art LEFT OUTER JOIN blog_space sp
+		select substr(pubDate,1,10) as pubDate from blog_article art LEFT OUTER JOIN blog_space sp
 		on art.space_id = sp.id
 		where art_status = 0
 		<if test="space != null">
@@ -491,7 +464,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<if test="ymd != null">
 			AND substr(pubDate,1,10) <![CDATA[ < ]]> #{ymd}
 		</if>
-		order by pubDate desc,art.id desc
+		GROUP BY substr(pubDate,1,10)
+		order by pubDate desc
 		LIMIT #{offset},#{pageSize}
 	</select>
 	

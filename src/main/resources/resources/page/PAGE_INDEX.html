@@ -15,7 +15,7 @@
 	rel="stylesheet">
 <!-- Bootstrap core CSS -->
 <link rel="stylesheet"
-	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=1}" />
 <style>
 body {
 	padding-top: 54px;
@@ -65,30 +65,25 @@ body {
 		<div class="row">
 
 			<!-- Blog Entries Column -->
-			<div class="col-md-8">
+			<div class="col-md-8 order-md-1 order-2">
 
 				<fragment name="文章列表" />
 
 			</div>
 
 			<!-- Sidebar Widgets Column -->
-			<div class="col-md-4 d-none d-md-block d-sm-none">
-				<!-- Search Widget -->
-				<div class="card my-4 sticky-top sticky-offset">
-					<h5 class="card-header">搜索</h5>
-					<div class="card-body">
-						<form th:action="${urls.currentUrl}" id="searchForm">
-							<div class="input-group mb-3">
-								<input type="text" class="form-control" name="query"
-									th:value="${param.query}">
-								<div class="input-group-append">
-									<span class="input-group-text"><a href="###"
-										onclick="document.getElementById('searchForm').submit()">搜索</a></span>
-								</div>
-							</div>
-						</form>
+			<div class="col-md-4 order-md-2 order-1">
+
+				<form th:action="${urls.currentUrl}" id="searchForm">
+					<div class="input-group my-md-4 my-2">
+						<input type="text" class="form-control" name="query"
+							th:value="${param.query}">
+						<div class="input-group-append">
+							<span class="input-group-text"><a href="###"
+								onclick="document.getElementById('searchForm').submit()">搜索</a></span>
+						</div>
 					</div>
-				</div>
+				</form>
 
 			</div>
 			<!-- /.row -->

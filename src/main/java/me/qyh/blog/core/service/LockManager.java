@@ -62,7 +62,7 @@ public class LockManager implements LockProviderRegistry {
 		if (lockId == null) {
 			return;
 		}
-		if (Environment.isLogin()) {
+		if (Environment.hasAuthencated()) {
 			return;
 		}
 		findLock(lockId).ifPresent(lock -> {

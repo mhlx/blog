@@ -41,7 +41,7 @@ public class SimpleCommentChecker implements CommentChecker {
 	}
 
 	protected void checkCommentUser(Comment comment, CommentConfig config) throws LogicException {
-		if (Environment.isLogin()) {
+		if (Environment.hasAuthencated()) {
 			return;
 		}
 		String email = comment.getEmail();

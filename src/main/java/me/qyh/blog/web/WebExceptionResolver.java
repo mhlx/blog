@@ -265,7 +265,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 			ResourceNotFoundException ex = (ResourceNotFoundException) e;
-			return handlerLogicException(ex, request, HttpStatus.NOT_FOUND);
+			return handlerLogicException(ex, request);
 		}
 
 	}
@@ -280,7 +280,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 			LogicException ex = (LogicException) e;
-			return handlerLogicException(ex, request, HttpStatus.CONFLICT);
+			return handlerLogicException(ex, request);
 		}
 
 	}
@@ -295,20 +295,27 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 			LogicException ex = ((RuntimeLogicException) e).getLogicException();
-			return handlerLogicException(ex, request, HttpStatus.CONFLICT);
+			return handlerLogicException(ex, request);
 		}
 	}
 
-	private ModelAndView handlerLogicException(LogicException ex, HttpServletRequest request,
-			HttpStatus restfulStatus) {
+	private ModelAndView handlerLogicException(LogicException ex, HttpServletRequest request) {
+		HttpStatus status;
+
+		if (ex instanceof ResourceNotFoundException) {
+			status = HttpStatus.NOT_FOUND;
+		} else {
+			status = HttpStatus.CONFLICT;
+		}
+
 		if (Webs.isRestful(request)) {
-			return restfulView(new RestfulError(ex.getLogicMessage()), restfulStatus);
+			return restfulView(new RestfulError(ex.getLogicMessage()), status);
 		}
 		if (Webs.isAjaxRequest(request)) {
 			return jsonResultView(new JsonResult(false, ex.getLogicMessage()));
 		}
 
-		return getErrorForward(request, new ErrorInfo(ex.getLogicMessage(), restfulStatus.value()));
+		return getErrorForward(request, new ErrorInfo(ex.getLogicMessage(), status.value()));
 	}
 
 	private final class SpaceNotFoundExceptionHandler implements ExceptionHandler {
@@ -463,10 +470,8 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 			MaxUploadSizeExceededException ex = (MaxUploadSizeExceededException) e;
-			return handlerLogicException(
-					new LogicException(new Message("upload.overlimitsize",
-							"超过允许的最大上传文件大小：" + ex.getMaxUploadSize() + "字节", ex.getMaxUploadSize())),
-					request, HttpStatus.CONFLICT);
+			return handlerLogicException(new LogicException(new Message("upload.overlimitsize",
+					"超过允许的最大上传文件大小：" + ex.getMaxUploadSize() + "字节", ex.getMaxUploadSize())), request);
 		}
 
 	}

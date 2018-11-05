@@ -74,7 +74,7 @@ public class SysLockPluginHandler extends PluginHandlerSupport {
 
 	@Override
 	public void addIcon(IconRegistry registry) {
-		registry.addIcon(new Icon(new Message("plugin.sysLock.iconName", "本地锁"), "<i class=\"fas fa-lock\"></i>",
+		registry.addIcon(new Icon(new Message("plugin.sysLock.iconName", "系统锁"), "<i class=\"fas fa-lock\"></i>",
 				"console/syslock"));
 	}
 }

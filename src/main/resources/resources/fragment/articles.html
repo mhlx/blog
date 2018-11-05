@@ -1,37 +1,70 @@
-<data name="articlePage" th:currentPage="${param.currentPage}" queryPrivate="true" th:query="${param.query}" th:tag="${param.tag}" />
-<div class="card my-4" th:each="article:${articlePage.datas}">
-    <span> <a href="#" class="badge badge-light" th:href="${urls.getUrl(article.space)}">[[${article.space.name}]]</a></span>
-    <div class="card-body">
-        <h2 class="card-title"><span th:if="${article.level != null}">【置顶】</span><span th:utext="${article.title}"></span></h2>
+<data name="articlePage" th:currentPage="${param.currentPage}"
+	queryPrivate="true" th:query="${param.query}" th:tag="${param.tag}" />
 
-        <div class="card-text" style="margin-bottom:1rem" th:utext="${article.summary}" th:unless="${article.hasLock() && user == null}"></div>
-        <div class="card-text" style="margin-bottom:1rem" th:if="${article.hasLock() && user == null}">
-            <strong th:text="${messages.getMessage('article.locked','文章受锁保护')}"></strong>
-        </div>
-        <a th:href="${urls.getUrl(article)}" class="btn btn-primary">阅读更多 &rarr;</a>
-    </div>
-    <div class="card-footer text-muted">
-        [[${times.format(article.pubDate,'yyyy-MM-dd HH:mm')}]]
-        &nbsp;&nbsp;<i class="fab fa-gripfire" style="margin-left: 5px"></i>&nbsp;[[${article.hits}]]
-        <div style="float:right;text-align:right" th:if="${!article.tags.isEmpty()}">
+<div class="card my-md-4 my-2" th:if="${articlePage.datas.isEmpty()}">
+	<div class="card-body">没有任何文章</div>
+</div>
 
-            <div class="btn-group" role="group">
-                <button id="btnGroupDrop1" type="button" style="padding:0px" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-tags"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
-                    <a class="dropdown-item" href="#" th:each="tag : ${article.tags}" th:href=" ${urls.getArticlesUrlHelper().getArticlesUrl(tag)}" th:utext=" ${tag.name}"></a>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="card my-md-4 my-2" th:each="article:${articlePage.datas}"
+	th:if="${!articlePage.datas.isEmpty()}">
+	<span> <a href="#" class="badge badge-light"
+		th:href="${urls.getUrl(article.space)}">[[${article.space.name}]]</a></span>
+	<div class="card-body">
+		<h2 class="card-title">
+			<span th:if="${article.level != null}">【置顶】</span><span
+				th:utext="${article.title}"></span>
+		</h2>
+
+		<div class="card-text" style="margin-bottom: 1rem"
+			th:utext="${article.summary}"
+			th:unless="${article.hasLock() && user == null}"></div>
+		<div class="card-text" style="margin-bottom: 1rem"
+			th:if="${article.hasLock() && user == null}">
+			<div class="card">
+             <div class="card-body">
+             <i class="fas fa-fw fa-lock"></i>文章受到锁保护
+             </div>
+           </div>
+		</div>
+		<a th:href="${urls.getUrl(article)}" class="btn btn-primary">阅读更多
+			&rarr;</a>
+	</div>
+	<div class="card-footer text-muted">
+		<span style="font-size: 12px">[[${times.format(article.pubDate,'yyyy-MM-dd
+			HH:mm')}]] &nbsp;&nbsp;<i class="fab fa-gripfire"
+			style="margin-left: 5px"></i>&nbsp;[[${article.hits}]] &nbsp;&nbsp;<i
+			class="fas fa-comment" style="margin-left: 5px"></i>&nbsp;[[${article.comments}]]
+		</span>
+		<div style="float: right; text-align: right"
+			th:if="${!article.tags.isEmpty()}">
+
+			<div class="btn-group" role="group">
+				<button id="btnGroupDrop1" type="button" style="padding: 0px"
+					class="btn btn-link dropdown-toggle" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">
+					<i class="fas fa-tags"></i>
+				</button>
+				<div class="dropdown-menu dropdown-menu-right"
+					aria-labelledby="btnGroupDrop1">
+					<a class="dropdown-item" href="#" th:each="tag : ${article.tags}"
+						th:href=" ${urls.getArticlesUrlHelper().getArticlesUrl(tag)}"
+						th:utext=" ${tag.name}"></a>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 <!-- Pagination -->
-<ul class="pagination justify-content-center mb-4">
-    <li class="page-item " th:classappend="${articlePage.currentPage == 1?'disabled' : ''}">
-        <a class="page-link" th:href="${urls.getArticlesUrlHelper().getArticlesUrl(articlePage.param,articlePage.currentPage-1)}">&larr; 上一页 </a>
-    </li>
-    <li class="page-item" th:classappend="${articlePage.currentPage == articlePage.totalPage?'disabled' : ''}">
-        <a class="page-link" th:href="${urls.getArticlesUrlHelper().getArticlesUrl(articlePage.param,articlePage.currentPage+1)}">下一页&rarr;</a>
-    </li>
+<ul class="pagination justify-content-center my-2">
+	<li class="page-item "
+		th:classappend="${(articlePage.currentPage == 1 || articlePage.totalPage <= 1)?'disabled' : ''}">
+		<a class="page-link"
+		th:href="${urls.getArticlesUrlHelper().getArticlesUrl(articlePage.param,articlePage.currentPage-1)}">&larr;
+			上一页 </a>
+	</li>
+	<li class="page-item"
+		th:classappend="${articlePage.currentPage >= articlePage.totalPage?'disabled' : ''}">
+		<a class="page-link"
+		th:href="${urls.getArticlesUrlHelper().getArticlesUrl(articlePage.param,articlePage.currentPage+1)}">下一页&rarr;</a>
+	</li>
 </ul>

@@ -60,12 +60,6 @@
 				</bean>
 
 				<bean
-					class="me.qyh.blog.template.render.data.RandomArticleDataTagProcessor">
-					<constructor-arg index="0" value="随机文章" />
-					<constructor-arg index="1" value="randomArticle" />
-				</bean>
-
-				<bean
 					class="me.qyh.blog.template.render.data.ArticleArchivesDataTagProcessor">
 					<constructor-arg index="0" value="文章归档" />
 					<constructor-arg index="1" value="archives" />

@@ -203,7 +203,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="selectNewsDays" resultType="string">
-		select distinct(substr(news_write,1,10))  from blog_news
+		select substr(news_write,1,10) as news_write  from blog_news
 		<where>
 			<if test="!queryPrivate">
 				 news_private = false
@@ -222,12 +222,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 				</choose>
 			</if>
 		</where>
+		GROUP BY substr(news_write,1,10)
 		<choose>
 			<when test="asc">
-				ORDER BY news_write,id
+				ORDER BY news_write
 			</when>
 			<otherwise>
-				ORDER BY news_write DESC,id DESC
+				ORDER BY news_write DESC
 			</otherwise>
 		</choose>
 		LIMIT #{offset},#{pageSize}

@@ -1,4 +1,6 @@
+<transaction:begin/>
 <data name="article" th:idOrAlias="${idOrAlias}" />
+<data name="articleNav" ref-article="article" th:queryLock="${user != null}"/>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,7 +18,7 @@
 <link th:href="@{/static/fontawesome-free/css/all.min.css}"
 	rel="stylesheet">
 <link rel="stylesheet"
-	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
+	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=1}" />
 <link rel="stylesheet" th:href="@{/static/css/markdown.css}" />
 <link rel="stylesheet" th:href="@{/static/prettify/github-v2.min.css}" />
 <style>
@@ -61,8 +63,8 @@ body {
 				<h1 class="mt-4">[[${article.title}]]</h1>
 				<p class="lead" th:if="${!article.tags.isEmpty()}">
 					<i class="fas fa-tags" style="margin-right: 10px"></i><a
-						th:href="${urls.getUrl(tag)}" th:each="tag : ${article.tags}"
-						th:text="${tag.name}"></a>
+						th:href="${urls.getArticlesUrlHelper().getArticlesUrl(tag)}" th:each="tag : ${article.tags}"
+						th:text="${tag.name}" style="margin-right:5px"></a>
 				</p>
 				<hr>
 
@@ -74,6 +76,19 @@ body {
 				<div class="markdown-body" th:utext="${article.content}"></div>
 
 				<hr>
+              
+                <ul class="pagination justify-content-center mb-4" th:if="${articleNav != null}">
+                    <li class="page-item " th:classappend="${articleNav.previous  == null ?'disabled' : ''}">
+                        <a class="page-link" th:href="${urls.getUrl(articleNav.previous)}" th:if="${articleNav.previous != null}">&larr;
+                            上一篇 </a>
+                        <a class="page-link" th:if="${articleNav.previous == null}">&larr;
+                            上一篇 </a>
+                    </li>
+                    <li class="page-item" th:classappend="${articleNav.next == null ?'disabled' : ''}">
+                        <a class="page-link" th:href="${urls.getUrl(articleNav.next)}" th:if="${articleNav.next != null}">下一篇&rarr;</a>
+                        <a class="page-link" th:if="${articleNav.next == null}">下一篇&rarr;</a>
+                    </li>
+                </ul>
 
 				<div id="comments-container"></div>
 
@@ -87,7 +102,7 @@ body {
 				<div class="card my-4 sticky-top sticky-offset">
 					<h5 class="card-header">搜索</h5>
 					<div class="card-body">
-						<form th:action="${urls.currentUrl}">
+						<form th:action="${urls.currentUrl}" id="searchForm">
 							<div class="input-group mb-3">
 								<input type="text" class="form-control" name="query" value="">
 								<div class="input-group-append">

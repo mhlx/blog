@@ -6,6 +6,7 @@
 <body id="page-top">
 
 	<nav th:replace="console/base/nav"></nav>
+	<div th:replace="console/base/mobile_nav"></div>
 
 	<div id="wrapper">
 
@@ -22,15 +23,17 @@
 					</div>
 					<div class="card-body">
 
-						<form class="form-inline">
-							<a class="btn btn-primary mb-2"
-								th:href="@{/console/template/page/new}">新页面</a>
-							<div class="form-group mx-sm-3 mb-2">
+						<form class="form-inline justify-content-left my-2">
+							<div class="form-group mr-sm-3">
 								<label  class="sr-only">名称|路径</label> <input
 									type="text" class="form-control" id="query"
 									placeholder="查询">
 							</div>
-							<button type="button" id="query-btn" class="btn btn-primary mb-2">查询</button>
+							
+							<div class="btn-group" role="group" aria-label="Basic example">
+								<a th:href="@{/console/template/page/new}" class="btn btn-secondary" id="query">新页面</a>
+								<button type="button" class="btn btn-secondary" id="query-btn">查询</button>
+							</div>
 						</form>
 
 						<div class="table-responsive">
@@ -58,13 +61,8 @@
 			<!-- /.container-fluid -->
 
 			<!-- Sticky Footer -->
-			<footer class="sticky-footer">
-				<div class="container my-auto">
-					<div class="copyright text-center my-auto">
-						<span>Copyright © Your Website 2018</span>
-					</div>
-				</div>
-			</footer>
+
+			<div th:replace="console/base/footer"></div>
 
 		</div>
 		<!-- /.content-wrapper -->

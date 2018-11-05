@@ -189,7 +189,7 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 	@Override
 	@Transactional(readOnly = true)
 	public List<Space> querySpace(SpaceQueryParam param) {
-		if (param.getQueryPrivate() && !Environment.isLogin()) {
+		if (param.getQueryPrivate() && !Environment.hasAuthencated()) {
 			param.setQueryPrivate(false);
 		}
 		return cache.stream().filter(space -> {

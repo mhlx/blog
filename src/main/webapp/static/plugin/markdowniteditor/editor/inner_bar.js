@@ -243,7 +243,7 @@ var inner_bar = (function(editor,config){
             table += '</form>';
             table += ' </div>';
             table += '<div class="modal-footer">';
-            table += '  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+            table += '  <button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
             table += '  <button type="button" class="btn btn-primary" data-table-confirm>确定</button>';
             table += '  </div>';
             table += '  </div>';

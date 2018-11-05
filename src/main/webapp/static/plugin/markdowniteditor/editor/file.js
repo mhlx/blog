@@ -11,7 +11,7 @@ var files = (function(editor) {
     videoModal += '<textarea class="form-control" style="margin-top:10px" rows="8"></textarea>';
     videoModal += '</div>';
     videoModal += '<div class="modal-footer">';
-    videoModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+    videoModal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
     videoModal += '<button type="button" class="btn btn-primary">插入</button>';
     videoModal += ' </div>';
     videoModal += ' </div>';

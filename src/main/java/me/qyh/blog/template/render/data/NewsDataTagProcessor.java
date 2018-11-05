@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import me.qyh.blog.core.entity.News;
 import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.exception.ResourceNotFoundException;
 import me.qyh.blog.core.service.NewsService;
 
 public class NewsDataTagProcessor extends DataTagProcessor<News> {
@@ -41,14 +42,14 @@ public class NewsDataTagProcessor extends DataTagProcessor<News> {
 			if (ignoreException) {
 				return null;
 			}
-			throw new LogicException("news.notExists", "动态不存在");
+			throw new ResourceNotFoundException("news.notExists", "动态不存在");
 		}
 		Optional<News> op = newsService.getNews(id);
 		if (op.isPresent()) {
 			return op.get();
 		}
 		if (!ignoreException) {
-			throw new LogicException("news.notExists", "动态不存在");
+			throw new ResourceNotFoundException("news.notExists", "动态不存在");
 		}
 		return null;
 	}

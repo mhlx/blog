@@ -77,7 +77,7 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 		if (article.isPrivate()) {
 			Environment.doAuthencation();
 		}
-		if (!article.getAllowComment() && !Environment.isLogin()) {
+		if (!article.getAllowComment() && !Environment.hasAuthencated()) {
 			throw new LogicException("article.notAllowComment", "文章不允许被评论");
 		}
 		lockManager.openLock(article.getLockId());
@@ -89,7 +89,7 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 		if (article == null || !article.isPublished()) {
 			return false;
 		}
-		if (article.isPrivate() && !Environment.isLogin()) {
+		if (article.isPrivate() && !Environment.hasAuthencated()) {
 			return false;
 		}
 		if (!Environment.match(article.getSpace())) {

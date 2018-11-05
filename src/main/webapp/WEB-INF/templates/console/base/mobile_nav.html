@@ -1,0 +1,74 @@
+<div id="mobile-nav"
+	style="display: none; position: absolute; top: 56px; left: 0px; background: #212529; width: 100%; z-index: 99999999;">
+	<div class="row" style="margin: 0px !important">
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/user}" style="color: rgba(255, 255, 255, .5)"><i
+				class="fas fa-fw fa-user"></i> <span style="display: block">我的信息</span></a>
+		</div>
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/space}" style="color: rgba(255, 255, 255, .5)"><i
+				class="fab fa-fw fa-skype"></i> <span style="display: block">空间</span></a>
+		</div>
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/article}"
+				style="color: rgba(255, 255, 255, .5)"> <i
+				class="fas fa-fw fa-book"></i><span style="display: block">文章</span>
+			</a>
+		</div>
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/news}" style="color: rgba(255, 255, 255, .5)">
+				<i class="fas fa-fw fa-newspaper"></i><span style="display: block">动态</span>
+			</a>
+		</div>
+
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/file}" style="color: rgba(255, 255, 255, .5)">
+				<i class="fas fa-fw fa-file"></i><span style="display: block">文件</span>
+			</a>
+		</div>
+
+		<div class="col-3" style="text-align: center; padding: 10px">
+			<div class="btn-group">
+				<button type="button" class="btn btn-link dropdown-toggle"
+					data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+					style="color: rgba(255, 255, 255, .5); padding: 0px; font-size: .65rem !important">
+					<i class="fas fa-fw fa-user"></i> <span style="display: block">模板管理</span>
+				</button>
+				<div class="dropdown-menu">
+					<a class="dropdown-item" th:href="@{/console/template}">导入导出</a> <a
+						class="dropdown-item" th:href="@{/console/template/page}">页面</a> <a
+						class="dropdown-item" th:href="@{/console/template/fragment}">模板片段</a><a
+						class="dropdown-item" th:href="@{/console/template/data}">模板数据</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/plugin}"
+				style="color: rgba(255, 255, 255, .5)"><i
+				class="fas fa-fw fa-cogs"></i> <span style="display: block">插件</span></a>
+		</div>
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/tag}" style="color: rgba(255, 255, 255, .5)"><i
+				class="fas fa-fw fa-tags"></i> <span style="display: block">标签</span></a>
+		</div>
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/statistics}"
+				style="color: rgba(255, 255, 255, .5)"><i
+				class="fas fa-fw fa-chart-bar"></i> <span style="display: block">统计</span></a>
+		</div>
+		<div class="col-3"
+			style="text-align: center; padding: 10px; font-size: .65rem">
+			<a th:href="@{/console/config}"
+				style="color: rgba(255, 255, 255, .5)"><i
+				class="fas fa-fw fa-cog"></i> <span style="display: block">配置</span></a>
+		</div>
+	</div>
+</div>

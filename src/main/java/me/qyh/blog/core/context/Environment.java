@@ -55,7 +55,7 @@ public final class Environment {
 	 * 
 	 */
 	public static void doAuthencation() {
-		if (!isLogin()) {
+		if (!hasAuthencated()) {
 			throw new AuthencationException();
 		}
 	}
@@ -89,7 +89,7 @@ public final class Environment {
 	 * 
 	 * @return
 	 */
-	public static boolean isLogin() {
+	public static boolean hasAuthencated() {
 		return getUser() != null;
 	}
 

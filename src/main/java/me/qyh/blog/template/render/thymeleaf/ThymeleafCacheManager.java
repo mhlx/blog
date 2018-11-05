@@ -80,32 +80,32 @@ public class ThymeleafCacheManager extends AbstractCacheManager implements Appli
 
 		@Override
 		public void put(TemplateCacheKey key, TemplateModel value) {
-//			TemplateData templateData = value.getTemplateData();
-//			ITemplateResource resource = templateData.getTemplateResource();
-//			if (resource instanceof TemplateResource) {
-//				// @since 6.0
-//				// if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
-//				// return;
-//				// }
-//				// if (key.getOwnerTemplate() != null) {
-//				// return;
-//				// }
-//				final Template template = ((TemplateResource) resource).getTemplate();
-//				String templateName = templateData.getTemplate();
-//				tpe.execute(() ->
-//				/**
-//				 * 如果是Template，此时应该和当前的Template进行比对，如果一致才放入缓存 因为如果读写操作并发执行的话，此时的数据可能是旧的数据
-//				 * 
-//				 * 这个操作可能是同步的，因此在首次载入时效率可能非常低
-//				 */
-//				templateService.compareTemplate(templateName, template, flag -> {
-//					if (flag) {
-//						cache.put(key, value);
-//					}
-//				}));
-//			} else {
-//				cache.put(key, value);
-//			}
+			TemplateData templateData = value.getTemplateData();
+			ITemplateResource resource = templateData.getTemplateResource();
+			if (resource instanceof TemplateResource) {
+				// @since 6.0
+				// if (!CollectionUtils.isEmpty(key.getTemplateSelectors())) {
+				// return;
+				// }
+				// if (key.getOwnerTemplate() != null) {
+				// return;
+				// }
+				final Template template = ((TemplateResource) resource).getTemplate();
+				String templateName = templateData.getTemplate();
+				tpe.execute(() ->
+				/**
+				 * 如果是Template，此时应该和当前的Template进行比对，如果一致才放入缓存 因为如果读写操作并发执行的话，此时的数据可能是旧的数据
+				 * 
+				 * 这个操作可能是同步的，因此在首次载入时效率可能非常低
+				 */
+				templateService.compareTemplate(templateName, template, flag -> {
+					if (flag) {
+						cache.put(key, value);
+					}
+				}));
+			} else {
+				cache.put(key, value);
+			}
 		}
 
 		@Override

@@ -61,7 +61,7 @@ public class PageCommentModuleHandler extends CommentModuleHandler {
 		if (page == null) {
 			throw new LogicException("page.user.notExists", "页面不存在");
 		}
-		if (!page.getAllowComment() && !Environment.isLogin()) {
+		if (!page.getAllowComment() && !Environment.hasAuthencated()) {
 			throw new LogicException("page.notAllowComment", "页面不允许评论");
 		}
 	}

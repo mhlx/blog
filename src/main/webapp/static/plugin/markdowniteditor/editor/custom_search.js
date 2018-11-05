@@ -11,12 +11,12 @@ var search = (function(cm,config) {
     html += '     <input type="text" class="form-control" placeholder="替换内容" id="search-box-replace-input">';
     html += ' </div>';
     html += '</form>';
-    html += '  <button class="btn btn-default" id="search-btn" type="button">查找</button>';
-    html += '  <button class="btn btn-default" id="search-prev" data-hidden-before-search style="display:none" type="button"><i class="fas fa-arrow-up"></i></button>';
-    html += '  <button class="btn btn-default" id="search-next" data-hidden-before-search style="display:none" type="button"><i class="fas fa-arrow-down"></i></button>';
-    html += '  <button class="btn btn-default" id="search-replace" data-hidden-before-search type="button" style="display:none">替换</button>';
-    html += '  <button class="btn btn-default" id="search-replace-all" data-hidden-before-search type="button" style="display:none">替换全部</button>';
-    html += '  <button class="btn btn-default" id="search-close" type="button">关闭</button>';
+    html += '  <button class="btn btn-primary" id="search-btn" type="button">查找</button>';
+    html += '  <button class="btn btn-primary" id="search-prev" data-hidden-before-search style="display:none" type="button"><i class="fas fa-arrow-up"></i></button>';
+    html += '  <button class="btn btn-primary" id="search-next" data-hidden-before-search style="display:none" type="button"><i class="fas fa-arrow-down"></i></button>';
+    html += '  <button class="btn btn-primary" id="search-replace" data-hidden-before-search type="button" style="display:none">替换</button>';
+    html += '  <button class="btn btn-primary" id="search-replace-all" data-hidden-before-search type="button" style="display:none">替换全部</button>';
+    html += '  <button class="btn btn-primary" id="search-close" type="button">关闭</button>';
     html += '  </div>';
     var searchBox = $(html);
     searchBox.appendTo($("#in"));

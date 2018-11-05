@@ -1,8 +1,10 @@
-<script th:src="@{/static/jquery/jquery.min.js}"></script>
-<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
-<script th:src="@{/static/js/base.js}"></script>
-<script th:src="@{/static/js/moment.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/static/jquery/jquery.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/static/bootstrap/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/bootstrap-confirmation.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/base.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/bootbox.min.js}"></script>
 <input type="hidden" id="basePath" th:value="@{/}" />
 <input type="hidden" id="actPath" th:value="${urls.currentUrl}" />
 <input type="hidden" id="rootPath" th:value="${urls.url}" />
@@ -10,4 +12,12 @@
 	var basePath = $("#basePath").val();
 	var rootPath = $("#rootPath").val();
 	var actPath = $("#actPath").val();
+	if (basePath == '/') {
+		basePath = '';
+	} else {
+		basePath = basePath.substring(0, basePath.length - 1);
+	}
+	bootbox.setDefaults({
+	    locale: "zh_CN"
+	});
 </script>

@@ -145,18 +145,6 @@ public interface ArticleService {
 	String createPreviewContent(Editor editor, String content);
 
 	/**
-	 * 得到一篇随机文章
-	 * <p>
-	 * <b>这篇文章只会保留用于构造访问链接的基本属性，不能直接用于显示</b>
-	 * </p>
-	 * 
-	 * @param queryLock
-	 *            是否查询被锁保护的文章
-	 * @return 随机文章
-	 */
-	Optional<Article> selectRandom(boolean queryLock);
-
-	/**
 	 * 更新文章
 	 * 
 	 * @param article
@@ -171,7 +159,7 @@ public interface ArticleService {
 	 * @param
 	 * @since 7.0
 	 */
-	PageResult<ArticleArchive> selectArticleArchives(ArticleArchivePageQueryParam param);
+	PageResult<ArticleArchive> queryArticleArchives(ArticleArchivePageQueryParam param);
 
 	/**
 	 * 统计某个空间下的文章

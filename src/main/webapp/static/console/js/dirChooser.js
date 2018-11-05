@@ -17,7 +17,7 @@ var dirChooser = (function(){
 	modal += '</div>';
 	modal += '<div class="modal-footer">';
 	modal += '<button type="button" id="dir-choose-btn" class="btn btn-primary" >确定</button>';
-	modal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+	modal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
 	modal += '</div>';
 	modal += '</div>';
 	modal += '</div>';

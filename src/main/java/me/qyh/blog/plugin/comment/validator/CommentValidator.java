@@ -52,7 +52,7 @@ public class CommentValidator implements Validator {
 					"回复的内容不能超过" + MAX_COMMENT_LENGTH + "个字符");
 			return;
 		}
-		if (!Environment.isLogin()) {
+		if (!Environment.hasAuthencated()) {
 			String email = comment.getEmail();
 			if (email != null) {
 				email = email.strip();

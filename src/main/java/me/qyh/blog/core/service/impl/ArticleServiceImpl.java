@@ -383,16 +383,24 @@ public class ArticleServiceImpl
 					article.setSummary(htmlMap.get(article.getId()));
 				}
 			});
-			if (!Environment.isLogin()) {
+			if (!Environment.hasAuthencated()) {
 				datas.stream().filter(Article::hasLock).forEach(art -> art.setSummary(null));
 			}
+		}
+		/**
+		 * @since 7.0
+		 */
+		if (!Environment.hasAuthencated()) {
+			page.getDatas().stream().filter(Article::hasLock).forEach(a -> {
+				a.setSummary(null);
+			});
 		}
 		return page;
 	}
 
 	private void checkParam(ArticleQueryParam param) {
 		// 如果查询私有文章，但是用户没有登录
-		if (param.isQueryPrivate() && !Environment.isLogin()) {
+		if (param.isQueryPrivate() && !Environment.hasAuthencated()) {
 			param.setQueryPrivate(false);
 		}
 		// 如果在空间下查询，不能查询多个空间
@@ -512,7 +520,7 @@ public class ArticleServiceImpl
 		if (!Environment.match(article.getSpace())) {
 			return Optional.empty();
 		}
-		boolean queryPrivate = Environment.isLogin();
+		boolean queryPrivate = Environment.hasAuthencated();
 		Article previous = articleDao.getPreviousArticle(article, queryPrivate, queryLock);
 		Article next = articleDao.getNextArticle(article, queryPrivate, queryLock);
 		return (previous != null || next != null) ? Optional.of(new ArticleNav(previous, next)) : Optional.empty();
@@ -521,20 +529,14 @@ public class ArticleServiceImpl
 	@Override
 	@Transactional(readOnly = true)
 	public List<TagCount> queryTags() {
-		return articleTagDao.selectTags(Environment.getSpace(), Environment.isLogin());
+		return articleTagDao.selectTags(Environment.getSpace(), Environment.hasAuthencated());
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<Article> selectRandom(boolean queryLock) {
-		return Optional.ofNullable(articleDao.selectRandom(Environment.getSpace(), Environment.isLogin(), queryLock));
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public PageResult<ArticleArchive> selectArticleArchives(ArticleArchivePageQueryParam param) {
+	public PageResult<ArticleArchive> queryArticleArchives(ArticleArchivePageQueryParam param) {
 		if (param.isQueryPrivate()) {
-			param.setQueryPrivate(Environment.isLogin());
+			param.setQueryPrivate(Environment.hasAuthencated());
 		}
 		param.setSpace(Environment.getSpace());
 
@@ -570,6 +572,10 @@ public class ArticleServiceImpl
 
 		List<Article> articles = articleDao.selectPage(ap);
 
+		if (!Environment.hasAuthencated()) {
+			articles.stream().filter(Article::hasLock).forEach(art -> art.setSummary(null));
+		}
+
 		Map<String, List<Article>> map = articles.stream().collect(Collectors.groupingBy(art -> {
 			Date pub = art.getPubDate();
 			return Times.format(pub, "yyyy-MM-dd");
@@ -577,6 +583,7 @@ public class ArticleServiceImpl
 
 		List<ArticleArchive> archives = days.stream().map(d -> new ArticleArchive(d, map.get(d)))
 				.collect(Collectors.toList());
+
 		return new PageResult<>(param, count, archives);
 	}
 
@@ -601,9 +608,10 @@ public class ArticleServiceImpl
 	@Transactional(readOnly = true)
 	public ArticleStatistics queryArticleStatistics() {
 		ArticleStatistics articleStatistics = articleDao.selectStatistics(Environment.getSpace(),
-				Environment.isLogin());
+				Environment.hasAuthencated());
 		if (!Environment.hasSpace()) {
-			articleStatistics.setSpaceStatisticsList(articleDao.selectArticleSpaceStatistics(Environment.isLogin()));
+			articleStatistics
+					.setSpaceStatisticsList(articleDao.selectArticleSpaceStatistics(Environment.hasAuthencated()));
 		}
 		return articleStatistics;
 	}
@@ -766,8 +774,8 @@ public class ArticleServiceImpl
 		}
 
 		private boolean validHit(Article article) {
-			boolean hit = !Environment.isLogin() && article.isPublished() && Environment.match(article.getSpace())
-					&& !article.getIsPrivate();
+			boolean hit = !Environment.hasAuthencated() && article.isPublished()
+					&& Environment.match(article.getSpace()) && !article.getIsPrivate();
 
 			if (hit) {
 				lockManager.openLock(article.getLockId());

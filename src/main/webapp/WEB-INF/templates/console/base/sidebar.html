@@ -47,16 +47,10 @@
 				th:classappend="${menu == 'data'} ? 'active' : null"
 				th:href="@{/console/template/data}">模板数据</a>
 		</div></li>
-
-
-
-
 	<li class="nav-item"
 		th:classappend="${menu == 'plugin'} ? 'active' : null"><a
 		class="nav-link" th:href="@{/console/plugin}"><i
 			class="fas fa-fw fa-cogs"></i><span>插件</span> </a></li>
-
-
 	<li class="nav-item"
 		th:classappend="${menu == 'tag'} ? 'active' : null"><a
 		class="nav-link" th:href="@{/console/tag}"> <i
@@ -67,12 +61,9 @@
 		class="nav-link" th:href="@{/console/statistics}"> <i
 			class="fas fa-fw fa-chart-bar"></i> <span>统计</span>
 	</a></li>
-
-
 	<li class="nav-item"
 		th:classappend="${menu == 'config'} ? 'active' : null"><a
 		class="nav-link" th:href="@{/console/config}"> <i
 			class="fas fa-fw fa-cog"></i> <span>配置</span>
 	</a></li>
-
 </ul>

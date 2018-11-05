@@ -44,6 +44,7 @@ import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.util.ExceptionUtils;
 import me.qyh.blog.core.util.Formats;
 import me.qyh.blog.core.util.Jsons;
+import me.qyh.blog.core.util.Jsoups;
 import me.qyh.blog.core.util.StringUtils;
 import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.util.UrlUtils;
@@ -190,6 +191,7 @@ public final class TemplateRender
 		pros.put("formats", Formats.class);
 		pros.put("fragments", Fragments.class);
 		pros.put("gravatars", new Gravatars(gravatarUrlGenerator));
+		pros.put("jsoups", Jsoups.class);
 	}
 
 	public void setPros(Map<String, Object> pros) {

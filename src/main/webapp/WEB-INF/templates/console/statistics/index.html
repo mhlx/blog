@@ -6,6 +6,7 @@
 <body id="page-top">
 
 	<nav th:replace="console/base/nav"></nav>
+	<div th:replace="console/base/mobile_nav"></div>
 
 	<div id="wrapper">
 
@@ -18,7 +19,7 @@
 
 				<div class="row">
 
-					<div class="col-8 ">
+					<div class="col-12 ">
 						<div class="alert alert-danger"
 							th:text="${messages.getMessage(error)}" th:if="${error != null}"></div>
 						<div class="form-group">
@@ -166,27 +167,13 @@
 							</div>
 						</div>
 					</div>
-					<div class="col-4 ">
-						<div class="alert alert-warning">
-							<h4>关于文章统计：</h4>
-							<p>无论文章处于何种状态(发布、计划、草稿，回收站)都将会被统计到，例如一篇处于回收站中的文章发布日期是最新的，那么最后发布日期将会取这篇文章的发布日期</p>
-
-							<h4 style="margin-top: 20px">关于文章引用标签数统计：</h4>
-							<p>无论文章处于何种状态(发布、计划、草稿，回收站)，只要该文章依旧持有对标签的引用，那么仍旧会统计该文章持有的标签，例如标签A被且仅被回收站中的文章A引用，那么统计文章引用标签数时依旧会统计到标签A</p>
-						</div>
-					</div>
 				</div>
 			</div>
 			<!-- /.container-fluid -->
 
 			<!-- Sticky Footer -->
-			<footer class="sticky-footer">
-				<div class="container my-auto">
-					<div class="copyright text-center my-auto">
-						<span>Copyright © Your Website 2018</span>
-					</div>
-				</div>
-			</footer>
+
+			<div th:replace="console/base/footer"></div>
 
 		</div>
 		<!-- /.content-wrapper -->

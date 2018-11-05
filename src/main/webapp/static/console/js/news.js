@@ -231,4 +231,23 @@
 				 queryParam.content = $("#queryContent").val();
 				 load();
 			 });
+			 
+			 
+			 $.ajax({
+					url : root + 'api/console/locks',
+					success:function(data){
+						var locks = data;
+						if(locks.length > 0){
+							var html = '';
+							for(var i=0;i<locks.length;i++){
+								var lock = locks[i];
+								html += '<option value="'+lock.id+'">'+lock.name+'</option>';
+							}
+							$("#lock").append(html);
+						}
+					},
+					error : function(jqXHR){
+						swal('获取锁失败',$.parseJSON(jqXHR.responseText).error,'error');
+					}
+				})
 		});

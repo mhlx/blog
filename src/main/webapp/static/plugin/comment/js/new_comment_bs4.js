@@ -61,7 +61,7 @@
         modal += '</form>';
         modal += '</div>';
         modal += '<div class="modal-footer">';
-        modal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+        modal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
         modal += ' <button type="button" class="btn btn-primary" id="comment-btn">提交</button>';
         modal += '</div>';
         modal += '</div>';
@@ -240,7 +240,7 @@
         conversationsModal += '<div class="tip"></div>';
         conversationsModal += '</div>';
         conversationsModal += '<div class="modal-footer">';
-        conversationsModal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+        conversationsModal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
         conversationsModal += '</div>';
         conversationsModal += '</div>';
         conversationsModal += '</div>';
@@ -475,18 +475,18 @@
                                 '</small>';
                             if (isLogin) {
                             	if(!data.admin && !data.ban){
-                                	html += '<a href="javascript:void(0)" data-ban="'+data.id+'" style="margin-left:10px">禁IP</a>';
+                                	html += '<a href="javascript:void(0)" data-ban="'+data.id+'" style="margin-left:10px"><small>禁IP</small></a>';
                             	}
-                                html += '<a href="javascript:void(0)" data-del="'+data.id+'"  style="margin-left:10px">删除</a>';
+                                html += '<a href="javascript:void(0)" data-del="'+data.id+'"  style="margin-left:10px"><small>删除</small></a>';
                             }
                             if (data.status == 'CHECK') {
-                                html += '<a href="javascript:void(0)" data-check="'+data.id+'"  style="margin-left:10px">审核</a>';
+                                html += '<a href="javascript:void(0)" data-check="'+data.id+'"  style="margin-left:10px"><small>审核</small></a>';
                             } else {
                             	if(config.allowComment || isLogin){
-                            		html += '<a href="javascript:void(0)" data-moduleId="'+config.moduleId+'" data-moduletype="'+config.moduleType+'" data-reply="'+data.id+'"   style="margin-left:10px">回复</a>';
+                            		html += '<a href="javascript:void(0)" data-moduleId="'+config.moduleId+'" data-moduletype="'+config.moduleType+'" data-reply="'+data.id+'"   style="margin-left:10px"><small>回复</small></a>';
                             	}
                                 if (data.parent) {
-                                    html += '<a href="javascript:void(0)" data-moduleId="'+config.moduleId+'" data-moduletype="'+config.moduleType+'" data-conversations="'+data.id+'" style="margin-left:10px">查看对话</a>';
+                                    html += '<a href="javascript:void(0)" data-moduleId="'+config.moduleId+'" data-moduletype="'+config.moduleType+'" data-conversations="'+data.id+'" style="margin-left:10px"><small>查看对话</small></a>';
                                 }
                             }
                             html += '</p>';

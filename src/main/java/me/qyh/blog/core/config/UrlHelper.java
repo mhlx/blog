@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -46,7 +48,7 @@ import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.util.UrlUtils;
 import me.qyh.blog.core.vo.ArticleQueryParam;
 import me.qyh.blog.core.vo.ArticleQueryParam.Sort;
-import me.qyh.blog.core.vo.NewsQueryParam;
+import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
 import me.qyh.blog.template.PathTemplate;
 import me.qyh.blog.web.Webs;
 
@@ -335,7 +337,7 @@ public class UrlHelper {
 			this.path = path;
 		}
 
-		public String getNewsUrl(NewsQueryParam param, int page) {
+		public String getNewsUrl(NewsArchivePageQueryParam param, int page) {
 			StringBuilder sb = new StringBuilder(url);
 			if (!path.isEmpty()) {
 				if (!path.startsWith("/")) {
@@ -344,31 +346,25 @@ public class UrlHelper {
 				sb.append(path);
 			}
 			sb.append("?currentPage=").append(page);
-			Date begin = param.getBegin();
-			Date end = param.getEnd();
-			if (begin != null && end != null) {
-				sb.append("&begin=").append(Times.format(Times.toLocalDateTime(begin), "yyyy-MM-dd HH:mm:ss"));
-				sb.append("&end=").append(Times.format(Times.toLocalDateTime(end), "yyyy-MM-dd HH:mm:ss"));
+			if (param.getYmd() != null) {
+				sb.append("&ymd=").append(param.getYmd());
 			}
 			sb.append("&asc=").append(param.isAsc());
 			return sb.toString();
 		}
 
-		public String getNewsUrl(String begin, String end) {
-			NewsQueryParam param = new NewsQueryParam();
-			param.setBegin(Times.parseAndGetDate(begin));
-			if (param.getBegin() != null) {
-				param.setEnd(Times.parseAndGetDate(end));
-			}
+		public String getNewsUrl(String ymd) {
+			NewsArchivePageQueryParam param = new NewsArchivePageQueryParam();
+			if (param != null)
+				try {
+					LocalDate.parse(ymd);
+					param.setYmd(ymd);
+				} catch (DateTimeParseException e) {
+
+				}
 			return getNewsUrl(param, 1);
 		}
 
-		public String getNewsUrl(Date begin, Date end) {
-			NewsQueryParam param = new NewsQueryParam();
-			param.setBegin(begin);
-			param.setEnd(end);
-			return getNewsUrl(param, 1);
-		}
 	}
 
 	protected final class ArticlesUrlHelper {

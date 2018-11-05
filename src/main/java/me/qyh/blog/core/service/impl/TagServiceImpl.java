@@ -119,7 +119,7 @@ public class TagServiceImpl implements TagService {
 	@Transactional(readOnly = true)
 	public TagStatistics queryTagStatistics() {
 		TagStatistics tagStatistics = new TagStatistics();
-		boolean queryPrivate = Environment.isLogin();
+		boolean queryPrivate = Environment.hasAuthencated();
 		tagStatistics.setArticleTagCount(articleTagDao.selectTagsCount(Environment.getSpace(), queryPrivate));
 		return tagStatistics;
 	}

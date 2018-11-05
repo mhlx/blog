@@ -6,7 +6,7 @@
 <body id="page-top">
 
 	<nav th:replace="console/base/nav"></nav>
-
+	<div th:replace="console/base/mobile_nav"></div>
 	<div id="wrapper">
 
 		<!--sidebar-->
@@ -42,14 +42,19 @@
 							</div>
 						</div>
 						<div class="row">
-							<div class="col-md-6">
+							<div class="col-12 col-md-6">
 								<div class="input-group mb-3">
-									<input type="text" class="form-control" placeholder="搜索标题|内容|标签|摘要" id="searchText">
+									<input type="text" class="form-control"
+										placeholder="搜索标题|内容|标签|摘要" id="searchText">
 									<div class="input-group-append">
 										<span class="input-group-text"><a href="###"
 											id="search"><i class="fas fa-search"></i></a></span>
 									</div>
 								</div>
+							</div>
+							<div class="col-12 col-md-6">
+								<a th:href="@{/console/article/new}"
+									class="btn btn-primary mb-2">新文章</a>
 							</div>
 						</div>
 						<div class="table-responsive">
@@ -77,13 +82,7 @@
 			<!-- /.container-fluid -->
 
 			<!-- Sticky Footer -->
-			<footer class="sticky-footer">
-				<div class="container my-auto">
-					<div class="copyright text-center my-auto">
-						<span>Copyright © Your Website 2018</span>
-					</div>
-				</div>
-			</footer>
+			<div th:replace="console/base/footer"></div>
 
 		</div>
 		<!-- /.content-wrapper -->

@@ -227,7 +227,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 
 		long now = System.currentTimeMillis();
 		String ip = comment.getIp();
-		if (!Environment.isLogin()) {
+		if (!Environment.hasAuthencated()) {
 
 			if (blacklistHandler.match(ip)) {
 				throw new LogicException("comment.ip.forbidden", "ip被禁止评论");
@@ -275,7 +275,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 			throw new LogicException("comment.content.same", "已经回复过相同的评论了");
 		}
 
-		if (!Environment.isLogin()) {
+		if (!Environment.hasAuthencated()) {
 			String email = comment.getEmail();
 			if (email != null) {
 				// set gravatar md5
@@ -294,7 +294,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		comment.setParentPath(parentPath);
 		comment.setCommentDate(new Timestamp(now));
 
-		boolean check = config.getCheck() && !Environment.isLogin();
+		boolean check = config.getCheck() && !Environment.hasAuthencated();
 		comment.setStatus(check ? CommentStatus.CHECK : CommentStatus.NORMAL);
 		// 获取当前设置的编辑器
 		comment.setEditor(config.getEditor());
@@ -370,7 +370,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 
 		CommentPageResult result = new CommentPageResult(param, count, datas, new CommentConfig(config));
 
-		if (Environment.isLogin()) {
+		if (Environment.hasAuthencated()) {
 			CommentQueryParam copy = new CommentQueryParam(param);
 			copy.setStatus(CommentStatus.CHECK);
 			switch (mode) {
@@ -425,7 +425,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		if (handler == null) {
 			return new ArrayList<>();
 		}
-		List<Comment> comments = handler.queryLastComments(Environment.getSpace(), limit, Environment.isLogin(),
+		List<Comment> comments = handler.queryLastComments(Environment.getSpace(), limit, Environment.hasAuthencated(),
 				queryAdmin);
 		for (Comment comment : comments) {
 			handleComment(comment);
@@ -511,7 +511,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	@Transactional(readOnly = true)
 	public CommentStatistics queryCommentStatistics(Space space) {
 		CommentStatistics commentStatistics = new CommentStatistics();
-		boolean queryPrivate = Environment.isLogin();
+		boolean queryPrivate = Environment.hasAuthencated();
 		for (CommentModuleHandler handler : handlerMap.values()) {
 			commentStatistics.addModule(new CommentModuleStatistics(handler.getModuleName(), handler.getName(),
 					handler.queryCommentNum(space, queryPrivate)));
@@ -678,7 +678,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	}
 
 	private void fillComment(Comment comment) {
-		if (Environment.isLogin()) {
+		if (Environment.hasAuthencated()) {
 			comment.setBan(blacklistHandler.match(comment.getIp()));
 		}
 		if (comment.getAdmin() == null || !comment.getAdmin()) {
@@ -693,7 +693,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		comment.setEmail(email);
 		comment.setGravatar(user.getGravatar());
 
-		if (!Environment.isLogin()) {
+		if (!Environment.hasAuthencated()) {
 			comment.setIp(null);
 			comment.setEmail(null);
 		}

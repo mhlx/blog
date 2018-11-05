@@ -24,6 +24,7 @@ td img {
 <body id="page-top">
 
 	<nav th:replace="console/base/nav"></nav>
+	<div th:replace="plugin/comment/mobile_nav"></div>
 
 	<div id="wrapper">
 
@@ -84,20 +85,15 @@ td img {
 							<label for="">评论昵称</label> <input class="form-control"
 								placeholder="评论昵称" th:value="${config.nickname}" name="nickname">
 						</div>
-						<button type="button" id="update" class="btn btn-default">修改评论配置</button>
+						<button type="button" id="update" class="btn btn-primary">修改评论配置</button>
 					</form>
 				</div>
 			</div>
 			<!-- /.container-fluid -->
 
 			<!-- Sticky Footer -->
-			<footer class="sticky-footer">
-				<div class="container my-auto">
-					<div class="copyright text-center my-auto">
-						<span>Copyright © Your Website 2018</span>
-					</div>
-				</div>
-			</footer>
+
+			<div th:replace="console/base/footer"></div>
 
 		</div>
 		<!-- /.content-wrapper -->

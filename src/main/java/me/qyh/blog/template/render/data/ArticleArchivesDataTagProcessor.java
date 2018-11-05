@@ -64,7 +64,7 @@ public class ArticleArchivesDataTagProcessor extends DataTagProcessor<PageResult
 			param.setPageSize(pageSize);
 		}
 		param.setCurrentPage(attributes.getInteger("currentPage").orElse(1));
-		return articleService.selectArticleArchives(param);
+		return articleService.queryArticleArchives(param);
 	}
 
 	@Override

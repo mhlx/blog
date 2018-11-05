@@ -44,7 +44,7 @@
         modal += '</form>';
         modal += '</div>';
         modal += '<div class="modal-footer">';
-        modal += '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>';
+        modal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
         modal += ' <button type="button" class="btn btn-primary" id="comment-btn">提交</button>';
         modal += '</div>';
         modal += '</div>';

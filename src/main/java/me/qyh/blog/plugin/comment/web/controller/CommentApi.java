@@ -100,7 +100,7 @@ public class CommentApi implements InitializingBean {
 	public ResponseEntity<Comment> addComment(@RequestBody @Validated Comment comment,
 			@PathVariable("type") String type, @PathVariable("id") Integer moduleId, HttpServletRequest req)
 			throws LogicException {
-		if (!Environment.isLogin() && attemptLogger.log(Environment.getIP())) {
+		if (!Environment.hasAuthencated() && attemptLogger.log(Environment.getIP())) {
 			captchaValidator.doValidate(req);
 		}
 		comment.setCommentModule(new CommentModule(type, moduleId));
@@ -118,7 +118,7 @@ public class CommentApi implements InitializingBean {
 
 	@GetMapping("api/comment/captchaRequirement")
 	public boolean needCaptcha() {
-		return !Environment.isLogin() && attemptLogger.reach(Environment.getIP());
+		return !Environment.hasAuthencated() && attemptLogger.reach(Environment.getIP());
 	}
 
 	@EnsureLogin

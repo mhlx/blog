@@ -162,6 +162,7 @@
 	    if ($.trim($("#alias").val()) != '') {
 	        page.alias = $.trim($("#alias").val());
 	    }
+	    page.spaceGlobal = $("#spaceGlobal").prop("checked");
 	    page.allowComment = $("#allowComment").prop("checked");
 	    $.ajax({
 	        type: "post",
