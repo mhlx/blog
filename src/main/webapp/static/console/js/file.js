@@ -33,13 +33,13 @@ var loadFiles = function(){
 				icons += '<a href="###" data-properties="'+data.id+'" ><i style="font-size:20px" class="fas fa-fw fa-info"></i></a>';
 				var addPath = true;
 				if(data.type == 'DIRECTORY'){
-					html += '<a href="###" data-page="1" data-parent="'+data.id+'" "><img src="'+root+'static/img/folder.png" class="img-fluid" style="height:100px"/></a>';
+					html += '<a href="###" data-page="1" data-parent="'+data.id+'" "><img src="'+root+'static/img/folder.png" class="img-fluid " style="height:100px"/></a>';
 				} else {
 					var url =data.cf.url;
 					html += '<a href="###" data-file="'+data.id+'">'
 					if(data.cf.thumbnailUrl){
 						addPath = false;
-						html += '<img  src="'+data.cf.thumbnailUrl.small+'" data-middle="'+data.cf.thumbnailUrl.middle+'" class="img-fluid" style="height:100px"/>';
+						html += '<img  src="'+data.cf.thumbnailUrl.small+'" data-middle="'+data.cf.thumbnailUrl.middle+'" class="img-fluid img-thumbnail" style="height:100px"/>';
 					} else {
 						html += '<img src="'+root+'static/img/file.png" class="img-fluid" style="height:100px"/>';
 					}
@@ -51,7 +51,7 @@ var loadFiles = function(){
 				if (addPath) {
 					html += '<p class="text-center">'+data.path+'</p>';
 				}
-				html += '<p>'+icons+'</p>';
+				html += '<p style="padding:5px">'+icons+'</p>';
 				if (data.type == 'DIRECTORY') {
 					var path = '';
 					for (var j = 0; j < parents.length; j++) {

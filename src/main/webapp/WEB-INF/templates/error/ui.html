@@ -17,7 +17,7 @@
 			<div class="col-lg-12">
 				<h1 style="text-align: center; font-size: 48px">页面渲染异常</h1>
 			</div>
-			<div class="col-md-8 offset-md-2" th:if="${description != null}">
+			<div class="col-md-8 offset-md-2 wrap" th:if="${description != null}">
 				<a th:href="@{/}">返回首页</a>
 				<div th:unless="${#lists.isEmpty(description.templateErrorInfos)}"
 					class="table-responsive">
@@ -35,7 +35,7 @@
 					</table>
 				</div>
 				<p th:if="${description.expression != null}">
-					表达式:<span th:text="${description.expression}"></span>
+					表达式:<code><span th:text="${description.expression}"></span></code>
 				</p>
 
 				<h3 th:if="${description.stackTrace != null}">Stack Trace</h3>

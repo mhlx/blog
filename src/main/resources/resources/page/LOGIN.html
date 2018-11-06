@@ -1,6 +1,6 @@
 <redirect th:url="@{/}" th:if="${user != null}" />
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
 
@@ -74,7 +74,7 @@
                     <form>
                         <div id="validate-error" class="alert alert-danger" style="display: none"></div>
                         <div class="form-group">
-                            <img th:src="@{/captcha}" class="img-responsive" id="validateImg" />
+                            <img th:src="@{/captcha}" class="img-fluid" id="validateImg" />
                             <input type="text" class="form-control" id="validate" aria-describedby="basic-addon3">
                         </div>
                     </form>
@@ -152,7 +152,7 @@
             });
 
             $("#verify-btn").click(function() {
-                var url = rootPath + "login/otpVerify?code=" + $("#otpCode").val()+"&validateCode=" + $("#validateCode").val();
+                var url = rootPath + "login/otpVerify?code=" + $("#otpCode").val()+"&validateCode=" + $("#validate").val();
                 $.ajax({
                     type: "post",
                     url: url,
