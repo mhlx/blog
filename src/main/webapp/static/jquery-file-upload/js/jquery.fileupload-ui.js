@@ -284,9 +284,8 @@
                 var progress = Math.floor(data.loaded / data.total * 100);
                 if (data.context) {
                     data.context.each(function () {
-                        $(this).find('.progress')
-                            .attr('aria-valuenow', progress)
-                            .children().first().css(
+                        $(this).find('.progress-bar')
+                            .attr('aria-valuenow', progress).css(
                                 'width',
                                 progress + '%'
                             );

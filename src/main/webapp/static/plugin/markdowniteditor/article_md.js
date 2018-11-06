@@ -90,19 +90,6 @@ $(function() {
 		$("#space").val(oldSpace);
 	}
 
-	$("#tags-input")
-			.on(
-					'input',
-					function(e) {
-						var me = $(this);
-						var tag = me.val();
-						$("#add-tag-sign").remove();
-						if ($.trim(tag).length > 0) {
-							$("#tags-input")
-									.after(
-											'<a onclick="_addTag()" class="glyphicon glyphicon-ok-sign form-control-feedback form-control-clear" id="add-tag-sign" style="pointer-events: auto; text-decoration: none;cursor: pointer;"></a>');
-						}
-					});
 
 
 	$("#submit-art").click(function() {
@@ -245,14 +232,14 @@ function showTagError(error) {
 function addTag(tag) {
 	var tag = $.trim(tag);
 	if (tags.length >= 10) {
-		showTagError('<span id="tag-tip" class="text text-danger">最多只能有10标签</span>')
+		swal('最多只能有10标签','','error');
 	} else if (tag == "" || tag.length > 20) {
-		showTagError('<span id="tag-tip" class="text text-danger">标签名在1~20个字符之间</span>')
+		swal('标签名在1~20个字符之间','','error');
 	} else {
 		for (var i = 0; i < tags.length; i++) {
 			var _tag = tags[i];
 			if (_tag.name == tag) {
-				showTagError('<span id="tag-tip" class="text text-danger">已经存在该标签</span>')
+				swal('已经存在该标签','','error');
 				$("#tags-input").val("");
 				return;
 			}
@@ -334,9 +321,9 @@ function save(fn) {
 }
 
 function getLabel_html(tag) {
-	return '<td><span class="label label-success">'
+	return '<td><span class="badge badge-success">'
 			+ tag
-			+ '<a href="###" onclick="removeTag($(this))" style="margin-left:5px"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></span></td>';
+			+ '<a href="###" onclick="removeTag($(this))" style="margin-left:5px"><i class="fas fa-trash-alt"></i></a></span></td>';
 }
 
 function removeTag(o) {

@@ -190,8 +190,18 @@
 						</div>
 						<div class="form-group has-feedback has-clear"
 							id="tags-input-container">
-							<label>标签 </label> <input type="text" id="tags-input"
-								class="form-control" placeholder="标签(小于20个字符)" />
+							<label>标签 </label>
+							<div class="input-group mb-3">
+								<input type="text" id="tags-input" class="form-control"
+									placeholder="标签(小于20个字符)" />
+								<div class="input-group-append">
+									<span class="input-group-text"><a href="###"
+										onclick="_addTag()">添加</a></span>
+								</div>
+							</div>
+						</div>
+						<div class="card my-1">
+							<div class="card-body " id="tags-container"></div>
 						</div>
 						<div id="tags-container" class="well" style="margin-top: 5px"></div>
 						<div class="form-group">
@@ -544,15 +554,6 @@
 				$("#space").val(oldSpace);
 			}
 
-			$("#tags-input").on('input',function(e) {
-				var me = $(this);
-				var tag = me.val();
-				$("#add-tag-sign").remove();
-				if($.trim(tag).length > 0){
-					$("#tags-input").after('<a onclick="_addTag()" class="glyphicon glyphicon-ok-sign form-control-feedback form-control-clear" id="add-tag-sign" style="pointer-events: auto; text-decoration: none;cursor: pointer;"></a>');
-				}
-			});
-			
 			setInterval(function(){
 				save();
 			},10000);
@@ -779,10 +780,11 @@
 		}
 
 		function getLabel_html(tag) {
-			return '<td><span class="label label-success">'
+			return '<td><span class="badge badge-success">'
 					+ tag
-					+ '<a href="###" onclick="removeTag($(this))" style="margin-left:5px"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></span></td>';
+					+ '<a href="###" onclick="removeTag($(this))" style="margin-left:5px"><i class="fas fa-trash-alt"></i></a></span></td>';
 		}
+
 
 		function removeTag(o) {
 			var tag = o.parent().text();

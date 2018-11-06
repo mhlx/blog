@@ -1,119 +1,128 @@
 var parents = [];
-var table = datatable(
-		'fileTable',
-		{
-			paging : true,
-			url : function() {
-				return root + 'api/console/files';
-			},
 
-			dataConverter : function(data) {
-				parents = data.paths;
-				if (parents.length > 0) {
-					$("[data-prev]").show();
+var param = {currentPage:1};
+var loadFiles = function(){
+	$.ajax({
+		url : root + 'api/console/files',
+		data : param,
+		success:function(data){
+			var paths = data.paths;
+			parents = paths;
+			var page = data.page;
+			var datas = page.datas;
+			var html = '';
+			if(paths.length > 0){
+				html += '<nav aria-label="breadcrumb">';
+				html += '<ol class="breadcrumb">';
+				html += '<li class="breadcrumb-item" data-parent=""><a href="#">根目录</a></li>';
+				for(var i=0;i<paths.length;i++){
+					html += '<li class="breadcrumb-item"><a href="#" data-parent="'+paths[i].id+'">'+paths[i].path+'</a></li>';
+				}    
+			    html += '</ol>';
+			    html += '</nav>';
+			}
+			$("#fileTable_breadcrumb").html(html);
+			html = '';
+			for(var i=0;i<datas.length;i++){
+				html += '<div class="col-md-3 col-6" style="margin-bottom:10px">'
+				html += '<div class="card h-100" >';
+				html += '<div class="card-body wrap text-center" >';
+				var data = datas[i];
+				var icons = '';
+				icons += '<a href="###" data-delete="'+data.id+'"><i style="font-size:20px" class="fas fa-trash-alt fa-fw"></i></a>';
+				icons += '<a href="###" data-properties="'+data.id+'" ><i style="font-size:20px" class="fas fa-fw fa-info"></i></a>';
+				var addPath = true;
+				if(data.type == 'DIRECTORY'){
+					html += '<a href="###" data-page="1" data-parent="'+data.id+'" "><img src="'+root+'static/img/folder.png" class="img-fluid" style="height:100px"/></a>';
 				} else {
-					$("[data-prev]").hide();
+					var url =data.cf.url;
+					html += '<a href="###" data-file="'+data.id+'">'
+					if(data.cf.thumbnailUrl){
+						addPath = false;
+						html += '<img  src="'+data.cf.thumbnailUrl.small+'" data-middle="'+data.cf.thumbnailUrl.middle+'" class="img-fluid" style="height:100px"/>';
+					} else {
+						html += '<img src="'+root+'static/img/file.png" class="img-fluid" style="height:100px"/>';
+					}
+					html += '</a>';
+					icons += '<a href="###" data-copy="'+data.id+'"><i style="font-size:20px" class="fas fa-copy fa-fw"></i></a>';
+					icons += '<a href="###" data-rename="'+data.id+'" data-oldname="'+data.path+'" data-ext="'+data.ext+'" ><i style="font-size:20px" class="fas fa-edit fa-fw"></i></a>';
+					icons += '<a href="###" data-move="'+data.id+'" ><i style="font-size:20px" class="fas fa-arrows-alt fa-fw"></i></a>';
 				}
-				return data.page;
-			},
+				if (addPath) {
+					html += '<p class="text-center">'+data.path+'</p>';
+				}
+				html += '<p>'+icons+'</p>';
+				if (data.type == 'DIRECTORY') {
+					var path = '';
+					for (var j = 0; j < parents.length; j++) {
+						var p = parents[j];
+						path += p.path;
+						path += '/';
+					}
+					path += data.path;
+					html += '<p><a href="###" data-clipboard-text="'
+							+ path + '">复制路径</a></p>';
+				} else {
+					html += '<p><a href="###" data-clipboard-text="'
+							+ data.cf.url + '">复制地址</a></p>';
+				}
+				html += '</div>';
+				html += '</div>';
+				html += '</div>';
+			}
+			$("#fileTable").html(html);
+			var p = $("#fileTable_paging");
+			html = '';
+			if (page.totalPage > 1) {
+				html += '<nav >';
+				html += '<ul  class="pagination flex-wrap">';
+				html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="1"><span aria-hidden="true">&laquo;</span></a></li>';
+				for (var j = page.listbegin; j < page.listend; j++) {
+					if (j == page.currentPage) {
+						html += '<li class="page-item active"><a class="page-link" href="javascript:void(0)" >'
+								+ j + '</a></li>';
+					} else {
+						html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="'
+								+ j + '">' + j + '</a></li>';
+					}
+				}
+				html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="'
+						+ page.totalPage
+						+ '"><span aria-hidden="true">&raquo;</span></a></a></li>';
+				html += '</ul>';
+				html += '</nav>';
+			}
+			p.html(html);
+		},
+		error : function(jqXHR){
+			swal('查询文件失败',$.parseJSON(jqXHR.responseText).error,'error');
+		}
+	})
+}
+	
+loadFiles();
 
-			columns : [
-					{
-						bind : 'id',
-						classes : 'nowrap',
-						render : function(v, row) {
-							var html = '';
-							html += '<a href="###" data-delete="'+v+'"><i class="fas fa-trash-alt"></i></a>';
-							html += '<a href="###" data-properties="'+v+'" style="margin-left:10px"><i class="fas fa-info"></i></a>'
-							if (row.type == 'DIRECTORY') {
-							} else {
-								html += '<a href="###" data-copy="'+v+'" style="margin-left:10px"><i class="fas fa-copy"></i></a>';
-								html += '<a href="###" data-rename="'+v+'" data-oldname="'+row.path+'" data-ext="'+row.ext+'" style="margin-left:10px"><i class="fas fa-edit"></i></a>';
-								html += '<a href="###" data-move="'+v+'" style="margin-left:10px"><i class="fas fa-arrows-alt"></i></a>';
-							}
-							return html;
-						}
-					},
-					{
-						bind : 'xx3',
-						render : function(v, row) {
-							return row.path;
-						}
-					},
-					{
-						bind : 'xx2',
-						render : function(v, row) {
-							if (row.type == 'DIRECTORY') {
-								return '';
-							} else {
-								return humanFileSize(row.cf.size, false);
-							}
-						}
-					},
-					{
-						bind : 'xx1',
-						render : function(v, row) {
-							if (row.type == 'DIRECTORY') {
-								var path = '';
-								for (var i = 0; i < parents.length; i++) {
-									var p = parents[i];
-									path += p.path;
-									path += '/';
-								}
-								path += row.path;
-								return '<a href="###" data-clipboard-text="'
-										+ path + '">复制路径</a>';
-							} else {
-								return '<a href="###" data-clipboard-text="'
-										+ row.cf.url + '">复制地址</a>';
-							}
-						}
-					},
-					{
-						bind : 'path',
-						render : function(v, d) {
-							var html = '';
-							if (d.cf) {
-								if (d.cf.thumbnailUrl) {
-									html = '<img src="'
-											+ d.cf.thumbnailUrl.small
-											+ '" class="img-fluid " style="max-width:100px"/>';
-								} else {
-									html = '<img src="'
-											+ root
-											+ 'static/img/file.png" class="img-fluid " style="max-width:100px"/>'
-								}
-							} else {
-								html = '<a href="###" data-dir="'
-										+ d.id
-										+ '"><img src="'
-										+ root
-										+ 'static/img/folder.png" class="img-fluid " style="max-width:100px"/></a>'
-							}
-							return html;
-						}
-					} ]
-
-		});
-
+$(document).on('click','[data-parent]',function(){
+	var p = $(this).data('parent');
+	param.parent = p;
+	param.currentPage=1;
+	loadFiles();
+})
+$(document).on('click','[data-page]',function(){
+	var p = $(this).data('page');
+	param.currentPage=p;
+	loadFiles();
+})
 var parentFolder;
 $(function() {
 	$("#query").click(function () {
-		var data = {};
-		if(parentFolder){
-			data.parent = parentFolder;
-		}
-		data.type = $('input[name=queryType]:checked').val();
-		data.querySubDir = $("#querySubDir").is(":checked");
-		data.name = $("#queryName").val();
-		data.currentPage=1;
-		table.reload(data);
+		param.type = $('input[name=queryType]:checked').val();
+		param.querySubDir = $("#querySubDir").is(":checked");
+		param.name = $("#queryName").val();
+		param.currentPage=1;
+		loadFiles();
 	} );
 	
-	$("#fileTable").on("click","[data-dir]",function(){
-		parentFolder = $(this).data('dir');
-		table.reload({parent:parentFolder})
-	});
 	
 	$("#fileTable").on("click","[data-delete]",function(){
 		var id = $(this).data('delete');
@@ -132,7 +141,7 @@ $(function() {
 				type : 'DELETE',
 				url : root + 'api/console/file/'+id,
 				success:function(data) {
-					table.reload();
+					loadFiles();
 					swal('删除成功','文件已经被删除','success');
 				},
 				error:function(jqXHR, textStatus, errorThrown) {
@@ -211,7 +220,7 @@ $(function() {
 					type : 'POST',
 					url : root + 'api/console/file?folderPath='+path+"&id="+id,
 					success:function(data) {
-						table.reload();
+						loadFiles();
 						swal('拷贝成功','文件已经拷贝完成','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
@@ -243,7 +252,7 @@ $(function() {
 					type : 'PATCH',
 					url : root + 'api/console/file/'+id+"?name="+name,
 					success:function(data) {
-						table.reload();
+						loadFiles();
 						swal('重命名成功','文件已经完成重命名','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
@@ -274,7 +283,7 @@ $(function() {
 					type : 'PATCH',
 					url : root + 'api/console/file/'+id+"?path="+path,
 					success:function(data) {
-						table.reload();
+						loadFiles();
 						swal('移动成功','文件已经移动完成','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
@@ -308,16 +317,6 @@ $(function() {
 		}
 	});
 	
-	$("[data-prev]").click(function() {
-		if(parents.length == 0 || parents.length == 1){
-			parentFolder = undefined;	
-		} else {
-			var p = parents[parents.length-2];
-			parentFolder = p.id;
-		}
-		table.reload({parent:parentFolder});
-	});
-
 	$("#create-folder").click(function() {
 		var data = {
 			"path" : $("#folderName").val()
@@ -336,7 +335,7 @@ $(function() {
 					me.prop("disabled", false);
 					$("#folderModal").modal("hide");
 					swal('创建成功', '文件夹已经被创建', 'success');
-					table.reload();
+					loadFiles();
 				} else {
 					me.prop("disabled", false);
 					var data = $.parseJSON(jqXHR.responseText);
@@ -355,14 +354,14 @@ $(function() {
 		        var rows = $();
 		        $.each(o.files, function (index, file) {
 		            var row = $('<tr class="template-upload" style="max-height:80px">' +
-		                '<td><span class="preview" ></span></td>' +
-		                '<td><p class="name"></p>' +
+		                '<td class="nowrap"><span class="preview" ></span></td>' +
+		                '<td class="nowrap"><p class="name"></p>' +
 		                '<div class="error"></div>' +
 		                '</td>' +
-		                '<td><p class="size"></p>' +
-		                '<div class="progress"></div>' +
+		                '<td class="nowrap"><p class="size"></p>' +
+		                '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>' +
 		                '</td>' +
-		                '<td>' +
+		                '<td class="nowrap">' +
 		                (!index && !o.options.autoUpload ?
 		                    '  <button class="btn btn-primary start" disabled><i class="glyphicon glyphicon-upload"></i> <span>上传</span></button>' : '') +
 		                    (!index ? '<button class="btn btn-warning cancel" style="margin-left:10px">  <i class="glyphicon glyphicon-ban-circle"></i> <span>取消</span></button>' : '') +
@@ -385,12 +384,12 @@ $(function() {
 		        var rows = $();
 		        $.each(o.files, function (index, file) {
 		            var row = $('<tr class="template-download">' +
-		                '<td><span class="preview"></span></td>' +
-		                '<td><p class="name"></p>' +
+		                '<td class="nowrap"><span class="preview"></span></td>' +
+		                '<td class="nowrap"><p class="name"></p>' +
 		                (file.error ? '<div class="error alert alert-danger"></div>' : '') +
 		                '</td>' +
-		                '<td><span class="size"></span></td>' +
-		                '<td><button class="delete btn btn-info">完成</button></td>' +
+		                '<td class="nowrap"><span class="size"></span></td>' +
+		                '<td class="nowrap"><button class="delete btn btn-info">完成</button></td>' +
 		                '</tr>');
 		            var name = file.name;
 		            if(name.length > 10){
@@ -419,14 +418,14 @@ $(function() {
 		    }
 	}).bind('fileuploadadd', function (e, data) {
 		var url = root+'api/console/store/'+$("#store").val()+'/files';
-		if(parentFolder){
-			url += "?parent="+parentFolder;
+		if(parents.length>0){
+			url += "?parent="+parents[parents.length-1].id;
 		}
 	    data.url = url;
 	});
 	
 	$("#uploadModal").on('hide.bs.modal',function(){
-		table.reload();
+		loadFiles();
 	});
 	var clipboard=new Clipboard('[data-clipboard-text]');
 	clipboard.on('success',function(e){

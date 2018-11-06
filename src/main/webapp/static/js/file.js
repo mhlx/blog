@@ -230,72 +230,72 @@ var fileChooser = (function(){
 			autoUpload : false,
 			singleFileUploads : false,
 			limitConcurrentUploads : 1,
-			  uploadTemplate: function (o) {
-			        var rows = $();
-			        $.each(o.files, function (index, file) {
-			            var row = $('<tr class="template-upload">' +
-			                '<td><span class="preview"></span></td>' +
-			                '<td><p class="name"></p>' +
-			                '<div class="error"></div>' +
-			                '</td>' +
-			                '<td><p class="size"></p>' +
-			                '<div class="progress"></div>' +
-			                '</td>' +
-			                '<td>' +
-			                (!index && !o.options.autoUpload ?
-			                    '  <button class="btn btn-primary start" disabled><i class="glyphicon glyphicon-upload"></i> <span>上传</span></button>' : '') +
-			                    (!index ? '<button class="btn btn-warning cancel" style="margin-left:10px">  <i class="glyphicon glyphicon-ban-circle"></i> <span>取消</span></button>' : '') +
-			                '</td>' +
-			                '</tr>');
-			            var name = file.name;
-			            if(name.length > 10){
-			            	name = name.substring(0,10)
-			            }
-			            row.find('.name').text(name);
-			            row.find('.size').text(o.formatFileSize(file.size));
-			            if (file.error) {
-			                row.find('.error').addClass("alert alert-danger").text(file.error);
-			            } 
-			            rows = rows.add(row);
-			        });
-			        return rows;
-			    },
-			    downloadTemplate: function (o) {
-			        var rows = $();
-			        $.each(o.files, function (index, file) {
-			            var row = $('<tr class="template-download">' +
-			                '<td><span class="preview"></span></td>' +
-			                '<td><p class="name"></p>' +
-			                (file.error ? '<div class="error alert alert-danger"></div>' : '') +
-			                '</td>' +
-			                '<td><span class="size"></span></td>' +
-			                '<td><button class="delete btn btn-info">完成</button></td>' +
-			                '</tr>');
-			            var name = file.name;
-			            if(name.length > 10){
-			            	name = name.substring(0,10)
-			            }
-			            row.find('.size').text(o.formatFileSize(file.size));
-			            if (file.error) {
-			                row.find('.name').text(name);
-			                row.find('.error').text(file.error);
-			            } else {
-				            successUpload = true;
-			                row.find('.name').text(name);
-			                if (file.thumbnailUrl) {
-			                    row.find('.preview').append(
-			                        $('<a></a>').append(
-			                            $('<img>').prop('src', file.thumbnailUrl.small)
-			                        )
-			                    );
-			                }
-			                row.find('button.delete')
-			                    .attr('data-url', file.delete_url);
-			            }
-			            rows = rows.add(row);
-			        });
-			        return rows;
-			    }
+			uploadTemplate: function (o) {
+		        var rows = $();
+		        $.each(o.files, function (index, file) {
+		            var row = $('<tr class="template-upload" style="max-height:80px">' +
+		                '<td class="nowrap"><span class="preview" ></span></td>' +
+		                '<td class="nowrap"><p class="name"></p>' +
+		                '<div class="error"></div>' +
+		                '</td>' +
+		                '<td class="nowrap"><p class="size"></p>' +
+		                '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>' +
+		                '</td>' +
+		                '<td class="nowrap">' +
+		                (!index && !o.options.autoUpload ?
+		                    '  <button class="btn btn-primary start" disabled><i class="glyphicon glyphicon-upload"></i> <span>上传</span></button>' : '') +
+		                    (!index ? '<button class="btn btn-warning cancel" style="margin-left:10px">  <i class="glyphicon glyphicon-ban-circle"></i> <span>取消</span></button>' : '') +
+		                '</td>' +
+		                '</tr>');
+		            var name = file.name;
+		            if(name.length > 10){
+		            	name = name.substring(0,10)
+		            }
+		            row.find('.name').text(name);
+		            row.find('.size').text(o.formatFileSize(file.size));
+		            if (file.error) {
+		                row.find('.error').addClass("alert alert-danger").text(file.error);
+		            } 
+		            rows = rows.add(row);
+		        });
+		        return rows;
+		    },
+		    downloadTemplate: function (o) {
+		        var rows = $();
+		        $.each(o.files, function (index, file) {
+		            var row = $('<tr class="template-download">' +
+		                '<td class="nowrap"><span class="preview"></span></td>' +
+		                '<td class="nowrap"><p class="name"></p>' +
+		                (file.error ? '<div class="error alert alert-danger"></div>' : '') +
+		                '</td>' +
+		                '<td class="nowrap"><span class="size"></span></td>' +
+		                '<td class="nowrap"><button class="delete btn btn-info">完成</button></td>' +
+		                '</tr>');
+		            var name = file.name;
+		            if(name.length > 10){
+		            	name = name.substring(0,10)
+		            }
+		            row.find('.size').text(o.formatFileSize(file.size));
+		            if (file.error) {
+		                row.find('.name').text(name);
+		                row.find('.error').text(file.error);
+		            } else {
+			            successUpload = true;
+		                row.find('.name').text(name);
+		                if (file.thumbnailUrl) {
+		                    row.find('.preview').append(
+		                        $('<a></a>').append(
+		                            $('<img>').prop('src', file.thumbnailUrl.small)
+		                        )
+		                    );
+		                }
+		                row.find('button.delete')
+		                    .attr('data-url', file.delete_url);
+		            }
+		            rows = rows.add(row);
+		        });
+		        return rows;
+		    }
 		}).bind('fileuploadadd', function (e, data) {
 			var url = root+'api/console/store/'+uploadModal.find('select[name="store"]').val()+'/files';
 		    data.url = url;
