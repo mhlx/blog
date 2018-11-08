@@ -17,7 +17,6 @@ package me.qyh.blog.web.controller.console.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +46,7 @@ public class ConfigConsole extends BaseMgrController {
 	}
 
 	@GetMapping("config")
-	public GlobalConfig index(Model model) {
+	public GlobalConfig index() {
 		return configServer.getGlobalConfig();
 	}
 

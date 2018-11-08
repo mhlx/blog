@@ -572,6 +572,13 @@ public class ArticleServiceImpl
 
 		List<Article> articles = articleDao.selectPage(ap);
 
+		List<Integer> ids = articles.stream().map(Article::getId).collect(Collectors.toList());
+		Map<Integer, Integer> countsMap = commentServer.queryCommentNums(COMMENT_MODULE_NAME, ids);
+		articles.forEach(article -> {
+			Integer comments = countsMap.get(article.getId());
+			article.setComments(comments == null ? 0 : comments);
+		});
+
 		if (!Environment.hasAuthencated()) {
 			articles.stream().filter(Article::hasLock).forEach(art -> art.setSummary(null));
 		}

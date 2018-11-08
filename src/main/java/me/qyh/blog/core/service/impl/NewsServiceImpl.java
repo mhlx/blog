@@ -293,6 +293,7 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 		np.setQueryPrivate(param.isQueryPrivate());
 
 		List<News> newses = newsDao.selectPage(np);
+		setNewsComments(newses);
 
 		if (!Environment.hasAuthencated()) {
 			newses.stream().filter(News::hasLock).forEach(news -> news.setContent(null));

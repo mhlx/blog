@@ -72,7 +72,7 @@ public class ArticleMgrController extends BaseMgrController {
 		if (spaces.isEmpty()) {
 			// 没有任何可用空间，跳转到空间管理页面
 			ra.addFlashAttribute(Constants.ERROR, new Message("artic.write.noSpace", "在撰写文章之前，应该首先创建一个可用的空间"));
-			return "redirect:/mgr/space/index";
+			return "redirect:/console/space";
 		}
 		model.addAttribute("spaces", spaces);
 		model.addAttribute("editor", Editor.MD.name());

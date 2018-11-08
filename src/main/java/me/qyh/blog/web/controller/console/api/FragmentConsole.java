@@ -21,7 +21,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -72,7 +71,7 @@ public class FragmentConsole extends BaseMgrController {
 	}
 
 	@GetMapping("fragments")
-	public PageResult<Fragment> findFragments(@Validated FragmentQueryParam fragmentQueryParam, Model model) {
+	public PageResult<Fragment> findFragments(@Validated FragmentQueryParam fragmentQueryParam) {
 		fragmentQueryParam.setPageSize(configServer.getGlobalConfig().getFragmentPageSize());
 		return templateService.queryFragment(fragmentQueryParam);
 	}

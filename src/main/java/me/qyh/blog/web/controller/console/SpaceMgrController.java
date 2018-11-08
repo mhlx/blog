@@ -19,14 +19,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import me.qyh.blog.core.vo.SpaceQueryParam;
-
 @Controller
 @RequestMapping("console/space")
 public class SpaceMgrController extends BaseMgrController {
 
 	@GetMapping
-	public String index(SpaceQueryParam spaceQueryParam) {
+	public String index() {
 		return "console/user/space";
 	}
 }

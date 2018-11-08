@@ -8,86 +8,92 @@
 
 <head>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="_csrf" th:content="${_csrf.token}" />
-    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-    <title>动态</title>
-    <link th:href="@{/static/fontawesome-free/css/all.min.css}" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/static/bootstrap/css/bootstrap.min.css?v=1}" />
-    <meta name="description" th:content="${jsoups.body(news.content).text()}" />
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1,maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<title>动态</title>
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=1}" />
+<meta name="description"
+	th:content="${jsoups.body(news.content).text()}" />
 </head>
 <style>
-    body {
-        padding-top: 54px;
-    }
+body {
+	padding-top: 54px;
+}
 
-    @media (min-width: 992px) {
-        body {
-            padding-top: 56px;
-        }
-    }
+@media ( min-width : 992px) {
+	body {
+		padding-top: 56px;
+	}
+}
 
-    .media-body video {
-        max-width: 100% !important;
-        height: auto !important;
-    }
+.media-body video {
+	max-width: 100% !important;
+	height: auto !important;
+}
 
-    .media-body img {
-        max-width: 100% ;
-        height: auto ;
-    }
+.media-body img {
+	max-width: 100%;
+	height: auto;
+}
 </style>
 
 <body>
 
-    <!-- Navigation -->
-    <fragment name="顶部" />
+	<!-- Navigation -->
+	<fragment name="顶部" />
 
-    <!-- Page Content -->
-    <div class="container">
-        <div class="media my-4" th:data-news="${news.id}">
-            <img class="mr-3" th:src="${gravatars.getOptionalUrl(myInfo.gravatar).orElse('https://www.qyh.me/static/img/guest.png')}" id="gravatar" style="width: 32px; height: 32px;">
+	<!-- Page Content -->
+	<div class="container">
+		<div class="media my-4" th:data-news="${news.id}">
+			<img class="mr-3"
+				th:src="${gravatars.getOptionalUrl(myInfo.gravatar).orElse('https://www.qyh.me/static/img/guest.png')}"
+				id="gravatar" style="width: 32px; height: 32px;">
 
-            <div class="media-body">
-                <h5 class="mt-0">
-                    <span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>
-                    <a href="javascript:void(0)" th:data-cmt="${news.id}" style="margin-left: 5px" th:if="${news.allowComment || user != null}"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span></a>
-                </h5>
-                <div id="news-content" class="wrap">
-                    <div th:utext="${news.content}"></div>
-                </div>
-              	<div class="col-md-2" style="padding:0px">
-                  <button class="btn btn-block btn-primary" data-cmt>
-                 评论
-              	</button>
-              </div>
-              	<ul class="pagination mb-4 my-4" th:if="${newsNav != null}">
-                    <li class="page-item " th:classappend="${newsNav.previous  == null ?'disabled' : ''}">
-                        <a class="page-link" th:href="${urls.getUrl(newsNav.previous)}" th:if="${newsNav.previous != null}">&larr;
-                            上一条 </a>
-                        <a class="page-link" th:if="${newsNav.previous == null}">&larr;
-                            上一条 </a>
-                    </li>
-                    <li class="page-item" th:classappend="${newsNav.next == null ?'disabled' : ''}">
-                        <a class="page-link" th:href="${urls.getUrl(newsNav.next)}" th:if="${newsNav.next != null}">下一条&rarr;</a>
-                        <a class="page-link" th:if="${newsNav.next == null}">下一条&rarr;</a>
-                    </li>
-                </ul>
-                <div id="comment-detail"></div>
-            </div>
-        </div>
-    </div>
+			<div class="media-body">
+				<h5 class="mt-0">
+					<span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>&nbsp;&nbsp;&nbsp;<a
+						href="###" th:if="${news.allowComment || user != null}" data-cmt
+						style="font-size: 16px">评论</a>
+				</h5>
+				<div id="news-content" class="wrap">
+					<div th:utext="${news.content}"></div>
+				</div>
+				<ul class="pagination mb-4 my-4" th:if="${newsNav != null}">
+					<li class="page-item "
+						th:classappend="${newsNav.previous  == null ?'disabled' : ''}">
+						<a class="page-link" th:href="${urls.getUrl(newsNav.previous)}"
+						th:if="${newsNav.previous != null}">&larr; 上一条 </a> <a
+						class="page-link" th:if="${newsNav.previous == null}">&larr;
+							上一条 </a>
+					</li>
+					<li class="page-item"
+						th:classappend="${newsNav.next == null ?'disabled' : ''}"><a
+						class="page-link" th:href="${urls.getUrl(newsNav.next)}"
+						th:if="${newsNav.next != null}">下一条&rarr;</a> <a class="page-link"
+						th:if="${newsNav.next == null}">下一条&rarr;</a></li>
+					<li class="page-item"><a class="page-link"
+						onclick="window.history.go(-1)">返回</a></li>
+				</ul>
+				<div id="comment-detail"></div>
+			</div>
+		</div>
+	</div>
 
-    <fragment name="底部" />
+	<fragment name="底部" />
 
-    <script th:src="@{/static/jquery/jquery.min.js}"></script>
+	<script th:src="@{/static/jquery/jquery.min.js}"></script>
 	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
 	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
 	<script type="text/javascript" th:src="@{/static/prettify/prettify.js}"></script>
 	<script th:src="@{/static/js/base.js}"></script>
 	<script th:src="@{/static/js/moment.min.js}"></script>
- 	<script>
+	<script>
       var basePath = '[[@{/}]]';
       var actPath = '[[${urls.currentUrl}]]';
       if(basePath == '/'){

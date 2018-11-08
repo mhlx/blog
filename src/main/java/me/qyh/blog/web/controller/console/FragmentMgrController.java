@@ -58,7 +58,7 @@ public class FragmentMgrController extends BaseMgrController {
 		Optional<Fragment> optional = templateService.queryFragment(id);
 		if (!optional.isPresent()) {
 			ra.addFlashAttribute(Constants.ERROR, new Message("fragment.user.notExists", "自定义模板片段不存在"));
-			return "redirect:/mgr/template/fragment/index";
+			return "redirect:/console/template/fragment";
 		}
 		Fragment fragment = optional.get();
 		model.addAttribute("fragment", fragment);

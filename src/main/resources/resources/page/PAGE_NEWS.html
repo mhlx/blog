@@ -1,107 +1,134 @@
 <transaction:begin />
 <data name="myInfo" lazy="true" />
-<data name="newsPage" th:currentPage="${param.currentPage}" th:asc="${param.asc}" th:ymd="${param.ymd}" />
+<data name="newsPage" th:currentPage="${param.currentPage}"
+	th:asc="${param.asc}" th:ymd="${param.ymd}" />
 <!DOCTYPE html>
 <html>
 
 <head>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1,maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 
-    <title>最近动态</title>
-    <link th:href="@{/static/fontawesome-free/css/all.min.css}" rel="stylesheet">
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" th:href="@{/static/bootstrap/css/bootstrap.min.css?v=1}" />
+<title>最近动态</title>
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=1}" />
 </head>
 <style>
-    body {
-        padding-top: 54px;
-    }
+body {
+	padding-top: 54px;
+}
 
-    @media (min-width : 992px) {
-        body {
-            padding-top: 56px;
-        }
-    }
+@media ( min-width : 992px) {
+	body {
+		padding-top: 56px;
+	}
+}
 
-    .video {
-        position: relative;
-        display: inline-block;
-    }
+.video {
+	position: relative;
+	display: inline-block;
+}
 
-    .video-icon {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        font-size: 20px !important;
-    }
+.video-icon {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	color: white;
+	font-size: 20px !important;
+}
 </style>
 
 <body>
 
-    <!-- Navigation -->
-    <fragment name="顶部" />
+	<!-- Navigation -->
+	<fragment name="顶部" />
 
-    <!-- Page Content -->
-    <div class="container">
-        <div class="card my-4" th:if="${newsPage.datas.isEmpty()}">
-            <div class="card-body">没有任何动态</div>
-        </div>
-        <div th:each="na : ${newsPage.datas}" class="my-4">
-            <h3>[[${na.ymd}]]</h3>
-            <hr>
-            <div style="padding-left: 15px">
-                <div class="media" th:each="news : ${na.newses}" style="margin-bottom: 20px">
-                    <img class="mr-3" th:src="${gravatars.getOptionalUrl(myInfo.gravatar).orElse('/static/img/guest.png')}" style="width: 32px; height: 32px" />
-                    <div class="media-body">
-                        <h5 class="mt-0">
-                            [[${times.format(news.write,'HH:mm')}]] <small><i class="fab fa-fw fa-gripfire"></i>[[${news.hits}]]</small>
-                        </h5>
-                        <div th:remove="tag" th:with="doc=${jsoups.body(news.content)}" th:if="${news.content != null}">
-                            <p th:with="content=${doc.text()}">[[${content.length() > 20 ?
-                                content.substring(0,20)+'...' : content}]]</p>
-                            <div th:with="imgs=${doc.select('img[src]')}">
-                                <a th:href="${urls.getUrl(news)}" th:if="${!imgs.isEmpty()}"><img th:src="${imgs.get(0).attr('src')}" class="img-fluid" style="max-height: 64px" /></a>
-                                <div th:remove="tag" th:with="videos=${doc.select('video[poster]')}" th:if="${imgs.isEmpty()}">
-                                    <a th:href="${urls.getUrl(news)}" th:if="${!videos.isEmpty()}" class="video"><i class="fas fa-video video-icon"></i><img th:src="${videos.get(0).attr('poster')}" class="img-fluid" style="max-height: 64px" /></a>
-                                </div>
-                            </div>
+	<!-- Page Content -->
+	<div class="container">
+		<div class="card my-4" th:if="${newsPage.datas.isEmpty()}">
+			<div class="card-body">没有任何动态</div>
+		</div>
+		<div th:each="na : ${newsPage.datas}" class="my-4">
+			<h3>[[${na.ymd}]]</h3>
+			<hr>
+			<div style="padding-left: 15px">
+				<div class="media" th:each="news : ${na.newses}"
+					style="margin-bottom: 20px">
+					<img class="mr-3"
+						th:src="${gravatars.getOptionalUrl(myInfo.gravatar).orElse('/static/img/guest.png')}"
+						style="width: 32px; height: 32px" />
+					<div class="media-body">
+						<h5 class="mt-0">
+							[[${times.format(news.write,'HH:mm')}]] <small><i
+								class="fab fa-fw fa-gripfire"></i>[[${news.hits}]]</small>
+						</h5>
+						<div th:remove="tag" th:with="doc=${jsoups.body(news.content)}"
+							th:if="${news.content != null}">
+							<p th:with="content=${doc.text()}">[[${content.length() > 20
+								? content.substring(0,20)+'...' : content}]]</p>
+							<div th:with="imgs=${doc.select('img[src]')}">
+								<a th:href="${urls.getUrl(news)}" th:if="${!imgs.isEmpty()}"><img
+									th:src="${imgs.get(0).attr('src')}" class="img-fluid"
+									style="max-height: 64px" /></a>
+								<div th:remove="tag"
+									th:with="videos=${doc.select('video[poster]')}"
+									th:if="${imgs.isEmpty()}">
+									<a th:href="${urls.getUrl(news)}" th:if="${!videos.isEmpty()}"
+										class="video"><i class="fas fa-video video-icon"></i><img
+										th:src="${videos.get(0).attr('poster')}" class="img-fluid"
+										style="max-height: 64px" /></a>
+								</div>
+							</div>
 
-                            <p style="margin-top: 10px">
-                                <a th:href="${urls.getUrl(news)}+'#comment'">评论</a>&nbsp;&nbsp;&nbsp;
-                                <a th:href="${urls.getUrl(news)}">继续查看</a>
-                            </p>
-                        </div>
-                        <div th:if="${news.content == null}">
-                            <div class="card">
-                              <div class="card-body">
-                              <i class="fas fa-fw fa-lock"></i>内容受到锁保护，请先<a th:href="${urls.getUrl(news)}">解锁</a>
-                              </div>
-                            </div> 
-                        </div>
+							<p style="margin-top: 10px">
+								<a th:href="${urls.getUrl(news)}+'#comment'">评论([[${news.comments}]])</a>&nbsp;&nbsp;&nbsp;
+								<a th:href="${urls.getUrl(news)}">继续查看</a>
+							</p>
+						</div>
+						<div th:if="${news.content == null}">
+							<div class="card">
+								<div class="card-body">
+									<i class="fas fa-fw fa-lock"></i>内容受到锁保护，请先<a
+										th:href="${urls.getUrl(news)}">解锁</a>
+								</div>
+							</div>
+						</div>
 
-                    </div>
-                </div>
-            </div>
-        </div>
-        <nav th:if="${newsPage.totalPage > 1}" th:with="newsUrlHelper=${urls.newsUrlHelper}">
-            <ul class="pagination flex-wrap">
-                <li class="page-item"><a class="page-link" th:href="${newsUrlHelper.getNewsUrl(newsPage.param,1)}"><span aria-hidden="true">&laquo;</span></a></li>
-                <li th:each=" i : ${#numbers.sequence(newsPage.listbegin, newsPage.listend-1)}" th:class="${(i == newsPage.currentPage) ? 'page-item active' : 'page-item'}"><a class="page-link" th:href="${newsUrlHelper.getNewsUrl(newsPage.param,i)}" th:text="${i}"></a></li>
-                <li class="page-item"><a class="page-link" th:href="${newsUrlHelper.getNewsUrl(newsPage.param,newsPage.totalPage)}"><span aria-hidden="true">&raquo;</span></a></li>
-            </ul>
-        </nav>
-    </div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<nav th:if="${newsPage.totalPage > 1}"
+			th:with="newsUrlHelper=${urls.newsUrlHelper}">
+			<ul class="pagination flex-wrap">
+				<li class="page-item"><a class="page-link"
+					th:href="${newsUrlHelper.getNewsUrl(newsPage.param,1)}"><span
+						aria-hidden="true">&laquo;</span></a></li>
+				<li
+					th:each=" i : ${#numbers.sequence(newsPage.listbegin, newsPage.listend-1)}"
+					th:class="${(i == newsPage.currentPage) ? 'page-item active' : 'page-item'}"><a
+					class="page-link"
+					th:href="${newsUrlHelper.getNewsUrl(newsPage.param,i)}"
+					th:text="${i}"></a></li>
+				<li class="page-item"><a class="page-link"
+					th:href="${newsUrlHelper.getNewsUrl(newsPage.param,newsPage.totalPage)}"><span
+						aria-hidden="true">&raquo;</span></a></li>
+			</ul>
+		</nav>
+	</div>
 
-    <fragment name="底部" />
+	<fragment name="底部" />
 
-    <!-- Bootstrap core JavaScript -->
-    <script th:src="@{/static/jquery/jquery.min.js}"></script>
-    <script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
+	<!-- Bootstrap core JavaScript -->
+	<script th:src="@{/static/jquery/jquery.min.js}"></script>
+	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
 
 </body>
 

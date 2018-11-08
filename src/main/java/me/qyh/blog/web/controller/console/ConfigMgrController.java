@@ -16,7 +16,6 @@
 package me.qyh.blog.web.controller.console;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ConfigMgrController extends BaseMgrController {
 
 	@GetMapping
-	public String index(Model model) {
+	public String index() {
 		return "console/config/index";
 	}
 

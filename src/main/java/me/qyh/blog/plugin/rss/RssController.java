@@ -17,7 +17,7 @@ package me.qyh.blog.plugin.rss;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.View;
 
@@ -41,7 +41,7 @@ public class RssController {
 	private ConfigServer configServer;
 
 	@GetMapping({ "rss", "space/{alias}/rss" })
-	public View rss(ModelMap model) {
+	public View rss(Model model) {
 
 		ArticleQueryParam param = new ArticleQueryParam();
 		param.setCurrentPage(1);

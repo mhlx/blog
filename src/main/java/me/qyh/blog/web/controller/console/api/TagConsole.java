@@ -17,7 +17,6 @@ package me.qyh.blog.web.controller.console.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -64,7 +63,7 @@ public class TagConsole extends BaseMgrController {
 	}
 
 	@GetMapping("tags")
-	public PageResult<Tag> index(@Validated TagQueryParam tagQueryParam, Model model) {
+	public PageResult<Tag> index(@Validated TagQueryParam tagQueryParam) {
 		tagQueryParam.setPageSize(configServer.getGlobalConfig().getTagPageSize());
 		return tagService.queryTag(tagQueryParam);
 	}

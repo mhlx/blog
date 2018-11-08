@@ -1,6 +1,7 @@
-<transaction:begin/>
+<transaction:begin />
 <data name="article" th:idOrAlias="${idOrAlias}" />
-<data name="articleNav" ref-article="article" th:queryLock="${user != null}"/>
+<data name="articleNav" ref-article="article"
+	th:queryLock="${user != null}" />
 <!DOCTYPE html>
 <html>
 
@@ -8,7 +9,7 @@
 
 <meta charset="utf-8">
 <meta name="viewport"
-	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	content="width=device-width, initial-scale=1,maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <meta name="_csrf" th:content="${_csrf.token}" />
 <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 <meta name="description" th:content="${article.summary}" />
@@ -63,8 +64,9 @@ body {
 				<h1 class="mt-4">[[${article.title}]]</h1>
 				<p class="lead" th:if="${!article.tags.isEmpty()}">
 					<i class="fas fa-tags" style="margin-right: 10px"></i><a
-						th:href="${urls.getArticlesUrlHelper().getArticlesUrl(tag)}" th:each="tag : ${article.tags}"
-						th:text="${tag.name}" style="margin-right:5px"></a>
+						th:href="${urls.getArticlesUrlHelper().getArticlesUrl(tag)}"
+						th:each="tag : ${article.tags}" th:text="${tag.name}"
+						style="margin-right: 5px"></a>
 				</p>
 				<hr>
 
@@ -76,19 +78,23 @@ body {
 				<div class="markdown-body" th:utext="${article.content}"></div>
 
 				<hr>
-              
-                <ul class="pagination justify-content-center mb-4" th:if="${articleNav != null}">
-                    <li class="page-item " th:classappend="${articleNav.previous  == null ?'disabled' : ''}">
-                        <a class="page-link" th:href="${urls.getUrl(articleNav.previous)}" th:if="${articleNav.previous != null}">&larr;
-                            上一篇 </a>
-                        <a class="page-link" th:if="${articleNav.previous == null}">&larr;
-                            上一篇 </a>
-                    </li>
-                    <li class="page-item" th:classappend="${articleNav.next == null ?'disabled' : ''}">
-                        <a class="page-link" th:href="${urls.getUrl(articleNav.next)}" th:if="${articleNav.next != null}">下一篇&rarr;</a>
-                        <a class="page-link" th:if="${articleNav.next == null}">下一篇&rarr;</a>
-                    </li>
-                </ul>
+
+				<ul class="pagination justify-content-center mb-4"
+					th:if="${articleNav != null}">
+					<li class="page-item "
+						th:classappend="${articleNav.previous  == null ?'disabled' : ''}">
+						<a class="page-link" th:href="${urls.getUrl(articleNav.previous)}"
+						th:if="${articleNav.previous != null}">&larr; 上一篇 </a> <a
+						class="page-link" th:if="${articleNav.previous == null}">&larr;
+							上一篇 </a>
+					</li>
+					<li class="page-item"
+						th:classappend="${articleNav.next == null ?'disabled' : ''}">
+						<a class="page-link" th:href="${urls.getUrl(articleNav.next)}"
+						th:if="${articleNav.next != null}">下一篇&rarr;</a> <a
+						class="page-link" th:if="${articleNav.next == null}">下一篇&rarr;</a>
+					</li>
+				</ul>
 
 				<div id="comments-container"></div>
 

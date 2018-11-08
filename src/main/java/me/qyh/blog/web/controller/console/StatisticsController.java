@@ -17,7 +17,7 @@ package me.qyh.blog.web.controller.console;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,8 +56,8 @@ public class StatisticsController extends BaseMgrController {
 	private NewsService newsService;
 
 	@GetMapping
-	public String queryStatisticsDetail(@RequestParam(value = "spaceId", required = false) Integer spaceId,
-			ModelMap model, RedirectAttributes ra) {
+	public String queryStatisticsDetail(@RequestParam(value = "spaceId", required = false) Integer spaceId, Model model,
+			RedirectAttributes ra) {
 		model.addAttribute("spaces", spaceService.querySpace(new SpaceQueryParam()));
 		try {
 			Space space = spaceId == null ? null
