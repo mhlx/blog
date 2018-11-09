@@ -859,7 +859,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				try {
 					helper.registerPage(page);
 				} catch (LogicException e) {
-					throw new SystemException(e.getLogicMessage().getCodes()[0]);
+					throw new SystemException(page.getRelativePath() + "已经存在了");
 				}
 			}
 		});
@@ -932,11 +932,11 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		defaultTemplates.put("space/{alias}/article/{idOrAlias}", new SystemTemplate(
 				"space/{alias}/article/{idOrAlias}", new ClassPathResource("resources/page/PAGE_ARTICLE_DETAIL.html")));
 
-		defaultTemplates.put("error",
-				new SystemTemplate("error", new ClassPathResource("resources/page/PAGE_ERROR.html")));
+		defaultTemplates.put("error/{errorCode}",
+				new SystemTemplate("error/{errorCode}", new ClassPathResource("resources/page/PAGE_ERROR.html")));
 		// 各个空间错误显示页面
-		defaultTemplates.put("space/{alias}/error",
-				new SystemTemplate("space/{alias}/error", new ClassPathResource("resources/page/PAGE_ERROR.html")));
+		defaultTemplates.put("space/{alias}/error/{errorCode}", new SystemTemplate("space/{alias}/error/{errorCode}",
+				new ClassPathResource("resources/page/PAGE_ERROR.html")));
 
 		defaultTemplates.put("news",
 				new SystemTemplate("news", new ClassPathResource("resources/page/PAGE_NEWS.html")));
@@ -1219,7 +1219,15 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 	private LogicException convert(PatternAlreadyExistsException ex) {
 		String pattern = ex.getPattern();
-		return new LogicException("templateMapping.register.path.exists", "路径" + pattern + "已经存在", pattern);
+		if (ex.isKeyPath()) {
+			return new LogicException("templateMapping.register.path.keyPath", "路径" + pattern + "是系统保留路径", pattern);
+		}
+		if (ex.getMatchPattern() == null || pattern.equals(ex.getMatchPattern())) {
+			return new LogicException("templateMapping.register.path.exists", "路径" + pattern + "已经存在", pattern);
+		} else {
+			return new LogicException("templateMapping.register.path.match",
+					"路径" + pattern + "已经存在匹配路径:" + ex.getMatchPattern(), pattern, ex.getMatchPattern());
+		}
 	}
 
 	private interface TemplateProcessor {

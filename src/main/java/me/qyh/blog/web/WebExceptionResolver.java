@@ -505,16 +505,16 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 				// 检查空间是否存在
 				if (SpaceValidator.isValidAlias(space) && spaceService.getSpace(space).isPresent()) {
-					forwardMapping = "/space/" + space + "/error";
+					forwardMapping = "/space/" + space + "/error/";
 				} else {
-					forwardMapping = "/error";
+					forwardMapping = "/error/";
 					space = null;
 				}
 
 			} else {
-				forwardMapping = "/error";
+				forwardMapping = "/error/";
 			}
-			if (forwardMapping.equals(mapping)) {
+			if (mapping.startsWith(forwardMapping)) {
 				return jsonResultView(new JsonResult(false, ERROR_NO_ERROR_MAPPING));
 			} else {
 				return getErrorForward(request, new ErrorInfo(ERROR_404, 404), space);
@@ -615,9 +615,10 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 		request.setAttribute(Webs.ERROR_ATTR_NAME, Boolean.TRUE);
 
 		if (space != null) {
-			return new ModelAndView("forward:/space/" + space + "/error", model, HttpStatus.valueOf(error.getCode()));
+			return new ModelAndView("forward:/space/" + space + "/error/" + error.getCode(), model,
+					HttpStatus.valueOf(error.getCode()));
 		} else {
-			return new ModelAndView("forward:/error", model, HttpStatus.valueOf(error.getCode()));
+			return new ModelAndView("forward:/error/" + error.getCode(), model, HttpStatus.valueOf(error.getCode()));
 		}
 	}
 

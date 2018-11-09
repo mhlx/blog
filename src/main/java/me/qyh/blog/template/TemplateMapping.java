@@ -174,12 +174,12 @@ public class TemplateMapping {
 				throw new PatternAlreadyExistsException(pattern);
 			}
 
-			if (isHighestPriority(pattern, templateName)) {
+			if (isHighestPriorityPattern(pattern)) {
 
 				String highestPriorityTemplateName = highestPriorityPatternMap.get(pattern);
 				if (highestPriorityTemplateName != null) {
 					if (!SystemTemplate.isSystemTemplate(highestPriorityTemplateName)) {
-						throw new PatternAlreadyExistsException(pattern);
+						throw new PatternAlreadyExistsException(pattern, pattern);
 					}
 				}
 
@@ -188,19 +188,34 @@ public class TemplateMapping {
 			} else {
 
 				String patternMappingTemplateName = patternMap.get(pattern);
-				if (patternMappingTemplateName != null) {
-					throw new PatternAlreadyExistsException(pattern);
-				} else {
-					List<String> matchers = holder.getCondition().getMatchingPatterns(pattern);
-					if (!matchers.isEmpty()) {
-						String best = matchers.get(0);
-						if (this.pathMatcher.getPatternComparator(null).compare(best, pattern) == 0) {
-							throw new PatternAlreadyExistsException(pattern);
-						}
-					}
-
+				if (SystemTemplate.isSystemTemplate(patternMappingTemplateName)) {
 					patternMap.put(pattern, templateName);
 					holder.setCondition(new PatternsMatchCondition(patternMap.keySet()));
+				} else {
+					if (patternMappingTemplateName != null) {
+						throw new PatternAlreadyExistsException(pattern, pattern);
+					} else {
+						List<String> matchers = holder.getCondition().getMatchingPatterns(pattern);
+						if (!matchers.isEmpty()) {
+							String best = matchers.get(0);
+							String bestTemplateName = patternMap.get(best);
+							if (SystemTemplate.isSystemTemplate(bestTemplateName)) {
+								if (matchers.size() > 1) {
+									String second = matchers.get(1);
+									if (this.pathMatcher.getPatternComparator(null).compare(second, pattern) == 0) {
+										throw new PatternAlreadyExistsException(pattern, second);
+									}
+								}
+							} else {
+								if (this.pathMatcher.getPatternComparator(null).compare(best, pattern) == 0) {
+									throw new PatternAlreadyExistsException(pattern, best);
+								}
+							}
+						}
+
+						patternMap.put(pattern, templateName);
+						holder.setCondition(new PatternsMatchCondition(patternMap.keySet()));
+					}
 				}
 			}
 
@@ -230,7 +245,7 @@ public class TemplateMapping {
 				return;
 			}
 
-			if (isHighestPriority(pattern, templateName)) {
+			if (isHighestPriorityPattern(pattern)) {
 				highestPriorityPatternMap.put(pattern, templateName);
 				highestPriorityHolder.setCondition(new PatternsMatchCondition(highestPriorityPatternMap.keySet()));
 			} else {
@@ -270,23 +285,30 @@ public class TemplateMapping {
 		lock.writeLock().lock();
 		try {
 			String pattern = FileUtils.cleanPath(uncleanPattern);
-
-			if (highestPriorityPatternMap.remove(pattern) != null) {
-				String sysTemplateName = sysMap.get(pattern);
-				if (sysTemplateName != null) {
-					highestPriorityPatternMap.put(pattern, sysTemplateName);
-				}
-				highestPriorityHolder.setCondition(new PatternsMatchCondition(highestPriorityPatternMap.keySet()));
-				return true;
-			}
-			if (patternMap.remove(pattern) != null) {
-				holder.setCondition(new PatternsMatchCondition(patternMap.keySet()));
-				return true;
-			}
-			return false;
+			return doUnregister(pattern);
 		} finally {
 			lock.writeLock().unlock();
 		}
+	}
+
+	private boolean doUnregister(String pattern) {
+		if (highestPriorityPatternMap.remove(pattern) != null) {
+			String sysTemplateName = sysMap.get(pattern);
+			if (sysTemplateName != null) {
+				highestPriorityPatternMap.put(pattern, sysTemplateName);
+			}
+			highestPriorityHolder.setCondition(new PatternsMatchCondition(highestPriorityPatternMap.keySet()));
+			return true;
+		}
+		if (patternMap.remove(pattern) != null) {
+			String sysTemplateName = sysMap.get(pattern);
+			if (sysTemplateName != null) {
+				patternMap.put(pattern, sysTemplateName);
+			}
+			holder.setCondition(new PatternsMatchCondition(patternMap.keySet()));
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -367,9 +389,8 @@ public class TemplateMapping {
 				if (this.previewTemplateMap.isEmpty()) {
 					return doGetBestHighestPriorityTemplateMatch(path);
 				}
-				PatternsMatchCondition sysCondition = new PatternsMatchCondition(sysMap.keySet());
 				Set<String> highestPriorityPatterns = previewTemplateMap.keySet().stream()
-						.filter(pattern -> isHighestPriorityPattern(pattern, sysCondition)).collect(Collectors.toSet());
+						.filter(pattern -> isHighestPriorityPattern(pattern)).collect(Collectors.toSet());
 				if (!highestPriorityPatterns.isEmpty()) {
 					if (highestPriorityPatterns.contains(path)) {
 						return Optional.of(new TemplateMatch(path,
@@ -400,10 +421,8 @@ public class TemplateMapping {
 					return doGetBestPathVariableTemplateMatch(path);
 				}
 
-				PatternsMatchCondition sysCondition = new PatternsMatchCondition(sysMap.keySet());
 				Set<String> pathVariablesPatterns = previewTemplateMap.keySet().stream()
-						.filter(pattern -> !isHighestPriorityPattern(pattern, sysCondition))
-						.collect(Collectors.toSet());
+						.filter(pattern -> !isHighestPriorityPattern(pattern)).collect(Collectors.toSet());
 				if (!pathVariablesPatterns.isEmpty()) {
 					List<String> bestMatchPatterns = new PatternsMatchCondition(pathVariablesPatterns)
 							.getMatchingPatterns(path);
@@ -582,14 +601,8 @@ public class TemplateMapping {
 		}
 	}
 
-	private boolean isHighestPriority(String pattern, String templateName) {
-		return SystemTemplate.isSystemTemplate(templateName)
-				|| isHighestPriorityPattern(pattern, new PatternsMatchCondition(sysMap.keySet()));
-	}
-
-	private boolean isHighestPriorityPattern(String pattern, PatternsMatchCondition sysCondition) {
-		return sysMap.containsKey(pattern) || pattern.indexOf('{') == -1
-				|| !sysCondition.getMatchingPatterns(pattern).isEmpty();
+	private boolean isHighestPriorityPattern(String pattern) {
+		return pattern.indexOf('{') == -1;
 	}
 
 	/**
