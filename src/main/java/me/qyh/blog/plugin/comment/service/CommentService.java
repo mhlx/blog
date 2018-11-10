@@ -680,6 +680,9 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	private void fillComment(Comment comment) {
 		if (Environment.hasAuthencated()) {
 			comment.setBan(blacklistHandler.match(comment.getIp()));
+		} else {
+			comment.setIp(null);
+			comment.setEmail(null);
 		}
 		if (comment.getAdmin() == null || !comment.getAdmin()) {
 			return;
@@ -692,11 +695,6 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		String email = user.getEmail();
 		comment.setEmail(email);
 		comment.setGravatar(user.getGravatar());
-
-		if (!Environment.hasAuthencated()) {
-			comment.setIp(null);
-			comment.setEmail(null);
-		}
 	}
 
 	private void loadConfig() {

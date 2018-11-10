@@ -217,6 +217,7 @@
 		page.description=$("#description").val();
 		page.allowComment = $("#allowComment").prop("checked");
 		page.spaceGlobal = $("#spaceGlobal").prop('checked');
+	    page.enable = $("#enable").prop("checked");
 		saveFlag = true;
 		var method = update ? 'PUT' : 'POST'
 		$.ajax({

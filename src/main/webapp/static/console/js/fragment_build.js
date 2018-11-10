@@ -182,6 +182,7 @@
 		}
 		data.global = $("#previewModal form input[type=checkbox]").eq(0).prop("checked");
 		data.callable = $("#previewModal form input[type=checkbox]").eq(1).prop("checked");
+		data.enable = $("#enable").prop("checked");
 		data.tpl = editor.getValue();
 		
 		var id = $("#fragmentId").val();

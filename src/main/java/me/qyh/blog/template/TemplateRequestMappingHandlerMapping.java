@@ -124,7 +124,7 @@ public class TemplateRequestMappingHandlerMapping extends RequestMappingHandlerM
 	@Override
 	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request)
 			throws ServletException {
-		if ("GET".equals(request.getMethod())) {
+		if ("GET".equals(request.getMethod()) || Webs.errorRequest(request)) {
 			Optional<TemplateMatch> matchOptional;
 
 			if (Webs.isPreview(request)) {

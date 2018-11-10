@@ -67,6 +67,11 @@ public class Fragment extends BaseEntity implements Template {
 	 */
 	private boolean del;
 
+	/**
+	 * @since 7.0
+	 */
+	private boolean enable;
+
 	public Fragment() {
 		super();
 	}
@@ -103,6 +108,7 @@ public class Fragment extends BaseEntity implements Template {
 		this.createDate = fragment.createDate;
 		this.global = fragment.global;
 		this.del = fragment.del;
+		this.enable = fragment.enable;
 	}
 
 	public String getTpl() {
@@ -159,6 +165,7 @@ public class Fragment extends BaseEntity implements Template {
 		f.setDescription("");
 		f.setCallable(callable);
 		f.setGlobal(global);
+		f.setEnable(enable);
 		return f;
 	}
 
@@ -241,6 +248,14 @@ public class Fragment extends BaseEntity implements Template {
 
 	public void setDel(boolean del) {
 		this.del = del;
+	}
+
+	public boolean isEnable() {
+		return enable;
+	}
+
+	public void setEnable(boolean enable) {
+		this.enable = enable;
 	}
 
 	public static Optional<String> getOriginalTemplateFromPreviewTemplateName(String templateName) {

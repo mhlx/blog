@@ -141,9 +141,8 @@ public class FileServiceImpl implements FileService, InitializingBean {
 					uploadedFiles.add(new UploadedFile(originalFilename, e.getLogicMessage()));
 				}
 			} else {
-				String extension = FileUtils.getFileExtension(originalFilename);
-				uploadedFiles.add(new UploadedFile(originalFilename,
-						new Message("file.store.unsupportformat", "存储器不支持存储" + extension + "文件", extension)));
+				uploadedFiles
+						.add(new UploadedFile(originalFilename, new Message("file.store.unsupport", "存储器不支持存储这个文件")));
 			}
 		}
 		return uploadedFiles;

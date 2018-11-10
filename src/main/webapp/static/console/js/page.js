@@ -19,6 +19,11 @@ var table = datatable("pageTable", {
 			return v ? v.name : '默认' ;
 		}
 	},{
+		bind : 'enable',
+		render:function(v,d){
+			return v ? "是" : '否' ;
+		}
+	},{
 		bind:'createDate',
 		render:function(v,d){
 			return moment(v).format("YYYY-MM-DD HH:mm");

@@ -157,6 +157,16 @@
 									th:attr="selected=${(fragment.space != null && fragment.space.id == space.id) ? 'selected' : null}"></option>
 							</select>
 						</div>
+						<div class="form-group">
+							<div class="checkbox">
+								<label
+									th:if="${!fragment.enable}">
+									<input type="checkbox" id="enable" />启用
+								</label> <label
+									th:if="${fragment.enable}"><input
+									type="checkbox" id="enable" checked="checked" />启用 </label>
+							</div>
+						</div>
 					</form>
 				</div>
 				<div class="modal-footer">

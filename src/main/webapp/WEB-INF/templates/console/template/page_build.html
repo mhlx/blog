@@ -178,6 +178,16 @@
 									type="checkbox" id="allowComment" checked="checked" />允许评论 </label>
 							</div>
 						</div>
+						<div class="form-group">
+							<div class="checkbox">
+								<label
+									th:if="${!page.enable}">
+									<input type="checkbox" id="enable" />启用
+								</label> <label
+									th:if="${page.enable}"><input
+									type="checkbox" id="enable" checked="checked" />启用 </label>
+							</div>
+						</div>
 					</form>
 				</div>
 				<div class="modal-footer">

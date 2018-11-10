@@ -54,6 +54,11 @@ public class Page extends BaseEntity implements PathTemplate {
 	 */
 	private boolean spaceGlobal;
 
+	/**
+	 * @since 7.0
+	 */
+	private boolean enable;
+
 	public Page() {
 		super();
 	}
@@ -81,6 +86,7 @@ public class Page extends BaseEntity implements PathTemplate {
 		this.alias = page.alias;
 		this.allowComment = page.allowComment;
 		this.spaceGlobal = page.spaceGlobal;
+		this.enable = page.enable;
 	}
 
 	@Override
@@ -145,6 +151,7 @@ public class Page extends BaseEntity implements PathTemplate {
 		page.setName(name);
 		page.setDescription(description);
 		page.setSpaceGlobal(spaceGlobal);
+		page.setEnable(enable);
 		return page;
 	}
 
@@ -183,6 +190,14 @@ public class Page extends BaseEntity implements PathTemplate {
 
 	public void setSpaceGlobal(boolean spaceGlobal) {
 		this.spaceGlobal = spaceGlobal;
+	}
+
+	public boolean isEnable() {
+		return enable;
+	}
+
+	public void setEnable(boolean enable) {
+		this.enable = enable;
 	}
 
 	@Override

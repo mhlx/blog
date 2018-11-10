@@ -201,7 +201,9 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 			fragment.setCreateDate(Timestamp.valueOf(LocalDateTime.now()));
 			fragmentDao.insert(fragment);
-			evitFragmentCache(fragment.getName());
+			if (fragment.isEnable()) {
+				evitFragmentCache(fragment.getName());
+			}
 			return fragment;
 		});
 	}
@@ -344,8 +346,11 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			pageDao.insert(page);
 
 			evitPageCache(page);
-			// 注册现在的页面
-			helper.registerPage(page);
+			if (page.isEnable()) {
+				// 注册现在的页面
+				helper.registerPage(page);
+			}
+
 			this.applicationEventPublisher.publishEvent(new PageCreateEvent(this, page));
 			return page;
 		});
@@ -374,10 +379,14 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 			evitPageCache(db);
 
-			// 解除以前的mapping
-			helper.unregisterPage(db);
-			// 注册现在的页面
-			helper.registerPage(page);
+			if (db.isEnable()) {
+				// 解除以前的mapping
+				helper.unregisterPage(db);
+			}
+			if (page.isEnable()) {
+				// 注册现在的页面
+				helper.registerPage(page);
+			}
 
 			this.applicationEventPublisher.publishEvent(new PageUpdateEvent(this, db, page));
 			return page;
@@ -418,7 +427,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		try {
 			Space space = spaceId == null ? null : getRequiredSpace(spaceId);
 			List<ExportPage> exportPages = new ArrayList<>();
-			// User
 			for (Page page : pageDao.selectBySpace(space)) {
 				exportPages.add(export(page));
 			}
@@ -498,14 +506,16 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 					pageDao.insert(page);
 
-					// 尝试注册mapping，如果此时存在了其他该路径的mapping(PathTemplate
-					// mapping)那么无法注册成功
-					try {
-						helper.registerPage(page);
-					} catch (LogicException ex) {
-						records.add(new ImportRecord(false, ex.getLogicMessage()));
-						ts.setRollbackOnly();
-						return records;
+					if (page.isEnable()) {
+						// 尝试注册mapping，如果此时存在了其他该路径的mapping(PathTemplate
+						// mapping)那么无法注册成功
+						try {
+							helper.registerPage(page);
+						} catch (LogicException ex) {
+							records.add(new ImportRecord(false, ex.getLogicMessage()));
+							ts.setRollbackOnly();
+							return records;
+						}
 					}
 
 					records.add(new ImportRecord(true, new Message("import.insert.page.success",
@@ -514,17 +524,23 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				} else {
 					// 可能需要更新页面
 					Page current = optional.get();
-					// 如果页面内容发生了改变，此时需要更新页面
-					if (!current.getTpl().equals(page.getTpl())) {
+					// 如果页面内容发生了改变或者页面是否启用发生了改变，此时需要更新页面
+					if (!current.getTpl().equals(page.getTpl())
+							|| Boolean.compare(current.isEnable(), page.isEnable()) != 0) {
 						current.setTpl(page.getTpl());
+						if (current.isEnable()) {
+							helper.unregisterPage(current);
+						}
+						current.setEnable(page.isEnable());
 						pageDao.update(current);
-						helper.unregisterPage(current);
-						try {
-							helper.registerPage(current);
-						} catch (LogicException ex) {
-							records.add(new ImportRecord(false, ex.getLogicMessage()));
-							ts.setRollbackOnly();
-							return records;
+						if (page.isEnable()) {
+							try {
+								helper.registerPage(current);
+							} catch (LogicException ex) {
+								records.add(new ImportRecord(false, ex.getLogicMessage()));
+								ts.setRollbackOnly();
+								return records;
+							}
 						}
 						records.add(new ImportRecord(true,
 								new Message("import.update.page.success",
@@ -533,10 +549,10 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 						pageEvitKeySet.add(templateName);
 					} else {
-						records.add(new ImportRecord(true, new Message("import.page.nochange",
-
-								"页面" + page.getName() + "[" + page.getAlias() + "]内容没有发生变化，无需更新", page.getName(),
-								page.getAlias())));
+						records.add(new ImportRecord(true,
+								new Message("import.page.nochange",
+										"页面" + page.getName() + "[" + page.getAlias() + "]内容没有发生变化，无需更新",
+										page.getName(), page.getAlias())));
 					}
 				}
 			}
@@ -856,10 +872,12 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			PageRequestMappingRegisterHelper helper = new PageRequestMappingRegisterHelper();
 			List<Page> allPage = pageDao.selectAll();
 			for (Page page : allPage) {
-				try {
-					helper.registerPage(page);
-				} catch (LogicException e) {
-					throw new SystemException(page.getRelativePath() + "已经存在了");
+				if (page.isEnable()) {
+					try {
+						helper.registerPage(page);
+					} catch (LogicException e) {
+						throw new SystemException(page.getRelativePath() + "已经存在了");
+					}
 				}
 			}
 		});
@@ -997,14 +1015,14 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		Fragment del = null;
 
 		Fragment fragment = fragmentDao.selectBySpaceAndName(space, name);
-		if (fragment == null || fragment.isDel()) { // 查找全局
+		if (fragment == null || fragment.isDel() || !fragment.isEnable()) { // 查找全局
 			if (fragment != null && fragment.isDel()) {
 				del = new Fragment(fragment);
 			}
 			fragment = fragmentDao.selectGlobalByName(name);
 		}
 
-		if (fragment == null || fragment.isDel()) {
+		if (fragment == null || fragment.isDel() || !fragment.isEnable()) {
 			if (fragment != null && fragment.isDel() && del == null) {
 				del = new Fragment(fragment);
 			}
@@ -1030,6 +1048,9 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			page = pageDao.selectBySpaceAndAlias(new Space(Integer.parseInt(array[4])), array[2], false);
 		} else {
 			throw new SystemException(templateName + "无法转化为用户自定义页面");
+		}
+		if (page != null && !page.isEnable()) {
+			page = null;
 		}
 		return Optional.ofNullable(page);
 	}
@@ -1213,6 +1234,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		for (Fragment fragment : fragments) {
 			// 清除ID，用来判断是否是内置模板片段
 			fragment.setId(null);
+			fragment.setEnable(true);
 			this.fragments.add(fragment);
 		}
 	}

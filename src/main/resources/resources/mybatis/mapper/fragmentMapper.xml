@@ -12,6 +12,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="global" column="is_global"/>
 		<result property="callable" column="is_callable"/>
 		<result property="del" column="is_del"/>
+		<result property="enable" column="is_enable"/>
 		<association property="space" javaType="Space">
 			<result column="space_id" property="id" />
 			<result column="space_name" property="name"/>
@@ -23,8 +24,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 	
 	<insert id="insert" useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO blog_fragment_user(fragment_name,fragment_description,fragment_tpl,fragment_create_date,space_id,is_global,is_callable)
-		VALUES(#{name},#{description},#{tpl},#{createDate},#{space.id},#{global},#{callable})
+		INSERT INTO blog_fragment_user(fragment_name,fragment_description,fragment_tpl,fragment_create_date,space_id,is_global,is_callable,is_enable)
+		VALUES(#{name},#{description},#{tpl},#{createDate},#{space.id},#{global},#{callable},#{enable})
 	</insert>
 	
 	<select id="selectBySpaceAndName" resultMap="FragmentDetail">
@@ -37,7 +38,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			space_id,
 			is_global,
 			is_callable,
-			is_del
+			is_del,
+			is_enable
 		FROM
 			blog_fragment_user
 		WHERE 
@@ -63,7 +65,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			space_id,
 			is_global,
 			is_callable,
-			is_del
+			is_del,
+			is_enable
 		FROM
 			blog_fragment_user
 		WHERE 
@@ -80,7 +83,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			space_id,
 			space_name,
 			is_global,
-			is_callable
+			is_callable,
+			is_enable
 		FROM
 			blog_fragment_user bfu
 		LEFT OUTER JOIN blog_space bs ON bfu.space_id = bs.id
@@ -153,7 +157,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			is_del = #{del},
 			space_id = #{space.id},
 			is_global = #{global},
-			is_callable = #{callable}
+			is_callable = #{callable},
+			is_enable = #{enable}
 		</set>
 		WHERE 
 			id = #{id}
@@ -169,7 +174,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			space_id,
 			is_global,
 			is_callable,
-			is_del
+			is_del,
+			is_enable
 		FROM
 			blog_fragment_user
 		WHERE 
@@ -186,7 +192,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			space_id,
 			is_global,
 			is_callable,
-			is_del
+			is_del,
+			is_enable
 		FROM
 			blog_fragment_user
 		WHERE 

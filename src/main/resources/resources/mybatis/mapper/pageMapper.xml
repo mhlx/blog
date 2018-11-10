@@ -12,6 +12,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result column="page_description" property="description"/>
 		<result column="page_create_date" property="createDate"/>
 		<result column="page_allowComment" property="allowComment"/>
+		<result column="is_enable" property="enable"/>
 		<association property="space" javaType="Space">
 			<result column="space_id" property="id"/>
 			<result column="space_name" property="name"/>
@@ -20,8 +21,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 	
 	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
-		INSERT INTO blog_page_user(space_id,page_tpl,page_name,page_description,page_create_date,page_alias,page_allowComment,page_spaceGlobal)
-		VALUES(#{space.id},#{tpl},#{name},#{description},#{createDate},#{alias},#{allowComment},#{spaceGlobal})
+		INSERT INTO blog_page_user(space_id,page_tpl,page_name,page_description,page_create_date,page_alias,page_allowComment,page_spaceGlobal,is_enable)
+		VALUES(#{space.id},#{tpl},#{name},#{description},#{createDate},#{alias},#{allowComment},#{spaceGlobal},#{enable})
 	</insert>
 	
 	<update id="update">
@@ -33,7 +34,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			page_tpl = #{tpl},
 			page_alias = #{alias},
 			page_allowComment = #{allowComment},
-			page_spaceGlobal = #{spaceGlobal}
+			page_spaceGlobal = #{spaceGlobal},
+			is_enable = #{enable}
 		WHERE id = #{id}
 	</update>
 	
@@ -42,11 +44,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 
 	<select id="selectById" resultMap="PageDetail">
-		SELECT bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal FROM blog_page_user bpu LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id WHERE bpu.id = #{id}
+		SELECT bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal,is_enable FROM blog_page_user bpu LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id WHERE bpu.id = #{id}
 	</select>
 	
 	<select id="selectBySpace" resultMap="PageDetail">
-		SELECT bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal FROM blog_page_user bpu LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id 
+		SELECT bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal,is_enable FROM blog_page_user bpu LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id 
 		WHERE 
 		<choose>
 			<when test="space == null">
@@ -59,7 +61,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="selectBySpaceAndAlias" resultMap="PageDetail">
-		SELECT bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal 
+		SELECT bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal,is_enable 
 		FROM blog_page_user bpu LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id 
 		WHERE 
 		<choose>
@@ -76,7 +78,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<select id="selectPage" resultMap="PageDetail">
 		SELECT
-			bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal 
+			bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal,is_enable 
 		FROM
 			blog_page_user bpu
 		LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id
@@ -123,7 +125,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<select id="selectAll" resultMap="PageDetail">
 		SELECT
-			bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal 
+			bpu.id,space_id,page_tpl,page_name,page_description,page_create_date,space_name,space_alias,page_alias,page_allowComment,page_spaceGlobal,is_enable  
 		FROM
 			blog_page_user bpu
 		LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id
@@ -131,7 +133,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="selectSimpleByIds" resultMap="PageDetail">
-		SELECT bpu.id,space_id,page_name,space_alias,page_alias,page_spaceGlobal  FROM blog_page_user bpu LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id 
+		SELECT bpu.id,space_id,page_name,space_alias,page_alias,page_spaceGlobal,is_enable  FROM blog_page_user bpu LEFT OUTER JOIN blog_space bs ON bpu.space_id = bs.id 
 		WHERE bpu.id IN
 		<foreach collection="collection" item="id" open="(" close=")"
 			separator=",">#{id}</foreach>
