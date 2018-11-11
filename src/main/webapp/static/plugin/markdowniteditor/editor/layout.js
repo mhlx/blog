@@ -15,7 +15,7 @@
                 $(".icon").show();
                 $("#toolbar")
                     .append(
-                        '<span data-to-preview class="glyphicon glyphicon-eye-open icon" id="preview-icon" title="预览"></span>');
+                        '<i class="fas fa-eye icon" data-to-preview id="preview-icon" title="预览"></i>');
                 if (editor) {
                     editor.focus();
                     if (_cursor) {
@@ -40,7 +40,7 @@
                 $("#toolbar img").hide();
                 $("#toolbar")
                     .append(
-                        '<span data-to-editor class="glyphicon glyphicon-eye-close icon" id="editor-icon" title="取消预览"></span>');
+                        '<i class="fas fa-eye-slash icon" span data-to-editor  id="editor-icon" title="取消预览"></i>');
             }
             
   					var wwidth = $(window).width();
