@@ -58,8 +58,8 @@ public final class UrlUtils {
 	/**
 	 * Obtains the full URL the client used to make the request.
 	 * <p>
-	 * Note that the server port will not be shown if it is the default server
-	 * port for HTTP or HTTPS (80 and 443 respectively).
+	 * Note that the server port will not be shown if it is the default server port
+	 * for HTTP or HTTPS (80 and 443 respectively).
 	 *
 	 * @return the full URL, suitable for redirects (not decoded).
 	 */
@@ -110,5 +110,14 @@ public final class UrlUtils {
 	 */
 	public static boolean match(String pattern, String path) {
 		return APM.match(pattern, path);
+	}
+
+	/**
+	 * @since 7.0
+	 * @param request
+	 * @return
+	 */
+	public static String getRequestURIWithoutContextPath(HttpServletRequest request) {
+		return request.getRequestURI().substring(request.getContextPath().length() + 1);
 	}
 }

@@ -318,7 +318,9 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			String templateName = db.getTemplateName();
 			evitPageCache(templateName);
 			this.applicationEventPublisher.publishEvent(new PageDelEvent(this, List.of(db)));
-			new PageRequestMappingRegisterHelper().unregisterPage(db);
+			if (db.isEnable()) {
+				new PageRequestMappingRegisterHelper().unregisterPage(db);
+			}
 		});
 	}
 
@@ -1049,9 +1051,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		} else {
 			throw new SystemException(templateName + "无法转化为用户自定义页面");
 		}
-		if (page != null && !page.isEnable()) {
-			page = null;
-		}
 		return Optional.ofNullable(page);
 	}
 
@@ -1309,7 +1308,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 						.orElse(null);
 			}
 			if (template == null) {
-				template = queryPageWithTemplateName(originalTemplateName).orElse(null);
+				template = queryPageWithTemplateName(originalTemplateName).filter(Page::isEnable).orElse(null);
 			}
 			return template;
 		}
@@ -1464,6 +1463,27 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 			}
 		}
+	}
+
+	@Override
+	public synchronized void disablePageByPath(String path) throws LogicException {
+		Transactions.executeInTransaction(platformTransactionManager, status -> {
+			Optional<String> optional = templateMapping.getTemplateNameEqualsPattern(FileUtils.cleanPath(path));
+			if (optional.isPresent()) {
+				String templateName = optional.get();
+				if (Page.isPageTemplate(templateName)) {
+					Optional<Page> opPage = queryPageWithTemplateName(templateName);
+					if (opPage.isPresent()) {
+						Page page = opPage.get();
+						Page copy = new Page(page);
+						page.setEnable(false);
+						pageDao.update(page);
+						new PageRequestMappingRegisterHelper().unregisterPage(page);
+						this.applicationEventPublisher.publishEvent(new PageUpdateEvent(this, copy, page));
+					}
+				}
+			}
+		});
 	}
 
 	private Map<String, Boolean> readCallableMap() {

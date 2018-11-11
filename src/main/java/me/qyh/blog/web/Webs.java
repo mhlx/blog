@@ -30,6 +30,7 @@ import me.qyh.blog.core.config.UrlHelper.CurrentEnvUrls;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.util.ExceptionUtils;
 import me.qyh.blog.core.util.Jsons;
+import me.qyh.blog.core.util.UrlUtils;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.core.validator.SpaceValidator;
 
@@ -224,7 +225,7 @@ public class Webs {
 	 * @since 7.0
 	 */
 	public static boolean isRestful(HttpServletRequest request) {
-		String path = request.getRequestURI().substring(request.getContextPath().length() + 1);
+		String path = UrlUtils.getRequestURIWithoutContextPath(request);
 		if (path.startsWith("api/")) {
 			return true;
 		}
@@ -234,4 +235,5 @@ public class Webs {
 		}
 		return false;
 	}
+
 }

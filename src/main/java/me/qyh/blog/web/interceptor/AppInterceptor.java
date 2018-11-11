@@ -262,7 +262,7 @@ public class AppInterceptor extends HandlerInterceptorAdapter {
 	private void setRequestAttribute(HandlerMethod methodHandler, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (request.getAttribute(Webs.SPACE_ATTR_NAME) == null) {
-			String path = request.getRequestURI().substring(request.getContextPath().length() + 1);
+			String path = UrlUtils.getRequestURIWithoutContextPath(request);
 			if (path.startsWith("api/")) {
 				path = path.substring(4);
 			}
@@ -272,7 +272,7 @@ public class AppInterceptor extends HandlerInterceptorAdapter {
 		String alias = Webs.getSpaceFromRequest(request);
 		String unlockPattern = alias == null ? UNLOCK_PATTERN : SPACE_UNLOCK_PATTERN;
 		if (request.getAttribute(Webs.UNLOCK_ATTR_NAME) == null) {
-			String path = request.getRequestURI().substring(request.getContextPath().length());
+			String path = "/" + UrlUtils.getRequestURIWithoutContextPath(request);
 			boolean isUnlock = UrlUtils.match(unlockPattern, path) && request.getParameter("lockId") != null;
 			request.setAttribute(Webs.UNLOCK_ATTR_NAME, isUnlock);
 		}

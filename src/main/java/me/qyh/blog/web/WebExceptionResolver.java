@@ -188,6 +188,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 			}
 			Map<String, Object> model = new HashMap<>();
 			model.put("description", tre.getRenderErrorDescription());
+
 			return new ModelAndView("forward:/error/ui", model);
 		}
 	}
@@ -498,7 +499,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 			 * @since 5.9 当nohandlerfound的时候，AppInterceptorHandler不会起作用，因此
 			 *        getSpaceFromRequest始终为空，这里需要额外的判断
 			 */
-			String path = request.getRequestURI().substring(request.getContextPath().length() + 1);
+			String path = UrlUtils.getRequestURIWithoutContextPath(request);
 			String space = Webs.getSpaceFromPath(path, SpaceValidator.MAX_ALIAS_LENGTH + 1);
 			String forwardMapping;
 			if (space != null) {
@@ -574,14 +575,14 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 	}
 
-	private static <T> ModelAndView restfulView(T obj, HttpStatus status) {
-		ModelAndView mav = new ModelAndView(new JsonView<T>(obj));
+	private static ModelAndView restfulView(Object obj, HttpStatus status) {
+		ModelAndView mav = new ModelAndView(new JsonView(obj));
 		mav.setStatus(status);
 		return mav;
 	}
 
 	private static ModelAndView jsonResultView(JsonResult result) {
-		return new ModelAndView(new JsonView<JsonResult>(result));
+		return new ModelAndView(new JsonView(result));
 	}
 
 	private static ModelAndView emptyView(HttpStatus status) {

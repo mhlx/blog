@@ -25,11 +25,11 @@ import org.springframework.web.servlet.View;
 
 import me.qyh.blog.web.Webs;
 
-public class JsonView<T> implements View {
+public class JsonView implements View {
 
-	private final T result;
+	private final Object result;
 
-	public JsonView(T result) {
+	public JsonView(Object result) {
 		super();
 		this.result = result;
 	}

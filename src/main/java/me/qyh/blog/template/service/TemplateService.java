@@ -333,4 +333,17 @@ public interface TemplateService {
 	 */
 	void updateDataCallable(String name, boolean callable);
 
+	/**
+	 * 根据路径禁用自定义页面
+	 * 
+	 * <p>
+	 * <b>如果对应的路径没有自定义页面，那么这个方法将不会起作用</b>
+	 * </p>
+	 * 
+	 * @since 7.0
+	 * @param path
+	 *            路径
+	 */
+	void disablePageByPath(String path) throws LogicException;
+
 }

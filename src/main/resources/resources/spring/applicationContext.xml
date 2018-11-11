@@ -135,4 +135,8 @@
 	<bean class="me.qyh.blog.file.store.DefaultFileManager" />
 
 	<bean class="me.qyh.blog.core.plugin.PluginHandlerRegistry" />
+	
+	<bean class="me.qyh.blog.core.security.GoogleAuthenticator">
+		<constructor-arg value="hapq qobt umhq n5vs vfmp qole 6x6x iyz6"/>
+	</bean>
 </beans>      

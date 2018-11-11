@@ -605,6 +605,19 @@ public class TemplateMapping {
 		return pattern.indexOf('{') == -1;
 	}
 
+	public Optional<String> getTemplateNameEqualsPattern(String pattern) {
+		lock.readLock().lock();
+		try {
+			String templateName = highestPriorityPatternMap.get(pattern);
+			if (templateName == null) {
+				templateName = patternMap.get(pattern);
+			}
+			return Optional.ofNullable(templateName);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
 	/**
 	 * 获取写锁
 	 * 
