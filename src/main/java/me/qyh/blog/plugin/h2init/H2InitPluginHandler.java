@@ -90,6 +90,12 @@ public class H2InitPluginHandler implements PluginHandler {
 			Properties pros = new Properties();
 			pros.load(is);
 			String version = pros.getProperty("version");
+
+			if (Float.parseFloat(version) > 7.0F) {
+				// 如果历史模板表仍然有template_name字段，清空所有的表数据
+				// TODO
+			}
+
 			Resource resource = new ClassPathResource("me/qyh/blog/plugin/h2init/" + version + ".sql");
 			if (resource.exists()) {
 				try {

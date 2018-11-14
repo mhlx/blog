@@ -25,13 +25,13 @@
 
 						<form class="form-inline justify-content-left my-2">
 							<div class="form-group mr-sm-3">
-								<label  class="sr-only">名称|路径</label> <input
-									type="text" class="form-control" id="query"
-									placeholder="查询">
+								<label class="sr-only">名称|路径</label> <input type="text"
+									class="form-control" id="query" placeholder="查询">
 							</div>
-							
+
 							<div class="btn-group" role="group" aria-label="Basic example">
-								<a th:href="@{/console/template/page/new}" class="btn btn-secondary" id="query">新页面</a>
+								<a th:href="@{/console/template/page/new}"
+									class="btn btn-secondary" id="query">新页面</a>
 								<button type="button" class="btn btn-secondary" id="query-btn">查询</button>
 							</div>
 						</form>
@@ -76,7 +76,38 @@
 		class="fas fa-angle-up"></i>
 	</a>
 
-
+	<div class="modal fade" id="historyModal" tabindex="-1" role="dialog"
+		aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">历史模板</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="table-responsive">
+						<table class="table" id="historyTable">
+							<thead>
+								<tr>
+									<th data-bind="time">时间</th>
+									<th data-bind="remark">备注</th>
+									<th data-bind="id">操作</th>
+								</tr>
+							<thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="saveHistory">保存当前页面为历史模板</button>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div th:replace="console/base/foot"></div>
 	<script th:src="@{/static/console/js/page.js}"></script>
 

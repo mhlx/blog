@@ -29,6 +29,22 @@ function openFile() {
 	$("#fileSelectModal").modal("show");
 }
 
+function back(){
+	 swal({
+           title: '你确定要返回吗？',
+           type: 'warning',
+           showCancelButton: true,
+           confirmButtonColor: '#3085d6',
+           cancelButtonColor: '#d33',
+           confirmButtonText: '确定!',
+           cancelButtonText: '取消'
+       }).then((result) => {
+           if (result.value) {
+
+               window.history.go(-1);
+           }
+       });
+}
 $(function() {
 
 	$.ajax({

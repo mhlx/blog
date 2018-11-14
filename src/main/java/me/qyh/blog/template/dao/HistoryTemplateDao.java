@@ -20,12 +20,13 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import me.qyh.blog.template.entity.HistoryTemplate;
+import me.qyh.blog.template.entity.HistoryTemplate.HistoryTemplateType;
 
 public interface HistoryTemplateDao {
 
-	List<HistoryTemplate> selectByTemplateName(String templateName);
+	List<HistoryTemplate> selectByTemplate(@Param("id") Integer id, @Param("type") HistoryTemplateType type);
 
-	void deleteByTemplateName(String templateName);
+	void deleteByTemplate(@Param("id") Integer id, @Param("type") HistoryTemplateType type);
 
 	void insert(HistoryTemplate template);
 
@@ -34,8 +35,5 @@ public interface HistoryTemplateDao {
 	HistoryTemplate selectById(Integer id);
 
 	void update(HistoryTemplate historyTemplate);
-
-	void updateTemplateName(@Param("oldTemplateName") String oldTemplateName,
-			@Param("newTemplateName") String newTemplateName);
 
 }

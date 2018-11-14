@@ -79,6 +79,84 @@
 	            }
 	        });
 	    });
+	    
+	    $("#back").click(function(){
+	    	 swal({
+		            title: '你确定要返回吗？',
+		            type: 'warning',
+		            showCancelButton: true,
+		            confirmButtonColor: '#3085d6',
+		            cancelButtonColor: '#d33',
+		            confirmButtonText: '确定!',
+		            cancelButtonText: '取消'
+		        }).then((result) => {
+		            if (result.value) {
+
+		                window.history.go(-1);
+		            }
+		        });
+	    });
+	    
+	    var historyTable;
+	    $("#history").click(function() {
+	    	var id = $("#fragmentId").val();
+	    	if(id){
+	    		if(!historyTable){
+	    			historyTable = datatable('historyTable',{
+	    				url : function(){
+	    					return root+'api/console/template/fragment/'+id+'/histories'
+	    				},
+	    				columns:[{
+	    					bind : 'time',
+	    					render:function(v){
+	    						return moment(v).format('YYYY-MM-DD HH:mm');
+	    					}
+	    				},{
+	    					bind : 'id',
+	    					render:function(v){
+	    						return '<a href="###" data-load="'+v+'">加载</a>';
+	    					}
+	    				}]
+	    			});
+	    		}else{
+	    			historyTable.reload();
+	    		}
+	    		$("#historyModal").modal('show');
+	    	}else{
+	    		swal("新模板片段无法获取历史模板", "", "error")
+	    	}
+	    });
+	    
+	    $("#historyTable").on('click','[data-load]',function(){
+	    	var id = $(this).data('load');
+	    	swal({
+				  title: '你确定吗？',
+				  type: 'warning',
+				  showCancelButton: true,
+				  confirmButtonColor: '#3085d6',
+				  cancelButtonColor: '#d33',
+				  confirmButtonText: '加载!',
+				  cancelButtonText: '取消'
+				}).then((result) => {
+			  if (result.value) {
+				  $.ajax({
+						type : 'GET',
+						url : root + 'api/console/template/history/'+id,
+						success:function(data) {
+							 editor.setValue(data.tpl);$("#historyModal").modal('hide');
+						},
+						error:function(jqXHR, textStatus, errorThrown) {
+							if(jqXHR.status == 404){
+								swal('模板不存在','','error');return;
+							}
+							var data = $.parseJSON(jqXHR.responseText);
+							swal('保存失败',data.error,'error');
+						}
+					  })
+			  }
+			});
+	    })
+
 
 	    $("#lock").click(function() {
 	        $("#lockModal").modal('show')
@@ -93,7 +171,7 @@
 	                },
 	                error: function(jqXHR) {
 	                    var message = $.parseJSON(jqXHR.responseText).error;
-	                    swal("获取默认页面失败", "", "error")
+	                    swal("获取默认模板片段失败", "", "error")
 	                }
 	            });
 	        } else {
@@ -254,12 +332,22 @@ var fragment_storage = (function() {
 		if(v != null){
 			v = $.parseJSON(v);
 			current_tpl = editor.getValue();
-			bootbox.confirm("系统发现在"+new Date(v.time).format('yyyy-mm-dd HH:MM:ss')+"留有备份，是否加载？",function(result){
-				if(result){
-					editor.setValue(v.content);
+			current_tpl = editor.getValue();
+			swal({
+				  title: '要加载备份吗？',
+				  type: 'warning',
+				  text : "系统发现在"+moment(v.time).format('YYYY-MM-DD HH:mm:ss')+"留有备份，是否加载？",
+				  showCancelButton: true,
+				  confirmButtonColor: '#3085d6',
+				  cancelButtonColor: '#d33',
+				  confirmButtonText: '加载!',
+				  cancelButtonText: '取消'
+				}).then((result) => {
+			  if (result.value) {
+				  editor.setValue(v.content);
 					preEditorContent= v.content;
-				}
-			})
+			  }
+			});
 		}
 		
 		return {
@@ -333,7 +421,7 @@ var fragment_storage = (function() {
 			  var v = fragment_storage.get(key);
 				if(v != null){
 					v = $.parseJSON(v);
-					$("#pageKey").val(v.id);
+					$("#fragmentKey").val(v.id);
 					editor.setValue(v.content);
 				}
 				$("#backupModal").modal('hide');

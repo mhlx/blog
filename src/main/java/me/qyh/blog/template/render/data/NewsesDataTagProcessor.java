@@ -28,14 +28,14 @@ import me.qyh.blog.core.vo.NewsArchive;
 import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
 import me.qyh.blog.core.vo.PageResult;
 
-public class NewsPageDataTagProcessor extends DataTagProcessor<PageResult<NewsArchive>> {
+public class NewsesDataTagProcessor extends DataTagProcessor<PageResult<NewsArchive>> {
 
 	@Autowired
 	private NewsService newsService;
 	@Autowired
 	private ConfigServer configServer;
 
-	public NewsPageDataTagProcessor(String name, String dataName) {
+	public NewsesDataTagProcessor(String name, String dataName) {
 		super(name, dataName);
 	}
 

@@ -34,7 +34,7 @@ import me.qyh.blog.template.service.TemplateService;
 import me.qyh.blog.web.controller.console.BaseMgrController;
 
 @Controller
-@RequestMapping("console/template")
+@RequestMapping("api/console/template")
 public class HistoryTemplateConsole extends BaseMgrController {
 
 	private static final int MAX_REMARK_LENGTH = 500;

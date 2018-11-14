@@ -78,6 +78,83 @@
 	            }
 	        });
 	    });
+	    
+	    $("#back").click(function(){
+	    	 swal({
+		            title: '你确定要返回吗？',
+		            type: 'warning',
+		            showCancelButton: true,
+		            confirmButtonColor: '#3085d6',
+		            cancelButtonColor: '#d33',
+		            confirmButtonText: '确定!',
+		            cancelButtonText: '取消'
+		        }).then((result) => {
+		            if (result.value) {
+
+		                window.history.go(-1);
+		            }
+		        });
+	    });
+	    
+	    var historyTable;
+	    $("#history").click(function() {
+	    	var id = $("#pageId").val();
+	    	if(id){
+	    		if(!historyTable){
+	    			historyTable = datatable('historyTable',{
+	    				url : function(){
+	    					return root+'api/console/template/page/'+id+'/histories'
+	    				},
+	    				columns:[{
+	    					bind : 'time',
+	    					render:function(v){
+	    						return moment(v).format('YYYY-MM-DD HH:mm');
+	    					}
+	    				},{
+	    					bind : 'id',
+	    					render:function(v){
+	    						return '<a href="###" data-load="'+v+'">加载</a>';
+	    					}
+	    				}]
+	    			});
+	    		}else{
+	    			historyTable.reload();
+	    		}
+	    		$("#historyModal").modal('show');
+	    	}else{
+	    		swal("新页面无法获取历史模板", "", "error")
+	    	}
+	    });
+	    
+	    $("#historyTable").on('click','[data-load]',function(){
+	    	var id = $(this).data('load');
+	    	swal({
+				  title: '你确定吗？',
+				  type: 'warning',
+				  showCancelButton: true,
+				  confirmButtonColor: '#3085d6',
+				  cancelButtonColor: '#d33',
+				  confirmButtonText: '加载!',
+				  cancelButtonText: '取消'
+				}).then((result) => {
+			  if (result.value) {
+				  $.ajax({
+						type : 'GET',
+						url : root + 'api/console/template/history/'+id,
+						success:function(data) {
+							 editor.setValue(data.tpl);$("#historyModal").modal('hide');
+						},
+						error:function(jqXHR, textStatus, errorThrown) {
+							if(jqXHR.status == 404){
+								swal('模板不存在','','error');return;
+							}
+							var data = $.parseJSON(jqXHR.responseText);
+							swal('保存失败',data.error,'error');
+						}
+					  })
+			  }
+			});
+	    })
 
 	    $("#lock").click(function() {
 	        $("#lockModal").modal('show')

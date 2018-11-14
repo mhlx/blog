@@ -126,6 +126,8 @@ body {
 <body>
 	<div>
 		<div id="toolbar">
+		<i class="fas fa-backward icon" style="color: #ffc107" title="回退"
+				onclick="back()"></i>
 			<i class="fas fa-save icon" style="color: red" title="保存"
 				onclick="showBase()"></i><i class="fas fa-file icon" title="文件"
 				onclick="files.get()"></i> <i class="fas fa-question-circle icon"
@@ -518,7 +520,7 @@ public static void main(String [] args){
 	<script
 		th:src="@{/static/plugin/markdowniteditor/editor/layout.js?v=7.0}"></script>
 	<script
-		th:src="@{/static/plugin/markdowniteditor/article_editor.js?v=7.0}"></script>
+		th:src="@{/static/plugin/markdowniteditor/article_editor.js?v=7.0.1}"></script>
 	<script th:src="@{/static/plugin/markdowniteditor/article_md.js?v=7.0}"></script>
 </body>
 </html>

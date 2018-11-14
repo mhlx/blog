@@ -6,25 +6,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<resultMap type="HistoryTemplate" id="HistoryTemplateDetail">
 		<id column="id" property="id" />
-		<result column="template_name" property="templateName" />
+		<result column="template_type" property="type" typeHandler="EnumOrdinalTypeHandler" />
+		<result column="template_id" property="templateId" />
 		<result column="template_tpl" property="tpl" />
 		<result column="template_time" property="time" />
 		<result column="remark" property="remark" />
 	</resultMap>
 
 	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
-		INSERT INTO blog_history_template(template_name,template_tpl,template_time,remark)
-		VALUES(#{templateName},#{tpl},#{time},#{remark})
+		INSERT INTO blog_history_template(template_id,template_type,template_tpl,template_time,remark)
+		VALUES(#{templateId},#{type,javaType=HistoryTemplateType,typeHandler=EnumOrdinalTypeHandler},#{tpl},#{time},#{remark})
 	</insert>
 	
 	
-	<select id="selectByTemplateName" resultMap="HistoryTemplateDetail">
-		SELECT id,template_name,template_time,remark FROM blog_history_template
-		WHERE template_name = #{templateName}
+	<select id="selectByTemplate" resultMap="HistoryTemplateDetail">
+		SELECT id,template_id,template_type,template_time,remark FROM blog_history_template
+		WHERE template_id = #{id}
+		AND template_type = #{type,javaType=HistoryTemplateType,typeHandler=EnumOrdinalTypeHandler}
 	</select>
 	
-	<delete id="deleteByTemplateName">
-		DELETE FROM blog_history_template WHERE template_name = #{templateName}
+	<delete id="deleteByTemplate">
+		DELETE FROM blog_history_template WHERE template_id = #{id}
+		AND template_type = #{type,javaType=HistoryTemplateType,typeHandler=EnumOrdinalTypeHandler}
 	</delete>
 	
 	<delete id="deleteById">
@@ -32,7 +35,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 	
 	<select id="selectById" resultMap="HistoryTemplateDetail">
-		SELECT id,template_name,template_tpl,template_time,remark FROM blog_history_template
+		SELECT id,template_id,template_type,template_time,remark,template_tpl FROM blog_history_template
 		WHERE id = #{id}
 	</select>
 	
@@ -41,11 +44,5 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		SET
 			remark = #{remark}
 		WHERE id = #{id}			
-	</update>
-	
-	<update id="updateTemplateName">
-		UPDATE blog_history_template 
-		SET template_name = #{newTemplateName}
-		WHERE template_name = #{oldTemplateName}
 	</update>
 </mapper>

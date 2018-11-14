@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS `blog_fragment_user` (
   `is_global` tinyint(1) NOT NULL DEFAULT '0',
   `is_callable` tinyint(1) NOT NULL DEFAULT '0',
   `is_del` tinyint(1) NOT NULL DEFAULT '0',
+  `is_enable` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ;
 
@@ -110,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `blog_page_user` (
   `page_alias` varchar(255)  DEFAULT NULL,
   `page_allowComment` tinyint(1) NOT NULL DEFAULT '0',
   `page_spaceGlobal` tinyint(1) NOT NULL DEFAULT '0',
+  `is_enable` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ;
 
@@ -136,7 +138,8 @@ CREATE TABLE IF NOT EXISTS `blog_tag` (
 
 CREATE TABLE IF NOT EXISTS blog_history_template (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `template_name` varchar(255) NOT NULL,
+  `template_id` int(11) NOT NULL,
+  `template_type` int(11) NOT NULL,
   `template_tpl` mediumtext NOT NULL,
   `template_time` datetime NOT NULL,
   `remark` varchar(500) NOT NULL,

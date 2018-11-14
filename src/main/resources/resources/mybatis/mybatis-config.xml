@@ -31,6 +31,8 @@
 			alias="Fragment" />
 		<typeAlias type="me.qyh.blog.template.entity.HistoryTemplate"
 			alias="HistoryTemplate" />
+		<typeAlias type="me.qyh.blog.template.entity.HistoryTemplate$HistoryTemplateType"
+			alias="HistoryTemplateType" />
 
 		<typeAlias type="me.qyh.blog.core.vo.ArticleStatistics"
 			alias="ArticleStatistics" />

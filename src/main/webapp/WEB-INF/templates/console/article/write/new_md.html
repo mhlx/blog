@@ -83,6 +83,7 @@
 	<div class="container-fluid">
 		<div class="col-md-6">
 			<div id="toolbar" style="position:fixed;z-index: 999999;">
+				<i class="fas fa-backward icon" style="color:#ffc107" onclick="back()" title="后退"></i>
 				<i class="fas fa-pencil-alt icon" onclick="showBase()" title="基本信息"></i>
 				<i class="fas fa-file icon" onclick="openFile()" title="文件"></i>
 				<i class="fas fa-cog icon" onclick="openSettingModal()" title="设置预览样式"></i>
@@ -816,6 +817,23 @@
 			setTimeout(function(){
 				$("#auto-save-tip").remove();
 			},1500);
+		}
+		
+		function back(){
+	    	 swal({
+		            title: '你确定要返回吗？',
+		            type: 'warning',
+		            showCancelButton: true,
+		            confirmButtonColor: '#3085d6',
+		            cancelButtonColor: '#d33',
+		            confirmButtonText: '确定!',
+		            cancelButtonText: '取消'
+		        }).then((result) => {
+		            if (result.value) {
+
+		                window.history.go(-1);
+		            }
+		        });
 		}
 	</script>
 </body>

@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -97,6 +96,7 @@ import me.qyh.blog.template.dao.HistoryTemplateDao;
 import me.qyh.blog.template.dao.PageDao;
 import me.qyh.blog.template.entity.Fragment;
 import me.qyh.blog.template.entity.HistoryTemplate;
+import me.qyh.blog.template.entity.HistoryTemplate.HistoryTemplateType;
 import me.qyh.blog.template.entity.Page;
 import me.qyh.blog.template.event.PageCreateEvent;
 import me.qyh.blog.template.event.PageDelEvent;
@@ -212,7 +212,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	public synchronized void deleteFragment(Integer id) throws LogicException {
 		Transactions.executeInTransaction(platformTransactionManager, status -> {
 			Fragment fragment = getRequiredFragment(id, ResourceNotFoundException::new);
-			historyTemplateDao.deleteByTemplateName(fragment.getTemplateName());
 
 			/**
 			 * 
@@ -223,6 +222,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			fragment.setCallable(false);
 			fragment.setCreateDate(Timestamp.valueOf(Times.now()));
 			fragmentDao.update(fragment);
+			historyTemplateDao.deleteByTemplate(fragment.getId(), HistoryTemplateType.FRAGMENT);
 
 			evitFragmentCache(fragment.getName());
 		});
@@ -256,10 +256,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				}
 			}
 			fragmentDao.update(fragment);
-
-			if (!Objects.equals(old.getTemplateName(), fragment.getTemplateName())) {
-				historyTemplateDao.updateTemplateName(old.getTemplateName(), fragment.getTemplateName());
-			}
 
 			if (old.getName().equals(fragment.getName())) {
 				evitFragmentCache(old.getName());
@@ -312,7 +308,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	public synchronized void deletePage(Integer id) throws LogicException {
 		Transactions.executeInTransaction(platformTransactionManager, status -> {
 			Page db = getRequiredPage(id, ResourceNotFoundException::new);
-			historyTemplateDao.deleteByTemplateName(db.getTemplateName());
+			historyTemplateDao.deleteByTemplate(db.getId(), HistoryTemplateType.PAGE);
 			pageDao.deleteById(id);
 			commentServer.deleteComments(COMMENT_MODULE_NAME, id);
 			String templateName = db.getTemplateName();
@@ -374,10 +370,6 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				throw new LogicException("page.user.aliasExists", "别名" + alias + "已经存在", alias);
 			}
 			pageDao.update(page);
-
-			if (!Objects.equals(db.getTemplateName(), page.getTemplateName())) {
-				historyTemplateDao.updateTemplateName(db.getTemplateName(), page.getTemplateName());
-			}
 
 			evitPageCache(db);
 
@@ -789,7 +781,14 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	public void savePageHistory(Integer id, String remark) throws LogicException {
 		Transactions.executeInTransaction(platformTransactionManager, status -> {
 			Page db = getRequiredPage(id, LogicException::new);
-			saveTemplateHistory(db, remark);
+			HistoryTemplate historyTemplate = new HistoryTemplate();
+			historyTemplate.setTemplateId(db.getId());
+			historyTemplate.setType(HistoryTemplateType.PAGE);
+			historyTemplate.setRemark(remark);
+			historyTemplate.setTime(Timestamp.valueOf(Times.now()));
+			historyTemplate.setTpl(db.getTpl());
+
+			historyTemplateDao.insert(historyTemplate);
 		});
 	}
 
@@ -797,16 +796,15 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	public void saveFragmentHistory(Integer id, String remark) throws LogicException {
 		Transactions.executeInTransaction(platformTransactionManager, status -> {
 			Fragment db = getRequiredFragment(id, LogicException::new);
-			saveTemplateHistory(db, remark);
+			HistoryTemplate historyTemplate = new HistoryTemplate();
+			historyTemplate.setTemplateId(db.getId());
+			historyTemplate.setType(HistoryTemplateType.FRAGMENT);
+			historyTemplate.setRemark(remark);
+			historyTemplate.setTime(Timestamp.valueOf(Times.now()));
+			historyTemplate.setTpl(db.getTpl());
+
+			historyTemplateDao.insert(historyTemplate);
 		});
-	}
-
-	private void saveTemplateHistory(Template template, String remark) {
-		HistoryTemplate historyTemplate = new HistoryTemplate(template);
-		historyTemplate.setRemark(remark);
-		historyTemplate.setTime(Timestamp.valueOf(Times.now()));
-
-		historyTemplateDao.insert(historyTemplate);
 	}
 
 	@Override
@@ -816,7 +814,8 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			if (page == null) {
 				throw new ResourceNotFoundException("page.user.notExists", "自定义页面不存在");
 			}
-			return page == null ? new ArrayList<>() : historyTemplateDao.selectByTemplateName(page.getTemplateName());
+			return page == null ? new ArrayList<>()
+					: historyTemplateDao.selectByTemplate(page.getId(), HistoryTemplateType.PAGE);
 		});
 	}
 
@@ -832,7 +831,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 			if (fragment == null) {
 				throw new ResourceNotFoundException("fragment.user.notExists", "模板片段不存在");
 			}
-			return historyTemplateDao.selectByTemplateName(fragment.getTemplateName());
+			return historyTemplateDao.selectByTemplate(fragment.getId(), HistoryTemplateType.FRAGMENT);
 		});
 	}
 
@@ -1169,7 +1168,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				// 删除所有的fragments
 				List<Fragment> fragments = fragmentDao.selectBySpace(event.getSpace());
 				for (Fragment fragment : fragments) {
-					historyTemplateDao.deleteByTemplateName(fragment.getTemplateName());
+					historyTemplateDao.deleteByTemplate(fragment.getId(), HistoryTemplateType.FRAGMENT);
 					fragmentDao.deleteById(fragment.getId());
 				}
 				// 事务结束之后清空所有页面缓存
@@ -1179,7 +1178,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 				if (!pages.isEmpty()) {
 					PageRequestMappingRegisterHelper helper = new PageRequestMappingRegisterHelper();
 					for (Page page : pages) {
-						historyTemplateDao.deleteByTemplateName(page.getTemplateName());
+						historyTemplateDao.deleteByTemplate(page.getId(), HistoryTemplateType.PAGE);
 						pageDao.deleteById(page.getId());
 						// 解除mapping注册
 						helper.unregisterPage(page);
