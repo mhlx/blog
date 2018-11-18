@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+<div th:replace="plugin/staticfile/head"></div>
+<body>
+
+	<div class="container">
+		<textarea id="code" name="code" rows="5" class="form-control"
+			style="display: none" th:text="${file.content}"></textarea>
+	</div>
+
+	<div th:replace="plugin/staticfile/foot"></div>
+
+	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/javascript-hint.js}"></script>
+	<script th:src="@{/static/js-beautify/beautify.min.js}"></script>
+	<script>
+		editor.setOption('mode', 'typescript')
+		$(document).keydown(function(e) {
+			if (e.ctrlKey && e.shiftKey && e.which === 70) {
+				editor.setValue(js_beautify(editor.getValue()));
+				return false;
+			}
+			return true;
+		});
+	</script>
+
+</body>

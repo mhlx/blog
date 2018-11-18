@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('静态资源管理','console/file/head')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+	<div th:replace="console/base/mobile_nav"></div>
+
+	<div id="wrapper">
+
+		<ul class="sidebar navbar-nav">
+			<li class="nav-item"><a class="nav-link"
+				th:href="@{/console/plugin}"><i class="fas fa-fw fa-cogs"></i>
+					<span>返回插件</span> </a></li>
+		</ul>
+
+		<div id="content-wrapper">
+			<div class="container-fluid">
+
+				<div class="card mb-3">
+					<div class="card-header">
+						<i class="fas fa-table"></i>
+					</div>
+					<div class="card-body">
+						<button class="btn btn-primary" data-create-folder>创建文件夹</button>
+						<button class="btn btn-primary" data-create-file>创建文件</button>
+						<button class="btn btn-primary" data-upload>上传</button>
+						<a href="###" data-prev style="display: none; float: right"><i
+							class="fas fa-level-up-alt"></i></a>
+						<div style="margin-top: 10px">
+							<form class="form-inline justify-content-left">
+
+								<div class="form-group form-check" style="margin-right: 10px">
+									<input type="checkbox" class="form-check-input"
+										id="querySubDir"> <label class="form-check-label">查询子文件夹</label>
+								</div>
+								<div class="input-group mx-0 mx-md-3">
+									<input type="text" class="form-control" placeholder="输入文件名"
+										id="queryName" />
+
+									<div class="input-group-append">
+										<button class="btn btn-primary" type="button" id="query">查询</button>
+									</div>
+								</div>
+
+							</form>
+						</div>
+						<div id="fileTable_breadcrumb" style="margin-top: 10px">
+						</div>
+						<div id="fileTable" class="row" style="margin-top: 10px">
+						</div>
+						<div id="fileTable_paging"></div>
+					</div>
+				</div>
+				<!-- /.container-fluid -->
+
+				<!-- Sticky Footer -->
+			
+			<div th:replace="console/base/footer"></div>
+
+			</div>
+			<!-- /.content-wrapper -->
+
+		</div>
+	</div>
+	<!-- /#wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<div class="modal fade" id="folderModal" tabindex="-1" role="dialog"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">文件夹</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="form-group">
+							<label class="col-form-label">名称:</label> <input type="text"
+								class="form-control" id="folderName">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="create-folder">创建</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="fileModal" tabindex="-1" role="dialog"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">文件</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="form-group">
+							<label class="col-form-label">名称:</label> <input type="text"
+								class="form-control" id="fileName">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="create-file">创建</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="modal fade" id="unzipModal" tabindex="-1" role="dialog"
+		aria-labelledby="unzipModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="unzipModalLabel">解压缩</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="tip"></div>
+					<form autocomplete="off">
+						  <div class="form-group">
+						    <label>编码</label>
+						    <input type="text" class="form-control" placeholder="" name="encoding" value="GBK">
+						  </div>
+						  <div class="form-group">
+						    <label>解压到</label>
+						    <input type="text" class="form-control" placeholder="" name="path" value="">
+						  </div>
+						  <div class="checkbox">
+						    <label>
+						      <input type="checkbox" id="deleteAfterSuccessUnzip"> 解压完成后删除压缩包
+						    </label>
+						  </div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="unzip">解压</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">文件上传</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="fileupload" class="form-horizontal" autocomplete="off"
+						action="/mgr/file/upload?v=1" method="POST"
+						enctype="multipart/form-data">
+						<div class="fileupload-buttonbar">
+							<div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+								<span class="btn btn-success fileinput-button"> <i
+									class="glyphicon glyphicon-plus"></i> <span>添加文件</span> <input
+									type="file" name="files" multiple="">
+								</span>
+								<button type="submit" class="btn btn-primary start">
+									<i class="glyphicon glyphicon-upload"></i> <span>文件上传</span>
+								</button>
+								<button type="reset" class="btn btn-warning cancel">
+									<i class="glyphicon glyphicon-ban-circle"></i> <span>取消</span>
+								</button>
+								<span class="fileupload-process"></span>
+							</div>
+						</div>
+						<div style="margin-top: 10px">
+							<div
+								class="fileupload-progress fade col-lg-12 col-sm-12 col-md-12 col-xs-12">
+								<!-- The global progress bar -->
+								<div class="progress progress-striped active" role="progressbar"
+									aria-valuemin="0" aria-valuemax="100">
+									<div class="progress-bar progress-bar-success"
+										style="width: 0%;"></div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+							<div class="table-responsive">
+								<table role="presentation" class="table table-striped"
+									style="text-align: center">
+									<tbody class="files"></tbody>
+								</table>
+							</div>
+						</div>
+					</form>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="console/base/foot"></div>
+	<script type="text/javascript"
+		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/js/canvas-to-blob.min.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
+	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
+
+	<script th:src="@{/static/console/js/table.js}"></script>
+	<script th:src="@{/static/plugin/staticfile/file.js}"></script>
+</body>
+
+</html>

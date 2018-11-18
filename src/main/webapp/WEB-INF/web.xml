@@ -36,6 +36,18 @@
         <filter-name>CharacterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    
+    
+     <filter>
+        <filter-name>FormContentFilter</filter-name>
+        <filter-class>
+        	org.springframework.web.filter.FormContentFilter
+        </filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FormContentFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <servlet>
         <servlet-name>blog</servlet-name>
         <servlet-class>

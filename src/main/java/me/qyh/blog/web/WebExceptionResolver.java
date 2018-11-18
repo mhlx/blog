@@ -328,6 +328,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver, Exception
 
 		@Override
 		public ModelAndView handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+			request.removeAttribute(Webs.SPACE_ATTR_NAME);
 			if (Webs.isRestful(request)) {
 				return restfulView(new RestfulError(SPACE_NOT_FOUND), HttpStatus.NOT_FOUND);
 			}

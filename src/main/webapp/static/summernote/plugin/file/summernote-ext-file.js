@@ -46,7 +46,7 @@
         				  var f = data[i];
         				  var cf = f.cf;
         				  if(isImage(cf.extension)){
-        					  context.invoke('editor.pasteHTML', '<img src="'+cf.url+'"/>');
+        					  context.invoke('editor.pasteHTML', '<p><img src="'+cf.url+'"/></p>');
         				  }
         				  if(isVideo(cf.extension)){
         					  (async function getPath () {
@@ -61,9 +61,9 @@
     							})
 
     							if (path) {
-    								context.invoke('editor.pasteHTML', '<video controls="" poster="'+path+'"  src="'+cf.url+'" width="100%" ></video><p></p>');
+    								context.invoke('editor.pasteHTML', '<p><video controls="" poster="'+path+'"  src="'+cf.url+'" ></video></p>');
     							} else {
-    								context.invoke('editor.pasteHTML', '<video controls=""  src="'+cf.url+'" width="100%" ></video><p></p>');
+    								context.invoke('editor.pasteHTML', '<p><video controls=""  src="'+cf.url+'"  ></video></p>');
     							}
 
     						})()

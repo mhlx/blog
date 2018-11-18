@@ -155,27 +155,22 @@ public class AppInterceptor extends HandlerInterceptorAdapter {
 	private void setSpace(HttpServletRequest request, HandlerMethod handlerMethod) throws SpaceNotFoundException {
 		String spaceAlias = Webs.getSpaceFromRequest(request);
 		if (spaceAlias != null) {
+			if (!SpaceValidator.isValidAlias(spaceAlias)) {
+				throw new SpaceNotFoundException(spaceAlias);
+			}
+			Space space = spaceService.getSpace(spaceAlias).orElseThrow(() -> new SpaceNotFoundException(spaceAlias));
 
-			if (!(Webs.errorRequest(request) && Environment.getSpace() == null)) {
-				if (!SpaceValidator.isValidAlias(spaceAlias)) {
-					throw new SpaceNotFoundException(spaceAlias);
+			if (!Webs.errorRequest(request)) {
+				if (space.getIsPrivate()) {
+					Environment.doAuthencation();
 				}
-				Space space = spaceService.getSpace(spaceAlias)
-						.orElseThrow(() -> new SpaceNotFoundException(spaceAlias));
-
-				if (!Webs.errorRequest(request)) {
-					if (space.getIsPrivate()) {
-						Environment.doAuthencation();
-					}
-					if (space.hasLock() && !Webs.unlockRequest(request)
-							&& !getAnnotation(handlerMethod.getMethod(), IgnoreSpaceLock.class).isPresent()) {
-						lockManager.openLock(space.getLockId());
-					}
+				if (space.hasLock() && !Webs.unlockRequest(request)
+						&& !getAnnotation(handlerMethod.getMethod(), IgnoreSpaceLock.class).isPresent()) {
+					lockManager.openLock(space.getLockId());
 				}
-
-				Environment.setSpace(space);
 			}
 
+			Environment.setSpace(space);
 		}
 	}
 

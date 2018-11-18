@@ -139,4 +139,20 @@ public class PageResult<T> {
 		return new PageResult<>(param, 0, new ArrayList<>());
 	}
 
+	/**
+	 * @since 7.0
+	 * @return
+	 */
+	public boolean hasNext() {
+		return totalPage > 1 && totalPage > currentPage;
+	}
+
+	/**
+	 * @since 7.0
+	 * @return
+	 */
+	public boolean hasPrevious() {
+		return currentPage <= totalPage && currentPage > 1;
+	}
+
 }

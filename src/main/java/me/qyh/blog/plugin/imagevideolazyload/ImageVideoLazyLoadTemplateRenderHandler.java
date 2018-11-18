@@ -45,10 +45,10 @@ public class ImageVideoLazyLoadTemplateRenderHandler implements NamedTemplateRen
 					v.removeAttr("src");
 				}
 
-				v.select("source").forEach(s -> {
-					s.attr("data-src", s.attr("src"));
-					s.removeAttr("src");
-				});
+				// v.select("source").forEach(s -> {
+				// s.attr("data-src", s.attr("src"));
+				// s.removeAttr("src");
+				// });
 			});
 		});
 		String scriptUrl = urlHelper.getUrls().getUrl("/static/plugin/imagevideolazyload/lazyload.min.js");

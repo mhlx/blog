@@ -1443,9 +1443,14 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	@Override
 	public void updateDataCallable(String name, boolean callable) {
 		synchronized (this) {
-			Optional<DataTagProcessor<?>> op = processors.stream().filter(pro -> pro.getName().equals(name)).findAny();
+			Optional<DataTagProcessor<?>> op = processors.stream()
+					.filter(pro -> pro.getName().equals(name) || pro.getDataName().equals(name)).findAny();
 			if (op.isPresent()) {
 				DataTagProcessor<?> processor = op.get();
+
+				if (processor.isCallable() == callable) {
+					return;
+				}
 				processor.setCallable(callable);
 
 				Map<String, Boolean> map = processors.stream()
