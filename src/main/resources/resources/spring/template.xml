@@ -63,13 +63,12 @@
 					class="me.qyh.blog.template.render.data.ArticleArchivesDataTagProcessor">
 					<constructor-arg index="0" value="文章归档" />
 					<constructor-arg index="1" value="archives" />
-					<property name="callable" value="true"/>
 				</bean>
 
 				<bean
 					class="me.qyh.blog.template.render.data.NewsesDataTagProcessor">
 					<constructor-arg index="0" value="动态列表" />
-					<constructor-arg index="1" value="newses" />
+					<constructor-arg index="1" value="newsPage" />
 				</bean>
 
 				<bean

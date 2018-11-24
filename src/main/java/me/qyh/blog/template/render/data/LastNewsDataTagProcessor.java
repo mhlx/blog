@@ -47,6 +47,6 @@ public class LastNewsDataTagProcessor extends DataTagProcessor<List<News>> {
 
 	@Override
 	public List<String> getAttributes() {
-		return List.of("limit");
+		return List.of("limit", "queryLock");
 	}
 }

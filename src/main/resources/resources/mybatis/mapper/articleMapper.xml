@@ -94,6 +94,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="lastModifyDate != null">
 				lastModifyDate = #{lastModifyDate},
 			</if>
+			<if test="editor != null">
+				editor = #{editor,javaType=Editor,typeHandler=EnumOrdinalTypeHandler},
+			</if>
 			feature_image = #{featureImage},
 			art_alias = #{alias}
 		</set>
@@ -466,7 +469,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</if>
 		GROUP BY substr(pubDate,1,10)
 		order by pubDate desc
-		LIMIT #{offset},#{pageSize}
+		<if test="!ignorePaging">
+			LIMIT #{offset},#{pageSize}
+		</if>
 	</select>
 	
 	<select id="selectArchiveDaysCount" resultType="int">

@@ -59,6 +59,7 @@ public class ArticleArchivesDataTagProcessor extends DataTagProcessor<PageResult
 		param.setYmd(ymd);
 		param.setQueryPrivate(attributes.getBoolean("queryPrivate").orElse(true));
 		param.setPageSize(attributes.getInteger("pageSize").orElse(0));
+		param.setIgnorePaging(attributes.getBoolean("ignorePaging").orElse(true));
 		int pageSize = configServer.getGlobalConfig().getArticleArchivePageSize();
 		if (param.getPageSize() < 1 || param.getPageSize() > pageSize) {
 			param.setPageSize(pageSize);
@@ -69,7 +70,7 @@ public class ArticleArchivesDataTagProcessor extends DataTagProcessor<PageResult
 
 	@Override
 	public List<String> getAttributes() {
-		return List.of("currentPage", "pageSize", "queryPrivate", "ymd");
+		return List.of("currentPage", "pageSize", "queryPrivate", "ymd", "ignorePaging");
 	}
 
 }

@@ -569,6 +569,7 @@ public class ArticleServiceImpl
 		ap.setSort(Sort.PUBDATE);
 		ap.setSpace(param.getSpace());
 		ap.setStatus(ArticleStatus.PUBLISHED);
+		ap.setIgnorePaging(param.isIgnorePaging());
 
 		List<Article> articles = articleDao.selectPage(ap);
 

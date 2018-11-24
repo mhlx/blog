@@ -691,9 +691,11 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		/**
 		 * @since 6.2
 		 */
+		if (Environment.hasAuthencated()) {
+			String email = user.getEmail();
+			comment.setEmail(email);
+		}
 		comment.setNickname(config.getNickname());
-		String email = user.getEmail();
-		comment.setEmail(email);
 		comment.setGravatar(user.getGravatar());
 	}
 

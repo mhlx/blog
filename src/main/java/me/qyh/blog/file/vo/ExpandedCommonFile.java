@@ -32,7 +32,6 @@ public class ExpandedCommonFile extends CommonFile {
 	private static final long serialVersionUID = 1L;
 	private ThumbnailUrl thumbnailUrl;
 	private String url;
-	private String downloadUrl;
 
 	public ExpandedCommonFile() {
 		super();
@@ -56,14 +55,6 @@ public class ExpandedCommonFile extends CommonFile {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public String getDownloadUrl() {
-		return downloadUrl;
-	}
-
-	public void setDownloadUrl(String downloadUrl) {
-		this.downloadUrl = downloadUrl;
 	}
 
 }

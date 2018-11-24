@@ -51,7 +51,6 @@ import com.google.gson.annotations.Expose;
 
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.message.MessageSerializer;
-import me.qyh.blog.core.vo.JsonResult;
 
 /**
  * json处理工具类
@@ -264,16 +263,6 @@ public class Jsons {
 		}
 
 		return new ExpressionExecutors(toJsonArray(je));
-	}
-
-	/**
-	 * 
-	 * @param success
-	 * @param data
-	 * @return
-	 */
-	public static String toJsonResult(boolean success, Object data) {
-		return gson.toJson(new JsonResult(success, data));
 	}
 
 	/**

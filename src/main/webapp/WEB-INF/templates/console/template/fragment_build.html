@@ -10,8 +10,7 @@
 			<div class="btn-group" role="group" aria-label="Basic example">
 				<button type="button" class="btn btn-warning" id="back">返回</button>
 				<button type="button" class="btn btn-secondary" id="file">文件</button>
-				<a th:href="@{/doc/index.html}" target="_blank"
-					class="btn btn-secondary ">文档</a>
+				<button type="button" class="btn btn-secondary" id="doc">文档</button>
 				<button type="button" class="btn btn-secondary" id="fragment">默认模模板片段</button>
 				<button type="button" class="btn btn-secondary" id="clear">清空</button>
 				<button type="button" class="btn btn-secondary" id="beautiful">美化</button>
@@ -210,6 +209,35 @@
 			</div>
 		</div>
 	</div>
+	
+	<div class="modal " id="docModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg"   role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="container-fluid">
+					<div style="top:10px;position:fixed;">
+		<form class="form-inline my-2 my-lg-0">
+			<div class="dropdown">
+				<input name="q" id="qbox" data-toggle="dropdown" type="search"
+					class="form-control" placeholder="Search" autofocus="autofocus"
+					autocomplete="off" aria-haspopup="true" aria-expanded="false" />
+				<div id="search_results" style="max-height:100px;overflow-y:auto;display:none" class="dropdown-menu" role="menu"
+					aria-labelledby="qbox">
+				</div>
+			</div>
+		</form>
+		</div>
+		<div style="padding:10px;margin-top:50px" id="result" class="markdown-body">
+			
+		</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<form style="display: none" id="tplForm">
 		<input type="hidden"
@@ -271,5 +299,60 @@
 	<script th:src="@{/static/js/clipboard.min.js}"></script>
 	<script th:src="@{/static/console/js/table.js}"></script>
 	<script th:src="@{/static/console/js/fragment_build.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/static/prettify/prettify.js?v=7.0}"></script>
+	<script th:src="@{/doc/markdown.js}"></script>
+	<script th:src="@{/static/console/js/query.js}"></script>
+	<script>
+		var timeout;
+		$("#qbox").on('paste keyup',function() {
+			var text = $.trim($(this).val());
+			if(timeout){
+				clearTimeout(timeout);
+			}
+			timeout = setTimeout(function(){
+				if(text == ''){
+					$("#search_results").html('').hide();
+				}else{
+					querier.search(text, function(result) {
+						$("#search_results").html('').hide();
+						if(result.length > 0){
+							$.each(result,function(i,d){
+								$("#search_results").append('<div style="padding:3px"><a href="###" onclick="loadFile(\''+d+'\')">'+d+'</a></div>');
+							})	
+							$("#search_results").show();
+						}
+					})
+				}
+			},100)
+		});
+		
+		function loadFile(d){
+			$("#search_results").hide();
+			querier.getFile(d,function(data){
+				$("#result").html(data);
+				renderCode();
+			})
+		}
+		
+		
+		function renderCode(){
+			var p = false;
+			$("#docModal pre").each(function(){
+				var me = $(this);
+				if(me.hasClass('prettyprint prettyprinted'))
+					return true;
+				if(me.find('code').length == 0)
+					 return true;
+				else{
+					p = true;
+					me.addClass("prettyprint");
+				}
+			});
+			if(p)
+				prettyPrint();
+		}
+		
+	</script>
 </body>
 </html>

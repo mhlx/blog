@@ -12,6 +12,8 @@ public class ArticleArchivePageQueryParam extends PageQueryParam {
 	private boolean queryPrivate;// 查询私人博客
 	private Space space;
 	private String ymd;
+	
+	private boolean ignorePaging = true;
 
 	public boolean isQueryPrivate() {
 		return queryPrivate;
@@ -35,6 +37,14 @@ public class ArticleArchivePageQueryParam extends PageQueryParam {
 
 	public void setYmd(String ymd) {
 		this.ymd = ymd;
+	}
+
+	public boolean isIgnorePaging() {
+		return ignorePaging;
+	}
+
+	public void setIgnorePaging(boolean ignorePaging) {
+		this.ignorePaging = ignorePaging;
 	}
 
 }

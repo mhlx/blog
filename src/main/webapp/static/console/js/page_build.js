@@ -30,6 +30,10 @@
 				swal('获取访问锁失败',data.error,'error');
 			}
 		  })
+		  
+		$("#doc").click(function(){
+			$("#docModal").modal('show');
+		});
 	    
 	    $("#file").click(
 	        function() {

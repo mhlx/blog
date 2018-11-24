@@ -33,6 +33,9 @@
 	    $("#beautiful").click(function(){
 	    	editor.format();
 	    })
+	    		$("#doc").click(function(){
+			$("#docModal").modal('show');
+		});
 	    $("#file").click(
 	        function() {
 	            fileChooser
