@@ -637,7 +637,9 @@ public class ArticleServiceImpl
 
 	@EventListener
 	public void handleLockDeleteEvent(LockDelEvent event) {
-		articleDao.deleteLock(event.getLock().getId());
+		if (articleDao.checkExistsByLockId(event.getLock().getId())) {
+			throw new RuntimeLogicException(new Message("lock.delete.referenceByArticles", "锁已经被文章使用，无法删除"));
+		}
 	}
 
 	@EventListener

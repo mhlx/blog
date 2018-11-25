@@ -203,14 +203,6 @@ public interface ArticleDao {
 	Article selectByAlias(String alias);
 
 	/**
-	 * 删除锁
-	 * 
-	 * @param lockId
-	 *            锁id
-	 */
-	void deleteLock(String lockId);
-
-	/**
 	 * 查询最小的待发表文章的发布日期
 	 * 
 	 * @return 如果当前没有任何带发表文章，那么返回null
@@ -275,4 +267,13 @@ public interface ArticleDao {
 	 * @since 7.0
 	 */
 	int selectArchiveDaysCount(ArticleArchivePageQueryParam param);
+
+	/**
+	 * 检查是否存在拥有某个lockId的文章
+	 * 
+	 * @since 7.0
+	 * @param lockId
+	 * @return
+	 */
+	boolean checkExistsByLockId(String lockId);
 }

@@ -116,14 +116,6 @@ public interface NewsDao {
 	void updateHits(@Param("id") Integer id, @Param("hits") int currentHits);
 
 	/**
-	 * 删除锁
-	 * 
-	 * @since 6.6
-	 * @param id
-	 */
-	void deleteLock(String id);
-
-	/**
 	 * 分页查询动态归档日期
 	 * 
 	 * @param param
@@ -140,5 +132,14 @@ public interface NewsDao {
 	 * @since 7.0
 	 */
 	int selectNewsDaysCount(NewsArchivePageQueryParam param);
+
+	/**
+	 * 检查是否存在动态被某锁保护
+	 * 
+	 * @since 7.0
+	 * @param lockId
+	 * @return
+	 */
+	boolean checkExistsByLockId(String lockId);
 
 }

@@ -64,6 +64,7 @@ public class SysLockProvider implements LockProvider, ApplicationEventPublisherA
 	 *            锁id
 	 */
 	@CacheEvict(value = "lockCache", key = "'lock-'+#id")
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED)
 	public void removeLock(String id) {
 		Lock lock = sysLockDao.selectById(id);
 		if (lock != null) {
@@ -125,12 +126,14 @@ public class SysLockProvider implements LockProvider, ApplicationEventPublisherA
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Lock> getAllLocks() {
 		return Collections.unmodifiableList(sysLockDao.selectAll());
 	}
 
 	@Override
 	@Cacheable(value = "lockCache", key = "'lock-'+#id")
+	@Transactional(readOnly = true)
 	public Optional<Lock> getLock(String id) {
 		return Optional.ofNullable(sysLockDao.selectById(id));
 	}

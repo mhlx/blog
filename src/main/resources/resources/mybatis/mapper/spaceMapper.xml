@@ -81,6 +81,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		DELETE FROM blog_space WHERE id = #{id}
 	</delete>
 	
+	<select id="checkExistsByLockId" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM blog_space WHERE space_lock = #{lockId})
+	</select>
+	
 	<sql id="spaceDetailSql">
 		SELECT
 			bs.id AS space_id,

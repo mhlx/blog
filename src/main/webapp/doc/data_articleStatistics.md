@@ -1,4 +1,4 @@
-## articleStatistics
+## 文章统计
 
 ### 完整写法
 ```

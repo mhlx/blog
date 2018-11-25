@@ -99,7 +99,7 @@ public class CommentPluginHandler extends PluginHandlerSupport {
 		registry.register(cdtp);
 
 		LastCommentsDataTagProcessor lcdtp = new LastCommentsDataTagProcessor(
-				messages.getMessage("plugin.comment.data.lastComment", "最近评论"), "comments");
+				messages.getMessage("plugin.comment.data.lastComment", "最近评论"), "lastComments");
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(lcdtp);
 		registry.register(lcdtp);
 	}

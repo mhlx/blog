@@ -489,6 +489,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			AND substr(pubDate,1,10) <![CDATA[ < ]]> #{ymd}
 		</if>
 	</select>
+	
+	<select id="checkExistsByLockId" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM blog_article WHERE art_lock = #{lockId})
+	</select>
 
 	<sql id="articleDetailSql">
 		SELECT

@@ -233,4 +233,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</choose>
 		LIMIT #{offset},#{pageSize}
 	</select>
+	
+	<select id="checkExistsByLockId" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM blog_news WHERE news_lock = #{lockId})
+	</select>
 </mapper>

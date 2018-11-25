@@ -92,18 +92,18 @@ public interface SpaceDao {
 	Space selectDefault();
 
 	/**
-	 * 删除锁
-	 * 
-	 * @param lockId
-	 *            锁id
-	 */
-	void deleteLock(String lockId);
-
-	/**
 	 * 删除空间
 	 * 
 	 * @param id
 	 */
 	void deleteById(Integer id);
+
+	/**
+	 * 检查是否存在被某锁保护的空间
+	 * 
+	 * @param lockId
+	 * @return
+	 */
+	boolean checkExistsByLockId(String lockId);
 
 }

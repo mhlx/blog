@@ -43,6 +43,8 @@ import me.qyh.blog.core.event.NewsCreateEvent;
 import me.qyh.blog.core.event.NewsDelEvent;
 import me.qyh.blog.core.event.NewsUpdateEvent;
 import me.qyh.blog.core.exception.LogicException;
+import me.qyh.blog.core.exception.RuntimeLogicException;
+import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.service.CommentServer;
 import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.LockManager;
@@ -249,7 +251,9 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 
 	@EventListener
 	public void handleLockDeleteEvent(LockDelEvent event) {
-		newsDao.deleteLock(event.getLock().getId());
+		if (newsDao.checkExistsByLockId(event.getLock().getId())) {
+			throw new RuntimeLogicException(new Message("lock.delete.referenceByNewses", "锁已经被动态使用，无法删除"));
+		}
 	}
 
 	@Override

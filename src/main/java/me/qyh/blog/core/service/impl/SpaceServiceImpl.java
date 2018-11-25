@@ -41,6 +41,7 @@ import me.qyh.blog.core.event.SpaceDelEvent;
 import me.qyh.blog.core.event.SpaceUpdateEvent;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.ResourceNotFoundException;
+import me.qyh.blog.core.exception.RuntimeLogicException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.service.SpaceService;
@@ -202,7 +203,9 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 
 	@EventListener
 	public void handleLockDeleteEvent(LockDelEvent event) {
-		spaceDao.deleteLock(event.getLock().getId());
+		if (spaceDao.checkExistsByLockId(event.getLock().getId())) {
+			throw new RuntimeLogicException(new Message("lock.delete.referenceBySpaces", "锁已经被空间使用，无法删除"));
+		}
 	}
 
 	@Override
