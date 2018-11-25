@@ -40,8 +40,7 @@ function back(){
            cancelButtonText: '取消'
        }).then((result) => {
            if (result.value) {
-
-               window.history.go(-1);
+              window.location.href = root + 'console/article';
            }
        });
 }

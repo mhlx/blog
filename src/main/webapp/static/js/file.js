@@ -296,10 +296,14 @@ var fileChooser = (function(){
 		        });
 		        return rows;
 		    }
-		}).bind('fileuploadadd', function (e, data) {
-			var url = root+'api/console/store/'+uploadModal.find('select[name="store"]').val()+'/files';
-		    data.url = url;
-		});;
+		});
+		
+		uploadModal.find("form").attr('action',root+'api/console/store/'+uploadModal.find('select[name="store"]').val()+'/files')
+		uploadModal.find('select[name="store"]').change(function(){
+			var v = $(this).val();
+			var url = root+'api/console/store/'+v+'/files';
+			uploadModal.find("form").attr('action',url)
+		})
 		
 		fileSelectModal.find('[data-upload]').click(function(){
 			fileSelectModal.modal('hide');

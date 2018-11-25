@@ -12,7 +12,7 @@ var querier = (function($) {
 			'plugin_data_commentPage.md', 'plugin_data_lastComments.md',
 			'plugin_data_recentlyViewdArticles.md', 'private.md',
 			'redirect.md', 'space.md', 'times.md', 'transaction.md',
-			'unlocked.md', 'urls.md', 'user.md', 'validators.md' ];
+			'unlocked.md', 'urls.md', 'user.md', 'validators.md', 'csrf.md' ];
 
 	var cache = [];
 	var status = 'unloaded';

@@ -310,6 +310,7 @@ $(function() {
 			for(var i=0;i<data.length;i++){
 				$("#store").append('<option value="'+data[i].id+'">'+data[i].name+'</option>');
 			}
+			$("#fileupload").attr('action',root+'api/console/store/'+$("#store").val()+'/files')
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			var data = $.parseJSON(jqXHR.responseText);
@@ -416,13 +417,17 @@ $(function() {
 		        });
 		        return rows;
 		    }
-	}).bind('fileuploadadd', function (e, data) {
-		var url = root+'api/console/store/'+$("#store").val()+'/files';
+	});
+	
+	
+	$("#store").change(function(){
+		var v = $(this).val();
+		var url = root+'api/console/store/'+v+'/files';
 		if(parents.length>0){
 			url += "?parent="+parents[parents.length-1].id;
 		}
-	    data.url = url;
-	});
+		$("#fileupload").attr('action',url)
+	})
 	
 	$("#uploadModal").on('hide.bs.modal',function(){
 		loadFiles();

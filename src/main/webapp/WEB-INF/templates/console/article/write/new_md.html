@@ -317,7 +317,6 @@
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js?v=7.0}"></script>
 	<script type="text/javascript" th:src="@{/static/console/js/emoji.js?v=7.0}"></script>
 	<script type="text/javascript" th:src="@{/static/js/file.js?v=7.0}"></script>
-	<script type="text/javascript" th:src="@{/static/js/dir.js?v=7.0}"></script>
 	<script type="text/javascript">
 	
 		var autoParse = true;
@@ -495,6 +494,7 @@
 		}
 		
 		$(function(){
+			var oldLock = $("#oldLock").val();
 			setStyle();
 			$("#submit-setting").click(function(){
 				setStyle(function(){
@@ -669,7 +669,7 @@
 	            contentType:"application/json",
 				data : JSON.stringify(article),
 				success : function(data){
-					if(data.id){
+					if(data && data.id){
 						$("#id").val(data.id);
 					}
 				},
@@ -766,7 +766,7 @@
 	            contentType:"application/json",
 				data : JSON.stringify(article),
 				success : function(data){
-					if(data.id){
+					if(data && data.id){
 						$("#id").val(data.id);
 					}
 				},
@@ -830,8 +830,7 @@
 		            cancelButtonText: '取消'
 		        }).then((result) => {
 		            if (result.value) {
-
-		                window.history.go(-1);
+		            	window.location.href = root + 'console/article'
 		            }
 		        });
 		}
