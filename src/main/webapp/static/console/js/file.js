@@ -417,6 +417,12 @@ $(function() {
 		        });
 		        return rows;
 		    }
+	}).bind('fileuploadadd', function (e, data) {
+		var url = root+'api/console/store/'+$("#store").val()+'/files';
+		if(parents.length>0){
+			url += "?parent="+parents[parents.length-1].id;
+		}
+	    data.url = url;
 	});
 	
 	

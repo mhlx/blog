@@ -68,7 +68,7 @@ public class TemplateMgrController extends BaseMgrController {
 					: spaceService.getSpace(spaceId).orElseThrow(() -> new SystemException("空间" + spaceId + "不存在")));
 		} catch (LogicException e) {
 			ra.addFlashAttribute(Constants.ERROR, e.getLogicMessage());
-			return "redirect:/console/template/index";
+			return "redirect:/console/template";
 		}
 	}
 

@@ -22,6 +22,9 @@
 						<i class="fas fa-table"></i>
 					</div>
 					<div class="card-body">
+					<div class="alert alert-danger" th:if="${error != null}">
+							[[${messages.getMessage(error)}]]
+						</div>
 
 						<form class="form-inline justify-content-left my-2">
 							<div class="form-group mr-sm-3">
