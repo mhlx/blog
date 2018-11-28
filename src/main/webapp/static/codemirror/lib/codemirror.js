@@ -101,7 +101,8 @@ else { range = function(node, start, end) {
 }; }
 
 function contains(parent, child) {
-  if (child.nodeType == 3) // Android browser always returns false when child is a textnode
+  if (child.nodeType == 3) // Android browser always returns false when child
+							// is a textnode
     { child = child.parentNode; }
   if (parent.contains)
     { return parent.contains(child) }
@@ -112,9 +113,12 @@ function contains(parent, child) {
 }
 
 function activeElt() {
-  // IE and Edge may throw an "Unspecified Error" when accessing document.activeElement.
-  // IE < 10 will throw when accessed while the page is loading or in an iframe.
-  // IE > 9 and Edge will throw when accessed in an iframe if document.body is unavailable.
+  // IE and Edge may throw an "Unspecified Error" when accessing
+	// document.activeElement.
+  // IE < 10 will throw when accessed while the page is loading or in an
+	// iframe.
+  // IE > 9 and Edge will throw when accessed in an iframe if document.body is
+	// unavailable.
   var activeElement;
   try {
     activeElement = document.activeElement;
@@ -272,7 +276,8 @@ function isEmpty(obj) {
 var extendingChars = /[\u0300-\u036f\u0483-\u0489\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u065e\u0670\u06d6-\u06dc\u06de-\u06e4\u06e7\u06e8\u06ea-\u06ed\u0711\u0730-\u074a\u07a6-\u07b0\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0900-\u0902\u093c\u0941-\u0948\u094d\u0951-\u0955\u0962\u0963\u0981\u09bc\u09be\u09c1-\u09c4\u09cd\u09d7\u09e2\u09e3\u0a01\u0a02\u0a3c\u0a41\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a70\u0a71\u0a75\u0a81\u0a82\u0abc\u0ac1-\u0ac5\u0ac7\u0ac8\u0acd\u0ae2\u0ae3\u0b01\u0b3c\u0b3e\u0b3f\u0b41-\u0b44\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b82\u0bbe\u0bc0\u0bcd\u0bd7\u0c3e-\u0c40\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0cbc\u0cbf\u0cc2\u0cc6\u0ccc\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0d3e\u0d41-\u0d44\u0d4d\u0d57\u0d62\u0d63\u0dca\u0dcf\u0dd2-\u0dd4\u0dd6\u0ddf\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0f18\u0f19\u0f35\u0f37\u0f39\u0f71-\u0f7e\u0f80-\u0f84\u0f86\u0f87\u0f90-\u0f97\u0f99-\u0fbc\u0fc6\u102d-\u1030\u1032-\u1037\u1039\u103a\u103d\u103e\u1058\u1059\u105e-\u1060\u1071-\u1074\u1082\u1085\u1086\u108d\u109d\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b7-\u17bd\u17c6\u17c9-\u17d3\u17dd\u180b-\u180d\u18a9\u1920-\u1922\u1927\u1928\u1932\u1939-\u193b\u1a17\u1a18\u1a56\u1a58-\u1a5e\u1a60\u1a62\u1a65-\u1a6c\u1a73-\u1a7c\u1a7f\u1b00-\u1b03\u1b34\u1b36-\u1b3a\u1b3c\u1b42\u1b6b-\u1b73\u1b80\u1b81\u1ba2-\u1ba5\u1ba8\u1ba9\u1c2c-\u1c33\u1c36\u1c37\u1cd0-\u1cd2\u1cd4-\u1ce0\u1ce2-\u1ce8\u1ced\u1dc0-\u1de6\u1dfd-\u1dff\u200c\u200d\u20d0-\u20f0\u2cef-\u2cf1\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua66f-\ua672\ua67c\ua67d\ua6f0\ua6f1\ua802\ua806\ua80b\ua825\ua826\ua8c4\ua8e0-\ua8f1\ua926-\ua92d\ua947-\ua951\ua980-\ua982\ua9b3\ua9b6-\ua9b9\ua9bc\uaa29-\uaa2e\uaa31\uaa32\uaa35\uaa36\uaa43\uaa4c\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uabe5\uabe8\uabed\udc00-\udfff\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\uff9e\uff9f]/;
 function isExtendingChar(ch) { return ch.charCodeAt(0) >= 768 && extendingChars.test(ch) }
 
-// Returns a number from the range [`0`; `str.length`] unless `pos` is outside that range.
+// Returns a number from the range [`0`; `str.length`] unless `pos` is outside
+// that range.
 function skipExtendingChars(str, pos, dir) {
   while ((dir < 0 ? pos > 0 : pos < str.length) && isExtendingChar(str.charAt(pos))) { pos += dir; }
   return pos
@@ -318,7 +323,8 @@ function Display(place, doc, input) {
   d.measure = elt("div", null, "CodeMirror-measure");
   // When lines outside of the viewport are measured, they are drawn in this.
   d.lineMeasure = elt("div", null, "CodeMirror-measure");
-  // Wraps everything that needs to exist inside the vertically-padded coordinate system
+  // Wraps everything that needs to exist inside the vertically-padded
+	// coordinate system
   d.lineSpace = eltP("div", [d.measure, d.lineMeasure, d.selectionDiv, d.cursorDiv, d.lineDiv],
                     null, "position: relative; outline: none");
   var lines = eltP("div", [d.lineSpace], "CodeMirror-lines");
@@ -340,7 +346,8 @@ function Display(place, doc, input) {
   // The element in which the editor lives.
   d.wrapper = elt("div", [d.scrollbarFiller, d.gutterFiller, d.scroller], "CodeMirror");
 
-  // Work around IE7 z-index bug (not perfect, hence IE7 not really being supported)
+  // Work around IE7 z-index bug (not perfect, hence IE7 not really being
+	// supported)
   if (ie && ie_version < 8) { d.gutters.style.zIndex = -1; d.scroller.style.paddingRight = 0; }
   if (!webkit && !(gecko && mobile)) { d.scroller.draggable = true; }
 
@@ -428,7 +435,10 @@ function getBetween(doc, start, end) {
 // Get the lines between from and to, as array of strings.
 function getLines(doc, from, to) {
   var out = [];
-  doc.iter(from, to, function (line) { out.push(line.text); }); // iter aborts when callback returns truthy value
+  doc.iter(from, to, function (line) { out.push(line.text); }); // iter aborts
+																// when callback
+																// returns
+																// truthy value
   return out
 }
 
@@ -948,20 +958,20 @@ function getBidiPartAt(order, ch, sticky) {
 // that this (partially) implements.
 
 // One-char codes used for character types:
-// L (L):   Left-to-Right
-// R (R):   Right-to-Left
-// r (AL):  Right-to-Left Arabic
-// 1 (EN):  European Number
-// + (ES):  European Number Separator
-// % (ET):  European Number Terminator
-// n (AN):  Arabic Number
-// , (CS):  Common Number Separator
+// L (L): Left-to-Right
+// R (R): Right-to-Left
+// r (AL): Right-to-Left Arabic
+// 1 (EN): European Number
+// + (ES): European Number Separator
+// % (ET): European Number Terminator
+// n (AN): Arabic Number
+// , (CS): Common Number Separator
 // m (NSM): Non-Spacing Mark
-// b (BN):  Boundary Neutral
-// s (B):   Paragraph Separator
-// t (S):   Segment Separator
-// w (WS):  Whitespace
-// N (ON):  Other Neutrals
+// b (BN): Boundary Neutral
+// s (B): Paragraph Separator
+// t (S): Segment Separator
+// w (WS): Whitespace
+// N (ON): Other Neutrals
 
 // Returns null if characters are ordered as they appear
 // (left-to-right), or an array of sections ({from, to, level}
@@ -1159,7 +1169,7 @@ function off(emitter, type, f) {
   }
 }
 
-function signal(emitter, type /*, values...*/) {
+function signal(emitter, type /* , values... */) {
   var handlers = getHandlers(emitter, type);
   if (!handlers.length) { return }
   var args = Array.prototype.slice.call(arguments, 2);
@@ -1254,7 +1264,8 @@ function hasBadBidiRects(measure) {
   var r0 = range(txt, 0, 1).getBoundingClientRect();
   var r1 = range(txt, 1, 2).getBoundingClientRect();
   removeChildren(measure);
-  if (!r0 || r0.left == r0.right) { return false } // Safari returns null in some cases (#2780)
+  if (!r0 || r0.left == r0.right) { return false } // Safari returns null in
+													// some cases (#2780)
   return badBidiRects = (r1.right - r0.right < 3)
 }
 
@@ -1557,7 +1568,8 @@ function highlightLine(cm, line, context, forceToEnd) {
     context.state = true;
     runMode(cm, line.text, overlay.mode, context, function (end, style) {
       var start = i;
-      // Ensure there's a token end at the current position, and that i points at it
+      // Ensure there's a token end at the current position, and that i points
+		// at it
       while (at < end) {
         var i_end = st[i];
         if (i_end > end)
@@ -2139,7 +2151,7 @@ var orphanDelayedCallbacks = null;
 // signalLater looks whether there are any handlers, and schedules
 // them to be executed when the last operation ends, or, if no
 // operation is active, when a timeout fires.
-function signalLater(emitter, type /*, values...*/) {
+function signalLater(emitter, type /* , values... */) {
   var arr = getHandlers(emitter, type);
   if (!arr.length) { return }
   var args = Array.prototype.slice.call(arguments, 2), list;
@@ -2559,8 +2571,10 @@ function measureCharInner(cm, prepared, ch, bias) {
   var node = place.node, start = place.start, end = place.end, collapse = place.collapse;
 
   var rect;
-  if (node.nodeType == 3) { // If it is a text node, use a range to retrieve the coordinates.
-    for (var i$1 = 0; i$1 < 4; i$1++) { // Retry a maximum of 4 times when nonsense rectangles are returned
+  if (node.nodeType == 3) { // If it is a text node, use a range to retrieve the
+							// coordinates.
+    for (var i$1 = 0; i$1 < 4; i$1++) { // Retry a maximum of 4 times when
+										// nonsense rectangles are returned
       while (start && isExtendingChar(prepared.line.text.charAt(place.coverStart + start))) { --start; }
       while (place.coverStart + end < place.coverEnd && isExtendingChar(prepared.line.text.charAt(place.coverStart + end))) { ++end; }
       if (ie && ie_version < 9 && start == 0 && end == place.coverEnd - place.coverStart)
@@ -2715,12 +2729,12 @@ function charCoords(cm, pos, context, lineObj, bias) {
 // A cursor Pos(line, char, "after") is on the same visual line as `char`
 // and before `char` in writing order of `char`
 // Examples (upper-case letters are RTL, lower-case are LTR):
-//     Pos(0, 1, ...)
-//     before   after
-// ab     a|b     a|b
-// aB     a|B     aB|
-// Ab     |Ab     A|b
-// AB     B|A     B|A
+// Pos(0, 1, ...)
+// before after
+// ab a|b a|b
+// aB a|B aB|
+// Ab |Ab A|b
+// AB B|A B|A
 // Every position after the last character on a line is considered to stick
 // to the last character on the line.
 function cursorCoords(cm, pos, context, lineObj, preparedMeasure, varHeight) {
@@ -3237,7 +3251,8 @@ function onFocus(cm, e) {
     // select-all detection hack)
     if (!cm.curOp && cm.display.selForContextMenu != cm.doc.sel) {
       cm.display.input.reset();
-      if (webkit) { setTimeout(function () { return cm.display.input.reset(true); }, 20); } // Issue #1730
+      if (webkit) { setTimeout(function () { return cm.display.input.reset(true); }, 20); } // Issue
+																							// #1730
     }
     cm.display.input.receivedFocus();
   }
@@ -3383,8 +3398,10 @@ function scrollPosIntoView(cm, pos, end, margin) {
   if (margin == null) { margin = 0; }
   var rect;
   if (!cm.options.lineWrapping && pos == end) {
-    // Set pos and end to the cursor positions around the character pos sticks to
-    // If pos.sticky == "before", that is around pos.ch - 1, otherwise around pos.ch
+    // Set pos and end to the cursor positions around the character pos sticks
+	// to
+    // If pos.sticky == "before", that is around pos.ch - 1, otherwise around
+	// pos.ch
     // If pos == Pos(_, 0, "before"), pos and end are unchanged
     pos = pos.ch ? Pos(pos.line, pos.sticky == "before" ? pos.ch - 1 : pos.ch, "after") : pos;
     end = pos.sticky == "before" ? Pos(pos.line, pos.ch + 1, "before") : pos;
@@ -3565,7 +3582,8 @@ var NativeScrollbars = function(place, scroll, cm) {
   });
 
   this.checkedZeroWidth = false;
-  // Need to set a minimum width to see the scrollbar on IE7 (but must not set it on IE8).
+  // Need to set a minimum width to see the scrollbar on IE7 (but must not set
+	// it on IE8).
   if (ie && ie_version < 8) { this.horiz.style.minHeight = this.vert.style.minWidth = "18px"; }
 };
 
@@ -3724,17 +3742,22 @@ var nextOpId = 0;
 function startOperation(cm) {
   cm.curOp = {
     cm: cm,
-    viewChanged: false,      // Flag that indicates that lines might need to be redrawn
+    viewChanged: false,      // Flag that indicates that lines might need to
+								// be redrawn
     startHeight: cm.doc.height, // Used to detect need to update scrollbar
     forceUpdate: false,      // Used to force a redraw
     updateInput: null,       // Whether to reset the input textarea
-    typing: false,           // Whether this reset should be careful to leave existing text (for compositing)
+    typing: false,           // Whether this reset should be careful to leave
+								// existing text (for compositing)
     changeObjs: null,        // Accumulated changes, for firing change events
     cursorActivityHandlers: null, // Set of handlers to fire cursorActivity on
-    cursorActivityCalled: 0, // Tracks which cursorActivity handlers have been called already
+    cursorActivityCalled: 0, // Tracks which cursorActivity handlers have
+								// been called already
     selectionChanged: false, // Whether the selection needs to be redrawn
-    updateMaxLine: false,    // Set when the widest line needs to be determined anew
-    scrollLeft: null, scrollTop: null, // Intermediate scroll position, not pushed to DOM yet
+    updateMaxLine: false,    // Set when the widest line needs to be
+								// determined anew
+    scrollLeft: null, scrollTop: null, // Intermediate scroll position, not
+										// pushed to DOM yet
     scrollToPos: null,       // Used to scroll to a specific position
     focus: false,
     id: ++nextOpId           // Unique ID
@@ -3933,7 +3956,8 @@ function regChange(cm, from, to, lendiff) {
       display.viewFrom += lendiff;
       display.viewTo += lendiff;
     }
-  } else if (from <= display.viewFrom && to >= display.viewTo) { // Full overlap
+  } else if (from <= display.viewFrom && to >= display.viewTo) { // Full
+																	// overlap
     resetView(cm);
   } else if (from <= display.viewFrom) { // Top overlap
     var cut = viewCuttingPoint(cm, to, to + lendiff, 1);
@@ -4108,7 +4132,8 @@ var DisplayUpdate = function(cm, viewport, force) {
   var display = cm.display;
 
   this.viewport = viewport;
-  // Store some values that we'll need later (but don't want to force a relayout for)
+  // Store some values that we'll need later (but don't want to force a
+	// relayout for)
   this.visible = visibleLines(display, cm.doc, viewport);
   this.editorIsHidden = !display.wrapper.offsetWidth;
   this.wrapperHeight = display.wrapper.clientHeight;
@@ -4313,7 +4338,9 @@ function patchDisplay(cm, updateNumbersFrom, dims) {
   for (var i = 0; i < view.length; i++) {
     var lineView = view[i];
     if (lineView.hidden) {
-    } else if (!lineView.node || lineView.node.parentNode != container) { // Not drawn yet
+    } else if (!lineView.node || lineView.node.parentNode != container) { // Not
+																			// drawn
+																			// yet
       var node = buildLineElement(cm, lineView, lineN, dims);
       container.insertBefore(node, cur);
     } else { // Already drawn
@@ -5615,8 +5642,10 @@ BranchChunk.prototype = {
       if (at <= sz) {
         child.insertInner(at, lines, height);
         if (child.lines && child.lines.length > 50) {
-          // To avoid memory thrashing when child.lines is huge (e.g. first view of a large file), it's never spliced.
-          // Instead, small slices are taken. They're taken in order because sequential memory accesses are fastest.
+          // To avoid memory thrashing when child.lines is huge (e.g. first
+			// view of a large file), it's never spliced.
+          // Instead, small slices are taken. They're taken in order because
+			// sequential memory accesses are fastest.
           var remaining = child.lines.length % 25 + 25;
           for (var pos = remaining; pos < child.lines.length;) {
             var leaf = new LeafChunk(child.lines.slice(pos, pos += 25));
@@ -6374,7 +6403,9 @@ Doc.prototype = createObj(BranchChunk.prototype, {
     var index = coords.ch;
     if (coords.line < this.first || coords.ch < 0) { return 0 }
     var sepSize = this.lineSeparator().length;
-    this.iter(this.first, coords.line, function (line) { // iter aborts when callback returns a truthy value
+    this.iter(this.first, coords.line, function (line) { // iter aborts when
+															// callback returns
+															// a truthy value
       index += line.text.length + sepSize;
     });
     return index
@@ -6533,14 +6564,16 @@ function onDragStart(cm, e) {
   e.dataTransfer.effectAllowed = "copyMove";
 
   // Use dummy image instead of default browsers image.
-  // Recent Safari (~6.0.2) have a tendency to segfault when this happens, so we don't do it there.
+  // Recent Safari (~6.0.2) have a tendency to segfault when this happens, so
+	// we don't do it there.
   if (e.dataTransfer.setDragImage && !safari) {
     var img = elt("img", null, null, "position: fixed; left: 0; top: 0;");
     img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     if (presto) {
       img.width = img.height = 1;
       cm.display.wrapper.appendChild(img);
-      // Force a relayout, or Opera won't use our image for some obscure reason
+      // Force a relayout, or Opera won't use our image for some obscure
+		// reason
       img._top = img.offsetTop;
     }
     e.dataTransfer.setDragImage(img, 0, 0);
@@ -6843,7 +6876,8 @@ function moveVisually(cm, line, start, dir) {
   }
   var partPos = getBidiPartAt(bidi, start.ch, start.sticky), part = bidi[partPos];
   if (cm.doc.direction == "ltr" && part.level % 2 == 0 && (dir > 0 ? part.to > start.ch : part.from < start.ch)) {
-    // Case 1: We move within an ltr part in an ltr editor. Even with wrapped lines,
+    // Case 1: We move within an ltr part in an ltr editor. Even with wrapped
+	// lines,
     // nothing interesting happens.
     return moveLogically(line, start, dir)
   }
@@ -6861,13 +6895,15 @@ function moveVisually(cm, line, start, dir) {
     var moveInStorageOrder = (part.level == 1) == (dir < 0);
     var ch = mv(start, moveInStorageOrder ? 1 : -1);
     if (ch != null && (!moveInStorageOrder ? ch >= part.from && ch >= wrappedLineExtent.begin : ch <= part.to && ch <= wrappedLineExtent.end)) {
-      // Case 2: We move within an rtl part or in an rtl editor on the same visual line
+      // Case 2: We move within an rtl part or in an rtl editor on the same
+		// visual line
       var sticky = moveInStorageOrder ? "before" : "after";
       return new Pos(start.line, ch, sticky)
     }
   }
 
-  // Case 3: Could not move within this bidi part in this visual line, so leave
+  // Case 3: Could not move within this bidi part in this visual line, so
+	// leave
   // the current bidi part
 
   var searchInVisualLine = function (partPos, dir, wrappedLineExtent) {
@@ -7147,6 +7183,10 @@ function handleKeyBinding(cm, e) {
                { return doHandleBinding(cm, b) }
            })
   } else {
+	  // IOS 12中使用自带键盘输入中文，按回车会出现焦点消失的问题
+	 if(e.keyCode == 8 && ios){
+    	return false;
+     }
     return dispatchKey(cm, name, e, function (b) { return doHandleBinding(cm, b); })
   }
 }
@@ -7375,7 +7415,8 @@ function leftButtonStartDrag(cm, event, pos, behavior) {
       e_preventDefault(e);
       if (!behavior.addNew)
         { extendSelection(cm.doc, pos, null, null, behavior.extend); }
-      // Work around unexplainable focus problem in IE9 (#2127) and Chrome (#3081)
+      // Work around unexplainable focus problem in IE9 (#2127) and Chrome
+		// (#3081)
       if (webkit || ie && ie_version == 9)
         { setTimeout(function () {display.wrapper.ownerDocument.body.focus(); display.input.focus();}, 20); }
       else
@@ -7834,12 +7875,15 @@ function CodeMirror$1(place, options) {
   this.state = {
     keyMaps: [],  // stores maps added by addKeyMap
     overlays: [], // highlighting overlays, as added by addOverlay
-    modeGen: 0,   // bumped when mode/overlay changes, used to invalidate highlighting info
+    modeGen: 0,   // bumped when mode/overlay changes, used to invalidate
+					// highlighting info
     overwrite: false,
     delayingBlurEvent: false,
     focused: false,
-    suppressEdits: false, // used to disable editing during key handlers when in readOnly mode
-    pasteIncoming: false, cutIncoming: false, // help recognize paste/cut edits in input.poll
+    suppressEdits: false, // used to disable editing during key handlers when
+							// in readOnly mode
+    pasteIncoming: false, cutIncoming: false, // help recognize paste/cut
+												// edits in input.poll
     selectingText: false,
     draggingText: false,
     highlight: new Delayed(), // stores highlight worker timeout
@@ -7946,7 +7990,8 @@ function registerEventHandlers(cm) {
       var pos = cm.coordsChar(d.activeTouch, "page"), range;
       if (!touch.prev || farAway(touch, touch.prev)) // Single tap
         { range = new Range(pos, pos); }
-      else if (!touch.prev.prev || farAway(touch, touch.prev.prev)) // Double tap
+      else if (!touch.prev.prev || farAway(touch, touch.prev.prev)) // Double
+																	// tap
         { range = cm.findWordAt(pos); }
       else // Triple tap
         { range = new Range(Pos(pos.line, 0), clipPos(cm.doc, Pos(pos.line + 1, 0))); }
@@ -8398,7 +8443,8 @@ var addEditorMethods = function(CodeMirror) {
       } else if (vert == "above" || vert == "near") {
         var vspace = Math.max(display.wrapper.clientHeight, this.doc.height),
         hspace = Math.max(display.sizer.clientWidth, display.lineSpace.clientWidth);
-        // Default to positioning above (if specified and possible); otherwise default to positioning below
+        // Default to positioning above (if specified and possible); otherwise
+		// default to positioning below
         if ((vert == 'above' || pos.bottom + node.offsetHeight > vspace) && pos.top > node.offsetHeight)
           { top = pos.top - node.offsetHeight; }
         else if (pos.bottom + node.offsetHeight <= vspace)
@@ -8732,7 +8778,8 @@ ContentEditableInput.prototype.init = function (display) {
 
   on(div, "paste", function (e) {
     if (signalDOMEvent(cm, e) || handlePaste(e, cm)) { return }
-    // IE doesn't fire input events, so we schedule a read for the pasted content in this way
+    // IE doesn't fire input events, so we schedule a read for the pasted
+	// content in this way
     if (ie_version <= 11) { setTimeout(operation(cm, function () { return this$1.updateFromDOM(); }), 20); }
   });
 
@@ -8801,7 +8848,8 @@ ContentEditableInput.prototype.init = function (display) {
     if (e.clipboardData) {
       e.clipboardData.clearData();
       var content = lastCopied.text.join("\n");
-      // iOS exposes the clipboard API, but seems to discard content inserted into it
+      // iOS exposes the clipboard API, but seems to discard content inserted
+		// into it
       e.clipboardData.setData("Text", content);
       if (e.clipboardData.getData("Text") == content) {
         e.preventDefault();
@@ -8869,7 +8917,8 @@ ContentEditableInput.prototype.showPrimarySelection = function () {
 
   var old = sel.rangeCount && sel.getRangeAt(0), rng;
   try { rng = range(start.node, start.offset, end.offset, end.node); }
-  catch(e) {} // Our model of the DOM might be outdated, in which case the range we try to set can be impossible
+  catch(e) {} // Our model of the DOM might be outdated, in which case the
+				// range we try to set can be impossible
   if (rng) {
     if (!gecko && cm.state.focused) {
       sel.collapse(start.node, start.offset);
@@ -9229,7 +9278,8 @@ function locateNodeInLineView(lineView, node, offset) {
   var found = find(textNode, topNode, offset);
   if (found) { return badPos(found, bad) }
 
-  // FIXME this is all really shaky. might handle the few cases it needs to handle, but likely to cause problems
+  // FIXME this is all really shaky. might handle the few cases it needs to
+	// handle, but likely to cause problems
   for (var after = topNode.nextSibling, dist = textNode ? textNode.nodeValue.length - offset : 0; after; after = after.nextSibling) {
     found = find(after, after.firstChild, 0);
     if (found)
@@ -9262,7 +9312,8 @@ var TextareaInput = function(cm) {
   // Tracks when input.reset has punted to just putting a short
   // string into the textarea instead of the full selection.
   this.inaccurateSelection = false;
-  // Used to work around IE issue with selection being forgotten when focus moves away from textarea
+  // Used to work around IE issue with selection being forgotten when focus
+	// moves away from textarea
   this.hasSelection = false;
   this.composing = null;
 };
@@ -9279,7 +9330,8 @@ TextareaInput.prototype.init = function (display) {
   var te = this.textarea = div.firstChild;
   display.wrapper.insertBefore(div, display.wrapper.firstChild);
 
-  // Needed to hide big blue blinking cursor on Mobile Safari (doesn't seem to work in iOS 8 anymore)
+  // Needed to hide big blue blinking cursor on Mobile Safari (doesn't seem to
+	// work in iOS 8 anymore)
   if (ios) { te.style.width = "0px"; }
 
   on(te, "input", function () {
@@ -9432,7 +9484,8 @@ TextareaInput.prototype.supportsTouch = function () { return false };
 TextareaInput.prototype.focus = function () {
   if (this.cm.options.readOnly != "nocursor" && (!mobile || activeElt() != this.textarea)) {
     try { this.textarea.focus(); }
-    catch (e) {} // IE8 will throw if the textarea is display: none or not in DOM
+    catch (e) {} // IE8 will throw if the textarea is display: none or not in
+					// DOM
   }
 };
 
@@ -9514,7 +9567,8 @@ TextareaInput.prototype.poll = function () {
     applyTextInput(cm, text.slice(same), prevInput.length - same,
                    null, this$1.composing ? "*compose" : null);
 
-    // Don't leave long text in the textarea, since it makes further polling slow
+    // Don't leave long text in the textarea, since it makes further polling
+	// slow
     if (text.length > 1000 || text.indexOf("\n") > -1) { input.value = this$1.prevInput = ""; }
     else { this$1.prevInput = text; }
 
@@ -9541,7 +9595,8 @@ TextareaInput.prototype.onContextMenu = function (e) {
   var pos = posFromMouse(cm, e), scrollPos = display.scroller.scrollTop;
   if (!pos || presto) { return } // Opera is difficult.
 
-  // Reset the current text selection only if the click is done outside of the selection
+  // Reset the current text selection only if the click is done outside of the
+	// selection
   // and 'resetSelectionOnContextMenu' option is true.
   var reset = cm.options.resetSelectionOnContextMenu;
   if (reset && cm.doc.sel.contains(pos) == -1)
@@ -9552,7 +9607,8 @@ TextareaInput.prototype.onContextMenu = function (e) {
   var wrapperBox = input.wrapper.getBoundingClientRect();
   te.style.cssText = "position: absolute; width: 30px; height: 30px;\n      top: " + (e.clientY - wrapperBox.top - 5) + "px; left: " + (e.clientX - wrapperBox.left - 5) + "px;\n      z-index: 1000; background: " + (ie ? "rgba(255, 255, 255, .05)" : "transparent") + ";\n      outline: none; border-width: 0; outline: none; overflow: hidden; opacity: .05; filter: alpha(opacity=5);";
   var oldScrollY;
-  if (webkit) { oldScrollY = window.scrollY; } // Work around Chrome issue (#2712)
+  if (webkit) { oldScrollY = window.scrollY; } // Work around Chrome issue
+												// (#2712)
   display.input.focus();
   if (webkit) { window.scrollTo(null, oldScrollY); }
   display.input.reset();
@@ -9731,7 +9787,8 @@ defineOptions(CodeMirror$1);
 
 addEditorMethods(CodeMirror$1);
 
-// Set up methods on CodeMirror's prototype to redirect to the editor's document.
+// Set up methods on CodeMirror's prototype to redirect to the editor's
+// document.
 var dontDelegate = "iter insert remove copy getEditor constructor".split(" ");
 for (var prop in Doc.prototype) { if (Doc.prototype.hasOwnProperty(prop) && indexOf(dontDelegate, prop) < 0)
   { CodeMirror$1.prototype[prop] = (function(method) {
@@ -9749,7 +9806,7 @@ CodeMirror$1.inputStyles = {"textarea": TextareaInput, "contenteditable": Conten
 // Extra arguments are stored as the mode's dependencies, which is
 // used by (legacy) mechanisms like loadmode.js to automatically
 // load a mode. (Preferred mechanism is the require/define calls.)
-CodeMirror$1.defineMode = function(name/*, mode, …*/) {
+CodeMirror$1.defineMode = function(name/* , mode, … */) {
   if (!CodeMirror$1.defaults.mode && name != "null") { CodeMirror$1.defaults.mode = name; }
   defineMode.apply(this, arguments);
 };

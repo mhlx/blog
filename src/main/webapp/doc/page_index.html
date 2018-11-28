@@ -1,0 +1,103 @@
+<transaction:begin />
+<data name="myInfo" lazy="true" />
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1,maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+
+<title>[[${space == null ? '主页' : space.name}]]</title>
+<link th:href="@{/static/fontawesome-free/css/all.min.css?v=7.0}"
+	rel="stylesheet">
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=7.0}" />
+<style>
+body {
+	padding-top: 54px;
+}
+
+@media ( min-width : 992px) {
+	body {
+		padding-top: 56px;
+	}
+}
+
+.media p {
+	word-break: break-all
+}
+
+.media-body img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	max-height: 200px;
+}
+
+.media-body video {
+	max-height: 200px;
+}
+
+.card-text img {
+	max-width: 100% !important;
+	height: auto !important;
+}
+
+.sticky-offset {
+	top: 56px;
+}
+</style>
+
+</head>
+
+<body>
+
+	<!-- Navigation -->
+	<fragment name="顶部" />
+
+	<!-- Page Content -->
+	<div class="container">
+
+		<div class="row">
+
+			<!-- Blog Entries Column -->
+			<div class="col-md-8 order-md-1 order-2">
+
+				<fragment name="文章列表" />
+
+			</div>
+
+			<!-- Sidebar Widgets Column -->
+			<div class="col-md-4 order-md-2 order-1">
+
+				<form th:action="${urls.currentUrl}" id="searchForm">
+					<div class="input-group my-md-4 my-2">
+						<input type="text" class="form-control" name="query"
+							th:value="${param.query}">
+						<div class="input-group-append">
+							<span class="input-group-text"><a href="###"
+								onclick="document.getElementById('searchForm').submit()">搜索</a></span>
+						</div>
+					</div>
+				</form>
+
+			</div>
+			<!-- /.row -->
+		</div>
+	</div>
+	<!-- /.container -->
+
+	<fragment name="底部" />
+
+	<!-- Bootstrap core JavaScript -->
+	<script th:src="@{/static/jquery/jquery.min.js?v=7.0}"></script>
+	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js?v=7.0}"></script>
+	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
+
+</body>
+
+</html>

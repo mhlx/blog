@@ -186,10 +186,12 @@ $(function() {
 			success:function(data) {
 				loadFiles();
 				swal('解压成功','','success');
+				$("#unzip").prop("disabled",false);
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
 				var data = $.parseJSON(jqXHR.responseText);
 				swal('解压失败',data.error,'error');
+				$("#unzip").prop("disabled",false);
 			}
 		});
 	});

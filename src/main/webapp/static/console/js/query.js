@@ -14,6 +14,11 @@ var querier = (function($) {
 			'redirect.md', 'space.md', 'times.md', 'transaction.md',
 			'unlocked.md', 'urls.md', 'user.md', 'validators.md', 'csrf.md' ];
 
+	var templates = [ 'page_article_detail.html', 'page_index.html',
+			'page_error.html', 'page_news_detail.html', 'login.html',
+			'page_news.html', 'fragment_articles.html', 'fragment_foot.html',
+			'fragment_top.html' ];
+
 	var cache = [];
 	var status = 'unloaded';
 
@@ -43,6 +48,14 @@ var querier = (function($) {
 			read(name);
 		}
 
+		for (var i = 0; i < templates.length; i++) {
+			var template = templates[i];
+			cache.push({
+				'name' : template,
+				'content' : template
+			});
+		}
+
 		var t = setInterval(function() {
 			if (count == names.length) {
 				status = 'loaded';
@@ -66,11 +79,19 @@ var querier = (function($) {
 					url : root + 'doc/' + name,
 					dataType : "text",
 					success : function(data) {
-						var md = window.markdownit({
-							html : true
-						});
-						var result = md.render(data);
-						cb(result);
+						if ($.inArray(name, templates) != -1) {
+							var result = '<pre class="pre-scrollable"><code>';
+							result += data.replace(/&/g, '&amp;').replace(/</g,
+									'&lt;').replace(/>/g, '&gt;');
+							result += '</code></pre>';
+							cb(result);
+						} else {
+							var md = window.markdownit({
+								html : true
+							});
+							var result = md.render(data);
+							cb(result);
+						}
 					}
 				});
 			}

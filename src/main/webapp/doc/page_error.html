@@ -1,0 +1,52 @@
+<redirect th:url="${urls.currentUrl}" th:if="${error == null}"/>
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width,maximum-scale=1.0, user-scalable=no, initial-scale=1, shrink-to-fit=no">
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=7.0}" />
+<link th:href="@{/static/console/css/sb-admin.min.css?v=7.0}" rel="stylesheet">
+<title>[[${error.code}]]</title>
+</head>
+
+<body class="bg-dark">
+
+	<div class="container">
+		<div class="card card-login mx-auto mt-5">
+			<div class="card-header">发生了一个错误</div>
+			<div class="card-body">
+				<div class="alert alert-danger" th:if="${error.code == 500}"
+					th:text="${messages.getMessage(error.message)}">&nbsp;</div>
+				<div class="alert alert-warning"
+					th:if="${error.code > 200 && error.code < 500}"
+					th:text="${messages.getMessage(error.message)}">&nbsp;</div>
+				<div class="text-center">
+
+					<a class="d-block small" style="margin-top: 10px"
+						th:href="${urls.url+'/login?goto='+error.url}"
+						th:if="${error.code == 403}"><i
+						class="fas fa-fw fa-sign-in-alt"></i>登录</a> <a class="d-block small"
+						style="margin-top: 10px" th:href="@{/}"><i
+						class="fas fa-fw fa-arrow-left"></i>返回主页</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script th:src="@{/static/jquery/jquery.min.js?v=7.0}"></script>
+	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js?v=7.0}"></script>
+	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
+	<script th:src="@{/static/js/base.js?v=7.0}"></script>
+</body>
+
+</html>
