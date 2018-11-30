@@ -45,9 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="allowComment != null">
 				news_allowComment = #{allowComment},
 			</if>
-			<if test="lockId != null">
-				news_lock = #{lockId}
-			</if>
+			news_lock = #{lockId}
 		</set>
 		WHERE id = #{id}
 	</update>

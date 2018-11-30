@@ -18,6 +18,7 @@ commentStatistics
 |  属性名称  |说明| 是否可能为null   | 类型  |    
 |  -  |  -  |  -  |  -  |  -  |      
 |  modules  | 模块详情集合  |  否  | List<CommentModuleStatistics&gt;   |
+|  total  | 评论总数  |  否  | int   |
 
 ### CommentModuleStatistics
 |  属性名称  |说明| 是否可能为null   | 类型  |    

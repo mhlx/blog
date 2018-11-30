@@ -20,6 +20,16 @@ public class CommentStatistics {
 	}
 
 	/**
+	 * 获取文章总数
+	 * 
+	 * @since 7.0
+	 * @return
+	 */
+	public int getTotal() {
+		return modules.stream().mapToInt(CommentModuleStatistics::getCount).sum();
+	}
+
+	/**
 	 * 适配以前
 	 * 
 	 * @return
