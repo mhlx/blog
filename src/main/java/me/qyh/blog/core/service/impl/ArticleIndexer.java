@@ -105,6 +105,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	private static final String TITLE = "title";
 	private static final String CONTENT = "content";
 	private static final String SPACE_ID = "spaceId";
+	private static final String SPACE_ALIAS = "spaceAlias";
 	private static final String PRIVATE = "private";
 	private static final String STATUS = "status";
 	private static final String FROM = "from";
@@ -251,6 +252,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 			}
 		}
 		doc.add(new StringField(SPACE_ID, article.getSpace().getId().toString(), Field.Store.NO));
+		doc.add(new StringField(SPACE_ALIAS, article.getSpace().getAlias(), Field.Store.YES));
 		doc.add(new StringField(PRIVATE, article.isPrivate().toString(), Field.Store.NO));
 		doc.add(new StringField(STATUS, article.getStatus().name().toLowerCase(), Field.Store.NO));
 		doc.add(new StringField(FROM, article.getFrom().name().toLowerCase(), Field.Store.NO));
@@ -323,6 +325,51 @@ public abstract class ArticleIndexer implements InitializingBean {
 	private void doDeleteDocument(Integer id) throws IOException {
 		Term term = new Term(ID, id.toString());
 		oriWriter.deleteDocuments(term);
+	}
+
+	public List<Article> query(Space space, String queryContent, int max) {
+		IndexSearcher searcher = null;
+		try {
+			searcher = searcherManager.acquire();
+			Builder builder = new Builder();
+			if (space != null && space.hasId()) {
+				Query query = new TermQuery(new Term(SPACE_ID, space.getId().toString()));
+				builder.add(query, Occur.MUST);
+			}
+			Optional<Query> optionalMultiFieldQuery = buildMultiFieldQuery(queryContent);
+			optionalMultiFieldQuery.ifPresent(query -> builder.add(query, Occur.MUST));
+			Query query = builder.build();
+			TopDocs tds = searcher.search(query, max);
+			int total = (int) tds.totalHits;
+			List<Article> articles = new ArrayList<>();
+			ScoreDoc[] docs = tds.scoreDocs;
+			for (int i = 0; i < Math.min(total, max); i++) {
+				int docId = docs[i].doc;
+				Document doc = searcher.doc(docId);
+				Integer id = Integer.parseInt(doc.get(ID));
+				String title = doc.get(TITLE);
+				String alias = doc.get(ALIAS);
+				String spaceAlias = doc.get(SPACE_ALIAS);
+
+				Article article = new Article(id);
+				article.setTitle(title);
+				article.setAlias(alias);
+				article.setSpace(new Space(spaceAlias));
+				articles.add(article);
+			}
+			return articles;
+		} catch (IOException e) {
+			throw new SystemException(e.getMessage(), e);
+		} finally {
+			try {
+				if (searcher != null) {
+					searcherManager.release(searcher);
+					searcher = null;
+				}
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage(), e);
+			}
+		}
 	}
 
 	/**

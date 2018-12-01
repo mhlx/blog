@@ -1,6 +1,11 @@
 <transaction:begin />
 <data name="myInfo" lazy="true" />
-
+<data name="spaces" lazy="true" th:if="${space == null}" />
+<data name="articleStatistics" lazy="true" />
+<data name="tagStatistics" lazy="true" />
+<data name="newsStatistics" lazy="true" />
+<data name="commentStatistics" lazy="true" />
+<data name="lastNews" limit="1" queryLock="false" lazy="true" />
 <!DOCTYPE html>
 <html>
 
@@ -66,13 +71,51 @@ body {
 
 			<!-- Blog Entries Column -->
 			<div class="col-md-8 order-md-1 order-2">
-
 				<fragment name="文章列表" />
-
 			</div>
 
 			<!-- Sidebar Widgets Column -->
 			<div class="col-md-4 order-md-2 order-1">
+
+				<div class="media my-2  mt-md-4" style="margin-bottom: 20px"
+					th:if="${!lastNews.isEmpty()}" th:with="news=${lastNews.get(0)}">
+					<img class="mr-3"
+						th:src="${gravatars.getOptionalUrl(myInfo.gravatar).orElse('/static/img/guest.png')}"
+						style="width: 32px; height: 32px" />
+					<div class="media-body">
+						<h5 class="mt-0"
+							th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')} "></h5>
+						<div th:remove="tag" th:with="doc=${jsoups.body(news.content)}"
+							th:if="${news.content != null}">
+							<p th:with="content=${doc.text()}">
+								[[${content.length() > 50 ? content.substring(0,50)+'...' :
+								content}]] &nbsp;&nbsp;&nbsp;<a th:href="${urls.getUrl(news)}">继续查看</a>
+							</p>
+							<div th:with="imgs=${doc.select('img[src]')}">
+								<a th:href="${urls.getUrl(news)}" th:if="${!imgs.isEmpty()}"><img
+									th:src="${imgs.get(0).attr('src')}" class="img-fluid"
+									style="max-height: 64px" /></a>
+								<div th:remove="tag"
+									th:with="videos=${doc.select('video[poster]')}"
+									th:if="${imgs.isEmpty()}">
+									<a th:href="${urls.getUrl(news)}" th:if="${!videos.isEmpty()}"
+										class="video"><img
+										th:src="${videos.get(0).attr('poster')}" class="img-fluid"
+										style="max-height: 64px" /></a>
+								</div>
+							</div>
+						</div>
+						<div th:if="${news.content == null}">
+							<div class="card">
+								<div class="card-body">
+									<i class="fas fa-fw fa-lock"></i>内容受到锁保护，请先<a
+										th:href="${urls.getUrl(news)}">解锁</a>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
 
 				<form th:action="${urls.currentUrl}" id="searchForm">
 					<div class="input-group my-md-4 my-2">
@@ -85,6 +128,31 @@ body {
 					</div>
 				</form>
 
+				<div class=" d-none d-sm-block">
+					<div class="card my-md-3 my-2"
+						th:if="${space == null && !spaces.isEmpty()}">
+						<div class="card-header">空间</div>
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item" th:each="space : ${spaces}"><a
+								th:href="${urls.getUrl(space)}">[[${space.name}]]</a></li>
+						</ul>
+					</div>
+
+					<div class="card my-md-3 my-2">
+						<div class="card-header">网站信息</div>
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item">文章总数：[[${articleStatistics.totalArticles}]]</li>
+							<li class="list-group-item">标签引用数：[[${tagStatistics.articleTagCount}]]</li>
+							<div th:remove="tag" th:if="${space == null}">
+								<li class="list-group-item">动态总数：[[${newsStatistics.total}]]</li>
+							</div>
+							<li class="list-group-item">评论总数：[[${commentStatistics.total}]]</li>
+						</ul>
+					</div>
+				</div>
+
+
+
 			</div>
 			<!-- /.row -->
 		</div>
@@ -96,7 +164,8 @@ body {
 	<!-- Bootstrap core JavaScript -->
 	<script th:src="@{/static/jquery/jquery.min.js?v=7.0}"></script>
 	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js?v=7.0}"></script>
-	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
 
 </body>
 

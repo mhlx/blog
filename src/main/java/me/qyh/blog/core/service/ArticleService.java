@@ -171,4 +171,19 @@ public interface ArticleService {
 	 */
 	void changeStatus(Integer id, ArticleStatus status) throws LogicException;
 
+	/**
+	 * 根据内容查询符合条件的文章，只会查询文章用于构造访问地址的部分信息
+	 * <p>
+	 * <b>用于模板数据</b>
+	 * </p>
+	 * 
+	 * @param content
+	 *            内容
+	 * @param max
+	 *            最多返回条数
+	 * @return
+	 * @since 7.0
+	 */
+	List<Article> querySimpleArticles(String content, int max);
+
 }

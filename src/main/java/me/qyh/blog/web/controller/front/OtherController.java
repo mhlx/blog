@@ -38,7 +38,7 @@ public class OtherController {
 	private TemplateService templateService;
 
 	@GetMapping({ "api/data/{tagName}", "space/{alias}/api/data/{tagName}" })
-	public ResponseEntity<Map<String, Object>> queryData(@PathVariable("tagName") String tagName,
+	public ResponseEntity<Object> queryData(@PathVariable("tagName") String tagName,
 			@RequestParam Map<String, String> allRequestParams, HttpServletRequest request,
 			HttpServletResponse response) throws LogicException {
 		try {
@@ -52,9 +52,9 @@ public class OtherController {
 			DataBind bind = op.get();
 			Object data = bind.getData();
 			if (data == null) {
-				return ResponseEntity.ok(Map.of("dataName", bind.getDataName()));
+				return ResponseEntity.noContent().build();
 			} else {
-				return ResponseEntity.ok(Map.of("dataName", bind.getDataName(), "data", data));
+				return ResponseEntity.ok(data);
 			}
 		}
 		return ResponseEntity.notFound().build();

@@ -434,7 +434,7 @@
                     asc: config.asc
                 },
                 success:function(data){
-                	var page = data.data;
+                	var page = data;
                     config.pageSize = page.param.pageSize;
                     config.currentPage = page.param.currentPage;
                     var html = '';

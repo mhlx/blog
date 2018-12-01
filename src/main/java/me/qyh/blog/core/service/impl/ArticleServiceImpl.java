@@ -854,4 +854,9 @@ public class ArticleServiceImpl
 		this.publishSchedulePeriodSec = publishSchedulePeriodSec;
 	}
 
+	@Override
+	public List<Article> querySimpleArticles(String content, int max) {
+		return articleIndexer.query(Environment.getSpace(), content, max);
+	}
+
 }

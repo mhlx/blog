@@ -12,7 +12,8 @@ var querier = (function($) {
 			'plugin_data_commentPage.md', 'plugin_data_lastComments.md',
 			'plugin_data_recentlyViewdArticles.md', 'private.md',
 			'redirect.md', 'space.md', 'times.md', 'transaction.md',
-			'unlocked.md', 'urls.md', 'user.md', 'validators.md', 'csrf.md' ];
+			'unlocked.md', 'urls.md', 'user.md', 'validators.md', 'csrf.md',
+			'data_articles.md' ];
 
 	var templates = [ 'page_article_detail.html', 'page_index.html',
 			'page_error.html', 'page_news_detail.html', 'login.html',
@@ -67,9 +68,14 @@ var querier = (function($) {
 			search : function(text, cb) {
 				var result = [];
 				$.each(cache, function(i, d) {
-					var content = d.content;
-					if (content.indexOf(text) != -1) {
+					var name = d.name;
+					if (name.indexOf(text) != -1) {
 						result.push(d.name);
+					} else {
+						var content = d.content;
+						if (content.indexOf(text) != -1) {
+							result.push(d.name);
+						}
 					}
 				});
 				cb(result);

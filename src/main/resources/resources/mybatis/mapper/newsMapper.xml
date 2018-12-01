@@ -134,7 +134,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="getPreviousNews" resultMap="NewsDetail">
-		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
+		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits,news_lock,news_content FROM blog_news
 		WHERE 
 		(news_write = #{news.write}   AND id <![CDATA[ < ]]> #{news.id})
 		OR (news_write <![CDATA[ < ]]> #{news.write})
@@ -149,7 +149,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="getNextNews" resultMap="NewsDetail">
-		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits,news_lock FROM blog_news
+		SELECT id,news_write,news_update,news_private,news_allowComment,news_hits,news_lock,news_content FROM blog_news
 		WHERE 
 		(news_write = #{news.write}   AND id > #{news.id})
 		OR (news_write > #{news.write})

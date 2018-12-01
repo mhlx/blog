@@ -39,7 +39,7 @@ body {
 
 .media-body img {
 	max-width: 100%;
-	height: auto;
+	max-height: 400px;
 }
 </style>
 
@@ -57,9 +57,12 @@ body {
 
 			<div class="media-body">
 				<h5 class="mt-0">
-					<span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>&nbsp;&nbsp;&nbsp;<a
-						href="###" th:if="${news.allowComment || user != null}" data-cmt
-						style="font-size: 16px">评论</a>
+					<span th:text="${times.format(news.write,'yyyy-MM-dd HH:mm')}"></span>
+					<a href="javascript:void(0)" onclick="window.history.go(-1)"
+						style="margin-left: 5px; font-size: 16px">返回</a> <a
+						href="javascript:void(0)" th:data-cmt="${news.id}"
+						style="margin-left: 5px; font-size: 16px"
+						th:if="${news.allowComment || user != null}">评论</a>
 				</h5>
 				<div id="news-content" class="wrap">
 					<div th:utext="${news.content}"></div>
@@ -89,8 +92,10 @@ body {
 
 	<script th:src="@{/static/jquery/jquery.min.js?v=7.0}"></script>
 	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js?v=7.0}"></script>
-	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
-	<script type="text/javascript" th:src="@{/static/prettify/prettify.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/prettify/prettify.js?v=7.0}"></script>
 	<script th:src="@{/static/js/base.js?v=7.0}"></script>
 	<script th:src="@{/static/js/moment.min.js?v=7.0}"></script>
 	<script>
