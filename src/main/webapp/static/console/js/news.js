@@ -1,4 +1,13 @@
-		var queryParam = {'currentPage':1};
+var imageExtensions = ["jpg","jpeg","png","gif"];
+      var videoExtensions = ["mp4","mov"];
+      var isImage = function(ext){
+    	  return $.inArray(ext.toLowerCase(),imageExtensions) != -1;
+      }
+      var isVideo = function(ext){
+    	  return $.inArray(ext.toLowerCase(),videoExtensions) != -1;
+      }
+		
+var queryParam = {'currentPage':1};
 	
 		var load = function(){
 			$.ajax({
@@ -78,22 +87,82 @@
 			});
 		});
 		
+		var editorContent = '';
+		var editor;
 		var mode = 'write';
 		$(function(){
-			 
-			 $('#newsEditor').summernote({
-					lang: 'zh-CN',
-					toolbar:[
-						['custom', ['file']],
-						['style', ['style']],
-			            ['font', ['bold', 'underline', 'clear']],
-			            ['fontname', ['fontname']],
-			            ['para', ['ul', 'ol']],
-			            ['insert', ['link']],
-			            ['view', ['fullscreen', 'codeview']]
-					]
-				});
-			 
+			editor = editor = window.pell.init({
+		        element: document.getElementById('newsEditor'),
+		        defaultParagraphSeparator: 'p',
+		        styleWithCSS: false,
+		        onChange: function (html) {
+		        	editorContent = html;
+		        },
+		        actions:[
+		        	'bold',
+		        	'italic',
+		        	'underline',
+		        	'strikethrough',
+		        	'heading1',
+		        	'heading2',
+		        	'paragraph',
+		        	'quote',
+		        	'olist',
+		        	'ulist',
+		        	'code',
+		        	'line',
+		        	'link',
+		        	{
+		        	      name: 'image',
+		        	      result: function(){
+		        	    	  fileChooser.choose(function(data){
+		                		  if(data.length > 0){
+        								$(".pell-content").focus();
+		                			  for(var i=0;i<data.length;i++){
+		                				  var f = data[i];
+		                				  var cf = f.cf;
+		                				  if(isImage(cf.extension)){
+		                					  document.execCommand('insertHTML', false, '<p><img src="'+cf.url+'"/></p>');
+		                				  }
+		                				  if(isVideo(cf.extension)){
+		                					  var d = document;
+		                					  (async function getPath () {
+		            							const {value: path} = await swal({
+		            							  title: '插入视频',
+		            							  input: 'text',
+		            							  inputValue: cf.url,
+		            							  inputPlaceholder:'请输入视频封面地址',
+		            							  showCancelButton: true,
+		            							  confirmButtonText:'确定',
+		            							  cancelButtonText:'取消'
+		            							})
+
+		        								$(".pell-content").focus();
+		            							if (path) {
+		            								 document.execCommand('insertHTML',false, '<p>1</p><button data-src="'+cf.url+'" data-poster="'+path+'" style="display:block;width:100%" readony="readonly" type="button">视频</button><p>1</p>');
+		            								 //document.execCommand('insertHTML',false, '<p ><video controls poster="'+path+'"  src="'+cf.url+'"></video></p>');
+		            							} else {
+		            								 document.execCommand('insertHTML',false, '<p>1</p><button data-src="'+cf.url+'" style="display:block;width:100%" readony="readonly" type="button">视频</button><p>1</p>');
+		            							}
+
+		            						})()
+		                				  }
+		                			  }
+		                		  }
+		                	  })
+		        	      }
+		        	    }
+		        	
+		        ]
+		      });
+				
+			$("#newsEditor .pell-content").keyup(function(event){
+				var e = getSelectionStart();
+				if(e.tagName == 'BUTTON' && event.keyCode == 8 && $(e).text() != '视频'){
+					$(e).remove();
+				}
+			});
+			
 			 $("#createNews").click(function(){
 				mode = 'write';
 				toEditor();
@@ -108,7 +177,7 @@
 				 $("#editorContainer").show();
 				 if(mode == 'write'){
 					 $("#editForm")[0].reset();
-					 $("#newsEditor").summernote('code','');
+						$(".pell-content").focus();
 					 $("#time").val(moment().format("YYYY-MM-DD HH:mm"));
 				 }
 			 }
@@ -118,7 +187,6 @@
 				 $("#tableContainer").show();
 				 $('.dataTable').show();
 				 if(clear){
-					 $('#newsEditor').summernote('reset');
 					 load();
 				 }
 			 }
@@ -126,9 +194,15 @@
 			 $("#saveNews").click(function(){
 				var me = $(this);
 				me.prop('disabled',true);
-				var content = $("#newsEditor").summernote('code');
 				var news = {};
-				news.content = content;
+				$("#newsEditor .pell-content button").each(function(){
+					var me = $(this);
+					var poster = me.data('poster');
+					var src = me.data('src');
+					me.after('<p><video src="'+src+'" poster="'+poster+'" controls></video></p>');
+					me.remove();
+				});
+				news.content = $("#newsEditor .pell-content").html();
 				var lockId = $("#lock").val();
 				if(lockId != '')
 					news.lockId = lockId;
@@ -212,7 +286,15 @@
 						success:function(data) {
 							mode = 'update';
 							$("#time").val(moment(data.write).format("YYYY-MM-DD HH:mm"));
-							$("#newsEditor").summernote('code',data.content);
+							editor.content.innerHTML = data.content;
+							$("#newsEditor .pell-content video").each(function(){
+								var me = $(this);
+								var poster = me.attr('poster');
+								var src = me.attr('src');
+								me.parent().after('<button data-src="'+src+'" data-poster="'+poster+'" style="display:block;width:100%" readony="readonly" type="button">视频</button>');
+								me.parent().remove();
+							});
+							$(".pell-content").focus();
 							$("#id").val(id);
 							$("#isPrivate").prop('checked',data.isPrivate);
 							$("#lock").val(data.lockId?data.lockId : '');
@@ -251,3 +333,9 @@
 					}
 				})
 		});
+		
+		
+		function getSelectionStart() {
+			   var node = document.getSelection().anchorNode;
+			   return (node.nodeType == 3 ? node.parentNode : node);
+			}
