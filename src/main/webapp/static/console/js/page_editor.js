@@ -17,7 +17,9 @@
 			lineNumbers: true,
 			autoCloseTags: true,
 			allowDropFileTypes:['text/html'],
-			extraKeys: extraKeys
+			extraKeys: extraKeys,
+			foldGutter: true,
+		    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		});
 		
 		editor.on('dblclick', function(a,b) {

@@ -255,25 +255,26 @@
 	</div>
 
 	<div class="modal " id="docModal" tabindex="-1" role="dialog">
-		<div class="modal-dialog modal-lg"  role="document">
+		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-body">
 					<div class="container-fluid">
-					<div style="top:10px;position:fixed;">
-		<form class="form-inline my-2 my-lg-0">
-			<div class="dropdown">
-				<input name="q" id="qbox" data-toggle="dropdown" type="search"
-					class="form-control" placeholder="Search" autofocus="autofocus"
-					autocomplete="off" aria-haspopup="true" aria-expanded="false" />
-				<div id="search_results" style="max-height:100px;overflow-y:auto;display:none" class="dropdown-menu" role="menu"
-					aria-labelledby="qbox">
-				</div>
-			</div>
-		</form>
-		</div>
-		<div style="padding:10px;margin-top:50px" id="result" class="markdown-body">
-			
-		</div>
+						<div style="top: 10px; position: fixed;">
+							<form class="form-inline my-2 my-lg-0">
+								<div class="dropdown">
+									<input name="q" id="qbox" data-toggle="dropdown" type="search"
+										class="form-control" placeholder="Search"
+										autofocus="autofocus" autocomplete="off" aria-haspopup="true"
+										aria-expanded="false" />
+									<div id="search_results"
+										style="max-height: 100px; overflow-y: auto; display: none"
+										class="dropdown-menu" role="menu" aria-labelledby="qbox">
+									</div>
+								</div>
+							</form>
+						</div>
+						<div style="padding: 10px; margin-top: 50px" id="result"
+							class="markdown-body"></div>
 					</div>
 				</div>
 				<div class="modal-footer">
@@ -307,6 +308,9 @@
 	<script th:src="@{/static/codemirror/addon/dialog/dialog.js}"></script>
 	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
 	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
+
+	<script th:src="@{/static/codemirror/addon/fold/foldcode.js}"></script>
+	<script th:src="@{/static/codemirror/addon/fold/foldgutter.js}"></script>
 	<script
 		th:src="@{/static/codemirror/addon/scroll/annotatescrollbar.js}"></script>
 	<script
@@ -343,60 +347,64 @@
 	<script th:src="@{/static/js/clipboard.min.js}"></script>
 	<script th:src="@{/static/console/js/table.js}"></script>
 	<script th:src="@{/static/console/js/page_build.js}"></script>
-	
-	<script type="text/javascript" th:src="@{/static/prettify/prettify.js?v=7.0}"></script>
+
+	<script type="text/javascript"
+		th:src="@{/static/prettify/prettify.js?v=7.0}"></script>
 	<script th:src="@{/doc/markdown.js}"></script>
 	<script th:src="@{/static/console/js/query.js}"></script>
 	<script>
 		var timeout;
-		$("#qbox").on('paste keyup',function() {
-			var text = $.trim($(this).val());
-			if(timeout){
-				clearTimeout(timeout);
-			}
-			timeout = setTimeout(function(){
-				if(text == ''){
-					$("#search_results").html('').hide();
-				}else{
-					querier.search(text, function(result) {
-						$("#search_results").html('').hide();
-						if(result.length > 0){
-							$.each(result,function(i,d){
-								$("#search_results").append('<div style="padding:3px"><a href="###" onclick="loadFile(\''+d+'\')">'+d+'</a></div>');
-							})	
-							$("#search_results").show();
+		$("#qbox").on(
+				'paste keyup',
+				function() {
+					var text = $.trim($(this).val());
+					if (timeout) {
+						clearTimeout(timeout);
+					}
+					timeout = setTimeout(function() {
+						if (text == '') {
+							$("#search_results").html('').hide();
+						} else {
+							querier.search(text, function(result) {
+								$("#search_results").html('').hide();
+								if (result.length > 0) {
+									$.each(result, function(i, d) {
+										$("#search_results").append(
+												'<div style="padding:3px"><a href="###" onclick="loadFile(\''
+														+ d + '\')">' + d
+														+ '</a></div>');
+									})
+									$("#search_results").show();
+								}
+							})
 						}
-					})
-				}
-			},100)
-		});
-		
-		function loadFile(d){
+					}, 100)
+				});
+
+		function loadFile(d) {
 			$("#search_results").hide();
-			querier.getFile(d,function(data){
+			querier.getFile(d, function(data) {
 				$("#result").html(data);
 				renderCode();
 			})
 		}
-		
-		
-		function renderCode(){
+
+		function renderCode() {
 			var p = false;
-			$("#docModal pre").each(function(){
+			$("#docModal pre").each(function() {
 				var me = $(this);
-				if(me.hasClass('prettyprint prettyprinted'))
+				if (me.hasClass('prettyprint prettyprinted'))
 					return true;
-				if(me.find('code').length == 0)
-					 return true;
-				else{
+				if (me.find('code').length == 0)
+					return true;
+				else {
 					p = true;
 					me.addClass("prettyprint");
 				}
 			});
-			if(p)
+			if (p)
 				prettyPrint();
 		}
-		
 	</script>
 </body>
 </html>
