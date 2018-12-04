@@ -112,9 +112,12 @@ var queryParam = {'currentPage':1};
 				 $('.dataTable').hide();
 				 $("#editorContainer").show();
 				 if(mode == 'write'){
+					 editor.setValue("");
 					 $("#editForm")[0].reset();
 					 $("#time").val(moment().format("YYYY-MM-DD HH:mm"));
 				 }
+				editor.focus();
+				editor.setCursor(editor.lineCount(), 0);
 			 }
 			 
 			 var closeEditor = function(clear){
@@ -216,8 +219,6 @@ var queryParam = {'currentPage':1};
 							mode = 'update';
 							$("#time").val(moment(data.write).format("YYYY-MM-DD HH:mm"));
 							editor.setValue(data.content);
-							editor.focus();
-							editor.setCursor(editor.lineCount(), 0);
 							$("#id").val(id);
 							$("#isPrivate").prop('checked',data.isPrivate);
 							$("#lock").val(data.lockId?data.lockId : '');

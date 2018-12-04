@@ -7,11 +7,11 @@ while(!广电.ISDEAD)
 ```
 
 
-版本：6.6 RELEASE
+版本：7.0 RELEASE
 
 重型博客
 
-需要 **jdk 10**  
+需要 **jdk 11**  
 &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;  **tomcat 7+**
 
 

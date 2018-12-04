@@ -36,7 +36,16 @@ var loadFiles = function(){
 					html += '<a href="###" data-page="1" data-parent="'+data.id+'" "><img src="'+root+'static/img/folder.png" class="img-fluid " style="height:100px"/></a>';
 				} else {
 					var url =data.cf.url;
-					html += '<a href="###" data-file="'+data.id+'">'
+					
+					var video = data.cf.extension.toUpperCase() == 'MP4' || data.cf.extension.toUpperCase() == 'MOV';
+					if(video){
+						html += '<a href="###" data-file="'+data.id+'" style="position: relative;display: inline-block;">';
+					}else{
+						html += '<a href="###" data-file="'+data.id+'">';
+					}
+					if(video){
+						html += '<i class="fas fa-video " style="position: absolute;left: 50%;top: 50%;font-size:2rem;transform: translate(-50%, -50%);color:grey;"></i>';
+					}
 					if(data.cf.thumbnailUrl){
 						addPath = false;
 						html += '<img  src="'+data.cf.thumbnailUrl.small+'" data-middle="'+data.cf.thumbnailUrl.middle+'" class="img-fluid img-thumbnail" style="height:100px"/>';

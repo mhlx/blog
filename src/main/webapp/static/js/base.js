@@ -30,3 +30,20 @@ jQuery.prototype.serializeObject=function(){
     });  
     return obj;  
 }; 
+
+function confirmLogout(){
+	$("#mobile-nav").hide();
+	swal({
+		  title: '你确定要注销吗？',
+		  type: 'warning',
+		  showCancelButton: true,
+		  confirmButtonColor: '#3085d6',
+		  cancelButtonColor: '#d33',
+		  confirmButtonText: '确定!',
+		  cancelButtonText: '取消'
+		}).then((result) => {
+		  if (result.value) {
+			  document.getElementById('logoutForm').submit();
+		  }
+		});
+}

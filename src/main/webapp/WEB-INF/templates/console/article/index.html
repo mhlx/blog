@@ -67,6 +67,7 @@
 										<th data-bind="pubDate">发布日期</th>
 										<th data-bind="level">优先级</th>
 										<th data-bind="hits">点击量</th>
+										<th data-bind="lockId">访问锁</th>
 										<th data-bind="id">操作</th>
 									</tr>
 								</thead>
@@ -160,6 +161,11 @@
 									return v;
 								}
 								return '';
+							}
+						}, {
+							bind : 'lockId',
+							render : function(v, d) {
+								return v ? "是" : "否";
 							}
 						},
 						{

@@ -1,1 +1,53 @@
-Unexpected error.  File contents could not be restored from local history during undo/redo.
+const http = require('http');
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+var md = require('markdown-it')({
+	html : true,
+	linkify: true,
+	typographer: true
+}).use(require('markdown-it-footnote'))
+.use(require('@iktakahiro/markdown-it-katex'))
+.use(require("markdown-it-task-lists"))
+.use(require('markdown-it-sup'))
+.use(require('markdown-it-sub'))
+.use(require('markdown-it-abbr'))
+.use(require('markdown-it-anchor'))
+;
+
+const server = http.createServer((req, res) => {
+  if(req.method == 'POST'){
+	var body = '';
+	req.on('data', function (data) {
+		body += data;
+	});
+	req.on('end', function () {
+		body = JSON.parse(body);
+		var result = {};
+		for(let i in body){
+			result[i] = md.render(body[i],{});
+		}
+		var json = JSON.stringify({ 
+			success: true, 
+			data: result
+		});
+		
+		res.writeHead(200, {'Content-Type': 'application/json'});
+		res.end(json);
+	});
+  }else{
+	  
+	  var json = JSON.stringify({ 
+		success: false, 
+		message: "post only"
+	  });
+	  
+	  res.writeHead(200, {'Content-Type': 'application/json'});
+	  res.end(json);
+  }
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});

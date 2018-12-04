@@ -66,10 +66,12 @@
 		class="nav-link" th:href="@{/console/config}"> <i
 			class="fas fa-fw fa-cog"></i> <span>配置</span>
 	</a></li>
-	<li class="nav-item"><a class="nav-link" href="###" onclick="document.getElementById('logoutForm').submit()"> <i
+	<li class="nav-item"><a class="nav-link" href="###"
+		onclick="confirmLogout()"> <i
 			class="fas fa-sign-out-alt"></i> <span>注销</span>
 	</a>
-		<form id="logoutForm" style="display: none" th:action="@{/logout}" method="post">
+		<form id="logoutForm" style="display: none" th:action="@{/logout}"
+			method="post" >
 			<input type="hidden" th:name="${_csrf.parameterName}"
 				th:value="${_csrf.token}" />
 		</form></li>
