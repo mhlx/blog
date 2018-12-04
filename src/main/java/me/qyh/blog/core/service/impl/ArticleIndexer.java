@@ -81,7 +81,6 @@ import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.entity.Tag;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.service.ArticleContentHandler;
-import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.Markdown2Html;
 import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.core.util.Validators;
@@ -149,7 +148,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	private TagDao tagDao;
 	@Autowired
 	private PlatformTransactionManager platformTransactionManager;
-	@Autowired(required = false)
+	@Autowired
 	private Markdown2Html markdown2Html;
 
 	private static final Path INDEX_DIR = FileUtils.HOME_DIR.resolve("blog/index");
@@ -673,9 +672,6 @@ public abstract class ArticleIndexer implements InitializingBean {
 		}
 		if (summaryFormatter == null) {
 			summaryFormatter = new DefaultFormatter("lucene-highlight-summary");
-		}
-		if (markdown2Html == null) {
-			markdown2Html = CommonMarkdown2Html.INSTANCE;
 		}
 		qboostMap.put(TAG, boostMap.getOrDefault(TAG, 20F));
 		qboostMap.put(ALIAS, boostMap.getOrDefault(ALIAS, 10F));

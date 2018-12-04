@@ -59,7 +59,7 @@ public class NewsConsole extends BaseMgrController {
 
 	@GetMapping("news/{id}")
 	public ResponseEntity<News> getNews(@PathVariable("id") Integer id) {
-		Optional<News> op = newsService.getNews(id);
+		Optional<News> op = newsService.getNewsForEdit(id);
 		return ResponseEntity.of(op);
 	}
 

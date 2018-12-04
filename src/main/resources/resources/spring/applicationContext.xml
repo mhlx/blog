@@ -135,4 +135,7 @@
 	<bean class="me.qyh.blog.file.store.DefaultFileManager" />
 
 	<bean class="me.qyh.blog.core.plugin.PluginHandlerRegistry" />
+	
+	
+	<bean class="me.qyh.blog.core.text.DefaultMarkdown2Html"></bean>
 </beans>      

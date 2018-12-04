@@ -11,3 +11,4 @@ alter table blog_fragment_user add column if not exists is_enable boolean not nu
 alter table blog_history_template drop column if exists template_name;
 alter table blog_history_template add column if not exists template_id int not null;
 alter table blog_history_template add column if not exists template_type int not null; 
+alter table blog_news add column if not exists news_editor int not null default 1;--HTML

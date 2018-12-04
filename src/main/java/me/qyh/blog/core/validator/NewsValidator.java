@@ -38,6 +38,10 @@ public class NewsValidator implements Validator {
 			errors.reject("news.allowComment.blank", "是否允许评论不能为空");
 			return;
 		}
+		if (news.getEditor() == null) {
+			errors.reject("news.editor.null", "动态编辑器不能为空");
+			return;
+		}
 	}
 
 }

@@ -50,7 +50,6 @@ import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.service.CommentServer;
 import me.qyh.blog.core.service.UserService;
-import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.HtmlClean;
 import me.qyh.blog.core.text.Markdown2Html;
 import me.qyh.blog.core.util.FileUtils;
@@ -79,7 +78,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	private HtmlClean htmlClean;
 	@Autowired
 	protected CommentDao commentDao;
-	@Autowired(required = false)
+	@Autowired
 	private Markdown2Html markdown2Html;
 	@Autowired
 	private UserService userService;
@@ -568,10 +567,6 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 
 		if (blacklistHandler == null) {
 			blacklistHandler = new DefaultBlacklistHandler();
-		}
-
-		if (markdown2Html == null) {
-			markdown2Html = CommonMarkdown2Html.INSTANCE;
 		}
 
 		if (htmlClean == null) {

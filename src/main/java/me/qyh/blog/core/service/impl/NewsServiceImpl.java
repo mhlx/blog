@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.dao.NewsDao;
+import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.News;
 import me.qyh.blog.core.event.LockDelEvent;
 import me.qyh.blog.core.event.NewsCreateEvent;
@@ -34,6 +35,7 @@ import me.qyh.blog.core.service.CommentServer;
 import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.service.NewsService;
+import me.qyh.blog.core.text.Markdown2Html;
 import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.vo.NewsArchive;
 import me.qyh.blog.core.vo.NewsArchivePageQueryParam;
@@ -54,6 +56,8 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	private HitsStrategy<News> hitsStrategy;
 	@Autowired
 	private LockManager lockManager;
+	@Autowired
+	private Markdown2Html markdown2Html;
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
@@ -67,6 +71,7 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 		}
 		List<News> newsList = newsDao.selectPage(param);
 		setNewsComments(newsList);
+		setNewsContent(newsList);
 		if (!Environment.hasAuthencated()) {
 			newsList.stream().filter(News::hasLock).forEach(news -> news.setContent(null));
 		}
@@ -118,8 +123,15 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 			}
 			lockManager.openLock(news.getLockId());
 			setNewsComments(news);
+			setNewsContent(news);
 		}
 		return Optional.ofNullable(news);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<News> getNewsForEdit(Integer id) {
+		return Optional.ofNullable(newsDao.selectById(id));
 	}
 
 	@Override
@@ -143,6 +155,7 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 			newsList.stream().filter(News::hasLock).forEach(news -> news.setContent(null));
 		}
 		setNewsComments(newsList);
+		setNewsContent(newsList);
 		return newsList;
 	}
 
@@ -175,6 +188,15 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 		News next = newsDao.getNextNews(news, queryPrivate, queryLock);
 		if (previous == null && next == null) {
 			return Optional.empty();
+		}
+		if (previous != null) {
+			setNewsComments(previous);
+			setNewsContent(previous);
+		}
+
+		if (next != null) {
+			setNewsComments(next);
+			setNewsContent(next);
 		}
 		return Optional.of(new NewsNav(previous, next));
 	}
@@ -214,6 +236,19 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 			return;
 		}
 		news.setComments(commentServer.queryCommentNum(COMMENT_MODULE_NAME, news.getId()).orElse(0));
+	}
+
+	private void setNewsContent(News news) {
+		if (Editor.MD.equals(news.getEditor())) {
+			news.setContent(markdown2Html.toHtml(news.getContent()));
+		}
+	}
+
+	private void setNewsContent(List<News> newsList) {
+		if (newsList.isEmpty()) {
+			return;
+		}
+		newsList.forEach(this::setNewsContent);
 	}
 
 	@Override
@@ -283,6 +318,7 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 
 		List<News> newses = newsDao.selectPage(np);
 		setNewsComments(newses);
+		setNewsContent(newses);
 
 		if (!Environment.hasAuthencated()) {
 			newses.stream().filter(News::hasLock).forEach(news -> news.setContent(null));

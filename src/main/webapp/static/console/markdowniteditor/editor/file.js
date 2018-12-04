@@ -21,7 +21,7 @@ var files = (function(editor) {
     $video.appendTo($('body'));
     var showVideoModal = function(url) {
         $video.find('input[type="text"]').val(url);
-        $video.find('textarea').val('<video src="' + url + '" poster="" style="max-width:100%" controls>您的浏览器不支持播放视频</video>');
+        $video.find('textarea').val('<video src="' + url + '" poster="" controls></video>');
         var index = 22 + url.length;
         $video.find('textarea').unbind('click').bind('click', function() {
             $(this)[0].setSelectionRange(index, index);
@@ -40,6 +40,7 @@ var files = (function(editor) {
 	        line: cursor.line,
 	        ch: line.length - 1 // set the character position to the end of the line
 	    }
+	    console.log(pos);
 	    doc.replaceRange('\n'+data+'\n', pos); // adds a new line
 	}
     var handleFiles = function(datas){

@@ -31,6 +31,11 @@ public class News extends BaseEntity {
 	 */
 	private String lockId;
 
+	/**
+	 * @since 7.0
+	 */
+	private Editor editor;
+
 	public String getContent() {
 		return content;
 	}
@@ -97,6 +102,14 @@ public class News extends BaseEntity {
 
 	public boolean hasLock() {
 		return lockId != null;
+	}
+
+	public Editor getEditor() {
+		return editor;
+	}
+
+	public void setEditor(Editor editor) {
+		this.editor = editor;
 	}
 
 }

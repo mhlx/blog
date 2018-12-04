@@ -46,8 +46,21 @@
 							</div>
 							<form id="editForm">
 								<div class="form-group">
-									<label>内容</label>
-									<div id="newsEditor" class="spell"></div>
+									<label>内容</label> 
+									<div style="font-size:2rem">
+									<a href="javascript:void(0)" style="margin-right:10px"><i
+										onclick="previewNews($(this))" class="fas fa-eye icon"></i></a>
+										 <a href="javascript:void(0)" onclick="insertFiles()"><i class="fas fa-file icon"></i></a>
+									</div>
+									<div id="editor-content"
+										style="position: relative; height: 310px">
+										<textarea class="form-control" cols="8" rows="8"
+											placeholder="(0~2000字符)" id="editor"></textarea>
+									</div>
+									<div id="editor-rendered" class="markdown-body"
+										style="display: none; min-height: 300px; max-height: 800px; overflow-y: auto">
+
+									</div>
 								</div>
 								<div class="form-group">
 									<label>时间</label> <input type="text" class="form-control"
@@ -113,10 +126,31 @@
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
-	<script type="text/javascript"
-		th:src="@{/static/pell-1.0.4/dist/pell.js}"></script>
+	<script th:src="@{/static/codemirror/lib/codemirror.js??v=7.0}"></script>
+	<script th:src="@{/static/codemirror/addon/mode/overlay.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/mode/javascript/javascript.js?v=7.0}"></script>
+	<script th:src="@{/static/codemirror/mode/css/css.js?v=7.0}"></script>
+	<script th:src="@{/static/codemirror/mode/xml/xml.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/mode/htmlmixed/htmlmixed.js?v=7.0}"></script>
+	<script th:src="@{/static/codemirror/mode/markdown/markdown.js?v=7.0}"></script>
+	<script th:src="@{/static/codemirror/mode/gfm/gfm.js?v=7.0}"></script>
+	<script th:src="@{/static/codemirror/addon/dialog/dialog.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/search/searchcursor.js?v=7.0}"></script>
+	<script th:src="@{/static/codemirror/addon/search/search.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/scroll/annotatescrollbar.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/search/matchesonscrollbar.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/search/jump-to-line.js?v=7.0}"></script>
+	<script th:src="@{/static/console/markdowniteditor/md.js?v=7.0}"></script>
 	<script type="text/javascript" th:src="@{/static/js/file.js}"></script>
-	<script type="text/javascript" th:src="@{/static/console/js/news.js?v=0.2}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/console/js/news.js?v=0.3}"></script>
+	<script th:src="@{/static/console/markdowniteditor/editor/file.js?v=7.0}"></script>
 </body>
 
 </html>

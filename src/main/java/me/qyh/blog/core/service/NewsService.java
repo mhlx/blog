@@ -50,6 +50,14 @@ public interface NewsService {
 	Optional<News> getNews(Integer id);
 
 	/**
+	 * 查询指定的动态(不会转化内容)
+	 * 
+	 * @param id
+	 * @return
+	 */
+	Optional<News> getNewsForEdit(Integer id);
+
+	/**
 	 * 删除指的动态
 	 * 
 	 * @param id

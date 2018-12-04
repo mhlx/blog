@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import me.qyh.blog.core.entity.Article;
 import me.qyh.blog.core.entity.Article.ArticleStatus;
-import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.security.AuthencationException;
@@ -120,14 +119,6 @@ public interface ArticleService {
 	 * @return 标签集
 	 */
 	List<TagCount> queryTags();
-
-	/**
-	 * 用来处理预览文章，比如将markdown转化为html
-	 * 
-	 * @param article
-	 *            预览文章
-	 */
-	String createPreviewContent(Editor editor, String content);
 
 	/**
 	 * 更新文章

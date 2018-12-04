@@ -155,6 +155,7 @@ CREATE TABLE IF NOT EXISTS `blog_news` (
   `news_update` datetime DEFAULT NULL,
   `news_hits` int NOT NULL DEFAULT 0,
   `news_lock` varchar(40)  DEFAULT NULL,
+  `news_editor` int NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
 )
 

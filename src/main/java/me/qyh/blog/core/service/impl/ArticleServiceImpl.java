@@ -54,7 +54,6 @@ import me.qyh.blog.core.service.ArticleService;
 import me.qyh.blog.core.service.CommentServer;
 import me.qyh.blog.core.service.HitsStrategy;
 import me.qyh.blog.core.service.LockManager;
-import me.qyh.blog.core.text.CommonMarkdown2Html;
 import me.qyh.blog.core.text.Markdown2Html;
 import me.qyh.blog.core.util.Times;
 import me.qyh.blog.core.util.Validators;
@@ -106,7 +105,7 @@ public class ArticleServiceImpl
 
 	private ArticleHitManager articleHitManager;
 
-	@Autowired(required = false)
+	@Autowired
 	private Markdown2Html markdown2Html;
 
 	private final List<ArticleHitHandler> hitHandlers = new ArrayList<>();
@@ -609,17 +608,6 @@ public class ArticleServiceImpl
 		return articleStatistics;
 	}
 
-	@Override
-	public String createPreviewContent(Editor editor, String content) {
-		if (Editor.MD.equals(editor)) {
-			return markdown2Html.toHtml(content);
-		}
-		if (articleContentHandler != null) {
-			return articleContentHandler.handlePreview(content);
-		}
-		return content;
-	}
-
 	@EventListener
 	public void handleLockDeleteEvent(LockDelEvent event) {
 		if (articleDao.checkExistsByLockId(event.getLock().getId())) {
@@ -661,10 +649,6 @@ public class ArticleServiceImpl
 
 		if (commentServer == null) {
 			commentServer = EmptyCommentServer.INSTANCE;
-		}
-
-		if (markdown2Html == null) {
-			markdown2Html = CommonMarkdown2Html.INSTANCE;
 		}
 
 		if (publishSchedulePeriodSec <= 0) {

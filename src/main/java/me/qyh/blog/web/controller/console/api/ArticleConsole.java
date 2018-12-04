@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
@@ -17,13 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.qyh.blog.core.config.ConfigServer;
 import me.qyh.blog.core.entity.Article;
 import me.qyh.blog.core.entity.Article.ArticleStatus;
-import me.qyh.blog.core.entity.Editor;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.service.ArticleService;
 import me.qyh.blog.core.util.Validators;
@@ -94,12 +91,6 @@ public class ArticleConsole extends BaseMgrController {
 	public ResponseEntity<Article> write(@RequestBody @Validated Article article) throws LogicException {
 		Article saved = articleService.writeArticle(article);
 		return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-	}
-
-	@PostMapping("article/preview")
-	public ResponseEntity<String> createPreviewContent(@RequestParam("content") String content) throws LogicException {
-		String previewContent = articleService.createPreviewContent(Editor.MD, content);
-		return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.TEXT_PLAIN).body(previewContent);
 	}
 
 	@DeleteMapping("article/{id}")
