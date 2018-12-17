@@ -16,7 +16,7 @@ var table = datatable("pageTable", {
 	},{
 		bind : 'space',
 		render:function(v,d){
-			return v ? v.name : '默认' ;
+			return v ? v.name : (d.spaceGlobal ? '各个空间(除默认)' : '默认') ;
 		}
 	},{
 		bind : 'enable',

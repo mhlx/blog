@@ -71,14 +71,6 @@ public class ArticleMgrController extends BaseMgrController {
 		// return "mgr/article/write/editor";
 	}
 
-	/**
-	 * @since 2017/12/2
-	 */
-	@GetMapping("new/preview")
-	public String mdPreview() {
-		return "console/article/write/new_preview";
-	}
-
 	@GetMapping("edit/{id}")
 	public String update(@PathVariable("id") Integer id, RedirectAttributes ra, Model model) {
 		Optional<Article> optional = articleService.getArticleForEdit(id);

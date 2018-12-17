@@ -6,6 +6,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import me.qyh.blog.core.context.Environment;
+import me.qyh.blog.core.util.StringUtils;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.core.validator.UserValidator;
 import me.qyh.blog.plugin.comment.entity.Comment;
@@ -14,10 +15,8 @@ import me.qyh.blog.plugin.comment.entity.Comment;
 public class CommentValidator implements Validator {
 
 	private static final int MAX_COMMENT_LENGTH = 500;
-	static final int MAX_NAME_LENGTH = 20;
+	static final int MAX_NAME_LENGTH = 8;
 	private static final int MAX_WEBSITE_LENGTH = 50;
-
-	static final String NAME_PATTERN = "^[\u4e00-\u9fa5a-zA-Z0-9]+$";
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -57,20 +56,12 @@ public class CommentValidator implements Validator {
 			}
 			comment.setEmail(email);
 
-			String name = comment.getNickname();
-			if (Validators.isEmptyOrNull(name, true)) {
-				errors.reject("comment.nickname.blank", "昵称不能为空");
+			String finalName = validateName(comment.getNickname(), errors);
+			if (errors.hasErrors()) {
 				return;
 			}
-			if (name.length() > MAX_NAME_LENGTH) {
-				errors.reject("comment.nickname.toolong", new Object[] { MAX_NAME_LENGTH },
-						"昵称不能超过" + MAX_NAME_LENGTH + "位");
-				return;
-			}
-			if (!name.matches(NAME_PATTERN)) {
-				errors.reject("comment.nickname.invalid", "昵称不被允许");
-				return;
-			}
+
+			comment.setNickname(finalName);
 
 			String website = comment.getWebsite();
 			if (!Validators.isEmptyOrNull(website, true)) {
@@ -98,5 +89,23 @@ public class CommentValidator implements Validator {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	static String validateName(String name, Errors errors) {
+		if (Validators.isEmptyOrNull(name, true)) {
+			errors.reject("comment.nickname.blank", "昵称不能为空");
+			return null;
+		}
+		if (name.length() > MAX_NAME_LENGTH) {
+			errors.reject("comment.nickname.toolong", new Object[] { MAX_NAME_LENGTH },
+					"昵称不能超过" + MAX_NAME_LENGTH + "位");
+			return null;
+		}
+		String finalName = StringUtils.removeAllSpace(name);
+		if (finalName.isEmpty()) {
+			errors.reject("comment.nickname.blank", "昵称不能为空");
+			return null;
+		}
+		return finalName;
 	}
 }

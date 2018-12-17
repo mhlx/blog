@@ -1,5 +1,5 @@
 var querier = (function($) {
-	var names = [ 'doc', 'data_archives.md', 'data_articeNav.md',
+	var names = ['data_archives.md', 'data_articeNav.md',
 			'data_article.md', 'data_articlePage.md',
 			'data_articleStatistics.md', 'data_articleTag.md',
 			'data_commentCount.md', 'data_commentStatistics.md',
@@ -28,7 +28,6 @@ var querier = (function($) {
 			url : root + 'doc/' + name,
 			dataType : "text",
 			success : function(data) {
-				var md = window.markdownit();
 				var result = md.render(data);
 				cache.push({
 					'name' : name,
@@ -92,9 +91,6 @@ var querier = (function($) {
 							result += '</code></pre>';
 							cb(result);
 						} else {
-							var md = window.markdownit({
-								html : true
-							});
 							var result = md.render(data);
 							cb(result);
 						}

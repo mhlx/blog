@@ -129,4 +129,23 @@ public final class StringUtils {
 	public static String uuid() {
 		return UUID.randomUUID().toString().replace("-", "");
 	}
+
+	/**
+	 * 删除字符串中所有的空格
+	 * 
+	 * @param toRemove
+	 * @return
+	 */
+	public static String removeAllSpace(String toRemove) {
+		if (toRemove == null) {
+			return null;
+		}
+		StringBuilder sb = new StringBuilder();
+		for (char ch : toRemove.toCharArray()) {
+			if (!Character.isWhitespace(ch)) {
+				sb.append(ch);
+			}
+		}
+		return sb.toString();
+	}
 }

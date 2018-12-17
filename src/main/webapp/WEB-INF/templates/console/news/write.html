@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+
+<head th:replace="console/base/head :: head('动态管理','console/news/head')"></head>
+
+<body id="page-top">
+
+	<nav th:replace="console/base/nav"></nav>
+	<div th:replace="console/base/mobile_nav"></div>
+
+	<div id="wrapper">
+
+		<!--sidebar-->
+		<ul th:replace="console/base/sidebar :: active('data')"></ul>
+
+		<div id="content-wrapper">
+
+			<div class="container-fluid">
+
+				<div class="card mb-3">
+					<div class="card-header">
+						<i class="fas fa-table"></i>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-8 offset-md-2">
+								<div style="margin-bottom: 10px">
+									<a class="btn btn-primary" th:href="@{/console/news}">关闭</a>
+									<button class="btn btn-primary" id="saveNews">保存</button>
+								</div>
+								<form id="editForm">
+									<div class="form-group">
+										<label>内容</label>
+										<div style="font-size: 2rem">
+											<a href="javascript:void(0)" style="margin-right: 10px"><i
+												onclick="previewNews($(this))" class="fas fa-eye icon"></i></a>
+											<a href="javascript:void(0)" style="margin-right: 10px" onclick="insertFiles()"><i
+												class="fas fa-file icon"></i></a>
+											<a href="javascript:void(0)" style="margin-right: 10px" onclick="insertLink()"><i
+												class="fas fa-link icon"></i></a>
+										</div>
+										<div id="editor-content"
+											style="position: relative;">
+											<textarea class="form-control" cols="8" rows="8"
+												placeholder="(0~2000字符)" id="editor"
+												th:text="${news.content}"></textarea>
+										</div>
+										<div id="editor-rendered" class="markdown-body"
+											style="display: none; min-height: 300px; max-height: 800px; overflow-y: auto">
+
+										</div>
+									</div>
+									<div class="form-group">
+										<label>时间</label> <input type="text" class="form-control"
+											id="time"
+											th:value="${news.write != null ? times.format(news.write,'yyyy-MM-dd HH:mm:ss') : ''}">
+									</div>
+									<div class="form-group">
+										<label>访问锁</label> <select id="lock" class="form-control">
+											<option value="">无</option>
+										</select>
+									</div>
+
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox"
+											id="allowComment" checked="checked"> <label
+											class="form-check-label"> 允许评论 </label>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="isPrivate">
+										<label class="form-check-label"> 私人 </label>
+									</div>
+									<input type="hidden" id="id" th:if="${news.id != null}"
+										th:value="${news.id}" />
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<!-- /.container-fluid -->
+
+			<!-- Sticky Footer -->
+
+			<div th:replace="console/base/footer"></div>
+
+		</div>
+
+	</div>
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<div th:replace="console/base/foot"></div>
+	<script type="text/javascript"
+		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
+	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
+	<script th:src="@{/static/console/markdowniteditor/md.js?v=7.0}"></script>
+	<script type="text/javascript" th:src="@{/static/js/file.js}"></script>
+	<script>
+		var editor = $("#editor");
+	</script>
+	<script>
+		var mode = $("#id").length > 0 ? 'update' : 'write';
+		$.ajax({
+			url : root + 'api/console/locks',
+			success : function(data) {
+				var locks = data;
+				if (locks.length > 0) {
+					var html = '';
+					for (var i = 0; i < locks.length; i++) {
+						var lock = locks[i];
+						html += '<option value="' + lock.id + '">' + lock.name
+								+ '</option>';
+					}
+					$("#lock").append(html);
+					if(mode == 'update'){
+						$("#lock").val('[[${news.lockId}]]');
+					}
+				}
+			},
+			error : function(jqXHR) {
+				swal('获取锁失败', $.parseJSON(jqXHR.responseText).error, 'error');
+			}
+		})
+		function previewNews(o) {
+			var content = editor.val();
+			var html = md.render(content);
+			o.removeClass("fa-eye").addClass("fa-eye-slash").attr("onclick",
+					"inputNews($(this))");
+			$("#editor-content").hide();
+			$("#editor-rendered").html(html).show();
+		}
+
+		function inputNews(o) {
+			o.removeClass("fa-eye-slash").addClass("fa-eye").attr("onclick",
+					"previewNews($(this))");
+			$("#editor-rendered").html('').hide();
+			$("#editor-content").show();
+		}
+		$("#saveNews").click(function() {
+			var me = $(this);
+			me.prop('disabled', true);
+			var news = {};
+			news.editor = 'MD';
+			news.content = editor.val();
+			var lockId = $("#lock").val();
+			if (lockId != '')
+				news.lockId = lockId;
+			news.write = $("#time").val();
+			news.allowComment = $("#allowComment").is(":checked");
+			news.isPrivate = $("#isPrivate").is(":checked");
+			if (mode == 'update') {
+				news.id = $("#id").val();
+			}
+			if (mode == 'write') {
+				$.ajax({
+					type : "post",
+					url : root + "api/console/news",
+					contentType : "application/json",
+					data : JSON.stringify(news),
+					complete : function(jqXHR, textStatus, errorThrown) {
+						var code = jqXHR.status;
+						if (code == 201) {
+							me.prop("disabled", false);
+							swal('动态添加成功', '', 'success');
+							window.location.href = root+'console/news';
+						} else {
+							me.prop("disabled", false);
+							var data = $.parseJSON(jqXHR.responseText);
+							swal('添加失败', data.error, 'error');
+						}
+					}
+				});
+			} else {
+				$.ajax({
+					type : "PUT",
+					url : root + "api/console/news/" + news.id,
+					contentType : "application/json",
+					data : JSON.stringify(news),
+					success : function(data) {
+						me.prop("disabled", false);
+						swal('动态更新成功', '', 'success');
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						me.prop("disabled", false);
+						var data = $.parseJSON(jqXHR.responseText);
+						swal('更新失败', data.error, 'error');
+					}
+				});
+			}
+		});
+		if (mode == 'write')
+			$("#time").val(moment().format("YYYY-MM-DD HH:mm"));
+		if(mode == 'update'){
+			if('[[${news.isPrivate}]]' == 'true'){
+				$("#isPrivate").prop('checked',true);
+			}
+			if('[[${news.allowComment}]]' == 'true'){
+				$("#allowComment").prop('checked',true);
+			}else{
+				$("#allowComment").prop('checked',false);
+			}
+			
+		}
+	var pos;
+		function insertFiles() {
+			pos = editor.prop("selectionStart");
+			fileChooser.choose(function(datas){
+				var content = '';
+				for(var i=0;i<datas.length;i++){
+		    		var data = datas[i];
+		    		 var cf = data.cf;
+		             var ext = cf.extension.toLowerCase();
+		             if ($.inArray(ext, ['jpeg', 'jpg', 'png', 'gif']) == -1) {
+		                 if (ext == 'mp4' || ext == 'mov') {
+		                	 (async function getPoster () {
+		                		 const {value: poster} = await Swal({
+		                    		  title: '输入封面地址',
+		                    		  input: 'text',
+		                    		  inputValue: cf.url,
+		                    		  showCancelButton: true,
+		                    		  confirmButtonText:'确定',
+		                    		  canecelButtonText:'取消'
+		                    		});
+		                		 if(poster){
+		                			 insertAtCursor('<video src="'+cf.url+'" poster="'+poster+'" controls></video>\r\n');
+		                		 }
+		                	 })()
+		                 } else {
+		                	 content += ('[' + cf.originalFilename + '](' + cf.url + ')');
+		                 }
+		             } else {
+		                 var thumb = cf.thumbnailUrl;
+		                 if (thumb) {
+		                	 content += ('[![' + cf.originalFilename + '](' + thumb.middle + ')](' + thumb.large + ')\r\n\r\n');
+		                 } else {
+		                	 conten += ('![' + cf.originalFilename + '](' + cf.url + ')\r\n\r\n');
+		                 }
+		             }
+		    	}
+				insertAtCursor(content);
+			});
+		}
+		
+		function insertAtCursor(myValue) {
+			var myField = document.getElementById("editor");
+			 setTimeout(function(){
+        		 editor.focus();
+        		 if(pos){
+        			 editor.prop("selectionStart",pos);
+        			 pos = undefined;
+        		 }else{
+        			 pos = editor.prop("selectionStart");
+        		 }
+        		  if (document.selection) {
+      		        myField.focus();
+      		        sel = document.selection.createRange();
+      		        sel.text = myValue;
+      		    }
+      		    else if (myField.selectionStart || myField.selectionStart == '0') {
+      		        var startPos = myField.selectionStart;
+      		        var endPos = myField.selectionEnd;
+      		        myField.value = myField.value.substring(0, startPos)
+      		            + myValue
+      		            + myField.value.substring(endPos, myField.value.length);
+      		    } else {
+      		        myField.value += myValue;
+      		    }
+        	 },200);
+		}
+		
+		function insertLink(){
+			(async function getUrl(){
+				const {value: url} = await Swal({
+				  input: 'url',
+				  inputPlaceholder: '输入地址'
+				})
+
+				if (url) {
+					insertAtCursor('[' + url + '](' + url + ')');
+				}
+			})();
+		}
+	</script>
+</body>
+
+</html>

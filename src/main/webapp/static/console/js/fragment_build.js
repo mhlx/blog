@@ -503,3 +503,88 @@ var fragment_storage = (function() {
 		editor.replaceSelection('<fragment name="'+name+'"/>');
 		$("#lookupModal").modal('hide')
 	}
+	
+	
+	
+	
+	var timeout;
+	$("#doc-search").on(
+			'paste keyup',
+			function() {
+				if($(this).val() != ''){
+					$("#doc-search-clear").show();
+				}else{
+					$("#doc-search-clear").hide();
+				}
+				var text = $.trim($(this).val());
+				if (timeout) {
+					clearTimeout(timeout);
+				}
+				timeout = setTimeout(function() {
+					if (text == '') {
+						$("#search-results").html('').hide();
+					} else {
+						querier.search(text, function(result) {
+							$("#search-results").html('').hide();
+							if (result.length > 0) {
+								$.each(result, function(i, d) {
+									$("#search-results").append(
+											'<div style="padding:3px"><a href="###" onclick="loadFile(\''
+													+ d + '\')">' + d
+													+ '</a></div>');
+								})
+								$("#search-results").show();
+							}
+						})
+					}
+				}, 100)
+			});
+
+	function loadFile(d) {
+		$("#doc-search").hide();
+		$("#search-results").hide();
+		$("#doc-search-clear").hide();
+		querier.getFile(d,function(data){
+			$("#doc-title").html(d);
+			$("#doc-content").html(data);
+			if($(window).width() <= 1024){
+				$("#doc-card").css({"max-width":($(window).width()-100)+'px'})
+			}else{
+				$("#doc-card").css({"max-width":($(window).width()/2)+'px'})
+			}
+			$("#doc-card").show();
+			renderCode();
+		})
+	}
+	
+	$("#close-doc-card").click(function(){
+		$("#doc-card").hide();
+		$("#doc-search").show();
+		if($("#doc-search").val() != ''){
+			$("#doc-search-clear").show();
+		}
+		$("#search-results").show();
+	});
+	
+	$("#doc-search-clear").click(function(){
+		$("#search-results").html('').hide();
+		$("#doc-search").val('');
+		$("#doc-search-clear").hide();
+	});
+
+	function renderCode() {
+		var p = false;
+		$("#doc-content pre").each(function() {
+			var me = $(this);
+			if (me.hasClass('prettyprint prettyprinted'))
+				return true;
+			if (me.find('code').length == 0)
+				return true;
+			else {
+				p = true;
+				me.addClass("prettyprint");
+			}
+		});
+		if (p)
+			prettyPrint();
+	}
