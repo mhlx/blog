@@ -20,9 +20,9 @@ while(!广电.ISDEAD)
 * 支持插件，让博客拥有更多功能
 * markdown编辑器
 
-### 安装需求：
-需要 **jdk 11**  
-&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;  **tomcat 7+**
+### 安装需求
+jdk 11     
+**tomcat 7+**
 
 ### 技术架构
 spring & mybatis & thymeleaf
