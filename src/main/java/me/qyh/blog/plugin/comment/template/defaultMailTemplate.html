@@ -63,11 +63,11 @@
 		<div class="panel-body">
 			<div class="media" th:each="comment : ${comments}">
 				<a class="media-left" th:href="${urls.url}+'/mgr/comment/uncheck'" th:if="${comment.status.name() == 'CHECK'}">
-					<img th:src="${comment.gravatar == null ? urls.url+'/static/img/guest.png' : gravatarPrefix+comment.gravatar}"
+					<img th:src="${comment.gravatar == null ? urls.url+'/static/img/guest.png' : 'https://secure.gravatar.com/avatar/'+comment.gravatar}"
 					style="width: 64px; height: 64px" alt="...">
 				</a>
 				<a class="media-left" th:href="${comment.url}" th:if="${comment.status.name() == 'NORMAL'}">
-					<img th:src="${comment.gravatar == null ? urls.url+'/static/img/guest.png' : gravatarPrefix+comment.gravatar}"
+					<img th:src="${comment.gravatar == null ? urls.url+'/static/img/guest.png' : 'https://secure.gravatar.com/avatar/'+comment.gravatar}"
 					style="width: 64px; height: 64px" alt="...">
 				</a>
 				<div class="media-body">

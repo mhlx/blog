@@ -156,23 +156,15 @@ body {
       	var c = $("#comments-container");
      	var _config = {
          	 pageSize:10,
-             page:1,
+             page:0,
              moduleId:[[${article.id}]],
              moduleType:'article',
              asc:true,
              container:c,
-             allowComment:[[${article.allowComment}]],
-             afterLoad:function(page){
-               if(page.totalRow>0){
-                  c.show();
-                  c.prepend('<hr>');
-               }else{
-               	  c.hide();
-               }
-             }
+             allowComment:[[${article.allowComment}]]
          }
     </script>
-	<script th:src="@{/static/plugin/comment/js/new_comment_bs4.js}"></script>
+	<script th:src="@{/static/plugin/comment/js/new_comment_bs4.js?v=1}"></script>
 	<script>
    $(function() {
             var p = false;

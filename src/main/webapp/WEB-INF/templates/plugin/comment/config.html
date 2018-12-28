@@ -49,6 +49,15 @@ td img {
 				<div class="col-md-8 offset-md-2" style="margin-bottom: 10px">
 					<form id="commentForm">
 						<div class="form-group">
+							<label>是否启用评论</label> <label class="radio-inline"> <input
+								type="radio" name="enable" value="true"
+								th:attr="checked=${config.enable ? 'checked' : null}"> 是
+							</label> <label class="radio-inline"> <input type="radio"
+								name="enable" value="false"
+								th:attr="checked=${config.enable ? null : 'checked'}"> 否
+							</label>
+						</div>
+						<div class="form-group">
 							<label>是否审核评论</label> <label class="radio-inline"> <input
 								type="radio" name="check" value="true"
 								th:attr="checked=${config.check ? 'checked' : null}"> 是
@@ -113,27 +122,46 @@ td img {
 	<div th:replace="console/base/foot"></div>
 
 	<script>
-	$(document).ready(function() {
-		$("#update").click(function() {
-			var data = $("#commentForm").serializeObject();
-			$.ajax({
-				type : "PUT",
-				url : root + "api/console/commentConfig",
-				data : JSON.stringify(data),
-				dataType : "json",
-				contentType : 'application/json',
-				success : function(data) {
-					swal('修改成功','','success')
-				},
-				error:function(jqXHR){
-					swal('修改失败',$.parseJSON(jqXHR.responseText).error,'error')
-				},
-				complete : function() {
-					$("#update").prop("disabled", false);
-				}
-			});
-		});
-	});
+		$(document)
+				.ready(
+						function() {
+							$("#update")
+									.click(
+											function() {
+												var data = $("#commentForm")
+														.serializeObject();
+												$
+														.ajax({
+															type : "PUT",
+															url : root
+																	+ "api/console/commentConfig",
+															data : JSON
+																	.stringify(data),
+															dataType : "json",
+															contentType : 'application/json',
+															success : function(
+																	data) {
+																swal('修改成功',
+																		'',
+																		'success')
+															},
+															error : function(
+																	jqXHR) {
+																swal(
+																		'修改失败',
+																		$
+																				.parseJSON(jqXHR.responseText).error,
+																		'error')
+															},
+															complete : function() {
+																$("#update")
+																		.prop(
+																				"disabled",
+																				false);
+															}
+														});
+											});
+						});
 	</script>
 
 </body>

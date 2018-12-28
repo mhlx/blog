@@ -18,10 +18,23 @@ public class ImportRecord implements Serializable {
 	private final boolean success;
 	private final Message message;
 
+	private ImportType type;
+
+	public enum ImportType {
+		NEW, EDIT, NOCHANGE;
+	}
+
 	public ImportRecord(boolean success, Message message) {
 		super();
 		this.success = success;
 		this.message = message;
+	}
+
+	public ImportRecord(ImportType type, Message message) {
+		super();
+		this.success = true;
+		this.message = message;
+		this.type = type;
 	}
 
 	public boolean isSuccess() {
@@ -30,6 +43,14 @@ public class ImportRecord implements Serializable {
 
 	public Message getMessage() {
 		return message;
+	}
+
+	public ImportType getType() {
+		return type;
+	}
+
+	public void setType(ImportType type) {
+		this.type = type;
 	}
 
 }

@@ -13,15 +13,14 @@
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/lib/codemirror.css?v=7.0}">
 <link rel="stylesheet"
-	th:href="@{/static/codemirror/theme/base16-light.css?v=7.0}">
-<link rel="stylesheet"
 	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css?v=7.0}">
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/addon/dialog/dialog.css?v=7.0}">
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css?v=7.0}">
 <link rel="stylesheet" th:href="@{/static/css/markdown.css?v=7.0}">
-<link rel="stylesheet" th:href="@{/static/prettify/github-v2.min.css?v=7.0}">
+<link rel="stylesheet"
+	th:href="@{/static/prettify/github-v2.min.css?v=7.0}">
 <link th:href="@{/static/fontawesome-free/css/all.min.css?v=7.0}"
 	rel="stylesheet">
 <style>
@@ -73,6 +72,7 @@
 	width: auto;
 	height: auto;
 	background-color: #f9f9f7;
+	font-size: 1.5rem;
 }
 
 .CodeMirror-scroll {
@@ -126,15 +126,15 @@ body {
 <body>
 	<div>
 		<div id="toolbar">
-		<i class="fas fa-backward icon" style="color: #ffc107" title="回退"
-				onclick="back()"></i>
-			<i class="fas fa-save icon" style="color: red" title="保存"
-				onclick="showBase()"></i><i class="fas fa-file icon" title="文件"
-				onclick="files.get()"></i> <i class="fas fa-question-circle icon"
-				data-toggle="modal" data-target="#helpModal"></i> <i
-				class="far fa-check-square icon" onclick="toggleToolbar($(this))"
-				id="toggle-toolbar"></i> <i class="far fa-window-maximize icon"
-				data-to-fullscreen id="fullscreen-icon"></i>
+			<i class="fas fa-backward icon" style="color: #ffc107" title="回退"
+				onclick="back()"></i> <i class="fas fa-save icon" style="color: red"
+				title="保存" onclick="showBase()"></i><i class="fas fa-file icon"
+				title="文件" onclick="files.get()"></i> <i
+				class="fas fa-question-circle icon" data-toggle="modal"
+				data-target="#helpModal"></i> <i class="far fa-check-square icon"
+				onclick="toggleToolbar($(this))" id="toggle-toolbar"></i> <i
+				class="far fa-window-maximize icon" data-to-fullscreen
+				id="fullscreen-icon"></i>
 			<div style="float: right; display: none" id="saveTip"></div>
 		</div>
 		<div id="in" style="display: none">
@@ -332,12 +332,9 @@ public static void main(String [] args){
 						<div class="form-group">
 							<label>摘要 </label> <a href="javascript:void(0)"><i
 								onclick="previewSummary($(this))" class="fas fa-eye icon"></i></a>
-							<div id="summary-content"
-								style="position: relative; height: 310px">
-								<textarea class="form-control" cols="8" rows="8"
-									placeholder="(0~2000字符)" id="summary"
-									th:text="${article.summary}"></textarea>
-							</div>
+							<textarea class="form-control" cols="8" rows="8"
+								placeholder="(0~2000字符)" id="summary"
+								th:text="${article.summary}"></textarea>
 							<div id="summary-rendered" class="markdown-body"
 								style="display: none; max-height: 300px; overflow-y: auto">
 
@@ -438,20 +435,25 @@ public static void main(String [] args){
 	<div th:replace="console/base/foot"></div>
 	<script th:src="@{/static/codemirror/lib/codemirror.js??v=7.0}"></script>
 	<script th:src="@{/static/codemirror/addon/mode/overlay.js?v=7.0}"></script>
-	<script th:src="@{/static/codemirror/mode/javascript/javascript.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/mode/javascript/javascript.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/mode/css/css.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/mode/xml/xml.js?v=7.0}"></script>
-	<script th:src="@{/static/codemirror/mode/htmlmixed/htmlmixed.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/mode/htmlmixed/htmlmixed.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/mode/markdown/markdown.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/mode/gfm/gfm.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/addon/dialog/dialog.js?v=7.0}"></script>
-	<script th:src="@{/static/codemirror/addon/search/searchcursor.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/search/searchcursor.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/addon/search/search.js?v=7.0}"></script>
+	<script th:src="@{/static/codemirror/addon/edit/continuelist.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/codemirror/addon/scroll/annotatescrollbar.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/codemirror/addon/search/matchesonscrollbar.js?v=7.0}"></script>
-	<script th:src="@{/static/codemirror/addon/search/jump-to-line.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/search/jump-to-line.js?v=7.0}"></script>
 	<script type="text/javascript"
 		th:src="@{/static/jquery-file-upload/js/load-image.min.js?v=7.0}"></script>
 	<script type="text/javascript"
@@ -460,7 +462,8 @@ public static void main(String [] args){
 		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js?v=7.0}"></script>
-	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js?v=7.0}"></script>
 	<script
@@ -476,13 +479,15 @@ public static void main(String [] args){
 	<script type="text/javascript" th:src="@{/static/js/file.js?v=7.0}"></script>
 	<script type="text/javascript"
 		th:src="@{/static/console/js/dirChooser.js?v=7.0}"></script>
-	<script type="text/javascript" th:src="@{/static/console/js/emoji.js?v=7.0}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/console/js/emoji.js?v=7.0}"></script>
 	<script th:src="@{/static/console/markdowniteditor/md.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/console/markdowniteditor/markdown/turndown.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/console/markdowniteditor/markdown/turndown-plugin-gfm.js?v=7.0}"></script>
-	<script th:src="@{/static/console/markdowniteditor/waitForImages.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/console/markdowniteditor/waitForImages.js?v=7.0}"></script>
 	<script th:src="@{/static/prettify/prettify.js}"></script>
 	<script>
 		var config = {
@@ -508,19 +513,22 @@ public static void main(String [] args){
         var turndownService = new window.TurndownService()
         turndownService.use(window.turndownPluginGfm.gfm);
     </script>
-	<script th:src="@{/static/console/markdowniteditor/editor/sync.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/console/markdowniteditor/editor/sync.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/console/markdowniteditor/editor/custom_search.js?v=7.0}"></script>
 
-	<script th:src="@{/static/console/markdowniteditor/editor/file.js?v=7.0}"></script>
+	<script
+		th:src="@{/static/console/markdowniteditor/editor/file.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/console/markdowniteditor/editor/copy_helper.js?v=7.0}"></script>
 	<script
-		th:src="@{/static/console/markdowniteditor/editor/inner_bar.js?v=7.0}"></script>
+		th:src="@{/static/console/markdowniteditor/editor/inner_bar.js?v=7.1.3}"></script>
 	<script
 		th:src="@{/static/console/markdowniteditor/editor/layout.js?v=7.0}"></script>
 	<script
-		th:src="@{/static/console/markdowniteditor/article_editor.js?v=7.0.1}"></script>
-	<script th:src="@{/static/console/markdowniteditor/article_md.js?v=7.0}"></script>
+		th:src="@{/static/console/markdowniteditor/article_editor.js?v=7.1.2}"></script>
+	<script
+		th:src="@{/static/console/markdowniteditor/article_md.js?v=7.1.1}"></script>
 </body>
 </html>

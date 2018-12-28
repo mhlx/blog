@@ -96,6 +96,7 @@ import me.qyh.blog.template.vo.ExportPage;
 import me.qyh.blog.template.vo.ExportPages;
 import me.qyh.blog.template.vo.FragmentQueryParam;
 import me.qyh.blog.template.vo.ImportRecord;
+import me.qyh.blog.template.vo.ImportRecord.ImportType;
 import me.qyh.blog.template.vo.PageStatistics;
 import me.qyh.blog.template.vo.PreviewImport;
 import me.qyh.blog.template.vo.TemplatePageQueryParam;
@@ -497,7 +498,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 						}
 					}
 
-					records.add(new ImportRecord(true, new Message("import.insert.page.success",
+					records.add(new ImportRecord(ImportType.NEW, new Message("import.insert.page.success",
 							"插入页面" + page.getName() + "[" + page.getAlias() + "]成功", page.getName(), page.getAlias())));
 					pageEvitKeySet.add(templateName);
 				} else {
@@ -521,14 +522,14 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 								return records;
 							}
 						}
-						records.add(new ImportRecord(true,
+						records.add(new ImportRecord(ImportType.EDIT,
 								new Message("import.update.page.success",
 										"更新页面" + page.getName() + "[" + page.getAlias() + "]成功", page.getName(),
 										page.getAlias())));
 
 						pageEvitKeySet.add(templateName);
 					} else {
-						records.add(new ImportRecord(true,
+						records.add(new ImportRecord(ImportType.NOCHANGE,
 								new Message("import.page.nochange",
 										"页面" + page.getName() + "[" + page.getAlias() + "]内容没有发生变化，无需更新",
 										page.getName(), page.getAlias())));
@@ -549,7 +550,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 					Fragment currentFragment = optionalFragment.get();
 					// 模版内容没有发生改变，无需变动
 					if (currentFragment.getTpl().equals(fragment.getTpl())) {
-						records.add(new ImportRecord(true, new Message("import.fragment.nochange",
+						records.add(new ImportRecord(ImportType.NOCHANGE, new Message("import.fragment.nochange",
 								"模板片段" + fragmentName + "内容没有发生变化，无需更新", fragmentName)));
 					} else {
 						// 如果是内置模板片段，插入新模板片段
@@ -562,8 +563,9 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 							} else {
 								currentFragment.setTpl(fragment.getTpl());
 								fragmentDao.update(currentFragment);
-								records.add(new ImportRecord(true, new Message("import.update.fragment.success",
-										"模板片段" + fragmentName + "更新成功", fragmentName)));
+								records.add(
+										new ImportRecord(ImportType.EDIT, new Message("import.update.fragment.success",
+												"模板片段" + fragmentName + "更新成功", fragmentName)));
 							}
 						}
 						fragmentEvitKeySet.add(fragmentName);
@@ -719,7 +721,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		fragment.setTpl(toImport.getTpl());
 		fragment.setSpace(toImport.getSpace());
 		fragmentDao.insert(fragment);
-		records.add(new ImportRecord(true,
+		records.add(new ImportRecord(ImportType.NEW,
 				new Message("import.insert.tpl.success", "模板" + toImport.getName() + "插入成功", toImport.getName())));
 	}
 

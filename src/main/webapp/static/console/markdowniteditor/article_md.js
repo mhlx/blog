@@ -1,25 +1,6 @@
 var publishing = false;
 var tags = [];
 
-var summaryEditor = CodeMirror.fromTextArea(document.getElementById('summary'),
-		{
-			mode : 'gfm',
-			lineNumbers : false,
-			matchBrackets : true,
-			lineWrapping : true,
-			theme : 'base16-light',
-			dragDrop : false,
-			extraKeys : {
-				"Enter" : "newlineAndIndentContinueMarkdownList",
-				"Alt-F" : "findPersistent",
-				"Ctrl-A" : "selectAll"
-			}
-		});
-
-$("#baseModal .CodeMirror").css({
-	"height" : "300px"
-});
-
 function showBase() {
 	$("#baseModal").modal('show');
 }
@@ -146,11 +127,6 @@ $(function() {
 	});
 
 	$("#baseModal").on("shown.bs.modal", function() {
-		summaryEditor.refresh();
-	});
-
-	$("#stackeditModal").on('hidden.bs.modal', function() {
-		showStackedit();
 	});
 
 });
@@ -183,7 +159,7 @@ function getArticle() {
 	article.allowComment = $("#allowComment").prop("checked");
 	article.tags = tags;
 	article.featureImage = $("#featureImage").val();
-	article.summary = summaryEditor.getValue();
+	article.summary = $("#summary").val();
 	article.space = {
 		"id" : $("#space").val()
 	};
@@ -377,7 +353,7 @@ function showAutoSaveTip(time) {
 }
 
 function previewSummary(o) {
-	var content = summaryEditor.getValue();
+	var content = $("#summary").val();
 	var html = md.render(content);
 	o.removeClass("fa-eye").addClass("fa-eye-slash").attr(
 			"onclick", "inputSummry($(this))");

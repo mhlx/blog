@@ -97,6 +97,9 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	private static final String COMMENT_PAGESIZE = "commentConfig.pageSize";
 	private static final String COMMENT_NICKNAME = "commentConfig.nickname";
 
+	// @since 7.1
+	private static final String COMMENT_ENABLE = "commentConfig.enable";
+
 	private final Comparator<Comment> ascCommentComparator = Comparator.comparing(Comment::getCommentDate)
 			.thenComparing(Comment::getId);
 	private final Comparator<Comment> descCommentComparator = (t1, t2) -> -ascCommentComparator.compare(t1, t2);
@@ -174,6 +177,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		pros.setProperty(COMMENT_LIMIT_SEC, config.getLimitSec().toString());
 		pros.setProperty(COMMENT_PAGESIZE, String.valueOf(config.getPageSize()));
 		pros.setProperty(COMMENT_NICKNAME, config.getNickname());
+		pros.setProperty(COMMENT_ENABLE, String.valueOf(config.isEnable()));
 		try (OutputStream os = new FileOutputStream(configResource.getFile())) {
 			pros.store(os, "");
 		} catch (IOException e) {
@@ -201,6 +205,11 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Comment insertComment(Comment comment) throws LogicException {
+
+		if (!Environment.hasAuthencated() && !config.isEnable()) {
+			throw new LogicException("comment.disable", "评论未启用");
+		}
+
 		CommentModule module = comment.getCommentModule();
 
 		CommentModuleHandler handler = handlerMap.get(module.getModule());
@@ -687,6 +696,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		config.setLimitSec(Integer.parseInt(pros.getProperty(COMMENT_LIMIT_SEC, "60")));
 		config.setPageSize(Integer.parseInt(pros.getProperty(COMMENT_PAGESIZE, "10")));
 		config.setNickname(pros.getProperty(COMMENT_NICKNAME, "admin"));
+		config.setEnable(Boolean.parseBoolean(pros.getProperty(COMMENT_ENABLE, "true")));
 	}
 
 	private final class CollectFilteredFilter implements Predicate<Comment> {

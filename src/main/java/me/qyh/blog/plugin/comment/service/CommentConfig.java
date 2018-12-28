@@ -19,6 +19,7 @@ public class CommentConfig {
 	private Boolean check;// 审核
 	private int pageSize;
 	private String nickname;// 管理员的昵称
+	private boolean enable;// 是否启用评论
 
 	public CommentConfig() {
 		super();
@@ -31,6 +32,7 @@ public class CommentConfig {
 		this.limitSec = source.limitSec;
 		this.pageSize = source.pageSize;
 		this.nickname = source.nickname;
+		this.enable = source.enable;
 	}
 
 	public Integer getLimitSec() {
@@ -83,5 +85,13 @@ public class CommentConfig {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public boolean isEnable() {
+		return enable;
+	}
+
+	public void setEnable(boolean enable) {
+		this.enable = enable;
 	}
 }

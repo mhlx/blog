@@ -33,15 +33,7 @@ var files = (function(editor) {
     }
     
     var updateCodeMirror = function(data){
-	    var doc = editor.getDoc();
-	    var cursor = doc.getCursor(); // gets the line number in the cursor position
-	    var line = doc.getLine(cursor.line); // get the line contents
-	    var pos = { // create a new object to avoid mutation of the original selection
-	        line: cursor.line,
-	        ch: line.length - 1 // set the character position to the end of the line
-	    }
-	    console.log(pos);
-	    doc.replaceRange('\n'+data+'\n', pos); // adds a new line
+    	editor.replaceRange('\n'+data+'\n', editor.getCursor()); // adds a new line
 	}
     var handleFiles = function(datas){
     	for(var i=0;i<datas.length;i++){

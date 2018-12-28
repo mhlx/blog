@@ -104,6 +104,9 @@ var render = (function() {
 		}
 
 	}
+	
+	var v = md.render(editor.getValue());
+	$("#out").html(v);
 
 	return {
 		md : function(ms) {
@@ -114,14 +117,12 @@ var render = (function() {
 			t = setTimeout(function() {
 				v = md.render(v);
 				$("#out").html(v);
-				renderCodeBlock();
 				sync.reset();
 			}, ms);
 		}
 	}
 })();
 
-render.md(0);
 
 var resize_t;
 $(window).resize(function() {
@@ -197,7 +198,6 @@ editor.on('scroll', function() {
 		$('#out').off('scroll');
 		editor.on('scroll', sync.doSync);
 	}
-	inner_bar.remove();
 });
 
 function toggleToolbar(o) {

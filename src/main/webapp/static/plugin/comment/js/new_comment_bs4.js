@@ -1,88 +1,6 @@
  var cmt = (function(config) {
 	 	$("<style type='text/css'> .media-content{word-break: break-all;} .media-content img {max-width: 100%; height: auto;}  </style>").appendTo("head");
-        var moduleId;
-        var parentId;
-        var moduleType;
         var commentFunction;
-        var modal = '<div class="modal" tabindex="-1" role="dialog" id="comment-modal">';
-        modal += '<div class="modal-dialog" role="document">';
-        modal += '<div class="modal-content">';
-        modal += '<div class="modal-header">';
-        modal += '<h5 class="modal-title">评论</h5>';
-        modal += '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-        modal += '</div>';
-        modal += '<div class="modal-body">';
-        modal += '<div class="alert alert-danger" style="display: none" id="comment-error-tip"></div>';
-        modal += '<form >';
-        if (!config.isLogin) {
-            modal += '<div class="form-group row" >';
-            modal += '<label class="col-sm-2 control-label">昵称</label>';
-            modal += '<div class="col-sm-10">';
-            modal += ' <input type="text" class="form-control" id="nickname" placeholder="必填">';
-            modal += ' </div>';
-            modal += '</div>';
-        }
-        modal += '<div class="form-group row" >';
-        modal += '<label class="col-sm-2 control-label">内容</label>';
-        modal += '<div class="col-sm-10">';
-        modal += '<p><span data-smiley style="cursor:pointer;font-size:20px">😂</span><span data-smiley style="cursor:pointer;font-size:20px">😄</span><span data-smiley style="cursor:pointer;font-size:20px">😭 </span><span data-smiley style="cursor:pointer;font-size:20px">😍</span><span data-smiley style="cursor:pointer;font-size:20px">😘</span><span data-smiley style="cursor:pointer;font-size:20px">😝</span><span data-smiley style="cursor:pointer;font-size:20px">🤬</span><span data-smiley style="cursor:pointer;font-size:20px">😴</span><span data-smiley style="cursor:pointer;font-size:20px">👿</span></p>'
-        modal += '<textarea class="form-control" id="content" style="height: 270px" placeholder="必填"></textarea>';
-        modal += '</div>';
-        modal += '</div>';
-        
-        modal += '<div class="form-group row" style="display:none" id="captchaContainer">';
-        modal += '<label class="col-sm-2 control-label"></label>';
-        modal += '<div class="col-sm-10">';
-        modal += '<img src="'+basePath+'/captcha" class="img-fluid" id="captcha-img"/>'
-        modal += ' <input type="text" class="form-control" id="comment-captcha" placeholder="验证码">';
-        modal += '</div>';
-        modal += '</div>';
-        
-        if (!config.isLogin) {
-            modal += '<p class="text text-info" style="text-align: right">';
-            modal += '<a href="javascript:void(0)" onclick="$(\'#other-info\').toggle()"><small>补充其他信息</small></a>';
-            modal += '</p>';
-            modal += '<div id="other-info" style="display: none">';
-            modal += '<div class="form-group row">';
-            modal += ' <label class="col-sm-2 control-label">邮箱</label>';
-            modal += '<div class="col-sm-10">';
-            modal += '<input type="text" class="form-control" id="email" placeholder="用于显示gravatar头像" maxlength="100">';
-            modal += '</div>';
-            modal += '</div>';
-            modal += '<div class="form-group row">';
-            modal += '<label class="col-sm-2 control-label">网址</label>';
-            modal += '<div class="col-sm-10">';
-            modal += '<input type="text" class="form-control" id="website" placeholder="">';
-            modal += '</div>';
-            modal += '</div>';
-            modal += '</div>';
-        }
-
-        modal += '</form>';
-        modal += '</div>';
-        modal += '<div class="modal-footer">';
-        modal += '<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>';
-        modal += ' <button type="button" class="btn btn-primary" id="comment-btn">提交</button>';
-        modal += '</div>';
-        modal += '</div>';
-        modal += '</div>';
-        modal += '</div>';
-        $(modal).appendTo($('body'));
-        
-        var modal = $("#comment-modal");
-        modal.on('show.bs.modal', function() {
-            loadUserInfo();
-            $.ajax({
-                url: basePath + '/api/comment/captchaRequirement',
-                success: function(data) {
-                    if (data) {
-                    	$("#captchaContainer").show();
-                    }else{
-                    	$("#captchaContainer").hide();
-                    }
-                }
-            })
-        });
         
         
         var insertAtCursor = function(myField, myValue) {
@@ -102,66 +20,11 @@
             }
         }
         
-        $('[data-smiley]').click(function(){
-        	insertAtCursor($("#content")[0],$(this).text());
-        })
         
         $("#captcha-img").click(function(){
         	$(this).attr('src',basePath+'/captcha?time='+$.now());
         });
         
-        modal.on('hidden.bs.modal', function() {
-        	editor.clear();
-            $("#comment-error-tip").html('').hide();
-            moduleId = undefined;
-            parentId = undefined;
-            moduleType = undefined;
-            commentFunction = undefined;
-        });
-        	$("#comment-btn").click(
-                function() {
-                    var me = $(this)
-                    var comment = {};
-                    comment.content = editor.get();
-                    comment.website = $("#website").val();
-                    comment.email = $("#email").val();
-                    comment.nickname = $("#nickname").val();
-                    if (parentId) {
-                        comment.parent = {
-                            id: parentId
-                        };
-                    }
-                    $.ajax({
-                        type: "post",
-                        url: actPath + '/api/'+moduleType+'/' + moduleId + '/comment?validateCode='+$("#comment-captcha").val(),
-                        contentType: "application/json",
-                        data: JSON.stringify(comment),
-                        success: function(data) {
-                        	storeUserInfo(comment.nickname,
-                                    comment.email, comment.website);
-                       	 var check = data.status == 'CHECK';
-                       	 if(!check && commentFunction){
-                       		 commentFunction();
-                       	 }
-                                $("#comment-modal").modal('hide');
-                           	if (check) {
-                                   doAlert('评论将会在审核通过后显示');
-                                   return;
-                               }
-                        },
-                        error:function(jqXHR){
-                        	var error = $.parseJSON(jqXHR.responseText).error;
-                        	 $("#comment-error-tip").html(error)
-                             .show();
-                        },
-                        complete: function() {
-                        	$("#captcha-img").attr('src',basePath+'/captcha?time='+$.now());
-                            me.prop("disabled", false);
-                        }
-                    });
-
-                });
-        	
         var confirmModal = '';
         confirmModal += '<div class="modal" tabindex="-1" role="dialog">';
         confirmModal += '<div class="modal-dialog" role="document">';
@@ -419,9 +282,6 @@
                 pageSize = 10;
             }
             var page = config.page;
-            if (!page || page < 1) {
-                page = 1;
-            }
             var c = config.container;
             c.html('<img src="'+basePath+'/static/img/loading.gif" class="img-fluid mx-auto"/>')
             $.ajax({
@@ -471,7 +331,7 @@
                             html += '<div class="media-content">';
                             html += data.content;
                             html += '</div>'
-                            html += '<p><small>' + time +
+                            html += '<div style="padding-top:5px;padding-bottom:5px"><small>' + time +
                                 '</small>';
                             if (isLogin) {
                             	if(!data.admin && !data.ban){
@@ -489,7 +349,7 @@
                                     html += '<a href="javascript:void(0)" data-moduleId="'+config.moduleId+'" data-moduletype="'+config.moduleType+'" data-conversations="'+data.id+'" style="margin-left:10px"><small>查看对话</small></a>';
                                 }
                             }
-                            html += '</p>';
+                            html += '</div>';
                             html += '</div>';
                             html += '</div>';
                         }
@@ -510,6 +370,9 @@
                         html += '</nav>';
                     }
                     c.html(html);
+                    $('html, body').animate({
+                        scrollTop: c.offset().top
+                    }, 50);
                     var afterLoad = config.afterLoad;
                     if(afterLoad){
                     	afterLoad(page);
@@ -519,20 +382,6 @@
                 }
             });
         }
-        
-        var commentConfig;
-        
-        $.ajax({
-        	
-        	url : basePath + '/api/commentConfig',
-        	async : false,
-        	success:function(data){
-        		commentConfig = data;
-        	}
-        	
-        });
-        
-        var editor ;
         
         loadCSS = function(href) {
 
@@ -546,24 +395,100 @@
         	  });
 
         };
-        
-        editor = {
-    			
-        		get:function(){
-        			return   $("#content").val();
-        		}	,
-        		clear:function(){
-        			$("#content").val('');
-        		}
-        		
-        	}
-        
+        var commentEditor;
+        var renderConfig;
         var cache = [];
         return {
-
+        	
             renderComment: function(config) {
+            	renderConfig = config;
+            	var parserLoad = false;
+            	var commentConfig;
+                $.ajax({
+                	
+                	url : basePath + '/api/commentConfig',
+                	async : false,
+                	success:function(data){
+                		commentConfig = data;
+                		var commentEditorHtml = '<div data-comment-editor style="padding:15px">';
+            	        if(!isLogin){
+            	        	commentEditorHtml += '<div class="form-group row" >';
+            	        	commentEditorHtml += '<div class="col-sm-12">';
+            	        	commentEditorHtml += ' <input type="text" class="form-control" id="nickname" placeholder="昵称，必填">';
+            	        	commentEditorHtml += ' </div>';
+            	        	commentEditorHtml += '</div>';
+            	        }
+            	        commentEditorHtml += '<div class="form-group row" >';
+            	    	commentEditorHtml += '<div class="col-sm-12">';
+            	    	if(data.editor == 'HTML'){
+            	    		if(isLogin){
+            	    			commentEditorHtml += '<small>支持所有HTML标签</small>';
+            	    		}else{
+            	    			commentEditorHtml += '<small>支持b, em, i, strong, u等标签</small>';
+            	    		}
+            	    	}else{
+            	    		if(isLogin){
+            	    			commentEditorHtml += '<small>支持所有markdown语法</small>';
+            	    		}else{
+            	    			commentEditorHtml += '<small>支持**text**,*text*语法</small>';
+            	    		}
+            	    	}
+            	    	commentEditorHtml += '<p><span data-smiley style="cursor:pointer;font-size:20px">😂</span><span data-smiley style="cursor:pointer;font-size:20px">😄</span><span data-smiley style="cursor:pointer;font-size:20px">😭 </span><span data-smiley style="cursor:pointer;font-size:20px">😍</span><span data-smiley style="cursor:pointer;font-size:20px">😘</span><span data-smiley style="cursor:pointer;font-size:20px">😝</span><span data-smiley style="cursor:pointer;font-size:20px">🤬</span><span data-smiley style="cursor:pointer;font-size:20px">😴</span><span data-smiley style="cursor:pointer;font-size:20px">👿</span></p>'
+            	    	commentEditorHtml += '<textarea class="form-control" id="content" style="height: 200px" placeholder="评论内容，必填"></textarea>';
+            	    	commentEditorHtml += '</div>';
+            	    	commentEditorHtml += '</div>';
+            	    	if (!isLogin) {
+            	    		commentEditorHtml += '<p class="text text-info" style="text-align: right">';
+            	    		commentEditorHtml += '<a href="javascript:void(0)" onclick="$(\'#other-info\').toggle()"><small>补充其他信息</small></a>';
+            	    		commentEditorHtml += '</p>';
+            	    		commentEditorHtml += '<div id="other-info" style="display: none">';
+            	    		commentEditorHtml += '<div class="form-group row">';
+            	    		commentEditorHtml += '<div class="col-sm-12">';
+            	    		commentEditorHtml += '<input type="text" class="form-control" id="email" placeholder="邮箱，非必填，用于显示gravatar头像" maxlength="100">';
+            	    		commentEditorHtml += '</div>';
+            	    		commentEditorHtml += '</div>';
+            	    		commentEditorHtml += '<div class="form-group row">';
+            	    		commentEditorHtml += '<div class="col-sm-12">';
+            	    		commentEditorHtml += '<input type="text" class="form-control" id="website" placeholder="网址，非必填">';
+            	    		commentEditorHtml += '</div>';
+            	    		commentEditorHtml += '</div>';
+            	    		commentEditorHtml += '</div>';
+            	    		
+            	    		commentEditorHtml += '<div class="form-group row" style="display:none" id="captchaContainer">';
+            	    		commentEditorHtml += '<div class="col-sm-12">';
+        	    	        commentEditorHtml += '<img src="'+basePath+'/captcha" class="img-fluid" id="captcha-img"/>'
+        	    	        commentEditorHtml += ' <input type="text" class="form-control" id="comment-captcha" placeholder="验证码">';
+        	    	        commentEditorHtml += '</div>';
+        	    	        commentEditorHtml += '</div>';
+            	        }
+            	    	commentEditorHtml += '<button class="btn btn-danger" data-comment-close>关闭</button><button class="btn btn-primary" style="float:right" data-comment-btn>提交</button>';
+            	        commentEditorHtml += '<div style="clear: both"></div>';
+            	    	commentEditorHtml += '</div>';
+            	        
+            	        commentEditor= $(commentEditorHtml);
+                		
+                		if(data.editor == 'MD'){
+                			parserLoad = typeof md != 'undefined'
+                       		 if(!parserLoad){
+                       			 var script = document.createElement('script');
+                       			 script.onload = function () {
+                       				parserLoad = true;
+                       			 };
+                       			 script.src = basePath + '/static/console/markdowniteditor/md.js';
+                       			 document.head.appendChild(script);
+                       		 }	
+                		} else {
+                			parserLoad = true;
+                		}
+                	}
+                	
+                });
+                
                 loadComment(config);
                 var c = config.container;
+                c.on('click','[data-smiley]',function(){
+                	insertAtCursor($("[data-comment-editor]").find('textarea')[0],$(this).text());
+                })
                 for(var i=0;i<cache.length;i++){
                 	if(cache[i].is(c)){
                 		return ;
@@ -596,25 +521,129 @@
                 });
                 
                 c.on('click',"[data-reply]",function(){
-                	parentId = $(this).data('reply');
-                	moduleId = $(this).data('moduleid');
-                	moduleType = $(this).data('moduletype');
-                	commentFunction = function(){
-                		loadComment(config);
+                	var me = $(this);
+                	
+                	if($('[data-comment-editor]').length > 0){
+                		 doConfirm("要放弃正在编辑的内容吗？",function(){
+                			 commentEditor.remove();
+                         	 loadReplyEditor(me);
+                		 });
+                	}else{
+                    	loadReplyEditor(me);
                 	}
-                	modal.modal('show');
                 });
+                
+                var loadReplyEditor = function(me){
+                	me.parent().after(commentEditor);
+                	commentEditor.find('input').val('');
+                	commentEditor.find('textarea').val('');
+                	var parentId = me.data('reply');
+                	var moduleId = me.data('moduleid');
+                	var moduleType = me.data('moduletype');
+	       			 var btn = commentEditor.find('button').eq(1);
+	       			 btn.attr('data-parentid',parentId);
+                	 btn.attr('data-moduleid',moduleId);
+                	 btn.attr('data-moduletype',moduleType);
+                	 $("#captcha-img").attr('src',basePath+'/captcha?time='+$.now());
+                	 loadUserInfo();
+                	 $('html, body').animate({
+                         scrollTop: commentEditor.offset().top-100
+                     }, 50);
+	                   $.ajax({
+	                       url: basePath + '/api/comment/captchaRequirement',
+	                       success: function(data) {
+	                           if (data) {
+	                           	$("#captchaContainer").show();
+	                           }else{
+	                           	$("#captchaContainer").hide();
+	                           }
+	                       }
+	                   });
+                }
+                c.on('click','[data-comment-close]',function(){
+                	doConfirm('要放弃正在编辑的内容吗?',function(){
+                		commentEditor.remove();
+                	});
+                });
+                c.on('click','[data-comment-btn]',function(){
+                	var me = $(this)
+                    var comment = {};
+                    comment.content = $("#content").val();
+                    comment.website = $("#website").val();
+                    comment.email = $("#email").val();
+                    comment.nickname = $("#nickname").val();
+                    if (me.data('parentid')) {
+                        comment.parent = {
+                            id: me.data('parentid')
+                        };
+                    }
+                    $.ajax({
+                        type: "post",
+                        url: actPath + '/api/'+me.data('moduletype')+'/' + me.data('moduleid') + '/comment?validateCode='+$("#comment-captcha").val(),
+                        contentType: "application/json",
+                        data: JSON.stringify(comment),
+                        success: function(data) {
+                        	storeUserInfo(comment.nickname,
+                                    comment.email, comment.website);
+	                       	 var check = commentConfig.status == 'CHECK';
+	                       	 if(!check){
+	                       		 if(config.asc){
+	                       			config.page = 0;
+	                       		 }
+	                       		 loadComment(config);
+	                       	 }
+	                          if (check) {
+	                               swal('评论将会在审核通过后显示','','success');
+	                           }else{
+	                        	   swal("评论成功",'','success');
+	                           }
+                        },
+                        error:function(jqXHR){
+                        	var error = $.parseJSON(jqXHR.responseText).error;
+                        	swal('提交失败',error,'error')
+                        },
+                        complete: function() {
+                        	$("#captcha-img").attr('src',basePath+'/captcha?time='+$.now());
+                            me.prop("disabled", false);
+                        }
+                    });
+                })
                 cache.push(c);
             },
             
-            doComment:function(_moduleId,_moduleType,fun){
-            	moduleId=_moduleId;
-            	moduleType=_moduleType;
-            	if(fun){
-            		commentFunction = fun;
-            	}
-            	modal.modal('show');
+            
+            doComment:function(fun){
+            	var loadCommentEditor = function(){
+                	c.prepend(commentEditor);
+                	commentEditor.find('input').val('');
+                	commentEditor.find('textarea').val('');
+                	 var btn = commentEditor.find('button').eq(1);
+	       			 btn.removeAttr('data-parentid');
+	       			 
+	       			 btn.attr('data-moduleid',renderConfig.moduleId);
+                	 btn.attr('data-moduletype',renderConfig.moduleType);
+                	 $('html, body').animate({
+                        scrollTop: commentEditor.offset().top-100
+                    }, 50);
+                	 $.ajax({
+	                       url: basePath + '/api/comment/captchaRequirement',
+	                       success: function(data) {
+	                           if (data) {
+	                           	$("#captchaContainer").show();
+	                           }else{
+	                           	$("#captchaContainer").hide();
+	                           }
+	                       }
+	                   });
+                }
+            	if($('[data-comment-editor]').length > 0){
+	           		 doConfirm("要放弃正在编辑的内容吗？",function(){
+	           			 commentEditor.remove();
+	           			loadCommentEditor();
+	           		 });
+	           	}else{
+	           		loadCommentEditor();
+	           	}
             }
-
         }
     })(config);

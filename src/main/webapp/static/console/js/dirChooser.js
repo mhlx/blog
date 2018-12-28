@@ -83,7 +83,7 @@ var dirChooser = (function(){
 			html += '<div class="row">';
 			for(var i=0;i<datas.length;i++){
 				var data = datas[i];
-				html += '<div class="col-xs-6 col-md-4">';
+				html += '<div class="col-6 col-md-4">';
 				html += '<div class="img-thumbnail text-center" style="margin-bottom:10px">';
 				html += '<a href="###" data-page="1" data-parent="'+data.id+'" "><img src="'+basePath+'static/img/folder.png" class="mx-auto" style="height:100px"/></a>';
 				html += '<div class="caption" style="height:35px">';
