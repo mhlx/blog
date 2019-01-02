@@ -23,7 +23,6 @@ var base64Upload = function(f) {
 				reader.onload = (function(theFile) {
 					return function(e) {
 						var base64 = e.target.result;
-						console.log(base64);
 						$.ajax({
 							url : basePath + 'api/console/store/'+store+'/files?base64Upload',
 							type : 'post',
@@ -107,6 +106,7 @@ var render = (function() {
 	
 	var v = md.render(editor.getValue());
 	$("#out").html(v);
+    renderCodeBlock();
 
 	return {
 		md : function(ms) {
@@ -117,6 +117,7 @@ var render = (function() {
 			t = setTimeout(function() {
 				v = md.render(v);
 				$("#out").html(v);
+                renderCodeBlock();
 				sync.reset();
 			}, ms);
 		}

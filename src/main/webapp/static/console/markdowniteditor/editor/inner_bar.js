@@ -147,7 +147,7 @@ var inner_bar = (function(editor, config) {
 	$inner_bar.on('click', '[data-quote]', function() {
 		var text = editor.getSelection();
 		if (text == '') {
-			editor.replaceRange("> ", editor.getCursor());
+			editor.replaceRange("\n> ", editor.getCursor());
 			editor.focus();
 			var start_cursor = editor.getCursor();
 			var cursorLine = start_cursor.line;
@@ -168,7 +168,7 @@ var inner_bar = (function(editor, config) {
 	$inner_bar.on('click', '[data-uncheck-list]', function() {
 		var text = editor.getSelection();
 		if (text == '') {
-			editor.replaceRange("- [ ] ", editor.getCursor());
+			editor.replaceRange("\n- [ ] ", editor.getCursor());
 			editor.focus();
 			var start_cursor = editor.getCursor();
 			var cursorLine = start_cursor.line;
@@ -185,7 +185,7 @@ var inner_bar = (function(editor, config) {
 	$inner_bar.on('click', '[data-check-list]', function() {
 		var text = editor.getSelection();
 		if (text == '') {
-			editor.replaceRange("- [x] ", editor.getCursor());
+			editor.replaceRange("\n- [x] ", editor.getCursor());
 			editor.focus();
 			var start_cursor = editor.getCursor();
 			var cursorLine = start_cursor.line;
@@ -236,7 +236,7 @@ var inner_bar = (function(editor, config) {
 	$inner_bar.on('click', '[data-codeblock]', function() {
 		var text = "\n```";
 		text += '\n';
-		text += editor.getSelection();
+		text += editor.getSelection()+"";
 		text += '\n'
 		text += "```";
 		editor.focus();
@@ -330,7 +330,7 @@ var inner_bar = (function(editor, config) {
 	$inner_bar.on('click', '[data-h]', function() {
 		var v = parseInt($(this).data('v'));
 		var text = editor.getSelection();
-		var _text = '';
+		var _text = '\n';
 		for (var i = 0; i < v; i++) {
 			_text += '#';
 		}
@@ -380,7 +380,7 @@ var inner_bar = (function(editor, config) {
 			}
 		}
 		tableModal.modal('hide');
-		editor.replaceSelection(text);
+		editor.replaceSelection("\n"+text);
 	});
 
 	return {

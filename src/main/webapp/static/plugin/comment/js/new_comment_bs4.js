@@ -370,9 +370,6 @@
                         html += '</nav>';
                     }
                     c.html(html);
-                    $('html, body').animate({
-                        scrollTop: c.offset().top
-                    }, 50);
                     var afterLoad = config.afterLoad;
                     if(afterLoad){
                     	afterLoad(page);
@@ -596,6 +593,9 @@
 	                               swal('评论将会在审核通过后显示','','success');
 	                           }else{
 	                        	   swal("评论成功",'','success');
+	                               $('html, body').animate({
+	                                   scrollTop: c.offset().top
+	                               }, 50);
 	                           }
                         },
                         error:function(jqXHR){

@@ -41,7 +41,7 @@ var dirChooser = (function(){
 		param.currentPage = page;
 		if(parent && parent != "")
 			param.parent = parent;
-		container.html("<img src='"+basePath+"/static/img/loading.gif' class='img-responsive center-block' />")
+		container.html("<img src='"+basePath+"static/img/loading.gif' class='img-responsive center-block' />")
 		$.ajax({
 			url : basePath+'api/console/files?type=DIRECTORY',
 			data : param,

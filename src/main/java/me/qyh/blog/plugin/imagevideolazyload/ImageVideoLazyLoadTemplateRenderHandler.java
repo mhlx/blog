@@ -28,7 +28,6 @@ public class ImageVideoLazyLoadTemplateRenderHandler implements NamedTemplateRen
 		}
 		String containerClass = attrs.getOrDefault("containerClass", "lazy-container");
 		String lazyClass = attrs.getOrDefault("lazyClass", "lazy");
-		String versionNum = attrs.get("version");
 		Document doc = Jsoup.parse(content);
 		doc.select("." + containerClass).forEach(c -> {
 			c.select("img[src]").forEach(i -> {
@@ -51,15 +50,16 @@ public class ImageVideoLazyLoadTemplateRenderHandler implements NamedTemplateRen
 				// });
 			});
 		});
-		String scriptUrl = urlHelper.getUrls().getUrl("/static/plugin/imagevideolazyload/lazyload.min.js");
-		if (versionNum != null) {
-			scriptUrl += "?version=" + versionNum;
-		}
-		doc.body().append("<script src=\"" + scriptUrl + "\" type=\"text/javascript\"></script>");
-		doc.body()
-				.append("<script>\r\n" + "		  (function () {\r\n" + "				new LazyLoad({\r\n"
-						+ "					elements_selector: '." + lazyClass + "',\r\n" + "				});\r\n"
-						+ "		  }());\r\n" + "		  </script>");
+		String url = urlHelper.getUrl();
+		doc.body().append("<script>(function(w, d){\r\n" + 
+				"    var b = d.getElementsByTagName('body')[0];\r\n" + 
+				"    var s = d.createElement(\"script\"); \r\n" + 
+				"    var v = !(\"IntersectionObserver\" in w) ? \"8.17.0\" : \"10.19.0\";\r\n" + 
+				"    s.async = true; // This includes the script as async. See the \"recipes\" section for more information about async loading of LazyLoad.\r\n" + 
+				"    s.src = \""+url+"/static/plugin/imagevideolazyload/lazyload-\" + v + \".min.js\";\r\n" + 
+				"    w.lazyLoadOptions = {elements_selector: \"."+lazyClass+"\"};\r\n" + 
+				"    b.appendChild(s);\r\n" + 
+				"}(window, document));</script>");
 		return doc.html();
 
 	}

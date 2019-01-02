@@ -27,7 +27,6 @@
         theme : 'eclipse',
 		extraKeys : {
 			"Alt-/" : "autocomplete",
-			"Alt-F" : "findPersistent",
 			"Ctrl-S" : function(){
 				 $.ajax({
 					type : 'PUT',
@@ -41,6 +40,9 @@
 						swal('保存失败',data.error,'error');
 					}
 				  })
+			},
+			"Ctrl-F" : function(){
+				search.open();
 			},
 			"Esc" : function(){
 				swal({
@@ -62,3 +64,5 @@
 		fullScreen : true
 	});
 </script>
+
+<script th:src="@{/static/plugin/staticfile/search.js}"></script>
