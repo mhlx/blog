@@ -8,7 +8,7 @@ var querier = (function($) {
 			'data_spaces.md', 'data_tagStatistics.md', 'data_user.md',
 			'formats.md', 'fragment.md', 'fragments.md', 'gravatars.md',
 			'hander.md', 'ip.md', 'jsons.md', 'jsoups.md', 'lock.md',
-			'locked.md', 'markdown.md', 'messages.md', 'period.md',
+			'markdown.md', 'messages.md', 'period.md',
 			'plugin_data_commentPage.md', 'plugin_data_lastComments.md',
 			'plugin_data_recentlyViewdArticles.md', 'private.md',
 			'redirect.md', 'space.md', 'times.md', 'transaction.md',
@@ -18,7 +18,7 @@ var querier = (function($) {
 	var templates = [ 'page_article_detail.html', 'page_index.html',
 			'page_error.html', 'page_news_detail.html', 'login.html',
 			'page_news.html', 'fragment_articles.html', 'fragment_foot.html',
-			'fragment_top.html' ];
+			'fragment_top.html','guestbook.html' ];
 
 	var cache = [];
 	var status = 'unloaded';

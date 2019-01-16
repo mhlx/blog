@@ -316,6 +316,7 @@ $(function() {
 	$.ajax({
 		url : root + 'api/console/stores',
 		success:function(data){
+			$("#store").append('<option value="-1">自动选择</option>');
 			for(var i=0;i<data.length;i++){
 				$("#store").append('<option value="'+data[i].id+'">'+data[i].name+'</option>');
 			}

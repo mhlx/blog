@@ -95,23 +95,23 @@ var cp = (function(editor){
 			//
 			//});
 			
+			var setSelection = function(){
+				editor.focus();
+	              
+	              if(from.line > to.line || (from.line == to.line && from.ch > to.ch)){
+					editor.setSelection(to,from);
+				  }else{
+					editor.setSelection(from,to);
+				  }
+			}
+			
 			$("#_cursor_panel").on('click','[data-exec]',function(){
               	if(from.line == to.line && from.ch == to.ch){
                 	hide();
                     return ;
                 }
               
-			  editor.focus();
-              
-              if(from.line > to.line || (from.line == to.line && from.ch > to.ch)){
-				editor.setSelection(to,from,{
-					scroll:true
-				});
-			  }else{
-				editor.setSelection(from,to,{
-					scroll:true
-				});
-			  }
+              	//setSelection()
 				
 				if(document.execCommand('copy')){
 					if($(this).data('exec') == 'cut'){
@@ -124,8 +124,8 @@ var cp = (function(editor){
 			});
 			
 			$("#_cursor_panel").on('click','[data-close]',function(){
-				
-				hide();
+              
+				hide();	setSelection();
 			});
 			
 			var _toolbar = config.toolbar;
@@ -148,9 +148,9 @@ var cp = (function(editor){
 				$("#_cursor_panel").show();
 				editor.setOption('readOnly',true);
 				config.toolbar = false;
-					if(inner_bar){
-						inner_bar.remove();
-					}
+				if(inner_bar){
+					inner_bar.remove();
+				}
 			}
 
 			return {

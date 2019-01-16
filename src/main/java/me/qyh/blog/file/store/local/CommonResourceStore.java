@@ -22,4 +22,9 @@ public class CommonResourceStore extends LocalResourceRequestHandlerFileStore {
 	public final boolean canStore(MultipartFile multipartFile) {
 		return true;
 	}
+
+	@Override
+	public int getOrder(MultipartFile file) {
+		return Integer.MIN_VALUE;
+	}
 }

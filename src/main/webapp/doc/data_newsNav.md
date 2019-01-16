@@ -2,8 +2,15 @@
 
 ### 完整写法
 ```
-<data name="newsNav" />
+<data name="newsNav" queryLock="" id="" ref-news=""/>
 ```
+
+### 属性说明
+|  属性名称  |说明| 是否必须   | 允许值   | 默认值  |    
+|  -  |  -  |  -  |  -  |  -  |
+| id   | 动态   | 是   | int   |  |
+| queryLock   | 是否查询被锁保护的动态   | 否   | [true,false] |false| 
+| ref-news   | 上下问中存在的动态   | 否   | |   
 
 ### 默认DataName
 newsNav

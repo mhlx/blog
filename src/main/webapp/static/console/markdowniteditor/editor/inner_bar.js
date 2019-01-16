@@ -19,6 +19,7 @@ var inner_bar = (function(editor, config) {
 			+ '<i class="fas fa-search" data-search style="cursor: pointer;margin-right:20px"></i>'
 			+ '<i class="fas fa-times" data-remove style="cursor: pointer;margin-right:20px"></i>'
 			+ '<i class="fas fa-bullseye" data-cursor style="cursor: pointer;margin-right:20px"></i>'
+			+ '<i class="fab fa-adn" data-selectall style="cursor: pointer;margin-right:20px"></i>'
 			+ '</div>');
 
 	$inner_bar.appendTo($('body'));
@@ -60,8 +61,6 @@ var inner_bar = (function(editor, config) {
 		if ($(window).width() <= 768) {
 			var scrollTo = editor.cursorCoords(true, 'local').top
 					- $inner_bar.height()-2*lh;
-			console.log(editor.cursorCoords(true, 'local').top);
-			console.log(scrollTo);
 			if (scrollTo < 0) {
 				$("html, body").scrollTop(0);
 				$inner_bar.css({
@@ -271,12 +270,19 @@ var inner_bar = (function(editor, config) {
 	});
 
 	$inner_bar.on('click', '[data-search]', function() {
-		$inner_bar.hide();
+		$inner_bar.css({
+			"visibility" : "hidden"
+		});
 		search.open();
 	});
 
 	$inner_bar.on('click', '[data-redo]', function() {
 		editor.execCommand("redo")
+	});
+
+	$inner_bar.on('click', '[data-selectall]', function() {
+		editor.focus();
+		editor.execCommand("selectAll")
 	});
 
 	var table = '';
@@ -385,7 +391,7 @@ var inner_bar = (function(editor, config) {
 
 	return {
 		remove : function() {
-			if (!cursorScroll) {
+			if (!cursorScroll || !config.toolbar) {
 				$inner_bar.css({
 					"visibility" : "hidden"
 				});

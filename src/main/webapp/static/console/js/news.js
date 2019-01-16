@@ -23,9 +23,6 @@ var load = function() {
                     html += '<p class="font-weight-bold">' + moment(news.write).format('HH:mm') + '&nbsp;&nbsp;&nbsp;<small><i class="fas fa-fw fa-fire"></i>' + news.hits + '</small>&nbsp;&nbsp;&nbsp;<small><i class="far fa-fw fa-comment"></i>' + news.comments + '</small></p>';
                     var ele = $('<div>' + news.content + '</div>');
                     var text = ele.text();
-                    if (text.length > 50) {
-                        text = text.substring(0, 50) + '...'
-                    }
                     var hasMedia = ele.find('img').length > 0 || ele.find('video').length > 0;
                     html += '<p style="font-size:13px">' + text + '</p>';
                     if (hasMedia) {

@@ -86,22 +86,9 @@ var render = (function() {
 	var t;
 	var md = window.md;
 	var renderCodeBlock = function() {
-		var p = false;
-		$("#out pre").each(function() {
-			var me = $(this);
-			if (me.hasClass('prettyprint prettyprinted'))
-				return true;
-			if (me.find('code').length == 0)
-				return true;
-			else {
-				p = true;
-				me.addClass("prettyprint");
-			}
-		});
-		if (p) {
-			prettyPrint();
-		}
-
+		 $('#out pre code').each(function(i, block) {
+		    hljs.highlightBlock(block);
+		  });
 	}
 	
 	var v = md.render(editor.getValue());
@@ -161,7 +148,6 @@ editor.on('paste', function(editor, evt) {
 	var clipboardData, pastedData;
 	clipboardData = evt.clipboardData || window.clipboardData;
 	var files = clipboardData.files;
-	console.log(clipboardData);
 	if (files.length > 0) {
 		var f = files[0];// 上传第一张
 		var type = f.type;

@@ -114,6 +114,21 @@ public class CommentApi implements InitializingBean {
 	}
 
 	@EnsureLogin
+	@GetMapping("api/console/comment/{id}")
+	public ResponseEntity<Comment> getComment(@PathVariable("id") Integer id) {
+		return ResponseEntity.of(commentService.getComment(id));
+	}
+
+	@EnsureLogin
+	@PatchMapping(value = "api/console/comment/{id}", params = { "content" })
+	public ResponseEntity<Void> update(@PathVariable("id") Integer id, @RequestParam("content") String content)
+			throws LogicException {
+		CommentValidator.validateContent(content);
+		commentService.updateComment(id, content);
+		return ResponseEntity.noContent().build();
+	}
+
+	@EnsureLogin
 	@PostMapping(value = "api/console/comment/blacklistItem")
 	public ResponseEntity<Void> ban(@RequestParam("id") Integer id) throws LogicException {
 		commentService.banIp(id);
@@ -138,7 +153,7 @@ public class CommentApi implements InitializingBean {
 	}
 
 	@EnsureLogin
-	@PatchMapping("api/console/comment/{id}")
+	@PatchMapping(value = "api/console/comment/{id}", params = { "status" })
 	public ResponseEntity<Void> check(@PathVariable("id") Integer id, @RequestParam("status") CommentStatus status)
 			throws LogicException {
 		commentService.changeStatus(id, status);

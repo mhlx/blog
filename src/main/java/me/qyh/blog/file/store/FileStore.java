@@ -146,4 +146,14 @@ public interface FileStore {
 		return Map.of();
 	}
 
+	/**
+	 * 获取某个文件的存储顺序，数值越大优先级越高
+	 * 
+	 * @param file
+	 * @return
+	 */
+	default int getOrder(MultipartFile file) {
+		return 0;
+	}
+
 }

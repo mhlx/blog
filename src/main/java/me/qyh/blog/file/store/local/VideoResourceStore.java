@@ -240,4 +240,12 @@ public class VideoResourceStore extends ThumbnailSupport {
 	protected final boolean needCompress() {
 		return maxSize != null;
 	}
+
+	@Override
+	public int getOrder(MultipartFile file) {
+		if (canStore(file)) {
+			return Integer.MAX_VALUE;
+		}
+		return Integer.MIN_VALUE;
+	}
 }

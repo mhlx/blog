@@ -8,6 +8,7 @@ public class ImageVideoLazyLoadPluginHandler extends PluginHandlerSupport {
 	@Override
 	public void addTemplateRenderHandler(TemplateRenderHandlerRegistry registry) {
 		registry.register(new ImageVideoLazyLoadTemplateRenderHandler());
+		registry.register(new VideoToImageTemplateRenderHandler());
 	}
 
 }

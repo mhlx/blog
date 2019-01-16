@@ -21,7 +21,8 @@
 <link rel="stylesheet"
 	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=7.0}" />
 <link rel="stylesheet" th:href="@{/static/css/markdown.css?v=7.0}" />
-<link rel="stylesheet" th:href="@{/static/prettify/github-v2.min.css?v=7.0}" />
+<link rel="stylesheet"
+	th:href="@{/static/highlight/styles/github.css}">
 <style>
 body {
 	padding-top: 54px;
@@ -140,7 +141,7 @@ body {
 	<script th:src="@{/static/jquery/jquery.min.js?v=7.0}"></script>
 	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js?v=7.0}"></script>
 	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
-	<script type="text/javascript" th:src="@{/static/prettify/prettify.js?v=7.0}"></script>
+		<script th:src="@{/static/highlight/highlight.pack.js}"></script>
 	<script th:src="@{/static/js/base.js?v=7.0}"></script>
 	<script th:src="@{/static/js/moment.min.js?v=7.0}"></script>
 	<script>
@@ -166,21 +167,10 @@ body {
     </script>
 	<script th:src="@{/static/plugin/comment/js/new_comment_bs4.js?v=1}"></script>
 	<script>
-   $(function() {
-            var p = false;
-            $("pre").each(function() {
-                var me = $(this);
-                if (me.hasClass('prettyprint prettyprinted'))
-                    return;
-                if (me.find('code').length == 0)
-                    return;
-                else {
-                    p = true;
-                    me.addClass("prettyprint");
-                }
-            });
-            prettyPrint();
-     
+  		$(function() {
+		   $('pre code').each(function(i, block) {
+		     hljs.highlightBlock(block);
+		   });
     		 cmt.renderComment(_config);
     		$('[data-comment]').click(function(){
     	        	cmt.doComment(_config.moduleId,_config.moduleType,function(){

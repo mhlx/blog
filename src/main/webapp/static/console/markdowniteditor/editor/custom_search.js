@@ -38,7 +38,7 @@ var search = (function(cm,config) {
     });
 
     $("#search-close").click(function() {
-        clearSearch();
+    	clearSearch();
         if (_toolbar) {
             config.toolbar = true;
         }
@@ -209,8 +209,12 @@ var search = (function(cm,config) {
     return {
         open: function() {
             clearSearch();
-            if (_toolbar = config.toolbar) {
+            _toolbar = config.toolbar;
+            if (_toolbar) {
                 config.toolbar = false;
+				if(inner_bar){
+					inner_bar.remove();
+				}
             }
             $("#search-box form")[0].reset();
             $("#search-box").show();

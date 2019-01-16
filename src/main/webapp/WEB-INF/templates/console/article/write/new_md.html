@@ -20,7 +20,7 @@
 	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css?v=7.0}">
 <link rel="stylesheet" th:href="@{/static/css/markdown.css?v=7.0}">
 <link rel="stylesheet"
-	th:href="@{/static/prettify/github-v2.min.css?v=7.0}">
+	th:href="@{/static/highlight/styles/github.css}">
 <link th:href="@{/static/fontawesome-free/css/all.min.css?v=7.0}"
 	rel="stylesheet">
 <style>
@@ -433,7 +433,7 @@ public static void main(String [] args){
 		id="oldSpace" style="display: none" />
 
 	<div th:replace="console/base/foot"></div>
-	<script th:src="@{/static/codemirror/lib/codemirror.js??v=7.0}"></script>
+	<script th:src="@{/static/codemirror/lib/codemirror.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/addon/mode/overlay.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/codemirror/mode/javascript/javascript.js?v=7.0}"></script>
@@ -488,7 +488,7 @@ public static void main(String [] args){
 		th:src="@{/static/console/markdowniteditor/markdown/turndown-plugin-gfm.js?v=7.0}"></script>
 	<script
 		th:src="@{/static/console/markdowniteditor/waitForImages.js?v=7.0}"></script>
-	<script th:src="@{/static/prettify/prettify.js}"></script>
+	<script th:src="@{/static/highlight/highlight.pack.js}"></script>
 	<script>
 		var config = {
 			toolbar : true,
@@ -510,7 +510,9 @@ public static void main(String [] args){
         CodeMirror.keyMap.default["Shift-Tab"] = "indentLess";
         CodeMirror.keyMap.default["Tab"] = "indentMore";
 
-        var turndownService = new window.TurndownService()
+        var turndownService = new window.TurndownService({'headingStyle':'atx','codeBlockStyle':'fenced',defaultReplacement: function (innerHTML, node) {
+        	return node.isBlock ? '\n\n' + node.outerHTML + '\n\n' : node.outerHTML
+        }})
         turndownService.use(window.turndownPluginGfm.gfm);
     </script>
 	<script

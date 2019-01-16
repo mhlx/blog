@@ -571,6 +571,48 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		return blacklistHandler.query(param);
 	}
 
+	/**
+	 * 更新评论内容
+	 * 
+	 * @since 7.1
+	 * @param id
+	 * @param content
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	public void updateComment(Integer id, String content) throws LogicException {
+		Comment db = commentDao.selectById(id);
+		if (db == null) {
+			throw new LogicException("comment.notExists", "评论不存在");
+		}
+		if (!db.getAdmin()) {
+			throw new LogicException("comment.unEditable", "这条评论无法被编辑");
+		}
+
+		db.setContent(content);
+		commentDao.update(db);
+	}
+
+	/**
+	 * 查看是否已经评论某个模块
+	 * 
+	 * @since 7.1
+	 * @param module
+	 *            模块，可以为空
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public boolean hasCommented(CommentModule module) {
+		if (Environment.hasAuthencated()) {
+			return true;
+		}
+		return commentDao.hasCommented(Environment.getIP(), module);
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<Comment> getComment(Integer id) {
+		return Optional.ofNullable(commentDao.selectById(id));
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 

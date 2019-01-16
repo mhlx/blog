@@ -6534,11 +6534,23 @@
         if (cm.options.allowDropFileTypes &&
             indexOf(cm.options.allowDropFileTypes, file.type) == -1)
           { return }
+        
+        var ext = file.name.split(".").pop().toLowerCase();		
+  	  if(file.type.indexOf('text/') == -1 && ext != 'md'){
+  		  var handler = cm.getOption("dropFileHandler");
+  		  if(handler){
+  			handler(file);
+  		  }
+  	  } else {
 
         var reader = new FileReader;
         reader.onload = operation(cm, function () {
           var content = reader.result;
           if (/[\x00-\x08\x0e-\x1f]{2}/.test(content)) { content = ""; }
+          var handler = cm.getOption("dropFileContentHandler");
+			if(handler){
+				content = handler(file.name,content);
+			}
           text[i] = content;
           if (++read == n) {
             pos = clipPos(cm.doc, pos);
@@ -6550,6 +6562,7 @@
           }
         });
         reader.readAsText(file);
+  	  }
       };
       for (var i = 0; i < n; ++i) { loadFile(files[i], i); }
     } else { // Normal drop
@@ -6813,9 +6826,6 @@
 
   // Look up the name of a key as indicated by an event object.
   function keyName(event, noShift) {
-	  if(event.isComposing && event.keyCode == 8){
-			return false;
-		}
     if (presto && event.keyCode == 34 && event["char"]) { return false }
     var name = keyNames[event.keyCode];
     if (name == null || event.altGraphKey) { return false }
@@ -7201,6 +7211,9 @@
 
   // Handle a key from the keydown event.
   function handleKeyBinding(cm, e) {
+	  if(cm.display.input.composing){
+	      return false;
+	  }
     var name = keyName(e, true);
     if (!name) { return false }
 

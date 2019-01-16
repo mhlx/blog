@@ -291,4 +291,13 @@ public class ImageResourceStore extends ThumbnailSupport {
 			}
 		}
 	}
+
+	@Override
+	public int getOrder(MultipartFile file) {
+		String ext = FileUtils.getFileExtension(file.getOriginalFilename());
+		if (ImageHelper.isSystemAllowedImage(ext)) {
+			return Integer.MAX_VALUE;
+		}
+		return Integer.MIN_VALUE;
+	}
 }

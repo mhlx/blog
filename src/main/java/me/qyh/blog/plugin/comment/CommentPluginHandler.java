@@ -4,6 +4,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.thymeleaf.TemplateEngine;
 
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.message.Messages;
@@ -14,6 +15,7 @@ import me.qyh.blog.core.plugin.PluginHandlerSupport;
 import me.qyh.blog.core.plugin.PluginProperties;
 import me.qyh.blog.plugin.comment.data.CommentsDataTagProcessor;
 import me.qyh.blog.plugin.comment.data.LastCommentsDataTagProcessor;
+import me.qyh.blog.plugin.comment.thymeleaf.dialect.CommentDialect;
 
 public class CommentPluginHandler extends PluginHandlerSupport {
 
@@ -87,6 +89,12 @@ public class CommentPluginHandler extends PluginHandlerSupport {
 				messages.getMessage("plugin.comment.data.lastComment", "最近评论"), "lastComments");
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(lcdtp);
 		registry.register(lcdtp);
+	}
+
+	@Override
+	public void initChild(ApplicationContext applicationContext) throws Exception {
+		TemplateEngine templateEngine = applicationContext.getBean(TemplateEngine.class);
+		templateEngine.addDialect(new CommentDialect(applicationContext));
 	}
 
 }

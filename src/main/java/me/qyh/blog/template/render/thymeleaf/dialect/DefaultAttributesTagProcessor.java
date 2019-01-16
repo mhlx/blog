@@ -24,7 +24,7 @@ import org.thymeleaf.util.EscapedAttributeUtils;
  * @author mhlx
  *
  */
-abstract class DefaultAttributesTagProcessor extends AbstractElementTagProcessor {
+public abstract class DefaultAttributesTagProcessor extends AbstractElementTagProcessor {
 
 	private static final String DYNAMIC_ATT_PREFIX = "th:";
 

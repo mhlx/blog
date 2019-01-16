@@ -109,28 +109,35 @@ public class FileServiceImpl implements FileService, InitializingBean {
 		if (storeId == null) {
 			throw new LogicException("file.store.notexists", "文件存储器不存在");
 		}
-		FileStore store = fileManager.getFileStore(upload.getStore())
-				.orElseThrow(() -> new LogicException("file.store.notexists", "文件存储器不存在"));
-
-		if (store.readOnly()) {
-			throw new LogicException("file.store.readonly", "只读存储器无法存储文件");
-		}
 		List<UploadedFile> uploadedFiles = new ArrayList<>();
 		for (MultipartFile file : upload.getFiles()) {
 			String originalFilename = file.getOriginalFilename();
-			if (store.canStore(file)) {
-				try {
-					UploadedFile uf = storeMultipartFile(file, parent, folderKey, store);
-					uploadedFiles.add(uf);
-				} catch (LogicException e) {
-					uploadedFiles.add(new UploadedFile(originalFilename, e.getLogicMessage()));
-				}
-			} else {
-				uploadedFiles
-						.add(new UploadedFile(originalFilename, new Message("file.store.unsupport", "存储器不支持存储这个文件")));
+			try {
+				FileStore store = getFileStore(storeId, file);
+				UploadedFile uf = storeMultipartFile(file, parent, folderKey, store);
+				uploadedFiles.add(uf);
+			} catch (LogicException e) {
+				uploadedFiles.add(new UploadedFile(originalFilename, e.getLogicMessage()));
 			}
 		}
 		return uploadedFiles;
+	}
+
+	private FileStore getFileStore(Integer storeId, MultipartFile file) throws LogicException {
+		if (storeId.intValue() == -1) {
+			return fileManager.getAllStores().stream().filter(store -> !store.readOnly() && store.canStore(file))
+					.sorted((s1, s2) -> -Integer.compare(s1.getOrder(file), s2.getOrder(file))).findFirst()
+					.orElseThrow(() -> new LogicException("file.store.noMatchable", "没有合适的文件存储器"));
+		}
+		FileStore store = fileManager.getFileStore(storeId)
+				.orElseThrow(() -> new LogicException("file.store.notexists", "文件存储器不存在"));
+		if (store.readOnly()) {
+			throw new LogicException("file.store.readonly", "只读存储器无法存储文件");
+		}
+		if (!store.canStore(file)) {
+			throw new LogicException("file.store.unsupport", "存储器不支持存储这个文件");
+		}
+		return store;
 	}
 
 	private UploadedFile storeMultipartFile(MultipartFile mf, BlogFile parent, String folderKey, FileStore store)

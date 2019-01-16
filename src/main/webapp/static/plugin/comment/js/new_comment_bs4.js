@@ -338,6 +338,9 @@
                                 	html += '<a href="javascript:void(0)" data-ban="'+data.id+'" style="margin-left:10px"><small>禁IP</small></a>';
                             	}
                                 html += '<a href="javascript:void(0)" data-del="'+data.id+'"  style="margin-left:10px"><small>删除</small></a>';
+                                if(data.admin){
+                                	html += '<a href="javascript:void(0)" data-edit="'+data.id+'"  style="margin-left:10px"><small>编辑</small></a>';
+                                }
                             }
                             if (data.status == 'CHECK') {
                                 html += '<a href="javascript:void(0)" data-check="'+data.id+'"  style="margin-left:10px"><small>审核</small></a>';
@@ -517,17 +520,43 @@
                 	});
                 });
                 
+                c.on('click','[data-edit]',function(){
+                	var me = $(this);
+                	var id = me.data('edit');
+                	$.ajax({
+                		 url : basePath + '/api/console/comment/'+id,
+                		 success: function(data) {
+                			 if($('[data-comment-editor]').length > 0){
+                        		 doConfirm("要放弃正在编辑的内容吗？",function(){
+                        			 commentEditor.remove();
+                                 	 loadReplyEditor(me);
+                                 	 $('[data-comment-editor] textarea').val(data.content);
+                                 	 $('[data-comment-btn]').attr('data-comment-edit',id)
+                        		 });
+                        	}else{
+                            	loadReplyEditor(me);
+                            	$('[data-comment-editor] textarea').val(data.content);
+                            	 $('[data-comment-btn]').attr('data-comment-edit',id)
+                        	}
+	                     },
+	                     error:function(jqXHR){
+                        	var error = $.parseJSON(jqXHR.responseText).error;
+                        	swal('获取评论失败',error,'error')
+                        }
+                		
+                	})
+                });
+                
                 c.on('click',"[data-reply]",function(){
                 	var me = $(this);
-                	
                 	if($('[data-comment-editor]').length > 0){
-                		 doConfirm("要放弃正在编辑的内容吗？",function(){
-                			 commentEditor.remove();
-                         	 loadReplyEditor(me);
-                		 });
-                	}else{
-                    	loadReplyEditor(me);
-                	}
+               		 doConfirm("要放弃正在编辑的内容吗？",function(){
+               			 commentEditor.remove();
+                        	 loadReplyEditor(me);
+               		 });
+               	}else{
+                   	loadReplyEditor(me);
+               	}
                 });
                 
                 var loadReplyEditor = function(me){
@@ -556,6 +585,7 @@
 	                           }
 	                       }
 	                   });
+	                	 $('[data-comment-btn]').removeAttr('data-comment-edit');
                 }
                 c.on('click','[data-comment-close]',function(){
                 	doConfirm('要放弃正在编辑的内容吗?',function(){
@@ -564,6 +594,25 @@
                 });
                 c.on('click','[data-comment-btn]',function(){
                 	var me = $(this)
+                	if(me.data('comment-edit')){
+                		$.ajax({
+                            type: "PATCH",
+                            url: basePath + '/api/console/comment/'+me.data('comment-edit'),
+                            data:{"content":$("#content").val()},
+                            success: function(data) {
+                            	if(config.asc){
+	                       			config.page = 0;
+	                       		 }
+	                       		 loadComment(config);
+                            	swal("编辑成功",'','success');
+                            },
+                            error:function(jqXHR){
+                            	var error = $.parseJSON(jqXHR.responseText).error;
+                            	swal('提交失败',error,'error')
+                            }
+                        });
+                		return ;
+                	} 
                     var comment = {};
                     comment.content = $("#content").val();
                     comment.website = $("#website").val();
@@ -597,6 +646,9 @@
 	                                   scrollTop: c.offset().top
 	                               }, 50);
 	                           }
+	                          if(config.afterComment){
+	                        	  config.afterComment(check);
+	                          }
                         },
                         error:function(jqXHR){
                         	var error = $.parseJSON(jqXHR.responseText).error;

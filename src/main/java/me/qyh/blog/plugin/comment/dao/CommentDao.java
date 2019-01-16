@@ -165,4 +165,22 @@ public interface CommentDao {
 	 */
 	List<Comment> selectPageByPeriod(PeriodCommentQueryParam param);
 
+	/**
+	 * 更新评论
+	 * 
+	 * @since 7.1
+	 * @param db
+	 */
+	void update(Comment db);
+
+	/**
+	 * 查看某个IP是否已经评论
+	 * 
+	 * @since 7.1
+	 * @param ip
+	 * @param module
+	 * @return
+	 */
+	boolean hasCommented(@Param("ip") String ip, @Param("module") CommentModule module);
+
 }

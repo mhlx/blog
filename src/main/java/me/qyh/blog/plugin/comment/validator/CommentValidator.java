@@ -6,6 +6,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import me.qyh.blog.core.context.Environment;
+import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.util.StringUtils;
 import me.qyh.blog.core.util.Validators;
 import me.qyh.blog.core.validator.UserValidator;
@@ -107,5 +108,15 @@ public class CommentValidator implements Validator {
 			return null;
 		}
 		return finalName;
+	}
+
+	public static void validateContent(String content) throws LogicException {
+		if (Validators.isEmptyOrNull(content, true)) {
+			throw new LogicException("comment.content.blank", "回复内容不能为空");
+		}
+		if (content.length() > MAX_COMMENT_LENGTH) {
+			throw new LogicException("comment.content.toolong", "回复的内容不能超过" + MAX_COMMENT_LENGTH + "个字符",
+					MAX_COMMENT_LENGTH);
+		}
 	}
 }

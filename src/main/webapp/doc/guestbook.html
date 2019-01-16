@@ -1,0 +1,90 @@
+<data name="myInfo" />
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
+	rel="stylesheet">
+<link rel="stylesheet"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css?v=7.0}" />
+<title text="留言板"></title>
+</head>
+
+<body>
+	<div class="container">
+		<div class="row">
+			<comment module="userpage" id="${this.id}" th:if="${user == null}">
+			<commented>
+			<div class="col-12">
+				<div class="alert alert-info">感谢留言</div>
+			</div>
+			</commented> </comment>
+			<div class="col-lg-8 col-md-8  col-sm-8 text"
+				style="margin-top: 10px">
+				<a href="javascript:void(0)" data-comment>我要留言</a> <a
+					href="https://www.qyh.me" style="margin-left: 10px">返回首页</a>
+				<div id="comments-container"></div>
+			</div>
+		</div>
+	</div>
+
+
+	<script th:src="@{/static/jquery/jquery.min.js}"></script>
+	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
+	<script type="text/javascript" th:src="@{/static/prettify/prettify.js}"></script>
+	<script th:src="@{/static/js/base.js}"></script>
+	<script th:src="@{/static/js/moment.min.js}"></script>
+	<script th:inline="javascript">
+        var basePath = [[${urls.url}]];
+        var actPath = [[${urls.currentUrl}]];
+        var config = {
+            isLogin: [[${user != null}]],
+            gravatarPrefix: [[${gravatars.getUrl('')}]]
+        };
+    </script>
+	<script th:inline="javascript">
+        var config = {
+            isLogin: [[${user != null}]],
+            gravatarPrefix: [[${ gravatars.getUrl('')}]]
+        };
+        var c = $("#comments-container");
+        var _config = {
+            pageSize: 20,
+            page: 1,
+            moduleId: [[${this.id}]],
+            moduleType: 'userpage',
+            asc: false,
+            container: c,
+            allowComment: [[${this.allowComment}]],
+            afterLoad: function(page) {
+                if (page.totalRow > 0) {
+                    c.show();
+                    c.prepend('<hr>');
+                } else {
+                    c.hide();
+                }
+            }
+        }
+    </script>
+	<script th:src="@{/static/plugin/comment/js/new_comment_bs4.js?v=7.1}">
+    </script>
+	<script>
+        cmt.renderComment(_config);
+        $(function() {
+            $('[data-comment]').click(function() {
+                cmt.doComment(_config.moduleId, _config.moduleType, function() {
+                    cmt.renderComment(_config);
+                });
+            });
+        })
+    </script>
+</body>
+
+</html>

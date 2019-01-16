@@ -226,4 +226,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		LIMIT #{offset},#{pageSize}
 	</select>
 	
+	<update id="update">
+		UPDATE blog_comment
+		set
+			content = #{content}
+		where id = #{id}
+	</update>
+	
+	<select id="hasCommented" resultType="boolean">
+		SELECT EXISTS(SELECT 1 FROM blog_comment WHERE comment_ip = #{ip} 
+		<if test="module != null">
+				AND module_type = #{module.module}
+			<if test="module.id != null">
+				AND module_id = #{module.id}
+			</if>
+		</if>
+		)
+	</select>
+	
 </mapper>
