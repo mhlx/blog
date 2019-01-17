@@ -1,6 +1,9 @@
 (function(config, editor) {
 	var _cursor;
 	var toEditor = function() {
+		if(toolbar){
+			config.toolbar = true;
+		}
 		$("#out").hide();
 		$("#toolbar").css({
 			width : '100%',
@@ -23,9 +26,11 @@
 			}
 		}
 	}
-
+	var toolbar = false;
 	var toPreview = function() {
 		_cursor = editor.getCursor();
+		toolbar = config.toolbar;
+		config.toolbar = false;
 		inner_bar.remove();
 		render.md(0);
 		// sync.resetAndSync();

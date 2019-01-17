@@ -1,23 +1,24 @@
-var search = (function(cm,config) {
+var search = (function(cm, config) {
     var html = '';
-    html += '<div style="position:fixed;bottom:0px;background-color:#fff;width:50%;z-index:99;display:none" id="search-box" >';
-    html += ' <form class="form-inline">';
+    html += '<div style="position:fixed;bottom:0px;background-color:#f9f9f7;width:50%;z-index:99;display:none;padding:20px" id="search-box" >';
+    html += ' <form>';
     html += ' <div class="form-group">';
-    html += '  <label class="sr-only">内容</label>';
+    html += '  <label>内容</label>';
     html += ' <input type="text" class="form-control" placeholder="查找内容" id="search-box-search-input">';
     html += '  </div>';
     html += ' <div class="form-group">';
-    html += '      <label class="sr-only">替换内容</label>';
+    html += '      <label>替换内容</label>';
     html += '     <input type="text" class="form-control" placeholder="替换内容" id="search-box-replace-input">';
     html += ' </div>';
     html += '</form>';
-    html += '  <button class="btn btn-primary" id="search-btn" type="button">查找</button>';
-    html += '  <button class="btn btn-primary" id="search-prev" data-hidden-before-search style="display:none" type="button"><i class="fas fa-arrow-up"></i></button>';
-    html += '  <button class="btn btn-primary" id="search-next" data-hidden-before-search style="display:none" type="button"><i class="fas fa-arrow-down"></i></button>';
-    html += '  <button class="btn btn-primary" id="search-replace" data-hidden-before-search type="button" style="display:none">替换</button>';
-    html += '  <button class="btn btn-primary" id="search-replace-all" data-hidden-before-search type="button" style="display:none">替换全部</button>';
-    html += '  <button class="btn btn-primary" id="search-close" type="button">关闭</button>';
+   html += '<a href="javascript:void(0)" id="search-btn" style="margin-right:20px"><i class="fas fa-search" style="font-size:30px"></i></a>'
+    html += '<a href="javascript:void(0)" id="search-prev" style="display:none;margin-right:20px" data-hidden-before-search ><i class="fas fa-arrow-up" style="font-size:30px"></i></a>';
+    html += '<a href="javascript:void(0)" id="search-next" style="display:none;margin-right:20px" data-hidden-before-search><i class="fas fa-arrow-down" style="font-size:30px"></i></a>';
+    html += '<a href="javascript:void(0)" id="search-replace" style="display:none;margin-right:20px" data-hidden-before-search><i class="fas fa-undo" style="font-size:30px"></i></a>';
+    html += ' <a href="javascript:void(0)" id="search-replace-all" style="display:none;margin-right:20px" data-hidden-before-search><i class="fab fa-asymmetrik"  style="font-size:30px"></i></a>';
+  	html += '<a href="javascript:void(0)" id="search-close" ><i class="fas fa-times"  style="font-size:30px"></i></a>'
     html += '  </div>';
+
     var searchBox = $(html);
     searchBox.appendTo($("#in"));
 
@@ -38,7 +39,7 @@ var search = (function(cm,config) {
     });
 
     $("#search-close").click(function() {
-    	clearSearch();
+        clearSearch();
         if (_toolbar) {
             config.toolbar = true;
         }
@@ -58,9 +59,9 @@ var search = (function(cm,config) {
                 if (typeof query != "string") {
                     var match = cm.getRange(cursor.from(), cursor.to()).match(query);
                     cursor.replace(text.replace(/\$(\d)/g,
-                    function(_, i) {
-                        return match[i];
-                    }));
+                        function(_, i) {
+                            return match[i];
+                        }));
                 } else cursor.replace(text);
             }
         });
@@ -75,17 +76,17 @@ var search = (function(cm,config) {
         var cursor = getSearchCursor(cm, state.query, cm.getCursor("from"));
         var advance = function() {
             var start = cursor.from(),
-            match;
-            if (! (match = cursor.findNext())) {
+                match;
+            if (!(match = cursor.findNext())) {
                 cursor = getSearchCursor(cm, state.query);
-                if (! (match = cursor.findNext()) || (start && cursor.from().line == start.line && cursor.from().ch == start.ch)) return;
+                if (!(match = cursor.findNext()) || (start && cursor.from().line == start.line && cursor.from().ch == start.ch)) return;
             }
             cm.setSelection(cursor.from(), cursor.to());
 
             var coords = cm.cursorCoords(cursor.from(), 'local');
             cm.scrollTo(0, coords.top);
-            cursor.replace(typeof query == "string" ? text: text.replace(/\$(\d)/g,
-            function(_, i) {}));
+            cursor.replace(typeof query == "string" ? text : text.replace(/\$(\d)/g,
+                function(_, i) {}));
         };
         advance();
     });
@@ -96,7 +97,7 @@ var search = (function(cm,config) {
             return;
         }
         cm.operation(function() {
-            var cursor = getSearchCursor(cm, state.query, rev ? state.posFrom: state.posTo);
+            var cursor = getSearchCursor(cm, state.query, rev ? state.posFrom : state.posTo);
             if (!cursor.find(rev)) {
                 cursor = getSearchCursor(cm, state.query, rev ? CodeMirror.Pos(cm.lastLine()) : CodeMirror.Pos(cm.firstLine(), 0));
                 if (!cursor.find(rev)) return;
@@ -142,11 +143,11 @@ var search = (function(cm,config) {
 
     function parseString(string) {
         return string.replace(/\\(.)/g,
-        function(_, ch) {
-            if (ch == "n") return "\n"
-            if (ch == "r") return "\r"
-            return ch
-        })
+            function(_, ch) {
+                if (ch == "n") return "\n"
+                if (ch == "r") return "\r"
+                return ch
+            })
     }
 
     function parseQuery(query) {
@@ -154,12 +155,12 @@ var search = (function(cm,config) {
         var isRE = query.match(/^\/(.*)\/([a-z]*)$/);
         if (isRE) {
             try {
-                query = new RegExp(isRE[1], isRE[2].indexOf("i") == -1 ? "": "i");
-            } catch(e) {} // Not a regular expression after all, do a string search
+                query = new RegExp(isRE[1], isRE[2].indexOf("i") == -1 ? "" : "i");
+            } catch (e) {} // Not a regular expression after all, do a string search
         } else {
             query = parseString(query)
         }
-        if (typeof query == "string" ? query == "": query.test("")) query = /x^/;
+        if (typeof query == "string" ? query == "" : query.test("")) query = /x^/;
         return query;
     }
 
@@ -176,7 +177,7 @@ var search = (function(cm,config) {
             }
             state.annotate = cm.showMatchesOnScrollbar(state.query, queryCaseInsensitive(state.query));
         }
-      findNext(false);
+        findNext(false);
     }
 
     function SearchState() {
@@ -185,8 +186,8 @@ var search = (function(cm,config) {
     }
 
     function searchOverlay(query, caseInsensitive) {
-        if (typeof query == "string") query = new RegExp(query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), caseInsensitive ? "gi": "g");
-        else if (!query.global) query = new RegExp(query.source, query.ignoreCase ? "gi": "g");
+        if (typeof query == "string") query = new RegExp(query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), caseInsensitive ? "gi" : "g");
+        else if (!query.global) query = new RegExp(query.source, query.ignoreCase ? "gi" : "g");
 
         return {
             token: function(stream) {
@@ -212,9 +213,9 @@ var search = (function(cm,config) {
             _toolbar = config.toolbar;
             if (_toolbar) {
                 config.toolbar = false;
-				if(inner_bar){
-					inner_bar.remove();
-				}
+                if (inner_bar) {
+                    inner_bar.remove();
+                }
             }
             $("#search-box form")[0].reset();
             $("#search-box").show();
@@ -222,4 +223,4 @@ var search = (function(cm,config) {
         }
     }
 
-})(editor,config);
+})(editor, config);

@@ -7,7 +7,7 @@ var inner_bar = (function(editor, config) {
         '<i class="fas fa-italic" data-italic style="cursor: pointer;margin-right:20px"></i>' +
         '<i class="fas fa-strikethrough" data-strikethrough style="cursor: pointer;margin-right:20px"></i>' +
         '<i class="fas fa-quote-left" data-quote style="cursor: pointer;margin-right:20px"></i>' +
-        '<i class="fas fa-file" data-file style="cursor: pointer;margin-right:20px"></i>' +
+        '<i class="fas fa-file" data-file style="cursor: pointer;margin-right:20px;display:none"></i>' +
         '<i class="fas fa-link" data-link style="cursor: pointer;margin-right:20px"></i>' +
         '<i class="fas fa-table" data-table style="cursor: pointer;margin-right:20px"></i>' +
         '<i class="fas fa-code" data-code style="cursor: pointer;margin-right:20px"></i>' +
@@ -23,6 +23,10 @@ var inner_bar = (function(editor, config) {
         '</div>');
 
     $inner_bar.appendTo($('body'));
+    
+    if(getUrlParam("isLogin",'false') == 'true'){
+    	$inner_bar.find('[data-file]').show();
+    }
     editor.on('scrollCursorIntoView', function(editor, e) {
         if (!config.toolbar) {
             return;

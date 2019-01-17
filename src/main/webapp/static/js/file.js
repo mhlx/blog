@@ -143,7 +143,7 @@ var fileChooser = (function(){
             async: false,
 			data : {},
 			success : function(data){
-				stores.push({id:-1,name:'自动选择'})
+				data.unshift({id:-1,name:'自动选择'})
 				stores = data;
 			},
 			error:function(jqXHR){

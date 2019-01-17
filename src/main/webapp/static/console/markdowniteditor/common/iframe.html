@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<link rel="stylesheet"
+	href="../../../bootstrap/css/bootstrap.min.css?v=7.0">
+<link rel="stylesheet"
+	href="../../../codemirror/lib/codemirror.css?v=7.0">
+<link rel="stylesheet"
+	href="../../../codemirror/addon/dialog/dialog.css?v=7.0">
+<link rel="stylesheet"
+	href="../../../codemirror/addon/search/matchesonscrollbar.css?v=7.0">
+<link rel="stylesheet" href="../../../css/markdown.css?v=7.0">
+<link rel="stylesheet" href="../../../highlight/styles/github.css">
+<link href="../../../fontawesome-free/css/all.min.css?v=7.0"
+	rel="stylesheet">
+<style>
+#toolbar {
+	background-color: #f9f9f7;
+	height: 30px;
+	position: fixed;
+	left: 0;
+	width: 50%;
+	padding-left: 10px;
+	padding-right: 10px;
+	overflow: auto;
+	overflow-y: hidden;
+}
+
+#in {
+	position: fixed;
+	top: 30px;
+	left: 0;
+	bottom: 0;
+	width: 50%;
+	height: auto;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+	color: #2c3e50;
+	padding-bottom: 301px;
+}
+
+#out {
+	position: fixed;
+	top: 0;
+	right: 0;
+	left: 50%;
+	bottom: 0;
+	overflow: auto;
+	padding: 10px;
+	padding-left: 20px;
+	color: #444;
+	font-size: 16px;
+	line-height: 1.5em;
+	-webkit-overflow-scrolling: touch;
+}
+
+.CodeMirror {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: auto;
+	height: auto;
+	background-color: #f9f9f7;
+	font-size: 1.5rem;
+}
+
+.CodeMirror-scroll {
+	padding: 10px;
+	box-sizing: border-box;
+	overflow-x: hidden !important;
+}
+
+.icon {
+	margin-top: 5px;
+	cursor: pointer;
+	font-size: 16px;
+	margin-right: 20px;
+	margin-bottom: 5px
+}
+
+#stat {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	width: 50%;
+	text-align: right;
+	display: none;
+	z-index: 99999;
+	background-color: #f9f9f7;
+}
+
+.alpha30 {
+	background-color: rgb(0, 0, 0);
+	background-color: rgba(0, 0, 0, 0.3);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000,
+		endColorstr=#99000000);
+	-ms-filter:
+		"progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";
+}
+
+.styled-background {
+	background-color: #ff7;
+}
+
+body {
+	background-color: #f9f9f7
+}
+  #in .CodeMirror-code {
+            height: auto;
+            margin-bottom: 301px;
+        }
+</style>
+</head>
+
+<body>
+	<div>
+		<div id="toolbar">
+			<i class="fas fa-question-circle icon" data-toggle="modal"
+				data-target="#helpModal"></i> <i class="far fa-check-square icon"
+				onclick="toggleToolbar($(this))" id="toggle-toolbar"></i> <i
+				class="far fa-window-maximize icon" data-to-fullscreen
+				id="fullscreen-icon"></i>
+				 <i class="fas fa-times icon" data-close></i>
+			<div style="float: right; display: none" id="saveTip"></div>
+		</div>
+		<div id="in" style="display: none">
+			<textarea id="code" style="width: 100%; height: 100%"></textarea>
+		</div>
+		<div class="markdown-body" id="out"></div>
+		<div id="stat"></div>
+	</div>
+
+
+	<div class="modal fade" id="helpModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">编辑器说明</h4>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<h3>快捷键</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<tr>
+								<th>快捷键</th>
+								<th>说明</th>
+							</tr>
+							<tr>
+								<td>Ctrl + S</td>
+								<td>保存文章</td>
+							</tr>
+							<tr>
+								<td>Alt + F</td>
+								<td>寻找文本</td>
+							</tr>
+							<tr>
+								<td>Shift + Ctrl + F</td>
+								<td>替换单个文本</td>
+							</tr>
+							<tr>
+								<td>Shift + Ctrl + R</td>
+								<td>替换全部文本</td>
+							</tr>
+						</table>
+					</div>
+					<h3>markdown语法</h3>
+					<div class="table-responsive">
+						<table class="table">
+							<tr>
+								<th>格式</th>
+								<th>说明</th>
+							</tr>
+							<tr>
+								<td>粗体</td>
+								<td>**内容** <br> __内容__
+								</td>
+							</tr>
+							<tr>
+								<td>斜体</td>
+								<td>*内容* <br> _内容_
+								</td>
+							</tr>
+							<tr>
+								<td>链接</td>
+								<td>[link text](http://url.com/ "title")<br> [link
+									text](http://url.com/)
+								</td>
+							</tr>
+							<tr>
+								<td>图片</td>
+								<td>![alt text](http://path/to/img.jpg "title")<br>
+									![alt text](http://path/to/img.jpg)
+								</td>
+							</tr>
+
+							<tr>
+								<td>标题</td>
+								<td># h1<br> ## h2<br> ...
+								</td>
+							</tr>
+							<tr>
+								<td>有序列表(无段落)</td>
+								<td><pre>1.one
+2.two</pre></td>
+							</tr>
+							<tr>
+								<td>无需列表(有段落)</td>
+								<td><pre>* A list item.
+
+  With multiple paragraphs.
+
+* bar</pre></td>
+							</tr>
+							<tr>
+								<td>嵌套列表</td>
+								<td><pre>* Abacus
+  * anser
+* Bubbles
+  1. bunk
+  2. bupkis
+     * bar
+  3. burper
+* Cunning</pre></td>
+							</tr>
+							<tr>
+								<td>引用</td>
+								<td>> 内容</td>
+							</tr>
+							<tr>
+								<td>代码</td>
+								<td>`内容`<br> `` `内容` ``
+								</td>
+							</tr>
+
+							<tr>
+								<td>代码块</td>
+								<td><pre>```
+public static void main(String [] args){
+
+}
+```</pre></td>
+							</tr>
+							<tr>
+								<td>水平线</td>
+								<td>---<br>* * *<br>- - - -
+								</td>
+							</tr>
+							<tr>
+								<td>换行(行末两个空格)</td>
+								<td><pre>第一行   
+第二行</pre></td>
+							</tr>
+							<tr>
+								<td>表格</td>
+								<td><pre>| A | B | C | 
+| - | :-: | -: | 
+| 左对齐 | 居中对齐| 右对齐 | </pre></td>
+							</tr>
+							<tr>
+								<td>锚点</td>
+								<td>[内容](#1)</td>
+							</tr>
+							<tr>
+								<td>脚注</td>
+								<td><pre>Markdown[^1]
+[^1]: 内容</pre></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script src="../../../jquery/jquery.min.js"></script>
+	<script src="../../../bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script
+		src="../../../console/vendor/jquery-easing/jquery.easing.min.js"></script>
+	<script src="../../../console/js/sb-admin.min.js"></script>
+	<script src="../../../sweet2alert/dist/sweetalert2.all.min.js"></script>
+	<script src="../../../js/base.js"></script>
+	<script src="../../../js/moment.min.js"></script>
+	<script src="../../../js/clipboard.min.js"></script>
+	<script src="../../../console/js/table.js"></script>
+	<script src="../../../console/markdowniteditor/common/help.js"></script>
+	<script src="../../../codemirror/lib/codemirror.js"></script>
+	<script src="../../../codemirror/addon/mode/overlay.js"></script>
+	<script src="../../../codemirror/mode/javascript/javascript.js"></script>
+	<script src="../../../codemirror/mode/css/css.js"></script>
+	<script src="../../../codemirror/mode/xml/xml.js"></script>
+	<script src="../../../codemirror/mode/htmlmixed/htmlmixed.js"></script>
+	<script src="../../../codemirror/mode/markdown/markdown.js"></script>
+	<script src="../../../codemirror/mode/gfm/gfm.js"></script>
+	<script src="../../../codemirror/addon/dialog/dialog.js"></script>
+	<script src="../../../codemirror/addon/search/searchcursor.js"></script>
+	<script src="../../../codemirror/addon/search/search.js"></script>
+	<script src="../../../codemirror/addon/edit/continuelist.js"></script>
+	<script src="../../../codemirror/addon/scroll/annotatescrollbar.js"></script>
+	<script src="../../../codemirror/addon/search/matchesonscrollbar.js"></script>
+	<script src="../../../codemirror/addon/search/jump-to-line.js"></script>
+	<script src="../../../console/markdowniteditor/md.js"></script>
+	<script src="../../../console/markdowniteditor/waitForImages.js"></script>
+	<script src="../../../highlight/highlight.pack.js"></script>
+	<script>
+		var config = {
+			toolbar : true,
+			syncScroll : true,
+			autoRender:true
+		}
+		var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+			mode : 'gfm',
+			lineNumbers : false,
+			matchBrackets : true,
+			lineWrapping : true,
+			dragDrop : true,
+			extraKeys : {
+				"Enter" : "newlineAndIndentContinueMarkdownList",
+				"Alt-F" : "findPersistent",
+				"Ctrl-A" : "selectAll"
+			}
+		});
+	</script>
+	<script src="../../../console/markdowniteditor/editor/sync.js"></script>
+	<script src="../../../console/markdowniteditor/editor/custom_search.js"></script>
+	<script src="../../../console/markdowniteditor/editor/copy_helper.js"></script>
+	<script src="../../../console/markdowniteditor/common/inner_bar.js"></script>
+	<script src="../../../console/markdowniteditor/editor/layout.js"></script>
+	<script src="../../../console/markdowniteditor/common/common_editor.js"></script>
+	<script src="../../../console/markdowniteditor/common/file.js"></script>
+	<script src="../../../console/markdowniteditor/editor/file.js"></script>
+	<script>
+		function setEditorValue(v) {
+			editor.setValue(v);
+			var toolbar = config.toolbar;
+			if (toolbar) {
+				config.toolbar = false;
+			}
+			inner_bar.remove();
+			if (toolbar) {
+				config.toolbar = true;
+			}
+		}
+
+		function getEditorValue() {
+			return editor.getValue();
+		}
+	</script>
+</body>
+
+</html>

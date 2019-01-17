@@ -116,9 +116,13 @@
 	<script th:src="@{/static/console/markdowniteditor/md.js?v=7.0}"></script>
 	<script type="text/javascript" th:src="@{/static/js/file.js}"></script>
 	<script>
+		var basePath = root;
+		var isLogin = true;
 		var editor = $("#editor");
 	</script>
+	<script th:src="@{/static/console/markdowniteditor/common/iframe.js}"></script>
 	<script>
+		commonEditor.bind('#editor');
 		var mode = $("#id").length > 0 ? 'update' : 'write';
 		$.ajax({
 			url : root + 'api/console/locks',
