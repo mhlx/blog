@@ -21,9 +21,7 @@ var cp = (function(editor){
 			var cursor_panel = '<div style="position:absolute;bottom:5px;width:150px;left:calc(50% - 75px);display:none;z-index:9999" class="alpha30" id="_cursor_panel">'
 			
 			cursor_panel += '<div style="height:26.66%;padding:5px;cursor:pointer">';
-			cursor_panel += '<i class="fas fa-copy" data-exec="copy" style="font-size:35px;" title="复制"></i>';
-			cursor_panel += '<i class="fas fa-cut" data-exec="cut" style="font-size:35px;margin-left:15px" title="剪切"></i>';
-			cursor_panel += '<i class="fas fa-times" data-close style="font-size:35px;float:right" title="关闭"></i>';
+			cursor_panel += '<i class="fas fa-times" data-close style="font-size:35px" title="关闭"></i>';
 			
 			cursor_panel += '<div style="clear:both"></div>';
 			cursor_panel += '</div>';

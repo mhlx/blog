@@ -31,23 +31,10 @@
 								<form id="editForm">
 									<div class="form-group">
 										<label>内容</label>
-										<div style="font-size: 2rem">
-											<a href="javascript:void(0)" style="margin-right: 10px"><i
-												onclick="previewNews($(this))" class="fas fa-eye icon"></i></a>
-											<a href="javascript:void(0)" style="margin-right: 10px" onclick="insertFiles()"><i
-												class="fas fa-file icon"></i></a>
-											<a href="javascript:void(0)" style="margin-right: 10px" onclick="insertLink()"><i
-												class="fas fa-link icon"></i></a>
-										</div>
-										<div id="editor-content"
-											style="position: relative;">
+										<div id="editor-content" style="position: relative;">
 											<textarea class="form-control" cols="8" rows="8"
 												placeholder="(0~2000字符)" id="editor"
 												th:text="${news.content}"></textarea>
-										</div>
-										<div id="editor-rendered" class="markdown-body"
-											style="display: none; min-height: 300px; max-height: 800px; overflow-y: auto">
-
 										</div>
 									</div>
 									<div class="form-group">
@@ -94,73 +81,39 @@
 	</a>
 
 	<div th:replace="console/base/foot"></div>
-	<script type="text/javascript"
-		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
-	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
-	<script
-		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
-	<script th:src="@{/static/console/markdowniteditor/md.js?v=7.0}"></script>
-	<script type="text/javascript" th:src="@{/static/js/file.js}"></script>
-	<script>
-		var basePath = root;
-		var isLogin = true;
-		var editor = $("#editor");
-	</script>
 	<script th:src="@{/static/console/markdowniteditor/common/iframe.js}"></script>
 	<script>
-		commonEditor.bind('#editor');
-		var mode = $("#id").length > 0 ? 'update' : 'write';
-		$.ajax({
-			url : root + 'api/console/locks',
-			success : function(data) {
-				var locks = data;
-				if (locks.length > 0) {
-					var html = '';
-					for (var i = 0; i < locks.length; i++) {
-						var lock = locks[i];
-						html += '<option value="' + lock.id + '">' + lock.name
-								+ '</option>';
-					}
-					$("#lock").append(html);
-					if(mode == 'update'){
-						$("#lock").val('[[${news.lockId}]]');
-					}
+	var editor = $("#editor");
+	commonEditor.bind('textarea', {
+		 basePath : '[[@{/}]]',
+		 isLogin : true,
+		 csrfToken : '[[${_csrf.token}]]',
+		csrfHeader : '[[${_csrf.headerName}]]' 
+	});
+	
+	var mode = $("#id").length > 0 ? 'update' : 'write';
+	$.ajax({
+		url : root + 'api/console/locks',
+		success : function(data) {
+			var locks = data;
+			if (locks.length > 0) {
+				var html = '';
+				for (var i = 0; i < locks.length; i++) {
+					var lock = locks[i];
+					html += '<option value="' + lock.id + '">' + lock.name
+							+ '</option>';
 				}
-			},
-			error : function(jqXHR) {
-				swal('获取锁失败', $.parseJSON(jqXHR.responseText).error, 'error');
+				$("#lock").append(html);
+				if(mode == 'update'){
+					$("#lock").val('[[${news.lockId}]]');
+				}
 			}
-		})
-		function previewNews(o) {
-			var content = editor.val();
-			var html = md.render(content);
-			o.removeClass("fa-eye").addClass("fa-eye-slash").attr("onclick",
-					"inputNews($(this))");
-			$("#editor-content").hide();
-			$("#editor-rendered").html(html).show();
+		},
+		error : function(jqXHR) {
+			swal('获取锁失败', $.parseJSON(jqXHR.responseText).error, 'error');
 		}
-
-		function inputNews(o) {
-			o.removeClass("fa-eye-slash").addClass("fa-eye").attr("onclick",
-					"previewNews($(this))");
-			$("#editor-rendered").html('').hide();
-			$("#editor-content").show();
-		}
-		$("#saveNews").click(function() {
+	})
+	$("#saveNews").click(function() {
 			var me = $(this);
 			me.prop('disabled', true);
 			var news = {};
@@ -224,85 +177,6 @@
 				$("#allowComment").prop('checked',false);
 			}
 			
-		}
-	var pos;
-		function insertFiles() {
-			pos = editor.prop("selectionStart");
-			fileChooser.choose(function(datas){
-				var content = '';
-				for(var i=0;i<datas.length;i++){
-		    		var data = datas[i];
-		    		 var cf = data.cf;
-		             var ext = cf.extension.toLowerCase();
-		             if ($.inArray(ext, ['jpeg', 'jpg', 'png', 'gif']) == -1) {
-		                 if (ext == 'mp4' || ext == 'mov') {
-		                	 (async function getPoster () {
-		                		 const {value: poster} = await Swal({
-		                    		  title: '输入封面地址',
-		                    		  input: 'text',
-		                    		  inputValue: cf.url,
-		                    		  showCancelButton: true,
-		                    		  confirmButtonText:'确定',
-		                    		  canecelButtonText:'取消'
-		                    		});
-		                		 if(poster){
-		                			 insertAtCursor('<video src="'+cf.url+'" poster="'+poster+'" controls></video>\r\n');
-		                		 }
-		                	 })()
-		                 } else {
-		                	 content += ('[' + cf.originalFilename + '](' + cf.url + ')');
-		                 }
-		             } else {
-		                 var thumb = cf.thumbnailUrl;
-		                 if (thumb) {
-		                	 content += ('[![' + cf.originalFilename + '](' + thumb.middle + ')](' + thumb.large + ')\r\n\r\n');
-		                 } else {
-		                	 conten += ('![' + cf.originalFilename + '](' + cf.url + ')\r\n\r\n');
-		                 }
-		             }
-		    	}
-				insertAtCursor(content);
-			});
-		}
-		
-		function insertAtCursor(myValue) {
-			var myField = document.getElementById("editor");
-			 setTimeout(function(){
-        		 editor.focus();
-        		 if(pos){
-        			 editor.prop("selectionStart",pos);
-        			 pos = undefined;
-        		 }else{
-        			 pos = editor.prop("selectionStart");
-        		 }
-        		  if (document.selection) {
-      		        myField.focus();
-      		        sel = document.selection.createRange();
-      		        sel.text = myValue;
-      		    }
-      		    else if (myField.selectionStart || myField.selectionStart == '0') {
-      		        var startPos = myField.selectionStart;
-      		        var endPos = myField.selectionEnd;
-      		        myField.value = myField.value.substring(0, startPos)
-      		            + myValue
-      		            + myField.value.substring(endPos, myField.value.length);
-      		    } else {
-      		        myField.value += myValue;
-      		    }
-        	 },200);
-		}
-		
-		function insertLink(){
-			(async function getUrl(){
-				const {value: url} = await Swal({
-				  input: 'url',
-				  inputPlaceholder: '输入地址'
-				})
-
-				if (url) {
-					insertAtCursor('[' + url + '](' + url + ')');
-				}
-			})();
 		}
 	</script>
 </body>

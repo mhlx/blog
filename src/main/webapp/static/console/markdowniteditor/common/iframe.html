@@ -19,6 +19,8 @@
 <link rel="stylesheet" href="../../../highlight/styles/github.css">
 <link href="../../../fontawesome-free/css/all.min.css?v=7.0"
 	rel="stylesheet">
+<link rel="stylesheet"
+	href="../../../jquery-file-upload/css/jquery.fileupload.css">
 <style>
 #toolbar {
 	background-color: #f9f9f7;
@@ -113,10 +115,11 @@
 body {
 	background-color: #f9f9f7
 }
-  #in .CodeMirror-code {
-            height: auto;
-            margin-bottom: 301px;
-        }
+
+#in .CodeMirror-code {
+	height: auto;
+	margin-bottom: 301px;
+}
 </style>
 </head>
 
@@ -127,8 +130,7 @@ body {
 				data-target="#helpModal"></i> <i class="far fa-check-square icon"
 				onclick="toggleToolbar($(this))" id="toggle-toolbar"></i> <i
 				class="far fa-window-maximize icon" data-to-fullscreen
-				id="fullscreen-icon"></i>
-				 <i class="fas fa-times icon" data-close></i>
+				id="fullscreen-icon"></i> <i class="fas fa-times icon" data-close-iframe></i>
 			<div style="float: right; display: none" id="saveTip"></div>
 		</div>
 		<div id="in" style="display: none">
@@ -287,18 +289,36 @@ public static void main(String [] args){
 		</div>
 	</div>
 
-
 	<script src="../../../jquery/jquery.min.js"></script>
+	<script src="../../../console/markdowniteditor/common/help.js"></script>
+	<script>
+	var csrfToken = getUrlParam('csrfToken', '');
+	var csrfHeader = getUrlParam("csrfHeader", '');
+	$('head').append('<meta name="_csrf" content="'+csrfToken+'" />');
+	$('head').append(
+			'<meta name="_csrf_header" content="'+csrfHeader+'" />');
+	</script>
 	<script src="../../../bootstrap/js/bootstrap.bundle.min.js"></script>
 	<script
 		src="../../../console/vendor/jquery-easing/jquery.easing.min.js"></script>
-	<script src="../../../console/js/sb-admin.min.js"></script>
 	<script src="../../../sweet2alert/dist/sweetalert2.all.min.js"></script>
 	<script src="../../../js/base.js"></script>
 	<script src="../../../js/moment.min.js"></script>
 	<script src="../../../js/clipboard.min.js"></script>
-	<script src="../../../console/js/table.js"></script>
-	<script src="../../../console/markdowniteditor/common/help.js"></script>
+	<script type="text/javascript"
+		src="../../../jquery-file-upload/js/load-image.min.js"></script>
+	<script type="text/javascript" src="../../../js/canvas-to-blob.min.js"></script>
+	<script src="../../../jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+	<script src="../../../jquery-file-upload/js/jquery.iframe-transport.js"></script>
+	<script src="../../../jquery-file-upload/js/jquery.fileupload.js"></script>
+	<script src="../../../jquery-file-upload/js/jquery.fileupload-ui.js"></script>
+	<script
+		src="../../../jquery-file-upload/js/jquery.fileupload-process.js"></script>
+	<script src="../../../jquery-file-upload/js/jquery.fileupload-image.js"></script>
+	<script src="../../../jquery-file-upload/js/jquery.fileupload-audio.js"></script>
+	<script src="../../../jquery-file-upload/js/jquery.fileupload-video.js"></script>
+	<script
+		src="../../../jquery-file-upload/js/jquery.fileupload-validate.js"></script>
 	<script src="../../../codemirror/lib/codemirror.js"></script>
 	<script src="../../../codemirror/addon/mode/overlay.js"></script>
 	<script src="../../../codemirror/mode/javascript/javascript.js"></script>
@@ -321,7 +341,7 @@ public static void main(String [] args){
 		var config = {
 			toolbar : true,
 			syncScroll : true,
-			autoRender:true
+			autoRender : true
 		}
 		var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
 			mode : 'gfm',
