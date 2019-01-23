@@ -1,6 +1,7 @@
 var inner_bar = (function(editor, config) {
     var $inner_bar = $('<div  class="alpha30 inner-toolbar" style="position:fixed;width:50%;font-size:20px;padding-left:10px;padding-right:10px;visibility:hidden">' +
-        '<i class="fas" data-h  data-v="1" style="cursor: pointer;margin-right:20px">H1</i>' +
+    	'<i class="far fa-meh-rolling-eyes" style="cursor: pointer;margin-right:20px"></i>' +
+    	'<i class="fas" data-h  data-v="1" style="cursor: pointer;margin-right:20px">H1</i>' +
         '<i class="fas" data-h data-v="2" style="cursor: pointer;margin-right:20px">H2</i>' +
         '<i class="fas" data-h data-v="3" style="cursor: pointer;margin-right:20px">H3</i>' +
         '<i class="fas fa-bold" data-bold style="cursor: pointer;margin-right:20px"></i>' +
@@ -24,7 +25,7 @@ var inner_bar = (function(editor, config) {
 
     $inner_bar.appendTo($('body'));
     
-    if(getUrlParam("isLogin",'false') == 'true'){
+    if(editorConfig.isLogin){
     	$inner_bar.find('[data-file]').show();
     }
     editor.on('scrollCursorIntoView', function(editor, e) {

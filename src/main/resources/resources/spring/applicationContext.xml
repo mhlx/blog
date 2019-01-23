@@ -127,11 +127,14 @@
 	</task:scheduled-tasks>
 
 	<!-- 文件管理 -->
+	<!-- 
 	<bean class="me.qyh.blog.file.store.GraphicsMagickImageHelper">
 		<property name="magickPath"
 			value="C:/Program Files/GraphicsMagick-1.3.30-Q16" />
 		<property name="pngQuantDirPath" value="f:/pngquant" />
 	</bean>
+	 -->
+	 <bean class="me.qyh.blog.file.store.JavaImageHelper"></bean>
 	<bean class="me.qyh.blog.file.store.DefaultFileManager" />
 
 	<bean class="me.qyh.blog.core.plugin.PluginHandlerRegistry" />

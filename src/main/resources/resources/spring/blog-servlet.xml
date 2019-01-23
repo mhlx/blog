@@ -33,7 +33,7 @@
 			me.qyh.blog.web.view" />
 
 
-	<bean class="me.qyh.blog.web.security.ProxyIPGetter" />
+<!-- 	<bean class="me.qyh.blog.web.security.ProxyIPGetter" /> -->
 
 	<bean class="me.qyh.blog.template.render.TemplateRender" />
 
@@ -59,26 +59,26 @@
 	</bean>
 
 
-	<bean class="me.qyh.blog.file.store.local.VideoResourceStore"
-		parent="thumbnailSupport">
-		<property name="absPath" value="/web/file/blog_video/" />
-		<property name="id" value="4" />
-		<property name="thumbAbsPath"
-			value="/web/file/blog_video_thumb" />
-		<property name="name" value="视频存储" />
-		<property name="maxSize" value="960" />
-		<property name="readOnly" value="true" />
-	</bean>
+<!-- 	<bean class="me.qyh.blog.file.store.local.VideoResourceStore" -->
+<!-- 		parent="thumbnailSupport"> -->
+<!-- 		<property name="absPath" value="/web/file/blog_video/" /> -->
+<!-- 		<property name="id" value="4" /> -->
+<!-- 		<property name="thumbAbsPath" -->
+<!-- 			value="/web/file/blog_video_thumb" /> -->
+<!-- 		<property name="name" value="视频存储" /> -->
+<!-- 		<property name="maxSize" value="960" /> -->
+<!-- 		<property name="readOnly" value="true" /> -->
+<!-- 	</bean> -->
 
-	<bean class="me.qyh.blog.file.store.local.VideoResourceStore2"
-		parent="thumbnailSupport">
-		<constructor-arg index="0" value="960" />
-		<property name="absPath" value="/web/file/blog_video2/" />
-		<property name="id" value="5" />
-		<property name="thumbAbsPath"
-			value="/web/file/blog_video_thumb2" />
-		<property name="name" value="视频存储" />
-	</bean>
+<!-- 	<bean class="me.qyh.blog.file.store.local.VideoResourceStore2" -->
+<!-- 		parent="thumbnailSupport"> -->
+<!-- 		<constructor-arg index="0" value="960" /> -->
+<!-- 		<property name="absPath" value="/web/file/blog_video2/" /> -->
+<!-- 		<property name="id" value="5" /> -->
+<!-- 		<property name="thumbAbsPath" -->
+<!-- 			value="/web/file/blog_video_thumb2" /> -->
+<!-- 		<property name="name" value="视频存储" /> -->
+<!-- 	</bean> -->
 
 	<bean class="me.qyh.blog.file.store.local.Thumbnailator" />
 

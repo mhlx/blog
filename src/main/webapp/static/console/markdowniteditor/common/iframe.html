@@ -292,8 +292,11 @@ public static void main(String [] args){
 	<script src="../../../jquery/jquery.min.js"></script>
 	<script src="../../../console/markdowniteditor/common/help.js"></script>
 	<script>
-	var csrfToken = getUrlParam('csrfToken', '');
-	var csrfHeader = getUrlParam("csrfHeader", '');
+	var key = 'commonEditor_'+getUrlParam('stamp','');
+	var editorConfig = $.parseJSON(window.sessionStorage[key]);
+	sessionStorage.removeItem(key);
+	var csrfToken = editorConfig.csrfToken;
+	var csrfHeader = editorConfig.csrfHeader;
 	$('head').append('<meta name="_csrf" content="'+csrfToken+'" />');
 	$('head').append(
 			'<meta name="_csrf_header" content="'+csrfHeader+'" />');
@@ -363,6 +366,7 @@ public static void main(String [] args){
 	<script src="../../../console/markdowniteditor/editor/layout.js"></script>
 	<script src="../../../console/markdowniteditor/common/common_editor.js"></script>
 	<script src="../../../console/markdowniteditor/common/file.js"></script>
+	<script src="../../../console/markdowniteditor/editor/emoji.js"></script>
 	<script src="../../../console/markdowniteditor/editor/file.js"></script>
 	<script>
 		function setEditorValue(v) {

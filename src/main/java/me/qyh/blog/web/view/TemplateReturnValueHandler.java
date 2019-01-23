@@ -99,7 +99,7 @@ public class TemplateReturnValueHandler implements HandlerMethodReturnValueHandl
 	}
 
 	protected String getContentType(NativeWebRequest request, String ext) {
-		if ("html".equals(ext)) {
+		if ("html".equals(ext) || "htm".equals(ext)) {
 			return MediaType.TEXT_HTML_VALUE;
 		}
 		if ("json".equals(ext)) {

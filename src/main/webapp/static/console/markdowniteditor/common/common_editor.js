@@ -1,4 +1,4 @@
-
+var maxLenth = editorConfig.maxLength | 2000;
 var render = (function() {
 	var t;
 	var md = window.md;
@@ -51,7 +51,7 @@ editor.on('change', function(e) {
 			return line > 1 ? line - 1 : line;
 		});
 		var v = editor.getValue().length;
-		$("#stat").text("当前字数：" + v + "/200000").show();
+		$("#stat").text("当前字数：" + v + "/"+maxLenth).show();
 		if (stat_timer) {
 			clearTimeout(stat_timer);
 		}

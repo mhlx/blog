@@ -1,5 +1,5 @@
 var fileChooser = (function() {
-	var basePath = getUrlParam('basePath', '');
+	var basePath = editorConfig.basePath;
 	if (basePath.endsWith('/')) {
 		basePath = basePath.substring(0, basePath.length - 1);
 	}
@@ -145,7 +145,7 @@ var fileChooser = (function() {
 
 	(function() {
 		var stores = [];
-		if(getUrlParam('isLogin', '') == 'true'){
+		if(editorConfig.isLogin){
 			$.ajax({
 				type : "get",
 				url : basePath + "/api/console/stores",
