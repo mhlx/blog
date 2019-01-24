@@ -25,7 +25,7 @@ var inner_bar = (function(editor, config) {
 
     $inner_bar.appendTo($('body'));
     
-    if(editorConfig.isLogin){
+    if(editorConfig.isLogin === true){
     	$inner_bar.find('[data-file]').show();
     }
     editor.on('scrollCursorIntoView', function(editor, e) {

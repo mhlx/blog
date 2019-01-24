@@ -145,7 +145,7 @@ var fileChooser = (function() {
 
 	(function() {
 		var stores = [];
-		if(editorConfig.isLogin){
+		if(editorConfig.isLogin === true){
 			$.ajax({
 				type : "get",
 				url : basePath + "/api/console/stores",

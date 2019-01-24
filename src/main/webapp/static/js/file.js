@@ -234,20 +234,20 @@ var fileChooser = (function(){
 			uploadTemplate: function (o) {
 		        var rows = $();
 		        $.each(o.files, function (index, file) {
-		            var row = $('<tr class="template-upload" style="max-height:80px">' +
-		                '<td class="nowrap"><span class="preview" ></span></td>' +
-		                '<td class="nowrap"><p class="name"></p>' +
-		                '<div class="error"></div>' +
-		                '</td>' +
-		                '<td class="nowrap"><p class="size"></p>' +
-		                '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>' +
-		                '</td>' +
-		                '<td class="nowrap">' +
-		                (!index && !o.options.autoUpload ?
-		                    '  <button class="btn btn-primary start" disabled><i class="glyphicon glyphicon-upload"></i> <span>上传</span></button>' : '') +
-		                    (!index ? '<button class="btn btn-warning cancel" style="margin-left:10px">  <i class="glyphicon glyphicon-ban-circle"></i> <span>取消</span></button>' : '') +
-		                '</td>' +
-		                '</tr>');
+		        	 var row = $('<tr class="template-upload" style="max-height:80px">' +
+				                '<td style="white-space: nowrap!important"><span class="preview" ></span></td>' +
+				                '<td style="white-space: nowrap!important"><p class="name"></p>' +
+				                '<div class="error"></div>' +
+				                '</td>' +
+				                '<td style="white-space: nowrap!important"><p class="size"></p>' +
+				                '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>' +
+				                '</td>' +
+				                '<td style="white-space: nowrap!important">' +
+				                (!index && !o.options.autoUpload ?
+				                    '  <button class="btn btn-primary start" disabled><i class="glyphicon glyphicon-upload"></i> <span>上传</span></button>' : '') +
+				                    (!index ? '<button class="btn btn-warning cancel" style="margin-left:10px">  <i class="glyphicon glyphicon-ban-circle"></i> <span>取消</span></button>' : '') +
+				                '</td>' +
+				                '</tr>');
 		            var name = file.name;
 		            if(name.length > 10){
 		            	name = name.substring(0,10)
@@ -264,14 +264,14 @@ var fileChooser = (function(){
 		    downloadTemplate: function (o) {
 		        var rows = $();
 		        $.each(o.files, function (index, file) {
-		            var row = $('<tr class="template-download">' +
-		                '<td class="nowrap"><span class="preview"></span></td>' +
-		                '<td class="nowrap"><p class="name"></p>' +
-		                (file.error ? '<div class="error alert alert-danger"></div>' : '') +
-		                '</td>' +
-		                '<td class="nowrap"><span class="size"></span></td>' +
-		                '<td class="nowrap"><button class="delete btn btn-info">完成</button></td>' +
-		                '</tr>');
+		        	var row = $('<tr class="template-download">' +
+			                '<td style="white-space: nowrap!important"><span class="preview"></span></td>' +
+			                '<td style="white-space: nowrap!important"><p class="name"></p>' +
+			                (file.error ? '<div class="error alert alert-danger"></div>' : '') +
+			                '</td>' +
+			                '<td style="white-space: nowrap!important"><span class="size"></span></td>' +
+			                '<td style="white-space: nowrap!important"><button class="delete btn btn-info">完成</button></td>' +
+			                '</tr>');
 		            var name = file.name;
 		            if(name.length > 10){
 		            	name = name.substring(0,10)
