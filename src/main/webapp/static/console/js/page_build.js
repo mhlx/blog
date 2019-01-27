@@ -322,10 +322,7 @@
 				var error = $.parseJSON(jqXHR.responseText).error;
 				if(quick){
 					$("#previewModal").modal('show');
-						swal('保存失败',error,'error')
-				} else {
-					swal('保存失败',error,'error')
-				}
+				}swal('保存失败',error,'error')
 			}
 		});
 	}

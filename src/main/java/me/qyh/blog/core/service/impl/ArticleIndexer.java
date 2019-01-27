@@ -292,8 +292,9 @@ public abstract class ArticleIndexer implements InitializingBean {
 				return null;
 			}
 			for (Integer id : ids) {
-				Article article = articleDao.selectById(id);
-				if (article != null && article.isPublished()) {
+				Optional<Article> op = articleDao.selectById(id).filter(Article::isPublished);
+				if (op.isPresent()) {
+					Article article = op.get();
 					try {
 						doDeleteDocument(article.getId());
 						oriWriter.addDocument(buildDocument(article));

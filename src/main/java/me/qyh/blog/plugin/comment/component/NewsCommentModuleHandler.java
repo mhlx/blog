@@ -51,10 +51,7 @@ public class NewsCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public void doValidateBeforeInsert(Integer id) throws LogicException {
-		News news = newsDao.selectById(id);
-		if (news == null) {
-			throw new LogicException("news.notExists", "动态不存在");
-		}
+		News news = newsDao.selectById(id).orElseThrow(() -> new LogicException("news.notExists", "动态不存在"));
 		if (news.getIsPrivate()) {
 			Environment.doAuthencation();
 		}
@@ -66,10 +63,11 @@ public class NewsCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public boolean doValidateBeforeQuery(Integer id) {
-		News news = newsDao.selectById(id);
-		if (news == null) {
+		Optional<News> op = newsDao.selectById(id);
+		if (op.isEmpty()) {
 			return false;
 		}
+		News news = op.get();
 		if (news.getIsPrivate() && !Environment.hasAuthencated()) {
 			return false;
 		}
@@ -116,8 +114,7 @@ public class NewsCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public Optional<String> getUrl(Integer id) {
-		News news = newsDao.selectById(id);
-		return news == null ? Optional.empty() : Optional.of(urlHelper.getUrls().getUrl(news));
+		return newsDao.selectById(id).map(news -> urlHelper.getUrls().getUrl(news));
 	}
 
 }

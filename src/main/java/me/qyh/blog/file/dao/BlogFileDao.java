@@ -1,6 +1,7 @@
 package me.qyh.blog.file.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -31,7 +32,7 @@ public interface BlogFileDao {
 	 *            文件id
 	 * @return 如果不存在，返回null
 	 */
-	BlogFile selectById(Integer id);
+	Optional<BlogFile> selectById(Integer id);
 
 	/**
 	 * 查询文件数目
@@ -131,7 +132,7 @@ public interface BlogFileDao {
 	 *            路径
 	 * @return 如果不存在，返回null。否在返回已经存在的节点对象
 	 */
-	BlogFile selectByParentAndPath(@Param("parent") BlogFile parent, @Param("path") String path);
+	Optional<BlogFile> selectByParentAndPath(@Param("parent") BlogFile parent, @Param("path") String path);
 
 	/**
 	 * 删除没有关联的文件信息

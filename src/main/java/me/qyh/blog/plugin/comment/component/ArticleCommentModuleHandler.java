@@ -53,7 +53,7 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public void doValidateBeforeInsert(Integer id) throws LogicException {
-		Article article = articleDao.selectById(id);
+		Article article = articleDao.selectById(id).orElse(null);
 		// 博客不存在
 		if (article == null || !Environment.match(article.getSpace()) || !article.isPublished()) {
 			throw new LogicException("article.notExists", "文章不存在");
@@ -70,7 +70,7 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public boolean doValidateBeforeQuery(Integer id) {
-		Article article = articleDao.selectById(id);
+		Article article = articleDao.selectById(id).orElse(null);
 		if (article == null || !article.isPublished()) {
 			return false;
 		}
@@ -122,8 +122,7 @@ public class ArticleCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public Optional<String> getUrl(Integer id) {
-		Article article = articleDao.selectById(id);
-		return article == null ? Optional.empty() : Optional.of(urlHelper.getUrls().getUrl(article));
+		return articleDao.selectById(id).map(art -> urlHelper.getUrls().getUrl(art));
 	}
 
 }

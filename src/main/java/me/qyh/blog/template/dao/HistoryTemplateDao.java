@@ -1,6 +1,7 @@
 package me.qyh.blog.template.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -17,7 +18,7 @@ public interface HistoryTemplateDao {
 
 	void deleteById(Integer id);
 
-	HistoryTemplate selectById(Integer id);
+	Optional<HistoryTemplate> selectById(Integer id);
 
 	void update(HistoryTemplate historyTemplate);
 

@@ -46,19 +46,20 @@ public class TagServiceImpl implements TagService {
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Tag updateTag(Tag tag, boolean merge) throws LogicException {
-		Tag db = tagDao.selectById(tag.getId());
-		if (db == null) {
+		Optional<Tag> op = tagDao.selectById(tag.getId());
+		if (op.isEmpty()) {
 			throw new LogicException("tag.notExists", "标签不存在");
 		}
+		Tag db = op.get();
 		if (db.getName().equals(tag.getName())) {
 			return tag;
 		}
-		Tag newTag = tagDao.selectByName(tag.getName());
-		if (newTag != null) {
+		Optional<Tag> newOp = tagDao.selectByName(tag.getName());
+		if (newOp.isPresent()) {
 			if (!merge) {
 				throw new LogicException("tag.exists", "标签已经存在");
 			}
-			articleTagDao.merge(db, newTag);
+			articleTagDao.merge(db, newOp.get());
 			tagDao.deleteById(db.getId());
 		} else {
 			tagDao.update(tag);
@@ -76,10 +77,11 @@ public class TagServiceImpl implements TagService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void deleteTag(Integer id) throws LogicException {
-		Tag db = tagDao.selectById(id);
-		if (db == null) {
+		Optional<Tag> op = tagDao.selectById(id);
+		if (op.isPresent()) {
 			throw new LogicException("tag.notExists", "标签不存在");
 		}
+		Tag db = op.get();
 		articleTagDao.deleteByTag(db);
 		tagDao.deleteById(id);
 
@@ -112,7 +114,7 @@ public class TagServiceImpl implements TagService {
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<Tag> getTag(Integer id) {
-		return Optional.ofNullable(tagDao.selectById(id));
+		return tagDao.selectById(id);
 	}
 
 }

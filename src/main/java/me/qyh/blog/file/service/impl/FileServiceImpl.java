@@ -88,10 +88,8 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	public List<UploadedFile> upload(BlogFileUpload upload) throws LogicException {
 		BlogFile parent;
 		if (upload.getParent() != null) {
-			parent = blogFileDao.selectById(upload.getParent());
-			if (parent == null) {
-				throw new LogicException(PARENT_NOT_EXISTS);
-			}
+			parent = blogFileDao.selectById(upload.getParent())
+					.orElseThrow(() -> new LogicException(PARENT_NOT_EXISTS));
 		} else {
 			parent = blogFileDao.selectRoot();
 		}
@@ -153,8 +151,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 		String name = FileUtils.getNameWithoutExtension(originalFilename);
 		String fullname = ext.isEmpty() ? name : name + "." + ext.toLowerCase();
 
-		BlogFile checked = blogFileDao.selectByParentAndPath(parent, fullname);
-		if (checked != null) {
+		if (blogFileDao.selectByParentAndPath(parent, fullname).isPresent()) {
 			throw new LogicException("file.path.exists", "文件已经存在");
 		}
 
@@ -245,10 +242,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 		BlogFile parent = toCreate.getParent();
 		if (parent != null) {
-			parent = blogFileDao.selectById(parent.getId());
-			if (parent == null) {
-				throw new LogicException(PARENT_NOT_EXISTS);
-			}
+			parent = blogFileDao.selectById(parent.getId()).orElseThrow(() -> new LogicException(PARENT_NOT_EXISTS));
 			if (!parent.isDir()) {
 				throw new LogicException("file.parent.mustDir", "父目录必须是一个文件夹");
 			}
@@ -282,8 +276,9 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 		validateSlashPath(folder);
 
-		BlogFile checked = blogFileDao.selectByParentAndPath(parent, folder);
-		if (checked != null) {
+		Optional<BlogFile> op = blogFileDao.selectByParentAndPath(parent, folder);
+		if (op.isPresent()) {
+			BlogFile checked = op.get();
 			if (checked.isDir()) {
 				return checked;
 			} else {
@@ -307,10 +302,8 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	public BlogFilePageResult queryBlogFiles(BlogFileQueryParam param) throws LogicException {
 		List<BlogFile> paths = null;
 		if (param.getParent() != null) {
-			BlogFile parent = blogFileDao.selectById(param.getParent());
-			if (parent == null) {
-				throw new LogicException(PARENT_NOT_EXISTS);
-			}
+			BlogFile parent = blogFileDao.selectById(param.getParent())
+					.orElseThrow(() -> new LogicException(PARENT_NOT_EXISTS));
 			if (!parent.isDir()) {
 				throw new LogicException("file.parent.mustDir", "父目录必须是一个文件夹");
 			}
@@ -345,10 +338,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Override
 	@Transactional(readOnly = true)
 	public BlogFileProperties getBlogFileProperties(Integer id) throws LogicException {
-		BlogFile file = blogFileDao.selectById(id);
-		if (file == null) {
-			throw new ResourceNotFoundException(NOT_EXISTS);
-		}
+		BlogFile file = blogFileDao.selectById(id).orElseThrow(() -> new ResourceNotFoundException(NOT_EXISTS));
 		Map<String, Object> base = new HashMap<>();
 		base.put("type", file.getType());
 		if (file.isDir()) {
@@ -378,10 +368,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void copy(Integer sourceId, String folderPath) throws LogicException {
-		BlogFile source = blogFileDao.selectById(sourceId);
-		if (source == null) {
-			throw new ResourceNotFoundException(NOT_EXISTS);
-		}
+		BlogFile source = blogFileDao.selectById(sourceId).orElseThrow(() -> new ResourceNotFoundException(NOT_EXISTS));
 		if (!source.isFile()) {
 			throw new LogicException("file.copy.onlyFile", "只有文件才能被拷贝");
 		}
@@ -390,9 +377,8 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 		String oldPath = getFilePath(source);
 		BlogFile parent = createFolder(folderPath);
-		BlogFile checked = blogFileDao.selectByParentAndPath(parent, source.getPath());
 		// 路径上存在文件
-		if (checked != null) {
+		if (blogFileDao.selectByParentAndPath(parent, source.getPath()).isPresent()) {
 			throw new LogicException("file.path.exists", "文件已经存在");
 		}
 
@@ -422,10 +408,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void move(Integer sourceId, String newPath) throws LogicException {
-		BlogFile db = blogFileDao.selectById(sourceId);
-		if (db == null) {
-			throw new ResourceNotFoundException(NOT_EXISTS);
-		}
+		BlogFile db = blogFileDao.selectById(sourceId).orElseThrow(() -> new ResourceNotFoundException(NOT_EXISTS));
 		if (!db.isFile()) {
 			throw new LogicException("file.move.onlyFile", "只有文件才能被移动");
 		}
@@ -441,9 +424,8 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 		// 创建文件夹，如果不存在
 		BlogFile parent = createFolder(newPath);
-		BlogFile checked = blogFileDao.selectByParentAndPath(parent, db.getPath());
 		// 路径上存在文件
-		if (checked != null) {
+		if (blogFileDao.selectByParentAndPath(parent, db.getPath()).isPresent()) {
 			throw new LogicException("file.path.exists", "文件已经存在");
 		}
 
@@ -473,10 +455,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void rename(Integer id, String newName) throws LogicException {
-		BlogFile db = blogFileDao.selectById(id);
-		if (db == null) {
-			throw new ResourceNotFoundException(NOT_EXISTS);
-		}
+		BlogFile db = blogFileDao.selectById(id).orElseThrow(() -> new ResourceNotFoundException(NOT_EXISTS));
 		if (!db.isFile()) {
 			throw new LogicException("file.rename.onlyFile", "只有文件才能被重命名");
 		}
@@ -496,10 +475,10 @@ public class FileServiceImpl implements FileService, InitializingBean {
 		if (db.getParent() == null) {
 			parent = blogFileDao.selectRoot();
 		} else {
-			parent = blogFileDao.selectById(db.getParent().getId());
+			parent = blogFileDao.selectById(db.getParent().getId()).orElse(null);
 		}
 
-		BlogFile checked = blogFileDao.selectByParentAndPath(parent, name);
+		BlogFile checked = blogFileDao.selectByParentAndPath(parent, name).orElse(null);
 		// 路径上存在文件
 		if (checked != null && !Objects.equals(db.getId(), checked.getId())) {
 			throw new LogicException("file.path.exists", "文件已经存在");
@@ -528,10 +507,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void delete(Integer id) throws LogicException {
-		BlogFile db = blogFileDao.selectById(id);
-		if (db == null) {
-			throw new ResourceNotFoundException(NOT_EXISTS);
-		}
+		BlogFile db = blogFileDao.selectById(id).orElseThrow(() -> new ResourceNotFoundException(NOT_EXISTS));
 		if (db.getParent() == null) {
 			throw new LogicException("file.root.canNotDelete", "根节点不能删除");
 		}
@@ -595,10 +571,10 @@ public class FileServiceImpl implements FileService, InitializingBean {
 			param.setParentFile(parent);
 		} else {
 			if (cleanedPath.indexOf('/') == -1) {
-				parent = blogFileDao.selectByParentAndPath(parent, cleanedPath);
+				parent = blogFileDao.selectByParentAndPath(parent, cleanedPath).orElse(null);
 			} else {
 				for (String _path : cleanedPath.split("/")) {
-					parent = blogFileDao.selectByParentAndPath(parent, _path);
+					parent = blogFileDao.selectByParentAndPath(parent, _path).orElse(null);
 					if (parent == null) {
 						break;
 					}

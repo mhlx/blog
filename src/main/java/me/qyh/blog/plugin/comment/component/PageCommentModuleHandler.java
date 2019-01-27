@@ -42,10 +42,7 @@ public class PageCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public void doValidateBeforeInsert(Integer id) throws LogicException {
-		Page page = pageDao.selectById(id);
-		if (page == null) {
-			throw new LogicException("page.user.notExists", "页面不存在");
-		}
+		Page page = pageDao.selectById(id).orElseThrow(() -> new LogicException("page.user.notExists", "页面不存在"));
 		if (!page.getAllowComment() && !Environment.hasAuthencated()) {
 			throw new LogicException("page.notAllowComment", "页面不允许评论");
 		}
@@ -53,8 +50,7 @@ public class PageCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public boolean doValidateBeforeQuery(Integer id) {
-		Page page = pageDao.selectById(id);
-		return page != null && Environment.match(page.getSpace());
+		return pageDao.selectById(id).filter(page -> Environment.match(page.getSpace())).isPresent();
 	}
 
 	@Override
@@ -80,8 +76,7 @@ public class PageCommentModuleHandler extends CommentModuleHandler {
 
 	@Override
 	public Optional<String> getUrl(Integer id) {
-		Page page = pageDao.selectById(id);
-		return Optional.ofNullable(page == null ? null : urlHelper.getUrls().getUrl(page));
+		return pageDao.selectById(id).map(page -> urlHelper.getUrls().getUrl(page));
 	}
 
 }

@@ -51,10 +51,10 @@ public class SysLockProvider implements LockProvider, ApplicationEventPublisherA
 	@CacheEvict(value = "lockCache", key = "'lock-'+#id")
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED)
 	public void removeLock(String id) {
-		Lock lock = sysLockDao.selectById(id);
-		if (lock != null) {
+		Optional<SysLock> op = sysLockDao.selectById(id);
+		if (op.isPresent()) {
 			sysLockDao.delete(id);
-			applicationEventPublisher.publishEvent(new LockDelEvent(this, lock));
+			applicationEventPublisher.publishEvent(new LockDelEvent(this, op.get()));
 		}
 	}
 
@@ -85,10 +85,8 @@ public class SysLockProvider implements LockProvider, ApplicationEventPublisherA
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED)
 	@CacheEvict(value = "lockCache", key = "'lock-'+#lock.id")
 	public SysLock updateLock(SysLock lock) throws LogicException {
-		SysLock db = sysLockDao.selectById(lock.getId());
-		if (db == null) {
-			throw new LogicException("lock.notexists", "锁不存在，可能已经被删除");
-		}
+		SysLock db = sysLockDao.selectById(lock.getId())
+				.orElseThrow(() -> new LogicException("lock.notexists", "锁不存在，可能已经被删除"));
 		if (!db.getType().equals(lock.getType())) {
 			throw new LogicException("lock.type.unmatch", "锁类型不匹配");
 		}
@@ -120,6 +118,6 @@ public class SysLockProvider implements LockProvider, ApplicationEventPublisherA
 	@Cacheable(value = "lockCache", key = "'lock-'+#id")
 	@Transactional(readOnly = true)
 	public Optional<Lock> getLock(String id) {
-		return Optional.ofNullable(sysLockDao.selectById(id));
+		return Optional.ofNullable(sysLockDao.selectById(id).orElse(null));
 	}
 }

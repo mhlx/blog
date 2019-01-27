@@ -1,6 +1,7 @@
 package me.qyh.blog.core.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import me.qyh.blog.core.entity.Space;
 import me.qyh.blog.core.vo.SpaceQueryParam;
@@ -19,7 +20,7 @@ public interface SpaceDao {
 	 *            空间别名
 	 * @return 如果不存在，返回null
 	 */
-	Space selectByAlias(String alias);
+	Optional<Space> selectByAlias(String alias);
 
 	/**
 	 * 根据空间名查询空间
@@ -28,7 +29,7 @@ public interface SpaceDao {
 	 *            空间名
 	 * @return 如果不存在,返回null
 	 */
-	Space selectByName(String name);
+	Optional<Space> selectByName(String name);
 
 	/**
 	 * 更新空间
@@ -62,7 +63,7 @@ public interface SpaceDao {
 	 *            空间id
 	 * @return 如果不存在，返回null
 	 */
-	Space selectById(Integer id);
+	Optional<Space> selectById(Integer id);
 
 	/**
 	 * 将所有空间全部置为非默认状态
@@ -72,9 +73,9 @@ public interface SpaceDao {
 	/**
 	 * 查询默认空间
 	 * 
-	 * @return 如果没有默认空间返回null
+	 * @return
 	 */
-	Space selectDefault();
+	Optional<Space> selectDefault();
 
 	/**
 	 * 删除空间

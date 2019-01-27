@@ -2,6 +2,7 @@ package me.qyh.blog.template.dao;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -23,7 +24,7 @@ public interface PageDao {
 	 *            用户自定义页面id
 	 * @return 如果不存在，返回null
 	 */
-	Page selectById(Integer id);
+	Optional<Page> selectById(Integer id);
 
 	/**
 	 * 更新用户自定义页面
@@ -77,7 +78,7 @@ public interface PageDao {
 	 * @param spaceGlobal
 	 * @return 如果不存在，返回null
 	 */
-	Page selectBySpaceAndAlias(@Param("space") Space space, @Param("alias") String alias,
+	Optional<Page> selectBySpaceAndAlias(@Param("space") Space space, @Param("alias") String alias,
 			@Param("spaceGlobal") boolean spaceGlobal);
 
 	/**

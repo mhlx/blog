@@ -1,6 +1,7 @@
 package me.qyh.blog.core.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import me.qyh.blog.core.entity.Tag;
 import me.qyh.blog.core.vo.TagQueryParam;
@@ -27,7 +28,7 @@ public interface TagDao {
 	 *            标签名
 	 * @return 如果不存在，返回null
 	 */
-	Tag selectByName(String name);
+	Optional<Tag> selectByName(String name);
 
 	/**
 	 * 查询标签数
@@ -69,7 +70,7 @@ public interface TagDao {
 	 *            标签id
 	 * @return 如果不存在，返回null
 	 */
-	Tag selectById(Integer id);
+	Optional<Tag> selectById(Integer id);
 
 	/**
 	 * 删除id对应的标签
@@ -78,5 +79,5 @@ public interface TagDao {
 	 *            标签id
 	 */
 	void deleteById(Integer id);
-	
+
 }

@@ -2,6 +2,7 @@ package me.qyh.blog.plugin.comment.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -69,7 +70,7 @@ public interface CommentDao {
 	 *            评论id
 	 * @return 如果不存在返回null，否则返回存在的评论
 	 */
-	Comment selectById(Integer id);
+	Optional<Comment> selectById(Integer id);
 
 	/**
 	 * 插入评论
@@ -119,7 +120,7 @@ public interface CommentDao {
 	 *            评论
 	 * @return 如果不存在返回null，否在返回最后一条记录
 	 */
-	Comment selectLast(Comment current);
+	Optional<Comment> selectLast(Comment current);
 
 	/**
 	 * 

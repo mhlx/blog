@@ -1,6 +1,7 @@
 package me.qyh.blog.plugin.syslock.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import me.qyh.blog.plugin.syslock.entity.SysLock;
 
@@ -49,6 +50,6 @@ public interface SysLockDao {
 	 *            锁id
 	 * @return 如果不存在，返回null
 	 */
-	SysLock selectById(String id);
+	Optional<SysLock> selectById(String id);
 
 }

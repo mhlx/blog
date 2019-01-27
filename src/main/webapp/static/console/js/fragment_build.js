@@ -296,8 +296,8 @@
 				saveFlag = false;
 				if(quick){
 					$("#previewModal").modal('show');
-					swal('保存失败',$.parseJSON(jqXHR.responseText).error,'error');
 				}
+				swal('保存失败',$.parseJSON(jqXHR.responseText).error,'error');
 			}
 		});
 	}

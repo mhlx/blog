@@ -1,6 +1,7 @@
 package me.qyh.blog.core.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -33,7 +34,7 @@ public interface NewsDao {
 	 * @param id
 	 * @return
 	 */
-	News selectById(Integer id);
+	Optional<News> selectById(Integer id);
 
 	/**
 	 * 根据ID删除
@@ -69,7 +70,7 @@ public interface NewsDao {
 	 * @param queryPrivate
 	 * @return
 	 */
-	News getPreviousNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate,
+	Optional<News> getPreviousNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate,
 			@Param("queryLock") boolean queryLock);
 
 	/**
@@ -79,7 +80,7 @@ public interface NewsDao {
 	 * @param queryPrivate
 	 * @return
 	 */
-	News getNextNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate,
+	Optional<News> getNextNews(@Param("news") News news, @Param("queryPrivate") boolean queryPrivate,
 			@Param("queryLock") boolean queryLock);
 
 	/**

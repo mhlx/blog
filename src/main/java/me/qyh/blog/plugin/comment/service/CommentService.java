@@ -140,10 +140,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void changeStatus(Integer id, CommentStatus status) throws LogicException {
-		Comment comment = commentDao.selectById(id);// 查询父评论
-		if (comment == null) {
-			throw new LogicException("comment.notExists", "评论不存在");
-		}
+		commentDao.selectById(id).orElseThrow(() -> new LogicException("comment.notExists", "评论不存在"));// 查询父评论
 		commentDao.updateStatus(id, status);
 	}
 
@@ -156,10 +153,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void deleteComment(Integer id) throws LogicException {
-		Comment comment = commentDao.selectById(id);
-		if (comment == null) {
-			throw new LogicException("comment.notExists", "评论不存在");
-		}
+		Comment comment = commentDao.selectById(id).orElseThrow(() -> new LogicException("comment.notExists", "评论不存在"));
 		commentDao.deleteByPath(comment.getParentPath() + comment.getId());
 		commentDao.deleteById(id);
 	}
@@ -244,10 +238,8 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		// 判断是否存在父评论
 		Comment parent = comment.getParent();
 		if (parent != null) {
-			parent = commentDao.selectById(parent.getId());// 查询父评论
-			if (parent == null) {
-				throw new LogicException("comment.parent.notExists", "父评论不存在");
-			}
+			parent = commentDao.selectById(parent.getId())
+					.orElseThrow(() -> new LogicException("comment.parent.notExists", "父评论不存在"));// 查询父评论
 
 			// 如果父评论正在审核
 			if (parent.isChecking()) {
@@ -263,8 +255,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 			throw new LogicException("comment.path.toolong", "该评论不能再被回复了");
 		}
 
-		Comment last = commentDao.selectLast(comment);
-		if (last != null && last.getContent().equals(comment.getContent())) {
+		if (commentDao.selectLast(comment).map(last -> last.getContent().equals(comment.getContent())).isPresent()) {
 			throw new LogicException("comment.content.same", "已经回复过相同的评论了");
 		}
 
@@ -442,10 +433,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		if (handler == null || !handler.doValidateBeforeQuery(module.getId())) {
 			return new ArrayList<>();
 		}
-		Comment comment = commentDao.selectById(id);
-		if (comment == null) {
-			throw new LogicException("comment.notExists", "评论不存在");
-		}
+		Comment comment = commentDao.selectById(id).orElseThrow(() -> new LogicException("comment.notExists", "评论不存在"));
 		if (!comment.getCommentModule().equals(module)) {
 			return new ArrayList<>();
 		}
@@ -453,7 +441,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 		List<Comment> comments = new ArrayList<>();
 		if (!comment.getParents().isEmpty()) {
 			for (Integer pid : comment.getParents()) {
-				Comment p = commentDao.selectById(pid);
+				Comment p = commentDao.selectById(pid).get();
 				handleComment(p);
 				comments.add(p);
 			}
@@ -546,9 +534,9 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 */
 	@Transactional(readOnly = true)
 	public void banIp(Integer commentId) throws LogicException {
-		Comment comment = commentDao.selectById(commentId);
-		if (comment != null) {
-			blacklistHandler.add(comment.getIp());
+		Optional<Comment> op = commentDao.selectById(commentId);
+		if (op.isPresent()) {
+			blacklistHandler.add(op.get().getIp());
 		}
 	}
 
@@ -580,10 +568,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void updateComment(Integer id, String content) throws LogicException {
-		Comment db = commentDao.selectById(id);
-		if (db == null) {
-			throw new LogicException("comment.notExists", "评论不存在");
-		}
+		Comment db = commentDao.selectById(id).orElseThrow(() -> new LogicException("comment.notExists", "评论不存在"));
 		if (!db.getAdmin()) {
 			throw new LogicException("comment.unEditable", "这条评论无法被编辑");
 		}
@@ -610,7 +595,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 
 	@Transactional(readOnly = true)
 	public Optional<Comment> getComment(Integer id) {
-		return Optional.ofNullable(commentDao.selectById(id));
+		return commentDao.selectById(id);
 	}
 
 	@Override

@@ -145,8 +145,7 @@ public class ArticleServiceImpl
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<Article> getArticleForEdit(Integer id) {
-		Article article = articleDao.selectById(id);
-		return Optional.ofNullable(article);
+		return articleDao.selectById(id);
 	}
 
 	@Override
@@ -168,16 +167,15 @@ public class ArticleServiceImpl
 			lockManager.ensureLockAvailable(article.getLockId());
 		}
 		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-		Article articleDb = articleDao.selectById(article.getId());
-		if (articleDb == null) {
-			throw new ResourceNotFoundException("article.notExists", "文章不存在");
-		}
+		Article articleDb = articleDao.selectById(article.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("article.notExists", "文章不存在"));
+
 		if (articleDb.isDeleted()) {
 			throw new LogicException("article.deleted", "文章已经被删除");
 		}
 		if (article.getAlias() != null) {
-			Article aliasDb = articleDao.selectByAlias(article.getAlias());
-			if (aliasDb != null && !aliasDb.equals(article)) {
+			Optional<Article> op = articleDao.selectByAlias(article.getAlias()).filter(art -> !art.equals(article));
+			if (op.isPresent()) {
 				throw new LogicException("article.alias.exists", "别名" + article.getAlias() + "已经存在",
 						article.getAlias());
 			}
@@ -230,7 +228,7 @@ public class ArticleServiceImpl
 			}
 		});
 		applicationEventPublisher
-				.publishEvent(new ArticleUpdateEvent(this, articleDb, articleDao.selectById(article.getId())));
+				.publishEvent(new ArticleUpdateEvent(this, articleDb, articleDao.selectById(article.getId()).get()));
 		return article;
 
 	}
@@ -248,8 +246,7 @@ public class ArticleServiceImpl
 			lockManager.ensureLockAvailable(article.getLockId());
 		}
 		if (article.getAlias() != null) {
-			Article aliasDb = articleDao.selectByAlias(article.getAlias());
-			if (aliasDb != null) {
+			if (articleDao.selectByAlias(article.getAlias()).isPresent()) {
 				throw new LogicException("article.alias.exists", "别名" + article.getAlias() + "已经存在",
 						article.getAlias());
 			}
@@ -289,7 +286,8 @@ public class ArticleServiceImpl
 				}
 			}
 		});
-		applicationEventPublisher.publishEvent(new ArticleCreateEvent(this, articleDao.selectById(article.getId())));
+		applicationEventPublisher
+				.publishEvent(new ArticleCreateEvent(this, articleDao.selectById(article.getId()).get()));
 		return article;
 	}
 
@@ -300,10 +298,10 @@ public class ArticleServiceImpl
 		if (!CollectionUtils.isEmpty(tags)) {
 			for (Tag tag : tags) {
 				String tagName = cleanTag(tag.getName());
-				Tag tagDb = tagDao.selectByName(tagName);
+				Optional<Tag> opTag = tagDao.selectByName(tagName);
 				ArticleTag articleTag = new ArticleTag();
 				articleTag.setArticle(article);
-				if (tagDb == null) {
+				if (opTag.isEmpty()) {
 					// 插入标签
 					tag.setCreate(Timestamp.valueOf(LocalDateTime.now()));
 					tag.setName(tagName);
@@ -312,7 +310,7 @@ public class ArticleServiceImpl
 					indexTags.add(tagName);
 					rebuildIndexWhenTagChange = true;
 				} else {
-					articleTag.setTag(tagDb);
+					articleTag.setTag(opTag.get());
 				}
 				articleTagDao.insert(articleTag);
 			}
@@ -332,11 +330,11 @@ public class ArticleServiceImpl
 		if (Validators.isEmptyOrNull(param.getTag(), true)) {
 			param.setTagId(null);
 		} else {
-			Tag tag = tagDao.selectByName(param.getTag());
-			if (tag == null) {
+			Optional<Tag> opTag = tagDao.selectByName(param.getTag());
+			if (opTag.isEmpty()) {
 				return new PageResult<>(param, 0, new ArrayList<>());
 			}
-			param.setTagId(tag.getId());
+			param.setTagId(opTag.get().getId());
 		}
 
 		PageResult<Article> page;
@@ -412,10 +410,8 @@ public class ArticleServiceImpl
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void changeStatus(Integer id, ArticleStatus status) throws LogicException {
-		Article article = articleDao.selectById(id);
-		if (article == null) {
-			throw new ResourceNotFoundException("article.notExists", "文章不存在");
-		}
+		Article article = articleDao.selectById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("article.notExists", "文章不存在"));
 
 		if (article.getStatus().equals(status)) {
 			return;
@@ -457,10 +453,9 @@ public class ArticleServiceImpl
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void deleteArticle(Integer id) throws LogicException {
-		Article article = articleDao.selectById(id);
-		if (article == null) {
-			throw new ResourceNotFoundException("article.notExists", "文章不存在");
-		}
+		Article article = articleDao.selectById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("article.notExists", "文章不存在"));
+
 		if (!article.isDraft() && !article.isDeleted()) {
 			throw new LogicException("article.undeleted", "只有草稿或者回收站中的文章才能被删除");
 		}
@@ -505,8 +500,8 @@ public class ArticleServiceImpl
 			return Optional.empty();
 		}
 		boolean queryPrivate = Environment.hasAuthencated();
-		Article previous = articleDao.getPreviousArticle(article, queryPrivate, queryLock);
-		Article next = articleDao.getNextArticle(article, queryPrivate, queryLock);
+		Article previous = articleDao.getPreviousArticle(article, queryPrivate, queryLock).orElse(null);
+		Article next = articleDao.getNextArticle(article, queryPrivate, queryLock).orElse(null);
 		return (previous != null || next != null) ? Optional.of(new ArticleNav(previous, next)) : Optional.empty();
 	}
 
@@ -623,13 +618,13 @@ public class ArticleServiceImpl
 		if (count > 0) {
 			// 空间下存在文章
 			// 移动到默认空间
-			Space defaultSpace = spaceDao.selectDefault();
+			Optional<Space> op = spaceDao.selectDefault();
 			// 默认空间不存在，无法删除空间
-			if (defaultSpace == null) {
+			if (op.isEmpty()) {
 				throw new RuntimeLogicException(new Message("space.delete.hasArticles", "空间下存在文章，删除失败"));
 			}
 
-			articleDao.moveSpace(deleted, defaultSpace);
+			articleDao.moveSpace(deleted, op.get());
 		}
 	}
 
@@ -659,14 +654,16 @@ public class ArticleServiceImpl
 	}
 
 	private Optional<Article> getCheckedArticle(String idOrAlias) {
-		Article article;
+		Optional<Article> op;
 		try {
 			int id = Integer.parseInt(idOrAlias);
-			article = articleDao.selectById(id);
+			op = articleDao.selectById(id);
 		} catch (NumberFormatException e) {
-			article = articleDao.selectByAlias(idOrAlias);
+			op = articleDao.selectByAlias(idOrAlias);
 		}
-		if (article != null && article.isPublished() && Environment.match(article.getSpace())) {
+		op = op.filter(art -> art.isPublished() && Environment.match(art.getSpace()));
+		if (op.isPresent()) {
+			Article article = op.get();
 			if (article.isPrivate()) {
 				Environment.doAuthencation();
 			}
@@ -714,7 +711,7 @@ public class ArticleServiceImpl
 						}
 						applicationEventPublisher.publishEvent(new ArticlePublishEvent(this, schedules));
 					}
-					start = articleDao.selectMinimumScheduleDate();
+					start = articleDao.selectMinimumScheduleDate().orElse(null);
 					return schedules;
 				});
 				articleIndexer.addOrUpdateDocument(articles.stream().map(Article::getId).toArray(Integer[]::new));
@@ -724,7 +721,7 @@ public class ArticleServiceImpl
 
 		void update() {
 			Transactions.executeInReadOnlyTransaction(transactionManager, status -> {
-				start = articleDao.selectMinimumScheduleDate();
+				start = articleDao.selectMinimumScheduleDate().orElse(null);
 			});
 		}
 	}
@@ -739,8 +736,12 @@ public class ArticleServiceImpl
 		}
 
 		void hit(Integer id) {
-			Article article = articleDao.selectById(id);
-			if (article != null && validHit(article)) {
+			Optional<Article> op = articleDao.selectById(id);
+			if (op.isEmpty()) {
+				return;
+			}
+			Article article = op.get();
+			if (validHit(article)) {
 
 				if (!hitHandlers.isEmpty()) {
 					for (ArticleHitHandler hitHandler : hitHandlers) {
@@ -827,11 +828,7 @@ public class ArticleServiceImpl
 	}
 
 	private Space getRequiredSpace(Integer id) throws LogicException {
-		Space space = spaceDao.selectById(id);
-		if (space == null) {
-			throw new LogicException("space.notExists", "空间不存在");
-		}
-		return space;
+		return spaceDao.selectById(id).orElseThrow(() -> new LogicException("space.notExists", "空间不存在"));
 	}
 
 	public void setPublishSchedulePeriodSec(int publishSchedulePeriodSec) {

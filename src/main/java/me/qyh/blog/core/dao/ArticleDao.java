@@ -3,6 +3,7 @@ package me.qyh.blog.core.dao;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -26,7 +27,7 @@ public interface ArticleDao {
 	 * @param id
 	 * @return 文章，如果id对应的文章不存在，返回null
 	 */
-	Article selectById(int id);
+	Optional<Article> selectById(int id);
 
 	/**
 	 * 查询截至日期前的待发布文章
@@ -137,7 +138,7 @@ public interface ArticleDao {
 	 *            是否查询私有文章
 	 * @return 上一篇，如果不存在，返回null
 	 */
-	Article getPreviousArticle(@Param("article") Article article, @Param("queryPrivate") boolean queryPrivate,
+	Optional<Article> getPreviousArticle(@Param("article") Article article, @Param("queryPrivate") boolean queryPrivate,
 			@Param("queryLock") boolean queryLock);
 
 	/**
@@ -149,7 +150,7 @@ public interface ArticleDao {
 	 *            是否查询私有文章
 	 * @return 下一篇文章，如果不存在，返回null
 	 */
-	Article getNextArticle(@Param("article") Article article, @Param("queryPrivate") boolean queryPrivate,
+	Optional<Article> getNextArticle(@Param("article") Article article, @Param("queryPrivate") boolean queryPrivate,
 			@Param("queryLock") boolean queryLock);
 
 	/**
@@ -185,22 +186,14 @@ public interface ArticleDao {
 	 *            文章别名
 	 * @return 文章，如果不存在，返回null
 	 */
-	Article selectByAlias(String alias);
+	Optional<Article> selectByAlias(String alias);
 
 	/**
 	 * 查询最小的待发表文章的发布日期
 	 * 
 	 * @return 如果当前没有任何带发表文章，那么返回null
 	 */
-	Timestamp selectMinimumScheduleDate();
-
-	/**
-	 * 根据alias查询文章的id
-	 * 
-	 * @param alias
-	 * @return
-	 */
-	Integer selectIdByAlias(String alias);
+	Optional<Timestamp> selectMinimumScheduleDate();
 
 	/**
 	 * 查询某个空间下<b>所有文章</b>的数量

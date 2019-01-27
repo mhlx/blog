@@ -96,10 +96,7 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void updateNews(News news) throws LogicException {
-		News old = newsDao.selectById(news.getId());
-		if (old == null) {
-			throw new LogicException("news.notExists", "动态不存在");
-		}
+		News old = newsDao.selectById(news.getId()).orElseThrow(() -> new LogicException("news.notExists", "动态不存在"));
 
 		if (news.getIsPrivate()) {
 			news.setLockId(null);
@@ -116,31 +113,30 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<News> getNews(Integer id) {
-		News news = newsDao.selectById(id);
-		if (news != null) {
+		Optional<News> op = newsDao.selectById(id);
+		if (op.isPresent()) {
+			News news = op.get();
 			if (news.getIsPrivate()) {
 				Environment.doAuthencation();
 			}
 			lockManager.openLock(news.getLockId());
 			setNewsComments(news);
 			setNewsContent(news);
+			return Optional.of(news);
 		}
-		return Optional.ofNullable(news);
+		return Optional.empty();
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<News> getNewsForEdit(Integer id) {
-		return Optional.ofNullable(newsDao.selectById(id));
+		return newsDao.selectById(id);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void deleteNews(Integer id) throws LogicException {
-		News old = newsDao.selectById(id);
-		if (old == null) {
-			throw new LogicException("news.notExists", "动态不存在");
-		}
+		News old = newsDao.selectById(id).orElseThrow(() -> new LogicException("news.notExists", "动态不存在"));
 		newsDao.deleteById(id);
 
 		commentServer.deleteComments(COMMENT_MODULE_NAME, id);
@@ -168,11 +164,11 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<NewsNav> getNewsNav(Integer id, boolean queryLock) {
-		News news = newsDao.selectById(id);
-		if (news == null) {
+		Optional<News> op = newsDao.selectById(id);
+		if (op.isEmpty()) {
 			return Optional.empty();
 		}
-		return getNewsNav(news, queryLock);
+		return getNewsNav(op.get(), queryLock);
 	}
 
 	@Override
@@ -184,8 +180,8 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 		}
 		lockManager.openLock(news.getLockId());
 		boolean queryPrivate = Environment.hasAuthencated();
-		News previous = newsDao.getPreviousNews(news, queryPrivate, queryLock);
-		News next = newsDao.getNextNews(news, queryPrivate, queryLock);
+		News previous = newsDao.getPreviousNews(news, queryPrivate, queryLock).orElse(null);
+		News next = newsDao.getNextNews(news, queryPrivate, queryLock).orElse(null);
 		if (previous == null && next == null) {
 			return Optional.empty();
 		}
@@ -205,8 +201,9 @@ public class NewsServiceImpl implements NewsService, ApplicationEventPublisherAw
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void hit(Integer id) {
 		if (!Environment.hasAuthencated()) {
-			News news = newsDao.selectById(id);
-			if (news != null) {
+			Optional<News> op = newsDao.selectById(id);
+			if (op.isPresent()) {
+				News news = op.get();
 				lockManager.openLock(news.getLockId());
 				hitsStrategy.hit(news);
 			}

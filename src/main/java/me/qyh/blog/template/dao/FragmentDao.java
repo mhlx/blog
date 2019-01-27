@@ -1,6 +1,7 @@
 package me.qyh.blog.template.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -66,7 +67,7 @@ public interface FragmentDao {
 	 *            名称
 	 * @return 如果不存在，返回null
 	 */
-	Fragment selectBySpaceAndName(@Param("space") Space space, @Param("name") String name);
+	Optional<Fragment> selectBySpaceAndName(@Param("space") Space space, @Param("name") String name);
 
 	/**
 	 * 根据id查询用户模板片段
@@ -75,7 +76,7 @@ public interface FragmentDao {
 	 *            用户模板片段的id
 	 * @return 如果不存在，返回null
 	 */
-	Fragment selectById(Integer id);
+	Optional<Fragment> selectById(Integer id);
 
 	/**
 	 * 根据名称查询全局用户模板片段
@@ -84,7 +85,7 @@ public interface FragmentDao {
 	 *            名称
 	 * @return 如果不存在，返回null
 	 */
-	Fragment selectGlobalByName(String name);
+	Optional<Fragment> selectGlobalByName(String name);
 
 	/**
 	 * 查询某个空间下所有的模板片段
