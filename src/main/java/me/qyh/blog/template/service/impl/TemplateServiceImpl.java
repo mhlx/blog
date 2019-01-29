@@ -318,8 +318,9 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 
 			String alias = page.getAlias();
 			// 检查
-			pageDao.selectBySpaceAndAlias(page.getSpace(), alias, page.isSpaceGlobal())
-					.orElseThrow(() -> new LogicException("page.user.aliasExists", "别名" + alias + "已经存在", alias));
+			if (pageDao.selectBySpaceAndAlias(page.getSpace(), alias, page.isSpaceGlobal()).isPresent()) {
+				throw new LogicException("page.user.aliasExists", "别名" + alias + "已经存在", alias);
+			}
 			page.setCreateDate(Timestamp.valueOf(LocalDateTime.now()));
 			pageDao.insert(page);
 
@@ -784,27 +785,15 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		});
 	}
 
-	@Override
-	public List<HistoryTemplate> queryPageHistory(Integer id) throws LogicException {
-		return Transactions.executeInReadOnlyTransaction(platformTransactionManager, status -> {
-			Page page = pageDao.selectById(id)
-					.orElseThrow(() -> new ResourceNotFoundException("page.user.notExists", "自定义页面不存在"));
-			return page == null ? new ArrayList<>()
-					: historyTemplateDao.selectByTemplate(page.getId(), HistoryTemplateType.PAGE);
-		});
-	}
-
 	/**
-	 * 查询某个模板片段的历史模板
+	 * 查询某个历史模板
 	 * 
 	 * @param id
 	 * @return
 	 */
-	public List<HistoryTemplate> queryFragmentHistory(Integer id) throws LogicException {
+	public List<HistoryTemplate> queryHistoryTemplate(Integer id, HistoryTemplateType type) {
 		return Transactions.executeInReadOnlyTransaction(platformTransactionManager, status -> {
-			Fragment fragment = fragmentDao.selectById(id)
-					.orElseThrow(() -> new ResourceNotFoundException("fragment.user.notExists", "模板片段不存在"));
-			return historyTemplateDao.selectByTemplate(fragment.getId(), HistoryTemplateType.FRAGMENT);
+			return historyTemplateDao.selectByTemplate(id, type);
 		});
 	}
 

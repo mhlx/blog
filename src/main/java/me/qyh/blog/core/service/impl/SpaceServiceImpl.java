@@ -58,11 +58,11 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 		}
 		lockManager.ensureLockAvailable(space.getLockId());
 
-		if (spaceDao.selectByAlias(space.getAlias()) != null) {
+		if (spaceDao.selectByAlias(space.getAlias()).isPresent()) {
 			throw new LogicException(
 					new Message("space.alias.exists", "别名为" + space.getAlias() + "的空间已经存在了", space.getAlias()));
 		}
-		if (spaceDao.selectByName(space.getName()) != null) {
+		if (spaceDao.selectByName(space.getName()).isPresent()) {
 			throw new LogicException(
 					new Message("space.name.exists", "名称为" + space.getName() + "的空间已经存在了", space.getName()));
 		}
@@ -83,11 +83,8 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Space updateSpace(Space space) throws LogicException {
-		Optional<Space> op = spaceDao.selectById(space.getId());
-		if (op.isEmpty()) {
-			throw new ResourceNotFoundException("space.notExists", "空间不存在");
-		}
-		Space db = op.get();
+		Space db = spaceDao.selectById(space.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("space.notExists", "空间不存在"));
 		if (spaceDao.selectByName(space.getName()).filter(nameDb -> !nameDb.equals(db)).isPresent()) {
 			throw new LogicException(
 					new Message("space.name.exists", "名称为" + space.getName() + "的空间已经存在了", space.getName()));
@@ -134,11 +131,8 @@ public class SpaceServiceImpl implements SpaceService, ApplicationEventPublisher
 	@Sync
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class, isolation = Isolation.SERIALIZABLE)
 	public void deleteSpace(Integer id) throws LogicException {
-		Optional<Space> op = spaceDao.selectById(id);
-		if (op.isEmpty()) {
-			throw new ResourceNotFoundException("space.notExists", "空间不存在");
-		}
-		Space space = op.get();
+		Space space = spaceDao.selectById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("space.notExists", "空间不存在"));
 		if (space.getIsDefault()) {
 			throw new LogicException("space.default.canNotDelete", "默认空间不能被删除");
 		}

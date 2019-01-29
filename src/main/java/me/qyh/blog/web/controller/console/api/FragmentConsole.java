@@ -26,6 +26,7 @@ import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.vo.PageResult;
 import me.qyh.blog.template.entity.Fragment;
 import me.qyh.blog.template.entity.HistoryTemplate;
+import me.qyh.blog.template.entity.HistoryTemplate.HistoryTemplateType;
 import me.qyh.blog.template.service.TemplateService;
 import me.qyh.blog.template.validator.FragmentQueryParamValidator;
 import me.qyh.blog.template.validator.FragmentValidator;
@@ -91,8 +92,8 @@ public class FragmentConsole extends BaseMgrController {
 	}
 
 	@GetMapping("fragment/{id}/histories")
-	public List<HistoryTemplate> getHistories(@PathVariable("id") Integer id) throws LogicException {
-		return templateService.queryFragmentHistory(id);
+	public List<HistoryTemplate> getHistories(@PathVariable("id") Integer id) {
+		return templateService.queryHistoryTemplate(id, HistoryTemplateType.FRAGMENT);
 	}
 
 	@PostMapping("fragment/{id}/history")

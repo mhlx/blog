@@ -12,6 +12,7 @@ import me.qyh.blog.template.SystemTemplate;
 import me.qyh.blog.template.Template;
 import me.qyh.blog.template.entity.Fragment;
 import me.qyh.blog.template.entity.HistoryTemplate;
+import me.qyh.blog.template.entity.HistoryTemplate.HistoryTemplateType;
 import me.qyh.blog.template.entity.Page;
 import me.qyh.blog.template.vo.DataBind;
 import me.qyh.blog.template.vo.DataTag;
@@ -244,22 +245,13 @@ public interface TemplateService {
 	void saveFragmentHistory(Integer id, String remark) throws LogicException;
 
 	/**
-	 * 查询某个页面的历史模板
+	 * 查询历史模板
 	 * 
 	 * @param id
 	 * @return
 	 * @throws LogicException
 	 */
-	List<HistoryTemplate> queryPageHistory(Integer id) throws LogicException;
-
-	/**
-	 * 查询某个模板片段的历史模板
-	 * 
-	 * @param id
-	 * @return
-	 * @throws LogicException
-	 */
-	List<HistoryTemplate> queryFragmentHistory(Integer id) throws LogicException;
+	List<HistoryTemplate> queryHistoryTemplate(Integer id, HistoryTemplateType type);
 
 	/**
 	 * 查询历史模板详情

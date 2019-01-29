@@ -26,6 +26,7 @@ import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.vo.PageResult;
 import me.qyh.blog.template.SystemTemplate;
 import me.qyh.blog.template.entity.HistoryTemplate;
+import me.qyh.blog.template.entity.HistoryTemplate.HistoryTemplateType;
 import me.qyh.blog.template.entity.Page;
 import me.qyh.blog.template.service.TemplateService;
 import me.qyh.blog.template.validator.PageValidator;
@@ -86,7 +87,7 @@ public class PageConsole extends BaseMgrController {
 
 	@GetMapping("page/{id}/histories")
 	public List<HistoryTemplate> getHistory(@PathVariable("id") Integer id) throws LogicException {
-		return templateService.queryPageHistory(id);
+		return templateService.queryHistoryTemplate(id, HistoryTemplateType.PAGE);
 	}
 
 	@PostMapping("page/{id}/history")
