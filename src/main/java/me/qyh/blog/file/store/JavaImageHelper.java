@@ -134,14 +134,13 @@ public class JavaImageHelper extends ImageHelper {
 	private BufferedImage doResize(Path todo, Path dest, Resize resize) throws IOException {
 		BufferedImage originalImage = ImageIO.read(todo.toFile());
 		if (ImageHelper.isJPEG(FileUtils.getFileExtension(todo))) {
-			Optional<BufferedImage> orient = Optional.empty();
 			try {
-				orient = autoOrient(originalImage, todo);
+				Optional<BufferedImage> orient = autoOrient(originalImage, todo);
+				if (orient.isPresent()) {
+					originalImage = orient.get();
+				}
 			} catch (ImageProcessingException | MetadataException e) {
 				logger.debug(e.getMessage(), e);
-			}
-			if (orient.isPresent()) {
-				originalImage = orient.get();
 			}
 		}
 		int width = originalImage.getWidth();

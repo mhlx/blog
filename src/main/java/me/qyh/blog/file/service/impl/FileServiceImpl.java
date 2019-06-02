@@ -91,7 +91,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 			parent = blogFileDao.selectById(upload.getParent())
 					.orElseThrow(() -> new LogicException(PARENT_NOT_EXISTS));
 		} else {
-			parent = blogFileDao.selectRoot();
+			parent = blogFileDao.selectRoot().get();
 		}
 
 		/**
@@ -248,7 +248,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 			}
 		} else {
 			// 查询根节点
-			parent = blogFileDao.selectRoot();
+			parent = blogFileDao.selectRoot().get();
 		}
 
 		return createFolder(parent, toCreate.getPath());
@@ -258,12 +258,12 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 		String cleanedPath = FileUtils.cleanPath(path);
 		if (cleanedPath.isEmpty()) {
-			return blogFileDao.selectRoot();
+			return blogFileDao.selectRoot().get();
 		} else {
 			if (cleanedPath.indexOf('/') == -1) {
-				return createFolder(blogFileDao.selectRoot(), cleanedPath);
+				return createFolder(blogFileDao.selectRoot().get(), cleanedPath);
 			} else {
-				BlogFile parent = blogFileDao.selectRoot();
+				BlogFile parent = blogFileDao.selectRoot().get();
 				for (String _path : cleanedPath.split("/")) {
 					parent = createFolder(parent, _path);
 				}
@@ -310,7 +310,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 			paths = blogFileDao.selectPath(parent);
 			param.setParentFile(parent);
 		} else {
-			param.setParentFile(blogFileDao.selectRoot());
+			param.setParentFile(blogFileDao.selectRoot().get());
 		}
 
 		List<BlogFile> datas = blogFileDao.selectPage(param);
@@ -473,7 +473,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 
 		BlogFile parent;
 		if (db.getParent() == null) {
-			parent = blogFileDao.selectRoot();
+			parent = blogFileDao.selectRoot().get();
 		} else {
 			parent = blogFileDao.selectById(db.getParent().getId()).orElse(null);
 		}
@@ -563,7 +563,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Override
 	@Transactional(readOnly = true)
 	public PageResult<BlogFile> queryFiles(String path, BlogFileQueryParam param) {
-		BlogFile parent = blogFileDao.selectRoot();
+		BlogFile parent = blogFileDao.selectRoot().get();
 		String cleanedPath =
 				// since 5.7
 				path == null ? "" : FileUtils.cleanPath(path.strip());
@@ -609,7 +609,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Transactional(readOnly = true)
 	public FileStatistics queryFileStatistics() {
 		FileStatistics fileStatistics = new FileStatistics();
-		BlogFile root = blogFileDao.selectRoot();
+		BlogFile root = blogFileDao.selectRoot().get();
 		fileStatistics.setTypeCountMap(blogFileDao.selectSubBlogFileCount(root).stream()
 				.collect(Collectors.toMap(BlogFileCount::getType, BlogFileCount::getCount)));
 		fileStatistics.setStoreCountMap(blogFileDao.selectFileCount().stream()
@@ -649,7 +649,7 @@ public class FileServiceImpl implements FileService, InitializingBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		// 找根目录
-		if (blogFileDao.selectRoot() == null) {
+		if (blogFileDao.selectRoot().isEmpty()) {
 			LOGGER.debug("没有找到任何根目录，将创建一个根目录");
 			BlogFile root = new BlogFile();
 			root.setCreateDate(Timestamp.valueOf(LocalDateTime.now()));

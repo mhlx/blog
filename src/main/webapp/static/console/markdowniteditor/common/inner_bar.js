@@ -1,6 +1,6 @@
 var inner_bar = (function(editor, config) {
     var $inner_bar = $('<div  class="alpha30 inner-toolbar" style="position:fixed;width:50%;font-size:20px;padding-left:10px;padding-right:10px;visibility:hidden">' +
-    	'<i class="far fa-meh-rolling-eyes" style="cursor: pointer;margin-right:20px"></i>' +
+    	'<i class="far fa-meh-rolling-eyes" data-emoji style="cursor: pointer;margin-right:20px"></i>' +
     	'<i class="fas" data-h  data-v="1" style="cursor: pointer;margin-right:20px">H1</i>' +
         '<i class="fas" data-h data-v="2" style="cursor: pointer;margin-right:20px">H2</i>' +
         '<i class="fas" data-h data-v="3" style="cursor: pointer;margin-right:20px">H3</i>' +
@@ -289,6 +289,19 @@ var inner_bar = (function(editor, config) {
         editor.focus();
         editor.execCommand("selectAll")
     });
+    $inner_bar.on('click', '[data-emoji]', function() {
+    	emoji.choose(function(e){
+    		var text = editor.getSelection();
+            if (text == '') {
+                editor.replaceRange(e, editor.getCursor());
+                editor.focus();
+            } else {
+                editor.replaceSelection(e);
+            }
+    	});
+    });
+    
+    
 
     var table = '';
     table += '<div class="modal fade" tabindex="-1" role="dialog">';

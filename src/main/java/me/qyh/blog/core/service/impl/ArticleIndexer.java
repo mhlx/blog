@@ -115,7 +115,13 @@ public abstract class ArticleIndexer implements InitializingBean {
 	private static final String LOCKED = "locked";
 	private static final String ALIAS = "alias";
 	private static final String SUMMARY = "summary";
-	private static final String LASTMODIFYDATE = "lastModifyDate";
+
+	/**
+	 * 当文章存在最后更新日期时，这个值就是最后更新日期，否则为文章发布日期
+	 * 
+	 * @since 7.1.1
+	 */
+	private static final String _DATE = "_DATE";
 
 	protected Analyzer analyzer;
 	private final ControlledRealTimeReopenThread<IndexSearcher> reopenThread;
@@ -195,10 +201,8 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 构造器
 	 * 
-	 * @param analyzer
-	 *            分析器
-	 * @throws IOException
-	 *             索引目录打开失败等
+	 * @param analyzer 分析器
+	 * @throws IOException 索引目录打开失败等
 	 * 
 	 */
 	public ArticleIndexer(Analyzer analyzer) throws IOException {
@@ -270,7 +274,9 @@ public abstract class ArticleIndexer implements InitializingBean {
 
 		Timestamp lastModifyDate = article.getLastModifyDate();
 		if (lastModifyDate != null) {
-			doc.add(new SortedDocValuesField(LASTMODIFYDATE, new BytesRef(timeToString(lastModifyDate))));
+			doc.add(new SortedDocValuesField(_DATE, new BytesRef(timeToString(lastModifyDate))));
+		} else {
+			doc.add(new SortedDocValuesField(_DATE, pubDate));
 		}
 		doc.add(new SortedDocValuesField(ID, new BytesRef(article.getId().toString())));
 		return doc;
@@ -283,8 +289,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 增加|更新文章索引，如果文章索引存在，则先删除后增加索引
 	 * 
-	 * @param ids
-	 *            要增加|更新索引的文章id
+	 * @param ids 要增加|更新索引的文章id
 	 */
 	public synchronized void addOrUpdateDocument(Integer... ids) {
 		executor.submit(() -> {
@@ -310,8 +315,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 删除索引
 	 * 
-	 * @param ids
-	 *            文章id
+	 * @param ids 文章id
 	 */
 	public synchronized void deleteDocument(Integer... ids) {
 		executor.submit(() -> {
@@ -375,8 +379,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 查询文章
 	 * 
-	 * @param param
-	 *            查询参数
+	 * @param param 查询参数
 	 * @return 分页内容
 	 */
 	public PageResult<Article> query(ArticleQueryParam param) {
@@ -502,8 +505,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 				fields.add(new SortField(PUB_DATE, SortField.Type.STRING, true));
 				break;
 			case LASTMODIFYDATE:
-				fields.add(new SortField(LASTMODIFYDATE, SortField.Type.STRING, true));
-				fields.add(new SortField(PUB_DATE, SortField.Type.STRING, true));
+				fields.add(new SortField(_DATE, SortField.Type.STRING, true));
 				break;
 			default:
 				break;
@@ -516,10 +518,8 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 高亮显示
 	 * 
-	 * @param article
-	 *            文章
-	 * @param doc
-	 *            文章文档
+	 * @param article 文章
+	 * @param doc     文章文档
 	 * @param query
 	 */
 	protected void doHightlight(Article article, Document doc, Query query) {
@@ -582,8 +582,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 删除标签
 	 * 
-	 * @param tags
-	 *            要删除的标签名
+	 * @param tags 要删除的标签名
 	 */
 	public synchronized void removeTags(String... tags) {
 		executor.submit(() -> {
@@ -595,8 +594,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	/**
 	 * 增加标签
 	 * 
-	 * @param tags
-	 *            标签名
+	 * @param tags 标签名
 	 */
 	public synchronized void addTags(String... tags) {
 		executor.submit(() -> {
@@ -609,8 +607,7 @@ public abstract class ArticleIndexer implements InitializingBean {
 	 * 更新文章点击数
 	 * 
 	 * @since 6.4
-	 * @param hitsMap
-	 *            key文章ID value文章<b>当前</b>点击数
+	 * @param hitsMap key文章ID value文章<b>当前</b>点击数
 	 */
 	public synchronized void updateHits(Map<Integer, Integer> hitsMap) {
 		executor.submit(() -> {

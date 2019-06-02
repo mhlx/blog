@@ -115,6 +115,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 		try {
 			synchronized (this) {
 				if (needCompress()) {
+					// 怎么处理耗时过长的问题？？
 					compress(getVideoInfo(dest), dest, dest);
 				}
 				getVideoInfo(dest);

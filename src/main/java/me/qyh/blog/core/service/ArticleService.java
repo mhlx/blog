@@ -25,7 +25,7 @@ import me.qyh.blog.core.vo.TagCount;
  */
 public interface ArticleService {
 
-	final String COMMENT_MODULE_NAME = "article";
+	String COMMENT_MODULE_NAME = "article";
 
 	/**
 	 * 获取一篇可以被访问的文章

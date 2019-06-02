@@ -23,6 +23,7 @@ public class NewsStatistics implements Serializable {
 		this.lastModify = statistics.lastModify;
 		this.lastWrite = statistics.lastWrite;
 		this.total = statistics.total;
+		this.totalHits = statistics.totalHits;
 	}
 
 	public Timestamp getLastModify() {

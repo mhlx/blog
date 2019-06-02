@@ -25,6 +25,6 @@ package me.qyh.blog.web.security.csrf;
 public class MissingCsrfTokenException extends CsrfException {
 
 	public MissingCsrfTokenException(String actualToken) {
-		super("Expected CSRF token not found. Has your session expired?");
+		super("Expected CSRF token not found");
 	}
 }

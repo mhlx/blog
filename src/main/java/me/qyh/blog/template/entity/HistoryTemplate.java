@@ -17,7 +17,7 @@ public class HistoryTemplate extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 
 	public enum HistoryTemplateType {
-		PAGE, FRAGMENT;
+		PAGE, FRAGMENT
 	}
 
 	private Integer templateId;

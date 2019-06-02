@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.entity.User;
 import me.qyh.blog.core.exception.LogicException;
-import me.qyh.blog.core.security.GoogleAuthenticator;
+import me.qyh.blog.core.security.LoginAuthenticator;
 import me.qyh.blog.core.service.UserService;
 import me.qyh.blog.core.validator.UserValidator;
 import me.qyh.blog.web.controller.console.BaseMgrController;
@@ -30,8 +30,8 @@ public class UserConsole extends BaseMgrController {
 	private UserValidator userValidator;
 	@Autowired
 	private UserService userService;
-	@Autowired(required = false)
-	private GoogleAuthenticator ga;
+	@Autowired
+	private LoginAuthenticator authenticator;
 
 	@InitBinder(value = "user")
 	protected void initBinder(WebDataBinder binder) {
@@ -49,7 +49,7 @@ public class UserConsole extends BaseMgrController {
 	public ResponseEntity<Void> update(@RequestParam(value = "oldPassword") String oldPassword,
 			@RequestParam(value = "code", required = false) String codeStr, @Validated @RequestBody User user,
 			HttpSession session) throws LogicException {
-		if (ga != null && !ga.checkCode(codeStr)) {
+		if (authenticator.enable() && !authenticator.checkCode(codeStr)) {
 			throw new LogicException("otp.verifyFail", "动态口令校验失败");
 		}
 		userService.update(user, oldPassword);

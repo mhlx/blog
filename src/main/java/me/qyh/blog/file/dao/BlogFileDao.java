@@ -84,7 +84,7 @@ public interface BlogFileDao {
 	 * 
 	 * @return 根节点
 	 */
-	BlogFile selectRoot();
+	Optional<BlogFile> selectRoot();
 
 	/**
 	 * 更新文件节点

@@ -30,7 +30,7 @@ import me.qyh.blog.core.exception.LockException;
 import me.qyh.blog.core.exception.SpaceNotFoundException;
 import me.qyh.blog.core.security.AuthencationException;
 import me.qyh.blog.core.security.EnsureLogin;
-import me.qyh.blog.core.security.GoogleAuthenticator;
+import me.qyh.blog.core.security.LoginAuthenticator;
 import me.qyh.blog.core.service.LockManager;
 import me.qyh.blog.core.service.SpaceService;
 import me.qyh.blog.core.util.UrlUtils;
@@ -59,8 +59,8 @@ public class AppInterceptor extends HandlerInterceptorAdapter {
 	private UrlHelper urlHelper;
 	@Autowired
 	private RememberMeService rememberMeService;
-	@Autowired(required = false)
-	private GoogleAuthenticator ga;
+	@Autowired
+	private LoginAuthenticator authenticator;
 
 	private static final String UNLOCK_PATTERN = "/unlock/*";
 	private static final String SPACE_UNLOCK_PATTERN = "/space/*/unlock/*";
@@ -115,7 +115,7 @@ public class AppInterceptor extends HandlerInterceptorAdapter {
 					session = request.getSession();
 				}
 				User _user = autoLogin.get();
-				if (ga != null) {
+				if (authenticator.enable()) {
 					session.setAttribute(Constants.GA_SESSION_KEY, _user);
 				} else {
 					session.setAttribute(Constants.USER_SESSION_KEY, _user);

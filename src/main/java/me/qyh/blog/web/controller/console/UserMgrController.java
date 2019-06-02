@@ -6,18 +6,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import me.qyh.blog.core.security.GoogleAuthenticator;
+import me.qyh.blog.core.security.LoginAuthenticator;
 
 @Controller
 @RequestMapping("console/user")
 public class UserMgrController extends BaseMgrController {
 
-	@Autowired(required = false)
-	private GoogleAuthenticator ga;
+	@Autowired
+	private LoginAuthenticator authenticator;
 
 	@GetMapping
 	public String index(Model model) {
-		model.addAttribute("otpRequired", ga != null);
+		model.addAttribute("otpRequired", authenticator.enable());
 		return "console/user/index";
 	}
 

@@ -30,9 +30,8 @@ public class FragmentValidator implements Validator {
 	@Override
 	public void validate(Object target, Errors errors) {
 		Fragment fragment = (Fragment) target;
-		String name = fragment.getName();
 		try {
-			name = validName(name, false);
+			validName(fragment.getName(), false);
 		} catch (LogicException e) {
 			Message msg = e.getLogicMessage();
 			errors.reject(msg.getCodes()[0], msg.getArguments(), msg.getDefaultMessage());

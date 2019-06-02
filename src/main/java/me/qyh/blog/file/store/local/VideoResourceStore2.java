@@ -1,20 +1,32 @@
 package me.qyh.blog.file.store.local;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
+import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.exception.SystemException;
+import me.qyh.blog.core.message.Messages;
 import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.file.entity.CommonFile;
 
@@ -23,7 +35,14 @@ import me.qyh.blog.file.entity.CommonFile;
  * @author wwwqyhme
  *
  */
-public class VideoResourceStore2 extends VideoResourceStore {
+public class VideoResourceStore2 extends VideoResourceStore implements ApplicationListener<ContextClosedEvent> {
+
+	@Autowired
+	private Messages messages;
+
+	private final ExecutorService es = Executors.newSingleThreadExecutor();
+
+	private final Set<String> processing = ConcurrentHashMap.newKeySet();
 
 	public VideoResourceStore2(String urlPatternPrefix, String[] allowExtensions, int timeoutSecond, int maxSize) {
 		super(urlPatternPrefix, allowExtensions, timeoutSecond);
@@ -62,8 +81,8 @@ public class VideoResourceStore2 extends VideoResourceStore {
 		cf.setStore(id);
 		cf.setOriginalFilename(originalFilename);
 		try {
+			compress(dest, key);
 			synchronized (this) {
-				compress(getVideoInfo(dest), dest, getCompress(key, dest));
 				extraPoster(dest, getPoster(key));
 			}
 		} catch (Exception e) {
@@ -87,24 +106,84 @@ public class VideoResourceStore2 extends VideoResourceStore {
 		Path compress = getCompress(key, path);
 		if (FileUtils.exists(compress)) {
 			return Optional.of(new FileSystemResource(compress));
+		} else {
+			compress(path, key);
+			return Optional.of(getProcessingResource());
 		}
-		synchronized (this) {
-			if (FileUtils.exists(compress)) {
-				return Optional.of(new FileSystemResource(compress));
-			}
-			try {
-				compress(getVideoInfo(path), path, compress);
-			} catch (Exception e) {
-				logger.warn(e.getMessage(), e);
-				return Optional.empty();
-			}
-		}
-		return Optional.of(new FileSystemResource(compress));
+	}
+
+	protected Resource getProcessingResource() {
+		return new StringResource(messages.getMessage("video.compressing", "视频正在压缩中"));
 	}
 
 	@Override
 	public void setMaxSize(Integer maxSize) {
 		throw new SystemException("请使用构造函数设置最大尺寸");
+	}
+
+	@Override
+	public void onApplicationEvent(ContextClosedEvent event) {
+		if (!es.isShutdown())
+			es.shutdownNow();
+	}
+
+	private void compress(Path dest, String key) {
+		es.execute(() -> {
+			Path compress = getCompress(key, dest);
+			if (FileUtils.exists(compress)) {
+				return;
+			}
+			if (processing.contains(key)) {
+				return;
+			}
+			processing.add(key);
+			try {
+				compress(getVideoInfo(dest), dest, compress);
+			} catch (Exception e) {
+				logger.warn(e.getMessage(), e);
+			} finally {
+				processing.remove(key);
+			}
+		});
+	}
+
+	@Override
+	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
+		if (resource instanceof StringResource) {
+			return MediaType.valueOf("text/html;charset=UTF-8");
+		}
+		return super.getMediaType(request, resource);
+	}
+
+	private final class StringResource extends AbstractResource {
+
+		private final String content;
+
+		private StringResource(String content) {
+			super();
+			this.content = content;
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(content.getBytes(Constants.CHARSET));
+		}
+
+		@Override
+		public boolean exists() {
+			return true;
+		}
+
+		@Override
+		public String getDescription() {
+			return null;
+		}
+
+		@Override
+		public long lastModified() throws IOException {
+			return -1;
+		}
+
 	}
 
 }

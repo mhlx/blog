@@ -207,7 +207,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 						art.hits DESC,
 					</when>
 					<when test='sort.name() == "LASTMODIFYDATE"'>
-						art.lastModifyDate DESC,art.pubDate DESC,
+						IFNULL(art.lastModifyDate,art.pubDate) DESC,
 					</when>
 					<otherwise>
 						art.pubDate DESC,
@@ -215,7 +215,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 				</choose>
 			</when>
 			<otherwise>
-				art.pubDate DESC,
+				IFNULL(art.lastModifyDate,art.pubDate) DESC,
 			</otherwise>
 		</choose>
 		art.id DESC

@@ -33,6 +33,7 @@ public class ArticleStatistics implements Serializable {
 		this.lastPubDate = statistics.lastPubDate;
 		this.totalHits = statistics.totalHits;
 		this.totalArticles = statistics.totalArticles;
+		this.spaceStatisticsList = statistics.spaceStatisticsList;
 	}
 
 	public Timestamp getLastModifyDate() {

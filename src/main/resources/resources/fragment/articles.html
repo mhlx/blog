@@ -1,5 +1,5 @@
 <data name="articlePage" th:currentPage="${param.currentPage}"
-	queryPrivate="true" th:query="${param.query}" th:tag="${param.tag}" />
+	queryPrivate="true" th:query="${param.query}" th:tag="${param.tag}" th:sort="${param.sort}"/>
 
 <div class="card my-md-4 my-2" th:if="${articlePage.datas.isEmpty()}">
 	<div class="card-body">没有任何文章</div>

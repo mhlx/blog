@@ -21,7 +21,7 @@ public class ImportRecord implements Serializable {
 	private ImportType type;
 
 	public enum ImportType {
-		NEW, EDIT, NOCHANGE;
+		NEW, EDIT, NOCHANGE
 	}
 
 	public ImportRecord(boolean success, Message message) {

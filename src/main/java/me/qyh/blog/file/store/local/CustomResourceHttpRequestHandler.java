@@ -1,5 +1,6 @@
 package me.qyh.blog.file.store.local;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -30,14 +31,17 @@ public class CustomResourceHttpRequestHandler extends ResourceHttpRequestHandler
 		} catch (IOException e) {
 
 			if (!response.isCommitted() && !Webs.isClientAbortException(e)) {
-				Resource res = super.getResource(request);
-				if (res == null || !res.exists()) {
+				if (e instanceof FileNotFoundException) {
 					response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				} else {
-					logger.debug(e.getMessage(), e);
-					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					Resource res = super.getResource(request);
+					if (res == null || !res.exists()) {
+						response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					} else {
+						logger.debug(e.getMessage(), e);
+						response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					}
 				}
-
 			}
 		}
 	}

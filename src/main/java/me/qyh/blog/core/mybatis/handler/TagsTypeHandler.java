@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ public class TagsTypeHandler extends BaseTypeHandler<Set<Tag>> {
 
 	private Set<Tag> toTags(String str) {
 		if (Validators.isEmptyOrNull(str, true)) {
-			return new HashSet<>();
+			return new LinkedHashSet<>();
 		}
 		return Arrays.stream(str.split(",")).sorted().map(Tag::new)
 				.collect(Collectors.toCollection(LinkedHashSet::new));

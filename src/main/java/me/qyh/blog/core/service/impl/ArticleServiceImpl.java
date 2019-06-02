@@ -373,9 +373,7 @@ public class ArticleServiceImpl
 		 * @since 7.0
 		 */
 		if (!Environment.hasAuthencated()) {
-			page.getDatas().stream().filter(Article::hasLock).forEach(a -> {
-				a.setSummary(null);
-			});
+			page.getDatas().stream().filter(Article::hasLock).forEach(a -> a.setSummary(null));
 		}
 		return page;
 	}
@@ -541,7 +539,6 @@ public class ArticleServiceImpl
 
 		ArticleQueryParam ap = new ArticleQueryParam();
 		ap.setIgnoreLevel(true);
-		ap.setIgnorePaging(true);
 		ap.setBegin(begin);
 		ap.setEnd(end);
 		ap.setQueryPrivate(param.isQueryPrivate());

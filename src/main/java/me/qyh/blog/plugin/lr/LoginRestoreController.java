@@ -15,7 +15,7 @@ import me.qyh.blog.core.context.Environment;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.security.AttemptLogger;
-import me.qyh.blog.core.security.GoogleAuthenticator;
+import me.qyh.blog.core.security.LoginAuthenticator;
 import me.qyh.blog.template.service.TemplateService;
 import me.qyh.blog.web.security.CaptchaValidator;
 
@@ -25,7 +25,7 @@ public class LoginRestoreController {
 	@Autowired
 	private CaptchaValidator captchaValidator;
 	@Autowired
-	private GoogleAuthenticator ga;
+	private LoginAuthenticator authenticator;
 	@Autowired
 	private TemplateService templateService;
 
@@ -52,7 +52,7 @@ public class LoginRestoreController {
 				return "redirect:/login/restore";
 			}
 		}
-		if (!ga.checkCode(codeStr)) {
+		if (!authenticator.checkCode(codeStr)) {
 			ra.addFlashAttribute("error", new Message("otp.verifyFail", "动态口令校验失败"));
 			return "redirect:/login/restore";
 		}

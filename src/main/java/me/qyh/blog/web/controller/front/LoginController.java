@@ -26,7 +26,7 @@ import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.security.AttemptLogger;
 import me.qyh.blog.core.security.AttemptLoggerManager;
-import me.qyh.blog.core.security.GoogleAuthenticator;
+import me.qyh.blog.core.security.LoginAuthenticator;
 import me.qyh.blog.core.service.UserService;
 import me.qyh.blog.core.validator.LoginBeanValidator;
 import me.qyh.blog.core.vo.JsonResult;
@@ -44,8 +44,8 @@ public class LoginController implements InitializingBean {
 	@Autowired
 	private UserService userService;
 
-	@Autowired(required = false)
-	private GoogleAuthenticator ga;
+	@Autowired
+	private LoginAuthenticator authenticator;
 
 	@Autowired
 	private CaptchaValidator captchaValidator;
@@ -91,7 +91,7 @@ public class LoginController implements InitializingBean {
 			captchaValidator.doValidate(request);
 		}
 		User user = userService.login(loginBean);
-		if (ga != null) {
+		if (authenticator.enable()) {
 			HttpSession session = request.getSession();
 			if (loginBean.isRememberMe()) {
 				session.setAttribute(REMEMBER_ME_GA, Boolean.TRUE);
@@ -131,7 +131,7 @@ public class LoginController implements InitializingBean {
 			captchaValidator.doValidate(request);
 		}
 
-		if (!ga.checkCode(codeStr)) {
+		if (!authenticator.checkCode(codeStr)) {
 			return new JsonResult(false, otpVerifyFail);
 		}
 		session.removeAttribute(Constants.GA_SESSION_KEY);
@@ -146,17 +146,13 @@ public class LoginController implements InitializingBean {
 	private void successLogin(User user, HttpServletRequest request, HttpServletResponse response) {
 		HttpSession session = request.getSession();
 		session.setAttribute(Constants.USER_SESSION_KEY, user);
-		changeSessionId(request);
+		request.changeSessionId();
 		attemptLogger.remove(Environment.getIP());
 		changeCsrf(request, response);
 	}
 
-	private void changeSessionId(HttpServletRequest request) {
-		request.changeSessionId();
-	}
-
 	private void enableOtpRequired() throws LogicException {
-		if (ga == null) {
+		if (!authenticator.enable()) {
 			throw new LogicException("otp.required", "需要OTP支持");
 		}
 	}
@@ -165,7 +161,7 @@ public class LoginController implements InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		this.attemptLogger = attemptLoggerManager.createAttemptLogger(attemptCount, maxAttemptCount, sleepSec);
 
-		if (ga != null) {
+		if (authenticator.enable()) {
 
 			mapping.registerMapping(RequestMappingInfo.paths("login/otpVerify").methods(RequestMethod.POST),
 					"loginController", LoginController.class.getMethod("otpVerify", String.class,

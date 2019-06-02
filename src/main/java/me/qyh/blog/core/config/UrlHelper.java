@@ -182,8 +182,7 @@ public class UrlHelper {
 		/**
 		 * 获取空间的访问链接
 		 * 
-		 * @param space
-		 *            空间(别名不能为空)
+		 * @param space 空间(别名不能为空)
 		 * @return 访问链接
 		 */
 		public String getUrl(Space space) {
@@ -366,8 +365,7 @@ public class UrlHelper {
 		/**
 		 * 得到标签的访问链接
 		 * 
-		 * @param tag
-		 *            标签，标签名不能为空！
+		 * @param tag 标签，标签名不能为空！
 		 * @return 标签访问链接
 		 */
 		public String getArticlesUrl(Tag tag) {
@@ -377,8 +375,7 @@ public class UrlHelper {
 		/**
 		 * 得到标签的访问地址
 		 * 
-		 * @param tag
-		 *            标签名，会自动过滤html标签，eg:&lt;b&gt;spring&lt;/b&gt;会被过滤为spring
+		 * @param tag 标签名，会自动过滤html标签，eg:&lt;b&gt;spring&lt;/b&gt;会被过滤为spring
 		 * @return 标签访问地址
 		 */
 		public String getArticlesUrl(String tag) {
@@ -390,10 +387,8 @@ public class UrlHelper {
 		/**
 		 * 根据排序获取分页链接
 		 * 
-		 * @param param
-		 *            当前分页参数
-		 * @param sortStr
-		 *            排序方式 ，见{@code ArticleQueryParam.Sort}
+		 * @param param   当前分页参数
+		 * @param sortStr 排序方式 ，见{@code ArticleQueryParam.Sort}
 		 * @return 分页链接
 		 */
 		public String getArticlesUrl(ArticleQueryParam param, String sortStr) {
@@ -415,10 +410,8 @@ public class UrlHelper {
 		/**
 		 * 获取文章分页查询链接
 		 * 
-		 * @param param
-		 *            分页参数
-		 * @param page
-		 *            当前页面
+		 * @param param 分页参数
+		 * @param page  当前页面
 		 * @return 某个页面的分页链接
 		 */
 		public String getArticlesUrl(ArticleQueryParam param, int page) {
@@ -463,10 +456,8 @@ public class UrlHelper {
 		/**
 		 * 获取某个时间段内文章分页查询链接
 		 * 
-		 * @param begin
-		 *            开始时间
-		 * @param end
-		 *            结束时间
+		 * @param begin 开始时间
+		 * @param end   结束时间
 		 * @return 该时间段内的分页链接
 		 */
 		public String getArticlesUrl(Date begin, Date end) {
@@ -479,10 +470,8 @@ public class UrlHelper {
 		/**
 		 * 获取某个时间段内文章分页查询链接
 		 * 
-		 * @param begin
-		 *            开始时间
-		 * @param end
-		 *            结束时间
+		 * @param begin 开始时间
+		 * @param end   结束时间
 		 * @return 该时间段内的分页链接
 		 */
 		public String getArticlesUrl(String begin, String end) {
@@ -567,7 +556,8 @@ public class UrlHelper {
 		public void deleteCookie(String name, HttpServletRequest request, HttpServletResponse response) {
 			Cookie cookie = WebUtils.getCookie(request, name);
 			if (cookie != null) {
-				cookie.setValue(null);
+				cookie.setValue("");
+				cookie.setPath("/" + contextPath);
 				cookie.setMaxAge(0);
 				response.addCookie(cookie);
 			}
