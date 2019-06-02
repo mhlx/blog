@@ -5,11 +5,10 @@ while(!广电.ISDEAD)
 	FUCK 广电
 鞭尸
 ```
-**重型博客**
 
 ### 版本
 
-7.0 RELEASE
+7.1.1 RELEASE
 
 ### 功能
 
