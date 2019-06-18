@@ -21,6 +21,7 @@
 	rel="stylesheet">
 <link rel="stylesheet"
 	href="../../../jquery-file-upload/css/jquery.fileupload.css">
+<link rel="stylesheet" href="../../../katex/katex.min.css">
 <style>
 #toolbar {
 	background-color: #f9f9f7;
@@ -120,6 +121,14 @@ body {
 	height: auto;
 	margin-bottom: 301px;
 }
+
+#helpModal td {
+	white-space: nowrap !important;
+}
+
+#out img {
+	max-height: 200px !important;
+}
 </style>
 </head>
 
@@ -130,7 +139,8 @@ body {
 				data-target="#helpModal"></i> <i class="far fa-check-square icon"
 				onclick="toggleToolbar($(this))" id="toggle-toolbar"></i> <i
 				class="far fa-window-maximize icon" data-to-fullscreen
-				id="fullscreen-icon"></i> <i class="fas fa-times icon" data-close-iframe></i>
+				id="fullscreen-icon"></i> <i class="fas fa-times icon"
+				data-close-iframe></i>
 			<div style="float: right; display: none" id="saveTip"></div>
 		</div>
 		<div id="in" style="display: none">
@@ -152,31 +162,6 @@ body {
 					</button>
 				</div>
 				<div class="modal-body">
-					<h3>快捷键</h3>
-					<div class="table-responsive">
-						<table class="table">
-							<tr>
-								<th>快捷键</th>
-								<th>说明</th>
-							</tr>
-							<tr>
-								<td>Ctrl + S</td>
-								<td>保存文章</td>
-							</tr>
-							<tr>
-								<td>Alt + F</td>
-								<td>寻找文本</td>
-							</tr>
-							<tr>
-								<td>Shift + Ctrl + F</td>
-								<td>替换单个文本</td>
-							</tr>
-							<tr>
-								<td>Shift + Ctrl + R</td>
-								<td>替换全部文本</td>
-							</tr>
-						</table>
-					</div>
 					<h3>markdown语法</h3>
 					<div class="table-responsive">
 						<table class="table">
@@ -290,16 +275,77 @@ public static void main(String [] args){
 	</div>
 
 	<script src="../../../jquery/jquery.min.js"></script>
+	<script type="text/javascript">
+		(function($, undefined) {
+			var dom_parser = false;
+
+			// based on: https://developer.mozilla.org/en/DOMParser
+			// does not work with IE < 9
+			// Firefox/Opera/IE throw errors on unsupported types
+			try {
+				// WebKit returns null on unsupported types
+				if ((new DOMParser()).parseFromString("", "text/html")) {
+					// text/html parsing is natively supported
+					dom_parser = true;
+				}
+			} catch (ex) {
+			}
+
+			if (dom_parser) {
+				$.parseHTML2 = function(html) {
+					return new DOMParser().parseFromString(html, "text/html");
+				};
+			} else if (document.implementation
+					&& document.implementation.createHTMLDocument) {
+				$.parseHTML2 = function(html) {
+					var doc = document.implementation.createHTMLDocument("");
+					var doc_el = doc.documentElement;
+
+					doc_el.innerHTML = html;
+
+					var els = [], el = doc_el.firstChild;
+
+					while (el) {
+						if (el.nodeType === 1)
+							els.push(el);
+						el = el.nextSibling;
+					}
+
+					// are we dealing with an entire document or a fragment?
+					if (els.length === 1
+							&& els[0].localName.toLowerCase() === "html") {
+						doc.removeChild(doc_el);
+						el = doc_el.firstChild;
+						while (el) {
+							var next = el.nextSibling;
+							doc.appendChild(el);
+							el = next;
+						}
+					} else {
+						el = doc_el.firstChild;
+						while (el) {
+							var next = el.nextSibling;
+							if (el.nodeType !== 1 && el.nodeType !== 3)
+								doc.insertBefore(el, doc_el);
+							el = next;
+						}
+					}
+
+					return doc;
+				};
+			}
+		})(jQuery);
+	</script>
 	<script src="../../../console/markdowniteditor/common/help.js"></script>
 	<script>
-	var key = 'commonEditor_'+getUrlParam('stamp','');
-	var editorConfig = $.parseJSON(window.sessionStorage[key]);
-	sessionStorage.removeItem(key);
-	var csrfToken = editorConfig.csrfToken;
-	var csrfHeader = editorConfig.csrfHeader;
-	$('head').append('<meta name="_csrf" content="'+csrfToken+'" />');
-	$('head').append(
-			'<meta name="_csrf_header" content="'+csrfHeader+'" />');
+		var key = 'commonEditor_' + getUrlParam('stamp', '');
+		var editorConfig = $.parseJSON(window.sessionStorage[key]);
+		sessionStorage.removeItem(key);
+		var csrfToken = editorConfig.csrfToken;
+		var csrfHeader = editorConfig.csrfHeader;
+		$('head').append('<meta name="_csrf" content="'+csrfToken+'" />');
+		$('head').append(
+				'<meta name="_csrf_header" content="'+csrfHeader+'" />');
 	</script>
 	<script src="../../../bootstrap/js/bootstrap.bundle.min.js"></script>
 	<script
@@ -340,6 +386,7 @@ public static void main(String [] args){
 	<script src="../../../console/markdowniteditor/md.js"></script>
 	<script src="../../../console/markdowniteditor/waitForImages.js"></script>
 	<script src="../../../highlight/highlight.pack.js"></script>
+	<script src="../../../js/mermaid.min.js"></script>
 	<script>
 		var config = {
 			toolbar : true,
@@ -364,7 +411,8 @@ public static void main(String [] args){
 	<script src="../../../console/markdowniteditor/editor/copy_helper.js"></script>
 	<script src="../../../console/markdowniteditor/common/inner_bar.js"></script>
 	<script src="../../../console/markdowniteditor/editor/layout.js"></script>
-	<script src="../../../console/markdowniteditor/common/common_editor.js"></script>
+	<script
+		src="../../../console/markdowniteditor/common/common_editor.js?v=1"></script>
 	<script src="../../../console/markdowniteditor/common/file.js"></script>
 	<script src="../../../console/markdowniteditor/editor/emoji.js"></script>
 	<script src="../../../console/markdowniteditor/editor/file.js"></script>

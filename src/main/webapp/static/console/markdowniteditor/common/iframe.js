@@ -3,7 +3,7 @@ var commonEditor = (function() {
 
 	return {
 
-		'bind' : function(selector, config) {
+		'bind' : function(selector, config,evt) {
 			var basePath = config.basePath;
 			var isLogin = config.isLogin;
 			var csrfToken = config.csrfToken;
@@ -21,6 +21,9 @@ var commonEditor = (function() {
 				csrfHeader = "";
 			}
 			$(document).on('focus', selector, function() {
+				if(evt && evt.before){
+					evt.before();
+				}
 				var stamp = $.now();
 				var me = $(this);
 				var value = '';
@@ -32,12 +35,12 @@ var commonEditor = (function() {
 				window.sessionStorage['commonEditor_'+stamp] = JSON.stringify(config);
 				$("#commonEditor").remove();
 				var html = '';
-				html += '<div id="commonEditor"  style="position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:9999999999">';
+				html += '<div id="commonEditor"  style="position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:99999">';
 				var path = basePath;
 				if(!path.endsWith('/')){
 					path = path + '/';
 				}
-				html += '<iframe src="'+path+'static/console/markdowniteditor/common/iframe.html?stamp='+stamp+'" width="100%" height="100%" border="0" frameborder="0"></iframe>';
+				html += '<iframe src="'+path+'static/console/markdowniteditor/common/iframe.html?stamp='+stamp+'" width="100%" height="100%" border="0" frameborder="0" ></iframe>';
 				html += '</div>';
 				var el = $(html);
 				el.appendTo($('body'));
@@ -51,10 +54,17 @@ var commonEditor = (function() {
 						} else {
 							me.val(v);
 						}
+						if(evt && evt.close){
+							evt.close(v);
+						}
 						$("#commonEditor").remove();
 						$('body').removeClass('noscroll');
 					});
 					iframe[0].contentWindow.setEditorValue(value);
+					
+					if(evt && evt.afterLoad){
+						evt.afterLoad();
+					}
 				});
 				
 			});

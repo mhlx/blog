@@ -23,6 +23,9 @@
 <link rel="stylesheet" th:href="@{/static/css/markdown.css?v=7.0}" />
 <link rel="stylesheet"
 	th:href="@{/static/highlight/styles/github.css}">
+
+<link rel="stylesheet"
+	th:href="@{/static/katex/katex.min.css}">
 <style>
 body {
 	padding-top: 54px;
@@ -141,10 +144,12 @@ body {
 	<script th:src="@{/static/jquery/jquery.min.js?v=7.0}"></script>
 	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js?v=7.0}"></script>
 	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js?v=7.0}"></script>
-		<script th:src="@{/static/highlight/highlight.pack.js}"></script>
+	<script th:src="@{/static/highlight/highlight.pack.js}"></script>
+	<script th:src="@{/static/js/mermaid.min.js}"></script>
 	<script th:src="@{/static/js/base.js?v=7.0}"></script>
 	<script th:src="@{/static/js/moment.min.js?v=7.0}"></script>
 	<script>
+		mermaid.initialize({startOnLoad:true});
       var basePath = '[[@{/}]]';
       var actPath = '[[${urls.currentUrl}]]';
       if(basePath == '/'){

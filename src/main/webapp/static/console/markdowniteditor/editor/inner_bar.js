@@ -1,6 +1,7 @@
 var inner_bar = (function(editor, config) {
     var $inner_bar = $('<div  class="alpha30 inner-toolbar" style="position:fixed;width:50%;font-size:20px;padding-left:10px;padding-right:10px;visibility:hidden">' +
-        '<i class="fas" data-h  data-v="1" style="cursor: pointer;margin-right:20px">H1</i>' +
+    		'<i class="far fa-meh-rolling-eyes" data-emoji style="cursor: pointer;margin-right:20px"></i>' +
+    		'<i class="fas" data-h  data-v="1" style="cursor: pointer;margin-right:20px">H1</i>' +
         '<i class="fas" data-h data-v="2" style="cursor: pointer;margin-right:20px">H2</i>' +
         '<i class="fas" data-h data-v="3" style="cursor: pointer;margin-right:20px">H3</i>' +
         '<i class="fas fa-bold" data-bold style="cursor: pointer;margin-right:20px"></i>' +
@@ -71,7 +72,7 @@ var inner_bar = (function(editor, config) {
                 var scrollElement = editor.getScrollerElement();
                 var elem = $(scrollElement);
                 if (elem[0].scrollHeight - elem.scrollTop() -
-                    elem.outerHeight() < 2) {
+                    elem.outerHeight() < 0) {
                     $("html, body").scrollTop(0);
                     var top = editor.cursorCoords(true).top - 2 * lh -
                         $inner_bar.height() - $("#toolbar").height();
@@ -93,11 +94,26 @@ var inner_bar = (function(editor, config) {
 
                 } else {
                     cursorScroll = true;
+                    var _top = editor.cursorCoords(true).top;
                     editor.scrollTo(0, scrollTo);
+                    setTimeout(function(){
+                		if(editor.cursorCoords(true).top == _top){
+                			 var h = editor.cursorCoords(true).top;
+                	            var top = h > $inner_bar.height() + 2 * lh;
+                	            $inner_bar.css({
+                	                "top": top ? (h - 2 * lh - $inner_bar.height()) + "px" :
+                	                    (h + 2 * lh) + "px",
+                	                "visibility": "visible"
+                	            });
+                		}
+                	},50)
                 }
 
             }
         } else {
+        	if(editor.cursorCoords(true).top < 44){
+        		cursorScroll = true;
+        	}
             $inner_bar.css({
                 "top": (editor.cursorCoords(true).top + 2 * lh) + "px",
                 "visibility": "visible"
@@ -283,6 +299,18 @@ var inner_bar = (function(editor, config) {
     $inner_bar.on('click', '[data-selectall]', function() {
         editor.focus();
         editor.execCommand("selectAll")
+    });
+    
+    $inner_bar.on('click', '[data-emoji]', function() {
+    	emoji.choose(function(emoji){
+    		var text = editor.getSelection();
+            if (text == '') {
+                editor.replaceRange(emoji, editor.getCursor());
+               // ios 卡死？ editor.focus();
+            } else {
+                editor.replaceSelection(emoji);
+            }
+    	});
     });
 
     var table = '';

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Document.OutputSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
@@ -60,8 +61,8 @@ public class ImageVideoLazyLoadTemplateRenderHandler implements NamedTemplateRen
 				"    w.lazyLoadOptions = {elements_selector: \"."+lazyClass+"\"};\r\n" + 
 				"    b.appendChild(s);\r\n" + 
 				"}(window, document));</script>");
+		doc.outputSettings(new OutputSettings().prettyPrint(false));
 		return doc.html();
-
 	}
 
 	@Override

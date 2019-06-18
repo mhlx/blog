@@ -76,7 +76,7 @@ var inner_bar = (function(editor, config) {
                 var scrollElement = editor.getScrollerElement();
                 var elem = $(scrollElement);
                 if (elem[0].scrollHeight - elem.scrollTop() -
-                    elem.outerHeight() < 2) {
+                    elem.outerHeight() < 0) {
                     $("html, body").scrollTop(0);
                     var top = editor.cursorCoords(true).top - 2 * lh -
                         $inner_bar.height() - $("#toolbar").height();
@@ -98,11 +98,26 @@ var inner_bar = (function(editor, config) {
 
                 } else {
                     cursorScroll = true;
+                    var _top = editor.cursorCoords(true).top;
                     editor.scrollTo(0, scrollTo);
+                    setTimeout(function(){
+                		if(editor.cursorCoords(true).top == _top){
+                			 var h = editor.cursorCoords(true).top;
+                	            var top = h > $inner_bar.height() + 2 * lh;
+                	            $inner_bar.css({
+                	                "top": top ? (h - 2 * lh - $inner_bar.height()) + "px" :
+                	                    (h + 2 * lh) + "px",
+                	                "visibility": "visible"
+                	            });
+                		}
+                	},50)
                 }
 
             }
         } else {
+        	if(editor.cursorCoords(true).top < 44){
+        		cursorScroll = true;
+        	}
             $inner_bar.css({
                 "top": (editor.cursorCoords(true).top + 2 * lh) + "px",
                 "visibility": "visible"
@@ -166,7 +181,7 @@ var inner_bar = (function(editor, config) {
     });
 
     $inner_bar.on('click', '[data-file]', function() {
-        files.get();
+    	files.get();
     });
 
     $inner_bar.on('click', '[data-uncheck-list]', function() {
@@ -290,13 +305,13 @@ var inner_bar = (function(editor, config) {
         editor.execCommand("selectAll")
     });
     $inner_bar.on('click', '[data-emoji]', function() {
-    	emoji.choose(function(e){
+    	emoji.choose(function(emoji){
     		var text = editor.getSelection();
             if (text == '') {
-                editor.replaceRange(e, editor.getCursor());
-                editor.focus();
+                editor.replaceRange(emoji, editor.getCursor());
+               // ios 卡死？ editor.focus();
             } else {
-                editor.replaceSelection(e);
+                editor.replaceSelection(emoji);
             }
     	});
     });

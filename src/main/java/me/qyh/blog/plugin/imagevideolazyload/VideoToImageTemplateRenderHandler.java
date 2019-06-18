@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Document.OutputSettings;
 
 import me.qyh.blog.template.render.NamedTemplateRenderHandler;
 
@@ -38,6 +39,7 @@ public class VideoToImageTemplateRenderHandler implements NamedTemplateRenderHan
 					+ "\"/><i class=\"fas fa-video \" style=\"position: absolute;left: 50%;top: 50%;font-size:5rem;transform: translate(-50%, -50%);\"></i></div></a>");
 			e.remove();
 		});
+		doc.outputSettings(new OutputSettings().prettyPrint(false));
 		return doc.html();
 	}
 
