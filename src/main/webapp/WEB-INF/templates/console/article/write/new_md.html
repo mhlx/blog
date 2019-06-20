@@ -19,10 +19,8 @@
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/addon/search/matchesonscrollbar.css?v=7.0}">
 <link rel="stylesheet" th:href="@{/static/css/markdown.css?v=7.0}">
-<link rel="stylesheet"
-	th:href="@{/static/highlight/styles/github.css}">
-<link rel="stylesheet"
-	th:href="@{/static/katex/katex.min.css}">
+<link rel="stylesheet" th:href="@{/static/highlight/styles/github.css}">
+<link rel="stylesheet" th:href="@{/static/katex/katex.min.css}">
 <link th:href="@{/static/fontawesome-free/css/all.min.css?v=7.0}"
 	rel="stylesheet">
 <style>
@@ -124,8 +122,8 @@ body {
 	background-color: #f9f9f7
 }
 
-#out img{
-	max-height:200px !important;
+#out img {
+	max-height: 200px !important;
 }
 </style>
 </head>
@@ -439,6 +437,7 @@ public static void main(String [] args){
 		id="oldSpace" style="display: none" />
 
 	<div th:replace="console/base/foot"></div>
+	<script th:src="@{/static/js/morphdom-umd.min.js}"></script>
 	<script th:src="@{/static/codemirror/lib/codemirror.js?v=7.0}"></script>
 	<script th:src="@{/static/codemirror/addon/mode/overlay.js?v=7.0}"></script>
 	<script

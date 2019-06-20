@@ -69,11 +69,10 @@ public class StaticFileManager {
 
 	private static final int MAX_NAME_LENGTH = 255;
 
-	private static final Set<String> editableExts = Set.of("js", "css", "json", "txt", "xml", "html", "ts");
+	private static final Set<String> editableExts = Set.of("js", "css", "json", "txt", "xml", "html", "ts", "md");
 
 	/**
-	 * @param rootLocation
-	 *            根目录位置
+	 * @param rootLocation 根目录位置
 	 */
 	public StaticFileManager(String rootLocation) {
 		this(Paths.get(rootLocation));
@@ -81,8 +80,7 @@ public class StaticFileManager {
 
 	/**
 	 * 
-	 * @param root
-	 *            根目录
+	 * @param root 根目录
 	 */
 	public StaticFileManager(Path root) {
 		this.init(root);
@@ -164,12 +162,9 @@ public class StaticFileManager {
 	/**
 	 * 解压缩文件
 	 * 
-	 * @param path
-	 *            压缩文件路径
-	 * @param destPath
-	 *            存放目录
-	 * @param config
-	 *            配置
+	 * @param path     压缩文件路径
+	 * @param destPath 存放目录
+	 * @param config   配置
 	 * @throws LogicException
 	 */
 	public void unzip(String zipPath, UnzipConfig config) throws LogicException {
@@ -273,8 +268,7 @@ public class StaticFileManager {
 	 * 
 	 * @param path
 	 * @return 新建的文件夹，不包含本来已经存在的文件夹
-	 * @throws LogicException
-	 *             如果文件已经存在但是不是一个文件夹
+	 * @throws LogicException 如果文件已经存在但是不是一个文件夹
 	 */
 	private List<Path> createDirectories(Path dir) throws LogicException {
 		try {
@@ -333,8 +327,7 @@ public class StaticFileManager {
 	 * 
 	 * @param dir
 	 * @return 是否创建了一个新的文件夹
-	 * @throws IOException
-	 *             创建文件夹失败
+	 * @throws IOException 创建文件夹失败
 	 */
 	private synchronized boolean createAndCheckIsDirectory(Path dir) throws LogicException {
 		try {
@@ -408,10 +401,8 @@ public class StaticFileManager {
 	/**
 	 * 查询文件夹下第一层子文件
 	 * 
-	 * @param root
-	 *            根目录
-	 * @param param
-	 *            查询参数
+	 * @param root  根目录
+	 * @param param 查询参数
 	 * @return
 	 * @throws IOException
 	 */
@@ -482,10 +473,8 @@ public class StaticFileManager {
 	/**
 	 * 移动文件|文件夹
 	 * 
-	 * @param path
-	 *            旧路径
-	 * @param dir
-	 *            新文件夹
+	 * @param path 旧路径
+	 * @param dir  新文件夹
 	 * @throws LogicException
 	 */
 
@@ -617,10 +606,8 @@ public class StaticFileManager {
 	/**
 	 * 拷贝文件
 	 * 
-	 * @param path
-	 *            被拷贝文件路径
-	 * @param destPath
-	 *            目标文件夹
+	 * @param path     被拷贝文件路径
+	 * @param destPath 目标文件夹
 	 * @throws LogicException
 	 */
 	public void copy(String path, String destPath) throws LogicException {
@@ -822,8 +809,7 @@ public class StaticFileManager {
 	 * <b>无法保证能够删除全部文件</b>
 	 * </p>
 	 * 
-	 * @param path
-	 *            文件路径
+	 * @param path 文件路径
 	 * @throws LogicException
 	 */
 	public void delete(String path) throws LogicException {
@@ -899,8 +885,7 @@ public class StaticFileManager {
 	/**
 	 * 校验路径是否正确
 	 * 
-	 * @param path
-	 *            如果路径正确，返回格式化过的路径
+	 * @param path 如果路径正确，返回格式化过的路径
 	 * @return
 	 * @throws LogicException
 	 */

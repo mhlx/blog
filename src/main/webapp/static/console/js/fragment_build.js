@@ -553,7 +553,6 @@ var fragment_storage = (function() {
 				$("#doc-card").css({"max-width":($(window).width()/2)+'px'})
 			}
 			$("#doc-card").show();
-			renderCode();
 		})
 	}
 	
@@ -571,20 +570,3 @@ var fragment_storage = (function() {
 		$("#doc-search").val('');
 		$("#doc-search-clear").hide();
 	});
-
-	function renderCode() {
-		var p = false;
-		$("#doc-content pre").each(function() {
-			var me = $(this);
-			if (me.hasClass('prettyprint prettyprinted'))
-				return true;
-			if (me.find('code').length == 0)
-				return true;
-			else {
-				p = true;
-				me.addClass("prettyprint");
-			}
-		});
-		if (p)
-			prettyPrint();
-	}

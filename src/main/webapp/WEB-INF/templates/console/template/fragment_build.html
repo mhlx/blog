@@ -10,7 +10,6 @@
 			<div class="btn-group" role="group" aria-label="Basic example">
 				<button type="button" class="btn btn-warning" id="back">返回</button>
 				<button type="button" class="btn btn-secondary" id="file">文件</button>
-<!-- 				<button type="button" class="btn btn-secondary" id="doc">文档</button> -->
 				<button type="button" class="btn btn-secondary" id="fragment">默认模模板片段</button>
 				<button type="button" class="btn btn-secondary" id="clear">清空</button>
 				<button type="button" class="btn btn-secondary" id="beautiful">美化</button>
@@ -32,13 +31,13 @@
 		</div>
 	</div>
 	<div
-		style="width: 200px;background-color:#fff; position: fixed; bottom: 58px; right: 30px; border: 1px solid #ced4da; border-radius: .25rem; padding: 5px; display: none; max-height: 150px; word-break: break-all; z-index: 9999; overflow-y: auto"
+		style="width: 200px; background-color: #fff; position: fixed; bottom: 58px; right: 30px; border: 1px solid #ced4da; border-radius: .25rem; padding: 5px; display: none; max-height: 150px; word-break: break-all; z-index: 9999; overflow-y: auto"
 		id="search-results"></div>
 	<input type="text" class="form-control"
 		style="position: fixed; right: 30px; bottom: 10px; max-width: 200px; z-index: 9999"
 		id="doc-search" placeholder="搜索文档">
-	<i class="fas fa-times" 
-		style="position: fixed; right: 40px; z-index: 99999; bottom: 1.3rem; display: none;cursor:pointer"
+	<i class="fas fa-times"
+		style="position: fixed; right: 40px; z-index: 99999; bottom: 1.3rem; display: none; cursor: pointer"
 		id="doc-search-clear"></i>
 	<div class="card"
 		style="position: fixed; bottom: 10px; right: 30px; display: none; z-index: 9999"
@@ -68,25 +67,25 @@
 					</ul>
 					<div class="tab-content">
 						<div class="tab-pane fade show active" id="data" role="tabpanel">
-						<div class="table-responsive">
-							<table class="table" id="dataTable">
-								<tr>
-									<th data-bind="name">数据名</th>
-									<th data-bind="xx">操作</th>
-								</tr>
-							</table>
-						</div>
+							<div class="table-responsive">
+								<table class="table" id="dataTable">
+									<tr>
+										<th data-bind="name">数据名</th>
+										<th data-bind="xx">操作</th>
+									</tr>
+								</table>
+							</div>
 						</div>
 						<div class="tab-pane fade" id="fragment2" role="tabpanel">
-						<div class="table-responsive">
-							<table class="table" id="fragmentTable">
-								<tr>
-									<th data-bind="name">模板片段名</th>
-									<th data-bind="xx">操作</th>
-								</tr>
-							</table>
-						</div>
-						<div id="fragmentTable_paging"></div>
+							<div class="table-responsive">
+								<table class="table" id="fragmentTable">
+									<tr>
+										<th data-bind="name">模板片段名</th>
+										<th data-bind="xx">操作</th>
+									</tr>
+								</table>
+							</div>
+							<div id="fragmentTable_paging"></div>
 						</div>
 					</div>
 				</div>
@@ -180,11 +179,9 @@
 						</div>
 						<div class="form-group">
 							<div class="checkbox">
-								<label
-									th:if="${!fragment.enable}">
-									<input type="checkbox" id="enable" />启用
-								</label> <label
-									th:if="${fragment.enable}"><input
+								<label th:if="${!fragment.enable}"> <input
+									type="checkbox" id="enable" />启用
+								</label> <label th:if="${fragment.enable}"><input
 									type="checkbox" id="enable" checked="checked" />启用 </label>
 							</div>
 						</div>
@@ -229,27 +226,28 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="modal " id="docModal" tabindex="-1" role="dialog">
-		<div class="modal-dialog modal-lg"   role="document">
+		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-body">
 					<div class="container-fluid">
-					<div style="top:10px;position:fixed;">
-		<form class="form-inline my-2 my-lg-0">
-			<div class="dropdown">
-				<input name="q" id="qbox" data-toggle="dropdown" type="search"
-					class="form-control" placeholder="Search" autofocus="autofocus"
-					autocomplete="off" aria-haspopup="true" aria-expanded="false" />
-				<div id="search_results" style="max-height:100px;overflow-y:auto;display:none" class="dropdown-menu" role="menu"
-					aria-labelledby="qbox">
-				</div>
-			</div>
-		</form>
-		</div>
-		<div style="padding:10px;margin-top:50px" id="result" class="markdown-body">
-			
-		</div>
+						<div style="top: 10px; position: fixed;">
+							<form class="form-inline my-2 my-lg-0">
+								<div class="dropdown">
+									<input name="q" id="qbox" data-toggle="dropdown" type="search"
+										class="form-control" placeholder="Search"
+										autofocus="autofocus" autocomplete="off" aria-haspopup="true"
+										aria-expanded="false" />
+									<div id="search_results"
+										style="max-height: 100px; overflow-y: auto; display: none"
+										class="dropdown-menu" role="menu" aria-labelledby="qbox">
+									</div>
+								</div>
+							</form>
+						</div>
+						<div style="padding: 10px; margin-top: 50px" id="result"
+							class="markdown-body"></div>
 					</div>
 				</div>
 				<div class="modal-footer">
@@ -261,11 +259,12 @@
 
 	<form style="display: none" id="tplForm">
 		<input type="hidden"
-			th:value="${fragment.space == null ? '' : fragment.space.id}" id="space">
-		<input type="hidden" th:value="${fragment.id}" id="fragmentId">
+			th:value="${fragment.space == null ? '' : fragment.space.id}"
+			id="space"> <input type="hidden" th:value="${fragment.id}"
+			id="fragmentId">
 	</form>
-	<input type="hidden" th:value="'fragment_'+${fragment.id}" id="fragmentKey"
-		th:if="${fragment.id != null}">
+	<input type="hidden" th:value="'fragment_'+${fragment.id}"
+		id="fragmentKey" th:if="${fragment.id != null}">
 	<input type="hidden" id="fragmentKey" th:if="${fragment.id == null}">
 	<div th:replace="console/base/foot"></div>
 	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
@@ -288,7 +287,7 @@
 	<script
 		th:src="@{/static/codemirror/addon/search/matchesonscrollbar.js}"></script>
 	<script th:src="@{/static/codemirror/addon/search/jump-to-line.js}"></script>
-	
+
 	<script th:src="@{/static/codemirror/addon/fold/foldcode.js}"></script>
 	<script th:src="@{/static/codemirror/addon/fold/foldgutter.js}"></script>
 	<script th:src="@{/static/js-beautify/beautify.min.js}"></script>
@@ -322,8 +321,6 @@
 	<script th:src="@{/static/js/clipboard.min.js}"></script>
 	<script th:src="@{/static/console/js/table.js}"></script>
 	<script th:src="@{/static/console/js/fragment_build.js?v=7.1}"></script>
-	
-	<script type="text/javascript" th:src="@{/static/prettify/prettify.js?v=7.0}"></script>
 	<script th:src="@{/static/console/markdowniteditor/md.js}"></script>
 	<script th:src="@{/static/console/js/query.js}"></script>
 </body>

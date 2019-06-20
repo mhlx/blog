@@ -594,7 +594,6 @@
 				$("#doc-card").css({"max-width":($(window).width()/2)+'px'})
 			}
 			$("#doc-card").show();
-			renderCode();
 		})
 	}
 	
@@ -613,19 +612,3 @@
 		$("#doc-search-clear").hide();
 	});
 
-	function renderCode() {
-		var p = false;
-		$("#doc-content pre").each(function() {
-			var me = $(this);
-			if (me.hasClass('prettyprint prettyprinted'))
-				return true;
-			if (me.find('code').length == 0)
-				return true;
-			else {
-				p = true;
-				me.addClass("prettyprint");
-			}
-		});
-		if (p)
-			prettyPrint();
-	}

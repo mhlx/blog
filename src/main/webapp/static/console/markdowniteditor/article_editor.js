@@ -163,13 +163,26 @@ var render = (function() {
 			insertAfter(doc2.getElementsByTagName('body')[0].getElementsByTagName('div')[0],video);
 			video.parentNode.removeChild(video);
 		}
-		return doc.getElementsByTagName('body')[0].innerHTML;
+		return doc;
 	}
 	
-	var v = md.render(editor.getValue());
-	v = preParse(v);
-	$("#out").append(v);
-	afterRender();
+	var update = function(){
+		var doc = preParse(md.render(editor.getValue()));
+		var innerHTML = doc.getElementsByTagName('body')[0].innerHTML;
+		var div = document.createElement('div');
+		div.id = "preview-block";
+		div.innerHTML = innerHTML;
+		if($("#preview-block").length == 0){
+			$("#out").html(div);
+		} else {
+			if(morphdom){
+				morphdom($("#preview-block").get(0),div);
+			}
+		}
+		afterRender();
+	}
+	
+	update();
 
 	return {
 		md : function(ms) {
@@ -177,12 +190,15 @@ var render = (function() {
 			if (t) {
 				clearTimeout(t);
 			}
-			t = setTimeout(function() {
-				v = md.render(v);
-				v = preParse(v);
-				$("#out").html(v);
-				afterRender();
-				sync.reset();
+			t = setTimeout(function(cb) {
+				update();
+				if ($(window).width() > 768) {
+					sync.resetAndSync();
+				}else{
+					sync.reset();
+				}
+				if(cb)
+					cb();
 			}, ms);
 		}
 	}
@@ -200,16 +216,22 @@ $(window).resize(function() {
 })
 
 var stat_timer;
-
-editor.on('change', function(e) {
-	if (config.autoRender) {
-		render.md(300);
-	}
+var syncToLine = function(){
 	if ($(window).width() > 768) {
 		sync.doSyncAtLine(function() {
 			var line = editor.getCursor().line;
-			return line > 1 ? line - 1 : line;
+			return line ;
 		});
+	}
+}
+
+editor.on('change', function(e) {
+	if (config.autoRender) {
+		render.md(300,function(){
+			syncToLine();
+		});
+	}
+	if ($(window).width() > 768) {
 		var v = editor.getValue().length;
 		$("#stat").text("当前字数：" + v + "/200000").show();
 		if (stat_timer) {

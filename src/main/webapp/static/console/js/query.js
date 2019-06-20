@@ -1,15 +1,15 @@
 var querier = (function($) {
-	var names = ['data_archives.md', 'data_articeNav.md',
-			'data_article.md', 'data_articlePage.md',
-			'data_articleStatistics.md', 'data_articleTag.md',
-			'data_commentCount.md', 'data_commentStatistics.md',
-			'data_filePage.md', 'data_lastNews.md', 'data_news.md',
-			'data_newsNav.md', 'data_newsPage.md', 'data_newsStatistics.md',
-			'data_spaces.md', 'data_tagStatistics.md', 'data_user.md',
-			'formats.md', 'fragment.md', 'fragments.md', 'gravatars.md',
-			'hander.md', 'ip.md', 'jsons.md', 'jsoups.md', 'lock.md',
-			'markdown.md', 'messages.md', 'period.md',
-			'plugin_data_commentPage.md', 'plugin_data_lastComments.md',
+	var names = [ 'data_archives.md', 'data_articeNav.md', 'data_article.md',
+			'data_articlePage.md', 'data_articleStatistics.md',
+			'data_articleTag.md', 'data_commentCount.md',
+			'data_commentStatistics.md', 'data_filePage.md',
+			'data_lastNews.md', 'data_news.md', 'data_newsNav.md',
+			'data_newsPage.md', 'data_newsStatistics.md', 'data_spaces.md',
+			'data_tagStatistics.md', 'data_user.md', 'formats.md',
+			'fragment.md', 'fragments.md', 'gravatars.md', 'hander.md',
+			'ip.md', 'jsons.md', 'jsoups.md', 'lock.md', 'markdown.md',
+			'messages.md', 'period.md', 'plugin_data_commentPage.md',
+			'plugin_data_lastComments.md',
 			'plugin_data_recentlyViewdArticles.md', 'private.md',
 			'redirect.md', 'space.md', 'times.md', 'transaction.md',
 			'unlocked.md', 'urls.md', 'user.md', 'validators.md', 'csrf.md',
@@ -18,7 +18,8 @@ var querier = (function($) {
 	var templates = [ 'page_article_detail.html', 'page_index.html',
 			'page_error.html', 'page_news_detail.html', 'login.html',
 			'page_news.html', 'fragment_articles.html', 'fragment_foot.html',
-			'fragment_top.html','guestbook.html' ];
+			'fragment_top.html', 'guestbook.html', 'markdown.html',
+			'simple.html' ];
 
 	var cache = [];
 	var status = 'unloaded';
@@ -85,10 +86,10 @@ var querier = (function($) {
 					dataType : "text",
 					success : function(data) {
 						if ($.inArray(name, templates) != -1) {
-							var result = '<pre class="pre-scrollable"><code>';
+							var result = '<pre class="pre-scrollable">';
 							result += data.replace(/&/g, '&amp;').replace(/</g,
 									'&lt;').replace(/>/g, '&gt;');
-							result += '</code></pre>';
+							result += '</pre>';
 							cb(result);
 						} else {
 							var result = md.render(data);
