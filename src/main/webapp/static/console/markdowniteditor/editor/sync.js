@@ -1,110 +1,71 @@
 var sync = (function(editor) {
   			var scrollMap;
-            var oldVForScroll;
-            var building = false;
-            var t;
-            var syncResultScrollAtLine = function(lineNoFun) {
-              	if(!config.syncScroll){
+            var syncResultScrollAtLine = function(line) {
+				if(!config.syncScroll){
                 	return ;
                 }
-                if (!scrollMap) {
-
-                    buildScrollMap(function() {
-                        posTo = scrollMap[lineNoFun()];
-                        $('#out').stop(true).animate({
-                            scrollTop: posTo
-                        }, 100);
-
-                    });
-                } else {
-                    posTo = scrollMap[lineNoFun()];
-                    $('#out').stop(true).animate({
-                        scrollTop: posTo
-                    }, 50);
-                }
+				if(!scrollMap){
+					buildScrollMap();
+					if(!scrollMap){
+						return ;
+					}
+				}
+				var offset = scrollMap[line];
+				if(offset){
+					$('#out').stop(true).animate({
+						scrollTop: offset
+					}, 100);
+				}
             }
             var syncResultScroll = function() {
               	if(!config.syncScroll){
                 	return ;
                 }
-                var lineNo = function() {
-                    return editor.lineAtHeight(editor.getScrollInfo().top, 'local');
-                };
-                syncResultScrollAtLine(lineNo);
+                syncResultScrollAtLine(editor.lineAtHeight(editor.getScrollInfo().top,'local'));
             };
+			
+			var building = false;
 
-
-
-            var buildScrollMap = function(cb) {
-                if (building) {
-                    return;
-                }
-                building = true;
-                oldVForScroll = editor.getValue();
-                $('#out').waitForImages(function() {
-                    var i, offset, nonEmptyList, pos, a, b, lineHeightMap, linesCount,
-                        acc, textarea = $('.CodeMirror'),
-                        _scrollMap;
-
-                    offset = $('#out').scrollTop() - $('#out').offset().top;
-                    _scrollMap = [];
-                    nonEmptyList = [];
-
-                    linesCount = editor.lineCount();
-                    for (i = 0; i < linesCount; i++) {
-                        _scrollMap.push(-1);
-                    }
-
-                    nonEmptyList.push(0);
-                    _scrollMap[0] = 0;
-
-                    $('.line').each(function(n, el) {
-                        var $el = $(el),
-                            t = $el.data('line');
-                        if (t === '') {
-                            return;
-                        }
-                        if (t !== 0) {
-                            nonEmptyList.push(t);
-                        }
-                        _scrollMap[t] = Math.round($el.offset().top + offset);
-                    });
-
-                    nonEmptyList.push(linesCount);
-                    _scrollMap[linesCount] = $('#out')[0].scrollHeight;
-
-                    pos = 0;
-                    for (i = 1; i < linesCount; i++) {
-                        if (_scrollMap[i] !== -1) {
-                            pos++;
-                            continue;
-                        }
-
-                        a = nonEmptyList[pos];
-                        b = nonEmptyList[pos + 1];
-                        _scrollMap[i] = Math.round((_scrollMap[b] * (i - a) + _scrollMap[a] * (b - i)) / (b - a));
-                    }
-
-                    building = false;
-                    if (editor.getValue() == oldVForScroll) {
-                        scrollMap = _scrollMap;
-                        if (cb) {
-                            cb();
-                        }
-                    }
-                })
+            var buildScrollMap = function() {
+				scrollMap = undefined;
+				//editor.setOption("readOnly", true);
+				if(building)
+					return ;
+				building = true;
+				var offset = ($('#out').scrollTop() - $('#out').offset().top);
+				var _scrollMap = [];
+				var linesCount = editor.lineCount();
+				var lines = document.getElementById("out").querySelectorAll('[data-line]');
+				for(var i=0;i<lines.length;i++){
+					var ele = lines[i];
+					var top = ele.getBoundingClientRect().top;
+					var l = parseInt(ele.getAttribute('data-line'));
+					_scrollMap[l] = Math.round(top +offset );
+					var el = parseInt(ele.getAttribute('data-end-line'));
+					if(el != 'NaN' && el > l){
+						var scope = el-l;
+						for(var j=l;j<=el;j++){
+							var p = (j-l)/scope;
+							_scrollMap[j] = Math.round(top+ele.clientHeight*(p)  + offset)
+						}
+					}
+				}
+				
+				scrollMap = _scrollMap;
+				//editor.setOption("readOnly", false);
+				building = false;
             }
             return {
-              	reset : function(){
-                	scrollMap = null;
+              	rebuild : function(){
+                	buildScrollMap();
                 },
               	resetAndSync:function(){
-                	scrollMap = null;
+					scrollMap = undefined;
                   	syncResultScroll();
                 },
                 doSync: syncResultScroll,
-                doSyncAtLine: function(lineFun) {
-                    syncResultScrollAtLine(lineFun)
+                doSyncAtLine: function(line) {
+                    syncResultScrollAtLine(line)
                 }
             }
         })(editor);

@@ -115,8 +115,7 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 	/**
 	 * 获取文件的封面
 	 * 
-	 * @param original
-	 *            原始文件
+	 * @param original 原始文件
 	 */
 	protected abstract void extraPoster(Path original, Path poster) throws Exception;
 
@@ -387,10 +386,8 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 	 * 获取缩略图格式
 	 * 
 	 * @param sourceExt
-	 * @param ext
-	 *            访问连接后缀
-	 * @param request
-	 *            请求
+	 * @param ext       访问连接后缀
+	 * @param request   请求
 	 * @return
 	 */
 	private Optional<String> getThumbPath(String sourceExt, String path, HttpServletRequest request) {

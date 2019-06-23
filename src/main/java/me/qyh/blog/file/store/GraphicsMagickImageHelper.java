@@ -97,6 +97,7 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 			// 如果原图是gif图像
 			if (isGIF(FileUtils.getFileExtension(src))) {
 				doResize(resize, getGifCoverUseJava(src), dest);
+				return;
 			} else {
 				throw e;
 			}

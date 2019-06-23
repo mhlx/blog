@@ -4,10 +4,19 @@ function insertAfter(newNode, referenceNode) {
 }
 var maxLenth = editorConfig.maxLength | 2000;
 var render = (function() {
+	
+	var plugins = ['footnote','katex','mermaid','anchor'];
+	var md = createMarkdownParser({
+		html : true,
+		plugins:plugins,
+		lineNumber:true
+	});
 	var t;
-	var md = window.md;
-	var afterRender = function() {
-		mermaid.init({noteMargin: 10}, ".mermaid");
+	var afterRender = function(v) {
+		mermaid.init({},'#out .mermaid');
+		$('#out').waitForImages(function() {
+			sync.rebuild();
+		});
 	}
 	
 	var preParse = function(v){
@@ -27,27 +36,63 @@ var render = (function() {
 		}
 		return doc;
 	}
-	
-
+	var old;
 	var update = function(){
 		var doc = preParse(md.render(editor.getValue()));
 		var innerHTML = doc.getElementsByTagName('body')[0].innerHTML;
 		var div = document.createElement('div');
 		div.id = "preview-block";
 		div.innerHTML = innerHTML;
+		var mermaids = doc.getElementsByClassName('mermaid');
 		if($("#preview-block").length == 0){
 			$("#out").html(div);
 		} else {
 			if(morphdom){
-				morphdom($("#preview-block").get(0),div);
+				morphdom($("#preview-block").get(0),div,{
+					onBeforeElUpdated  : function(f,t){
+						if ($(window).width() <= 768) {
+							return true;
+						}
+						if (f.isEqualNode(t)) {
+							return false;
+						}
+						if(f.classList.contains('mermaid-block')
+							&& t.classList.contains('mermaid-block')){
+								var old =  f.getElementsByClassName('mermaid-source')[0].textContent;
+								var now =  t.getElementsByClassName('mermaid-source')[0].textContent;
+								if(old == now){
+									//更新属性
+									cloneAttributes(f,t);
+									return false;
+								}
+							}
+						return true;
+					}
+				});
 			}
 		}
 		afterRender();
 	}
 	
+	function cloneAttributes(element, sourceNode) {
+	  let attr;
+	  let attributes = Array.prototype.slice.call(sourceNode.attributes);
+	  while(attr = attributes.pop()) {
+		element.setAttribute(attr.nodeName, attr.nodeValue);
+	  }
+	}
+	
 	update();
 
 	return {
+		hasPlugin : function(name){
+			for(var i=0;i<plugins.length;i++){
+				if(plugins[i] === name){
+					return true;
+				}
+			}
+			return false;
+		},
 		md : function(ms) {
 			var v = editor.getValue();
 			if (t) {
@@ -57,8 +102,6 @@ var render = (function() {
 				update();
 				if ($(window).width() > 768) {
 					sync.resetAndSync();
-				}else{
-					sync.reset();
 				}
 				if(cb)
 					cb();
@@ -74,7 +117,7 @@ $(window).resize(function() {
 		clearTimeout(resize_t);
 	}
 	resize_t = setTimeout(function() {
-		sync.reset();
+		sync.rebuild();
 	}, 30)
 })
 
