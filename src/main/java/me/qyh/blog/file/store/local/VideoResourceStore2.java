@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,7 +42,7 @@ public class VideoResourceStore2 extends VideoResourceStore implements Applicati
 
 	private final ExecutorService es = Executors.newSingleThreadExecutor();
 
-	private final Set<String> processing = ConcurrentHashMap.newKeySet();
+	private final Map<String, Boolean> processing = new ConcurrentHashMap<>();
 
 	public VideoResourceStore2(String urlPatternPrefix, String[] allowExtensions, int timeoutSecond, int maxSize) {
 		super(urlPatternPrefix, allowExtensions, timeoutSecond);
@@ -81,7 +81,8 @@ public class VideoResourceStore2 extends VideoResourceStore implements Applicati
 		cf.setStore(id);
 		cf.setOriginalFilename(originalFilename);
 		try {
-			compress(dest, key);
+			VideoInfo info = getVideoInfo(dest);
+			compress(info, dest, key);
 			synchronized (this) {
 				extraPoster(dest, getPoster(key));
 			}
@@ -107,7 +108,13 @@ public class VideoResourceStore2 extends VideoResourceStore implements Applicati
 		if (FileUtils.exists(compress)) {
 			return Optional.of(new FileSystemResource(compress));
 		} else {
-			compress(path, key);
+			VideoInfo vi;
+			try {
+				vi = getVideoInfo(path);
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+			compress(vi, path, key);
 			return Optional.of(getProcessingResource());
 		}
 	}
@@ -127,22 +134,20 @@ public class VideoResourceStore2 extends VideoResourceStore implements Applicati
 			es.shutdownNow();
 	}
 
-	private void compress(Path dest, String key) {
+	private void compress(VideoInfo info, Path dest, String key) {
 		es.execute(() -> {
 			Path compress = getCompress(key, dest);
 			if (FileUtils.exists(compress)) {
 				return;
 			}
-			if (processing.contains(key)) {
-				return;
-			}
-			processing.add(key);
-			try {
-				compress(getVideoInfo(dest), dest, compress);
-			} catch (Exception e) {
-				logger.warn(e.getMessage(), e);
-			} finally {
-				processing.remove(key);
+			if (processing.putIfAbsent(key, Boolean.TRUE) == null) {
+				try {
+					compress(info, dest, compress);
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				} finally {
+					processing.remove(key);
+				}
 			}
 		});
 	}

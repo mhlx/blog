@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -79,10 +80,12 @@ import me.qyh.blog.template.TemplateMapping.PreviewTemplateMapping;
 import me.qyh.blog.template.dao.FragmentDao;
 import me.qyh.blog.template.dao.HistoryTemplateDao;
 import me.qyh.blog.template.dao.PageDao;
+import me.qyh.blog.template.dao.PluginTemplateDao;
 import me.qyh.blog.template.entity.Fragment;
 import me.qyh.blog.template.entity.HistoryTemplate;
 import me.qyh.blog.template.entity.HistoryTemplate.HistoryTemplateType;
 import me.qyh.blog.template.entity.Page;
+import me.qyh.blog.template.entity.PluginTemplate;
 import me.qyh.blog.template.event.PageCreateEvent;
 import me.qyh.blog.template.event.PageDelEvent;
 import me.qyh.blog.template.event.PageUpdateEvent;
@@ -125,6 +128,8 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	@Autowired
 	private SpaceDao spaceDao;
 	@Autowired
+	private PluginTemplateDao pluginTemplateDao;
+	@Autowired
 	private ConfigServer configServer;
 	@Autowired(required = false)
 	private CommentServer commentServer;
@@ -153,6 +158,8 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	private final List<Fragment> previewFragments = new ArrayList<>();
 
 	private static final Path DATA_CONFIG = FileUtils.HOME_DIR.resolve("blog/data_config.json");
+
+	private Map<String, PluginTemplate> defaultPluginTemplates = new ConcurrentHashMap<>();
 
 	static {
 		if (!FileUtils.exists(DATA_CONFIG)) {
@@ -584,8 +591,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	/**
 	 * 预览 导入的模板
 	 * 
-	 * @param spaceId
-	 *            空间
+	 * @param spaceId     空间
 	 * @param exportPages
 	 * @throws LogicException
 	 */
@@ -888,6 +894,8 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		this.templateProcessors.add(new PageTemplateProcessor());
 		// Fragment Template Processor
 		this.templateProcessors.add(new FragmentTemplateProcessor());
+		// Plugin Template Processor
+		this.templateProcessors.add(new PluginTemplateProcessor());
 
 		if (commentServer == null) {
 			commentServer = EmptyCommentServer.INSTANCE;
@@ -1224,8 +1232,7 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		/**
 		 * 根据模板名查询模板
 		 * 
-		 * @param templateName
-		 *            模板名
+		 * @param templateName 模板名
 		 * @return 模板，如果不存在，返回null
 		 */
 		Template getTemplate(String templateName);
@@ -1313,6 +1320,28 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		public boolean canProcess(String templateSign) {
 			return Fragment.isFragmentTemplate(templateSign)
 					|| Fragment.getOriginalTemplateFromPreviewTemplateName(templateSign).isPresent();
+		}
+	}
+
+	private final class PluginTemplateProcessor implements TemplateProcessor {
+
+		@Override
+		public Template getTemplate(String templateName) {
+			// TEMPLATE%Plugin%{PluginName}%{Name}
+			String[] array = templateName.split(Template.SPLITER);
+			if (array.length != 4) {
+				throw new SystemException(templateName + "无法转化为PluginTemplate");
+			}
+			Optional<PluginTemplate> op = pluginTemplateDao.selectByPluginNameAndName(array[2], array[3]);
+			if (op.isPresent()) {
+				return op.get();
+			}
+			return defaultPluginTemplates.get(templateName);
+		}
+
+		@Override
+		public boolean canProcess(String templateSign) {
+			return PluginTemplate.isPluginTemplate(templateSign);
 		}
 	}
 
@@ -1446,6 +1475,70 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 		});
 	}
 
+	@Override
+	public synchronized PluginTemplate savePluginTemplate(PluginTemplate template) throws LogicException {
+		if (!defaultPluginTemplates.containsKey(template.getTemplateName())) {
+			throw new LogicException("defaultPluginTemplate.notExists", "默认插件模板不存在");
+		}
+		return Transactions.executeInTransaction(platformTransactionManager, status -> {
+			if (pluginTemplateDao.selectByPluginNameAndName(template.getPluginName(), template.getName()).isPresent()) {
+				throw new LogicException("pluginTemplate.exists",
+						"模板:[" + template.getPluginName() + "," + template.getName() + "]已经存在",
+						template.getPluginName(), template.getName());
+			}
+			pluginTemplateDao.insert(template);
+			return template;
+		});
+	}
+
+	@Override
+	public synchronized PluginTemplate updatePluginTemplate(PluginTemplate template) throws LogicException {
+		if (!defaultPluginTemplates.containsKey(template.getTemplateName())) {
+			throw new LogicException("defaultPluginTemplate.notExists", "默认插件模板不存在");
+		}
+		return Transactions.executeInTransaction(platformTransactionManager, status -> {
+			pluginTemplateDao.selectById(template.getId())
+					.orElseThrow(() -> new LogicException("pluginTemplate.notExists", "插件模板不存在"));
+			Optional<PluginTemplate> opDuplicate = pluginTemplateDao.selectByPluginNameAndName(template.getPluginName(),
+					template.getName());
+			if (opDuplicate.isPresent() && !opDuplicate.get().getId().equals(template.getId())) {
+				throw new LogicException("pluginTemplate.exists",
+						"模板:[" + template.getPluginName() + "," + template.getName() + "]已经存在",
+						template.getPluginName(), template.getName());
+			}
+			pluginTemplateDao.update(template);
+			return template;
+		});
+	}
+
+	@Override
+	public synchronized void deletePluginTemplate(Integer id) throws LogicException {
+		Transactions.executeInTransaction(platformTransactionManager, status -> {
+			pluginTemplateDao.selectById(id)
+					.orElseThrow(() -> new LogicException("pluginTemplate.notExists", "插件模板不存在"));
+			pluginTemplateDao.deleteById(id);
+		});
+	}
+
+	@Override
+	public Optional<PluginTemplate> getPluginTemplate(Integer id) {
+		return Transactions.executeInTransaction(platformTransactionManager, status -> {
+			return pluginTemplateDao.selectById(id);
+		});
+	}
+
+	@Override
+	public synchronized List<PluginTemplate> allPluginTemplate() {
+		return Transactions.executeInTransaction(platformTransactionManager, status -> {
+			return pluginTemplateDao.selectAll();
+		});
+	}
+
+	@Override
+	public List<PluginTemplate> getDefaultPluginTemplates() {
+		return Collections.unmodifiableList(new ArrayList<>(this.defaultPluginTemplates.values()));
+	}
+
 	private Map<String, Boolean> readCallableMap() {
 		try {
 			String content = FileUtils.toString(DATA_CONFIG);
@@ -1463,4 +1556,12 @@ public class TemplateServiceImpl implements TemplateService, ApplicationEventPub
 	private Space getRequiredSpace(Integer id) throws LogicException {
 		return spaceDao.selectById(id).orElseThrow(() -> new LogicException("space.notExists", "空间不存在"));
 	}
+
+	@Override
+	public TemplateRegistry registerPluginTemplate(String pluginName, String name, String template) {
+		PluginTemplate pluginTemplate = new PluginTemplate(pluginName, template, name);
+		this.defaultPluginTemplates.put(pluginTemplate.getTemplateName(), pluginTemplate);
+		return this;
+	}
+
 }

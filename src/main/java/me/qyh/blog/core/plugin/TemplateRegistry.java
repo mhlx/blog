@@ -36,4 +36,13 @@ public interface TemplateRegistry {
 	 */
 	TemplateRegistry registerGlobalFragment(String name, String template, boolean callable);
 
+	/**
+	 * 注册一个简单的模板，这个模板不会匹配任何路径，只是使用模板名和模板内容做映射，仅用于插件的使用
+	 * 
+	 * @param name
+	 * @param template
+	 * @return
+	 */
+	TemplateRegistry registerPluginTemplate(String pluginName, String name, String template);
+
 }

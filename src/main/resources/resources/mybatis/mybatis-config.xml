@@ -29,6 +29,8 @@
 		<typeAlias type="me.qyh.blog.template.entity.Page" alias="Page" />
 		<typeAlias type="me.qyh.blog.template.entity.Fragment"
 			alias="Fragment" />
+		<typeAlias type="me.qyh.blog.template.entity.PluginTemplate"
+			alias="PluginTemplate" />
 		<typeAlias type="me.qyh.blog.template.entity.HistoryTemplate"
 			alias="HistoryTemplate" />
 		<typeAlias type="me.qyh.blog.template.entity.HistoryTemplate$HistoryTemplateType"
@@ -57,5 +59,6 @@
 		<mapper resource="resources/mybatis/mapper/historyTemplateMapper.xml" />
 		<mapper resource="resources/mybatis/mapper/fileDeleteMapper.xml" />
 		<mapper resource="resources/mybatis/mapper/newsMapper.xml" />
+		<mapper resource="resources/mybatis/mapper/pluginTemplateMapper.xml" />
 	</mappers>
 </configuration>

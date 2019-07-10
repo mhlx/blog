@@ -496,8 +496,15 @@ public class StaticFileManager {
 				return;
 			}
 
-			if (p.equals(destDir.resolve(p.getFileName()))) {
+			Path dest = destDir.resolve(p.getFileName());
+
+			if (p.equals(dest)) {
 				return;
+			}
+
+			// @since 7.1.3
+			if (Files.exists(dest)) {
+				throw new LogicException("staticFile.move.file.exists", "位置:" + dest + "已经存在文件", dest);
 			}
 
 			if (FileUtils.isSub(destDir, p)) {
@@ -513,7 +520,7 @@ public class StaticFileManager {
 
 				rollBacks.addAll(createDirectories(destDir));
 
-				Files.move(p, destDir.resolve(p.getFileName()), StandardCopyOption.ATOMIC_MOVE);
+				Files.move(p, dest, StandardCopyOption.ATOMIC_MOVE);
 			} catch (Exception e) {
 
 				delete(rollBacks);

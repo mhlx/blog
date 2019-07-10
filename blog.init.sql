@@ -159,3 +159,11 @@ CREATE TABLE IF NOT EXISTS `blog_news` (
   PRIMARY KEY (`id`)
 )
 
+CREATE TABLE IF NOT EXISTS `blog_pluginTemplate` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pluginName` varchar(50)  NOT NULL,
+  `name` varchar(50)  NOT NULL,
+  `template` mediumtext  NOT NULL,
+  PRIMARY KEY (`id`)
+) 
+

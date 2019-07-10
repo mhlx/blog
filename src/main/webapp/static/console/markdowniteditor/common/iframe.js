@@ -1,31 +1,44 @@
 var commonEditor = (function() {
 	$('head').append('<style>.noscroll{overflow: hidden;}</style>');
 
-	return {
+	
 
+	return {
 		'bind' : function(selector, config,evt) {
 			var basePath = config.basePath;
 			var isLogin = config.isLogin;
 			var csrfToken = config.csrfToken;
 			var csrfHeader = config.csrfHeader;
 			if (typeof basePath === "undefined") {
-				basePath = "";
+				config.basePath = "";
 			}
 			if (typeof isLogin === "undefined") {
-				isLogin = false;
+				config.isLogin = false;
 			}
 			if (typeof csrfToken === "undefined") {
-				csrfToken = "";
+				config.csrfToken = "";
 			}
 			if (typeof csrfHeader === "undefined") {
-				csrfHeader = "";
+				config.csrfHeader = "";
 			}
-			$(document).on('focus', selector, function() {
+			$(document).on('click', selector, function(event) {
+				
+				var getPos = function(textarea){
+					var lines = textarea.value.substr(0, textarea.selectionStart).split("\n");
+					var lineNum =  lines.length-1;
+					return {line : lineNum,ch:lines[lineNum].length};
+				}
+				
+				var pos;
+				if(event.target.type == 'textarea'){
+					pos = getPos($(this)[0]);
+				}
 				if(evt && evt.before){
 					evt.before();
 				}
 				var stamp = $.now();
 				var me = $(this);
+				config.pos = pos;
 				var value = '';
 				if (config.getValueFun) {
 					value = config.getValueFun(me);
@@ -71,5 +84,6 @@ var commonEditor = (function() {
 		}
 
 	}
+	
 
 })();

@@ -14,6 +14,7 @@ import me.qyh.blog.template.entity.Fragment;
 import me.qyh.blog.template.entity.HistoryTemplate;
 import me.qyh.blog.template.entity.HistoryTemplate.HistoryTemplateType;
 import me.qyh.blog.template.entity.Page;
+import me.qyh.blog.template.entity.PluginTemplate;
 import me.qyh.blog.template.vo.DataBind;
 import me.qyh.blog.template.vo.DataTag;
 import me.qyh.blog.template.vo.DataTagProcessorBean;
@@ -37,8 +38,7 @@ public interface TemplateService {
 	/**
 	 * 插入用户自定义模板片段
 	 * 
-	 * @param fragment
-	 *            用户自定义模板片段
+	 * @param fragment 用户自定义模板片段
 	 * @throws LogicException
 	 */
 	Fragment insertFragment(Fragment fragment) throws LogicException;
@@ -46,8 +46,7 @@ public interface TemplateService {
 	/**
 	 * 删除用户自定义挂件
 	 * 
-	 * @param id
-	 *            挂件id
+	 * @param id 挂件id
 	 * @throws LogicException
 	 */
 	void deleteFragment(Integer id) throws LogicException;
@@ -55,8 +54,7 @@ public interface TemplateService {
 	/**
 	 * 分页查询用户自定义模板片段
 	 * 
-	 * @param param
-	 *            查询参数
+	 * @param param 查询参数
 	 * @return 模板片段分页
 	 */
 	PageResult<Fragment> queryFragment(FragmentQueryParam param);
@@ -71,8 +69,7 @@ public interface TemplateService {
 	/**
 	 * 根据ID查询用户挂件
 	 * 
-	 * @param id
-	 *            挂件ID
+	 * @param id 挂件ID
 	 * @return null如果不存在
 	 */
 	Optional<Fragment> queryFragment(Integer id);
@@ -139,8 +136,7 @@ public interface TemplateService {
 	 * 根据模板名查询模板
 	 * </p>
 	 * 
-	 * @param templateName
-	 *            模板页面，如果模板名称是预览模板名称，将会返回{@code PreviewTemplate}
+	 * @param templateName 模板页面，如果模板名称是预览模板名称，将会返回{@code PreviewTemplate}
 	 * @return
 	 * @see PreviewTemplate
 	 * @see Template#getTemplateName()
@@ -151,11 +147,9 @@ public interface TemplateService {
 	/**
 	 * 根据空间导出页面
 	 * 
-	 * @param spaceId
-	 *            空间Id
+	 * @param spaceId 空间Id
 	 * @return
-	 * @throws LogicException
-	 *             空间不存在
+	 * @throws LogicException 空间不存在
 	 */
 	List<ExportPage> exportPage(Integer spaceId) throws LogicException;
 
@@ -163,8 +157,7 @@ public interface TemplateService {
 	 * 导入模板
 	 * 
 	 * @param exportPages
-	 * @throws LogicException
-	 *             空间不存在
+	 * @throws LogicException 空间不存在
 	 */
 	List<ImportRecord> importPage(ExportPages exportPages);
 
@@ -189,10 +182,8 @@ public interface TemplateService {
 	 * 如果路径已经存在，那么访问path即可预览该页面
 	 * </p>
 	 * 
-	 * @param PathTemplate
-	 *            用来预览的模板
-	 * @throws LogicException
-	 *             注册失败
+	 * @param PathTemplate 用来预览的模板
+	 * @throws LogicException 注册失败
 	 */
 	void registerPreview(Page page) throws LogicException;
 
@@ -318,9 +309,58 @@ public interface TemplateService {
 	 * </p>
 	 * 
 	 * @since 7.0
-	 * @param path
-	 *            路径
+	 * @param path 路径
 	 */
 	void disablePageByPath(String path) throws LogicException;
+
+	/**
+	 * 保存插件模板
+	 * 
+	 * @since 7.1.3
+	 * @param template
+	 * @throws LogicException
+	 */
+	PluginTemplate savePluginTemplate(PluginTemplate template) throws LogicException;
+
+	/**
+	 * 更新插件模板
+	 * 
+	 * @since 7.1.3
+	 * @param template
+	 * @throws LogicException
+	 */
+	PluginTemplate updatePluginTemplate(PluginTemplate template) throws LogicException;
+
+	/**
+	 * 删除插件模板
+	 * 
+	 * @param id
+	 * @throws LogicException
+	 */
+	void deletePluginTemplate(Integer id) throws LogicException;
+
+	/**
+	 * 获取所有的插件模板
+	 * 
+	 * @return
+	 * @throws LogicException
+	 */
+	List<PluginTemplate> allPluginTemplate();
+
+	/**
+	 * 获取插件模板
+	 * 
+	 * @since 7.1.3
+	 * @param id
+	 * @throws LogicException
+	 */
+	Optional<PluginTemplate> getPluginTemplate(Integer id);
+
+	/**
+	 * 获取默认的插件模板
+	 * 
+	 * @return
+	 */
+	List<PluginTemplate> getDefaultPluginTemplates();
 
 }

@@ -225,7 +225,6 @@ var fileChooser = (function(){
 			uploadModal.find(".files").html("");
 			fileSelectModal.modal("show");
 		});
-		
 		uploadModal.find("form").eq(0).fileupload({
 			dataType : 'json',
 			autoUpload : false,

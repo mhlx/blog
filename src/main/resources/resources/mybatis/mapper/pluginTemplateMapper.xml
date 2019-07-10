@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.template.dao.PluginTemplateDao">
+	<resultMap type="PluginTemplate" id="PluginTemplateDetail">
+		<id column="id" property="id" />
+		<result column="pluginName" property="pluginName" />
+		<result column="name" property="name" />
+		<result column="template" property="template" />
+	</resultMap>
+
+	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO blog_pluginTemplate(pluginName,name,template)
+		VALUES(#{pluginName},#{name},#{template})
+	</insert>
+
+	<update id="update">
+		UPDATE blog_pluginTemplate 
+		<set>
+			<if test="template != null">
+				template = #{template},
+			</if>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="pluginName != null">
+				pluginName = #{pluginName}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<delete id="deleteById">
+		DELETE FROM blog_pluginTemplate WHERE id = #{id}
+	</delete>
+
+	<select id="selectById" resultMap="PluginTemplateDetail">
+		SELECT id,pluginName,name,template FROM blog_pluginTemplate WHERE id = #{id}
+	</select>
+	
+	
+	<select id="selectByPluginNameAndName" resultMap="PluginTemplateDetail">
+		SELECT id,pluginName,name,template FROM blog_pluginTemplate WHERE pluginName = #{pluginName} AND name = #{name}
+	</select>
+
+	<select id="selectAll" resultMap="PluginTemplateDetail">
+		SELECT id,pluginName,name,template FROM blog_pluginTemplate
+	</select>
+</mapper>

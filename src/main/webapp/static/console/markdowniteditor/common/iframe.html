@@ -7,62 +7,20 @@
 <meta name="viewport"
 	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
+<link rel="stylesheet" href="../../../bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../../../codemirror/lib/codemirror.css">
 <link rel="stylesheet"
-	href="../../../bootstrap/css/bootstrap.min.css?v=7.0">
-<link rel="stylesheet"
-	href="../../../codemirror/lib/codemirror.css?v=7.0">
-<link rel="stylesheet"
-	href="../../../codemirror/addon/dialog/dialog.css?v=7.0">
-<link rel="stylesheet"
-	href="../../../codemirror/addon/search/matchesonscrollbar.css?v=7.0">
-<link rel="stylesheet" href="../../../css/markdown.css?v=7.0">
+	href="../../../codemirror/addon/scroll/simplescrollbars.css">
+<link rel="stylesheet" href="../../../css/markdown.css">
 <link rel="stylesheet" href="../../../highlight/styles/github.css">
-<link href="../../../fontawesome-free/css/all.min.css?v=7.0"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="../../../jquery-file-upload/css/jquery.fileupload.css">
-<link rel="stylesheet" href="../../../katex/katex.min.css">
+<link href="../../../fontawesome-free/css/all.min.css" rel="stylesheet">
 <style>
-#toolbar {
-	background-color: #f9f9f7;
-	height: 30px;
-	position: fixed;
-	left: 0;
-	width: 50%;
-	padding-left: 10px;
-	padding-right: 10px;
-	overflow: auto;
-	overflow-y: hidden;
+* {
+    -webkit-overflow-scrolling: touch;
 }
-
-#in {
-	position: fixed;
-	top: 30px;
-	left: 0;
-	bottom: 0;
-	width: 50%;
-	height: auto;
-	overflow: auto;
-	-webkit-overflow-scrolling: touch;
-	color: #2c3e50;
-	padding-bottom: 301px;
+.nowrap {
+	white-space: nowrap !important;
 }
-
-#out {
-	position: fixed;
-	top: 0;
-	right: 0;
-	left: 50%;
-	bottom: 0;
-	overflow: auto;
-	padding: 10px;
-	padding-left: 20px;
-	color: #444;
-	font-size: 16px;
-	line-height: 1.5em;
-	-webkit-overflow-scrolling: touch;
-}
-
 .CodeMirror {
 	position: absolute;
 	top: 0;
@@ -72,7 +30,8 @@
 	width: auto;
 	height: auto;
 	background-color: #f9f9f7;
-	font-size: 1.5rem;
+	font-size: 15px;
+	padding-top:30px;
 }
 
 .CodeMirror-scroll {
@@ -89,24 +48,18 @@
 	margin-bottom: 5px
 }
 
+.noclick{
+	pointer-events:none
+}
+
 #stat {
-	position: fixed;
+	position: absolute;
 	left: 0;
 	bottom: 0;
-	width: 50%;
+	width: 100%;
 	text-align: right;
 	display: none;
 	z-index: 99999;
-	background-color: #f9f9f7;
-}
-
-.alpha30 {
-	background-color: rgb(0, 0, 0);
-	background-color: rgba(0, 0, 0, 0.3);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000,
-		endColorstr=#99000000);
-	-ms-filter:
-		"progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";
 }
 
 .styled-background {
@@ -116,6 +69,122 @@
 body {
 	background-color: #f9f9f7
 }
+
+.wrap{
+    -ms-word-break: break-all;
+    word-break: break-all;
+    /* Non standard for webkit */
+    word-break: break-word;
+
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+}
+
+#toolbar {
+	height: 30px;
+	position: absolute;
+	left: 0;
+	width: 100%;
+	padding-left: 10px;
+	padding-right: 10px;
+	overflow: auto;
+	overflow-y: hidden;
+	z-index:99
+}
+
+#wrapper{
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: auto;
+	overflow-x:hidden}
+#docs {
+	position: absolute;
+	top: 0;
+	left: 0%;
+	bottom: 0;
+	width: 200px;
+	height: auto;
+	overflow: auto;
+	overflow-y:hidden;
+	overflow-x:hidden;
+}
+#in {
+	position: absolute;
+	top: 0;
+	left: 200px;
+	bottom: 0;
+	width: 50%;
+	height: auto;
+	overflow: auto;
+	display:none;
+}
+
+#out {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: calc(50% + 200px);
+	bottom: 0;
+	overflow: auto;
+	padding: 10px;
+	width: 50%;
+	padding-left: 20px;
+	font-size: 16px;
+	line-height: 1.5em;
+	visibility:hidden;
+}
+
+#toc {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	height: auto;
+	overflow: auto;
+	padding: 10px;
+	width: 200px;
+	padding:10px
+}
+
+#toc h1,h2,h3,h4,h5,h6{
+	cursor:pointer;
+}
+
+#toc h1{
+	margin: 1rem 0;
+	font-size:15px;
+}
+#toc h2{
+	margin: .7rem 0;
+	margin-left:30px;
+	font-size:14px;
+}
+#toc h3{
+	margin: .6rem 0;
+	margin-left:45px;
+	font-size:13px;
+}
+#toc h4{
+	margin: .5rem 0;
+	margin-left:60px;
+	font-size:12px;
+}
+#toc h5{
+	margin: .4rem 0;
+	margin-left:75px;
+	font-size:11px;
+}
+#toc h6{
+	margin: 0.3rem 0;
+	margin-left:90px;
+	font-size:10px;
+}
+
 
 #in .CodeMirror-code {
 	height: auto;
@@ -127,27 +196,120 @@ body {
 }
 
 #out img {
-	max-height: 200px !important;
+	max-height: 200px;
 }
+
+
+@media (max-width: 768px) {
+	#in {
+		left:100%;
+		width:100%;
+		display:block;
+		visibility:visible
+	}
+	#out {
+		width:100%;
+		left:200%;
+		visibility:visible;
+		overflow-y:auto;
+	}
+	#toolbar{
+		height:45px;
+		width:100%
+	}
+	.icon {font-size: 30px}
+	.CodeMirror-scroll{margin-top:10px}
+	.CodeMirror {
+		font-size: 1.5rem;
+		padding-top:40px;
+	}
+	#stat{
+		width:100%
+	}
+	#fullscreen-icon{
+		display:none
+	}
+	#toc-icon{
+		display:none
+	}
+	
+	#toc h1{
+		margin: 1rem 0;
+		font-size:1.3rem;
+	}
+	#toc h2{
+		margin: .7rem 0;
+		margin-left:40px;
+		font-size: 1.2rem;
+	}
+	#toc h3{
+		margin: .6rem 0;
+		margin-left:60px;
+		font-size: 1.1em;
+	}
+	#toc h4{
+		margin: .5rem 0;
+		margin-left:80px;
+		font-size: 1em;
+	}
+	#toc h5{
+		margin: .4rem 0;
+		margin-left:100px;
+		font-size:0.9em;
+	}
+	#toc h6{
+		margin: 0.3rem 0;
+		margin-left:120px;
+		font-size:0.8em;
+	}
+	#toc{
+		display:block;
+		width:100%;
+		overflow-y:auto;
+	}
+}
+
+ 
+::-webkit-scrollbar  
+{  
+    width: 6px;
+}  
+   
+::-webkit-scrollbar-track  
+{  
+    box-shadow:none;
+    border-radius: 3px;  
+}   
+::-webkit-scrollbar-thumb  
+{  border-radius: 10px;  
+    background-color: #bcd;  
+} 
+
 </style>
 </head>
 
 <body>
-	<div>
-		<div id="toolbar">
-			<i class="fas fa-question-circle icon" data-toggle="modal"
-				data-target="#helpModal"></i> <i class="far fa-check-square icon"
-				onclick="toggleToolbar($(this))" id="toggle-toolbar"></i> <i
-				class="far fa-window-maximize icon" data-to-fullscreen
-				id="fullscreen-icon"></i> <i class="fas fa-times icon"
-				data-close-iframe></i>
-			<div style="float: right; display: none" id="saveTip"></div>
+
+	<div id="wrapper">
+		<div id="toc">
 		</div>
-		<div id="in" style="display: none">
+		<div id="in">
+			<div id="toolbar">
+				<i class="fas fa-book icon" id="toc-icon"></i><i
+					class="fas fa-question-circle icon" data-toggle="modal"
+					data-target="#helpModal"></i> <i class="far fa-check-square icon"
+					onclick="toggleToolbar($(this))" id="toggle-toolbar"></i><i
+					class="fas fa-upload icon" id="upload-icon"></i><i
+					class="fas fa-download icon" id="download-icon"></i> <i
+					class="far fa-window-maximize icon" id="fullscreen-icon"></i><i
+					class="fas fa-cog icon" id="cog-icon"></i> <i
+					class="fas fa-times icon" data-close-iframe></i>
+			</div>
 			<textarea id="code" style="width: 100%; height: 100%"></textarea>
+
+			<div id="stat"></div>
 		</div>
-		<div class="markdown-body" id="out"></div>
-		<div id="stat"></div>
+		<div class="markdown-body " id="out"></div>
 	</div>
 
 
@@ -273,68 +435,33 @@ public static void main(String [] args){
 			</div>
 		</div>
 	</div>
+	
+	
+		<div class="modal" tabindex="-1" role="dialog" id="storage-modal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">本地存储</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body"></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<script src="../../../jquery/jquery.min.js"></script>
-	<script type="text/javascript">
-		(function($, undefined) {
-			var dom_parser = false;
-
-			// based on: https://developer.mozilla.org/en/DOMParser
-			// does not work with IE < 9
-			// Firefox/Opera/IE throw errors on unsupported types
-			try {
-				// WebKit returns null on unsupported types
-				if ((new DOMParser()).parseFromString("", "text/html")) {
-					// text/html parsing is natively supported
-					dom_parser = true;
-				}
-			} catch (ex) {
-			}
-
-			if (dom_parser) {
-				$.parseHTML2 = function(html) {
-					return new DOMParser().parseFromString(html, "text/html");
-				};
-			} else if (document.implementation
-					&& document.implementation.createHTMLDocument) {
-				$.parseHTML2 = function(html) {
-					var doc = document.implementation.createHTMLDocument("");
-					var doc_el = doc.documentElement;
-
-					doc_el.innerHTML = html;
-
-					var els = [], el = doc_el.firstChild;
-
-					while (el) {
-						if (el.nodeType === 1)
-							els.push(el);
-						el = el.nextSibling;
-					}
-
-					// are we dealing with an entire document or a fragment?
-					if (els.length === 1
-							&& els[0].localName.toLowerCase() === "html") {
-						doc.removeChild(doc_el);
-						el = doc_el.firstChild;
-						while (el) {
-							var next = el.nextSibling;
-							doc.appendChild(el);
-							el = next;
-						}
-					} else {
-						el = doc_el.firstChild;
-						while (el) {
-							var next = el.nextSibling;
-							if (el.nodeType !== 1 && el.nodeType !== 3)
-								doc.insertBefore(el, doc_el);
-							el = next;
-						}
-					}
-
-					return doc;
-				};
-			}
-		})(jQuery);
+	
+	<script src="../../../console/markdowniteditor/storage.js"></script>
+	<script src="../../../console/markdowniteditor/theme.js"></script>
+	<script>
+		theme.render();
 	</script>
 	<script src="../../../console/markdowniteditor/common/help.js"></script>
 	<script>
@@ -348,27 +475,11 @@ public static void main(String [] args){
 				'<meta name="_csrf_header" content="'+csrfHeader+'" />');
 	</script>
 	<script src="../../../bootstrap/js/bootstrap.bundle.min.js"></script>
-	<script
-		src="../../../console/vendor/jquery-easing/jquery.easing.min.js"></script>
 	<script src="../../../sweet2alert/dist/sweetalert2.all.min.js"></script>
 	<script src="../../../js/base.js"></script>
 	<script src="../../../js/moment.min.js"></script>
 	<script src="../../../js/morphdom-umd.min.js"></script>
-	<script src="../../../js/clipboard.min.js"></script>
-	<script type="text/javascript"
-		src="../../../jquery-file-upload/js/load-image.min.js"></script>
-	<script type="text/javascript" src="../../../js/canvas-to-blob.min.js"></script>
-	<script src="../../../jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
-	<script src="../../../jquery-file-upload/js/jquery.iframe-transport.js"></script>
-	<script src="../../../jquery-file-upload/js/jquery.fileupload.js"></script>
-	<script src="../../../jquery-file-upload/js/jquery.fileupload-ui.js"></script>
-	<script
-		src="../../../jquery-file-upload/js/jquery.fileupload-process.js"></script>
-	<script src="../../../jquery-file-upload/js/jquery.fileupload-image.js"></script>
-	<script src="../../../jquery-file-upload/js/jquery.fileupload-audio.js"></script>
-	<script src="../../../jquery-file-upload/js/jquery.fileupload-video.js"></script>
-	<script
-		src="../../../jquery-file-upload/js/jquery.fileupload-validate.js"></script>
+
 	<script src="../../../codemirror/lib/codemirror.js"></script>
 	<script src="../../../codemirror/addon/mode/overlay.js"></script>
 	<script src="../../../codemirror/mode/javascript/javascript.js"></script>
@@ -377,56 +488,105 @@ public static void main(String [] args){
 	<script src="../../../codemirror/mode/htmlmixed/htmlmixed.js"></script>
 	<script src="../../../codemirror/mode/markdown/markdown.js"></script>
 	<script src="../../../codemirror/mode/gfm/gfm.js"></script>
-	<script src="../../../codemirror/addon/dialog/dialog.js"></script>
 	<script src="../../../codemirror/addon/search/searchcursor.js"></script>
 	<script src="../../../codemirror/addon/search/search.js"></script>
 	<script src="../../../codemirror/addon/edit/continuelist.js"></script>
 	<script src="../../../codemirror/addon/scroll/annotatescrollbar.js"></script>
-	<script src="../../../codemirror/addon/search/matchesonscrollbar.js"></script>
-	<script src="../../../codemirror/addon/search/jump-to-line.js"></script>
+	<script src="../../../codemirror/addon/scroll/simplescrollbars.js"></script>
 	<script src="../../../console/markdowniteditor/md.js"></script>
-	<script src="../../../console/markdowniteditor/waitForImages.js"></script>
 	<script src="../../../highlight/highlight.pack.js"></script>
-	<script src="../../../js/mermaid.min.js"></script>
 	<script>
 		var config = {
 			toolbar : true,
 			syncScroll : true,
 			autoRender : true
 		}
+		var scrollBarStyle = CodeMirror.browser.mobile ? 'native' : 'overlay';
 		var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
-			mode : 'gfm',
-			lineNumbers : false,
-			matchBrackets : true,
-			lineWrapping : true,
-			dragDrop : true,
-			extraKeys : {
-				"Enter" : "newlineAndIndentContinueMarkdownList",
-				"Alt-F" : "findPersistent",
-				"Ctrl-A" : "selectAll"
-			}
+		   mode: {name: "gfm"},
+		    lineNumbers: false,
+		    matchBrackets: true,
+		    lineWrapping: true,
+		    dragDrop: true,
+		    theme : theme.editor.theme || 'default',
+			scrollbarStyle: scrollBarStyle,
+		    extraKeys: {
+		        "Enter": "newlineAndIndentContinueMarkdownList",
+		        "Alt-F": "findPersistent",
+		        "Ctrl-A": "selectAll"
+		    }
 		});
 	</script>
+	<script src="../../../console/markdowniteditor/jquery.touchwipe.min.js"></script>
+	<script src="../../../console/markdowniteditor/editor/parsehtml.js"></script>
+	<script src="../../../console/markdowniteditor/editor/render.js"></script>
 	<script src="../../../console/markdowniteditor/editor/sync.js"></script>
-	<script src="../../../console/markdowniteditor/editor/custom_search.js"></script>
-	<script src="../../../console/markdowniteditor/editor/copy_helper.js"></script>
-	<script src="../../../console/markdowniteditor/common/inner_bar.js"></script>
-	<script src="../../../console/markdowniteditor/editor/layout.js"></script>
-	<script
-		src="../../../console/markdowniteditor/common/common_editor.js?v=1"></script>
-	<script src="../../../console/markdowniteditor/common/file.js"></script>
+	<script src="../../../console/markdowniteditor/editor/searchHelper.js"></script>
+	<script src="../../../console/markdowniteditor/editor/cursorHelper.js"></script>
 	<script src="../../../console/markdowniteditor/editor/emoji.js"></script>
-	<script src="../../../console/markdowniteditor/editor/file.js"></script>
+	<script src="../../../console/markdowniteditor/editor/toolbar.js"></script>
+	<script src="../../../console/markdowniteditor/editor/layout.js"></script>
+	<script src="../../../console/markdowniteditor/common/common_editor.js"></script>
 	<script>
+	
+		$.getMultiScripts = function(arr) {
+		    var _arr = $.map(arr, function(scr) {
+		        return $.getScript(scr);
+		    });
+	
+		    _arr.push($.Deferred(function( deferred ){
+		        $( deferred.resolve );
+		    }));
+	
+		    return $.when.apply($, _arr);
+		}
+		if (editorConfig.isLogin) {
+			loadjQueryFileUpload();
+			bar.insertItem('fas fa-file', function() {
+				files.get();
+				bar.hide();
+			}, 5, 'before')
+		}
+		
+		function loadjQueryFileUpload(){
+			 fileUploadLoading = true;
+			  $('<link>').appendTo('head').attr({
+				  type: 'text/css', 
+				  rel: 'stylesheet',
+				  href: '../../../jquery-file-upload/css/jquery.fileupload.css'
+			  });
+			  
+			  $.getScript('../../../jquery-file-upload/js/vendor/jquery.ui.widget.js', function() {
+				  $.getScript(' ../../../jquery-file-upload/js/jquery.fileupload.js', function() {
+					  
+					  var jsUrls = ['../../../jquery-file-upload/js/load-image.min.js','../../../js/canvas-to-blob.min.js'
+							,'../../../jquery-file-upload/js/jquery.iframe-transport.js',
+							'../../../jquery-file-upload/js/jquery.fileupload-ui.js','../../../jquery-file-upload/js/jquery.fileupload-process.js'
+							,'../../../jquery-file-upload/js/jquery.fileupload-image.js','../../../jquery-file-upload/js/jquery.fileupload-audio.js'
+							,'../../../jquery-file-upload/js/jquery.fileupload-video.js','../../../jquery-file-upload/js/jquery.fileupload-validate.js'];
+					  $.getMultiScripts(jsUrls).done(function() {
+						var fileUrls = ['../../../console/markdowniteditor/common/file.js','../../../console/markdowniteditor/editor/file.js'];
+						 $.getMultiScripts(fileUrls);
+					  });
+					  
+		      	  });
+	      	  });
+		 }
+
 		function setEditorValue(v) {
+			editor.setOption('readOnly', true);
 			editor.setValue(v);
 			var toolbar = config.toolbar;
 			if (toolbar) {
 				config.toolbar = false;
 			}
-			inner_bar.remove();
+			bar.hide();
 			if (toolbar) {
 				config.toolbar = true;
+			}
+			editor.setOption('readOnly', false);
+			if (editorConfig.pos) {
+				editor.setCursor(editorConfig.pos);
 			}
 		}
 
@@ -434,6 +594,8 @@ public static void main(String [] args){
 			return editor.getValue();
 		}
 	</script>
+
+
 </body>
 
 </html>

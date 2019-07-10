@@ -133,8 +133,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	/**
 	 * 审核评论
 	 * 
-	 * @param id
-	 *            评论id
+	 * @param id 评论id
 	 * @return
 	 * @throws LogicException
 	 */
@@ -147,8 +146,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	/**
 	 * 删除评论
 	 * 
-	 * @param id
-	 *            评论id
+	 * @param id 评论id
 	 * @throws LogicException
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
@@ -161,8 +159,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	/**
 	 * 更新评论配置
 	 * 
-	 * @param config
-	 *            配置
+	 * @param config 配置
 	 */
 	public synchronized CommentConfig updateCommentConfig(CommentConfig config) {
 		pros.setProperty(COMMENT_EDITOR, config.getEditor().name());
@@ -255,7 +252,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 			throw new LogicException("comment.path.toolong", "该评论不能再被回复了");
 		}
 
-		if (commentDao.selectLast(comment).map(last -> last.getContent().equals(comment.getContent())).isPresent()) {
+		if (commentDao.selectLast(comment).filter(last -> last.getContent().equals(comment.getContent())).isPresent()) {
 			throw new LogicException("comment.content.same", "已经回复过相同的评论了");
 		}
 
@@ -381,8 +378,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	/**
 	 * 删除某个模块的评论
 	 * 
-	 * @param module
-	 *            模块
+	 * @param module 模块
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void deleteComment(CommentModule module) {
@@ -484,8 +480,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	/**
 	 * 查询评论统计情况
 	 * 
-	 * @param space
-	 *            当前空间
+	 * @param space 当前空间
 	 * @return
 	 */
 	@Override
@@ -581,8 +576,7 @@ public class CommentService implements InitializingBean, CommentServer, Applicat
 	 * 查看是否已经评论某个模块
 	 * 
 	 * @since 7.1
-	 * @param module
-	 *            模块，可以为空
+	 * @param module 模块，可以为空
 	 * @return
 	 */
 	@Transactional(readOnly = false)

@@ -10,11 +10,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import me.qyh.blog.core.config.Constants;
 import me.qyh.blog.core.exception.LogicException;
-import me.qyh.blog.core.security.EnsureLogin;
 import me.qyh.blog.plugin.staticfile.vo.FileContent;
 import me.qyh.blog.web.controller.console.BaseMgrController;
 
-@EnsureLogin
 @Controller
 @RequestMapping("console/staticFile")
 public class StaticFileMgrController extends BaseMgrController {

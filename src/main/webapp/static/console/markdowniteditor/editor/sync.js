@@ -1,71 +1,123 @@
 var sync = (function(editor) {
-  			var scrollMap;
-            var syncResultScrollAtLine = function(line) {
-				if(!config.syncScroll){
-                	return ;
-                }
-				if(!scrollMap){
-					buildScrollMap();
-					if(!scrollMap){
-						return ;
-					}
-				}
-				var offset = scrollMap[line];
-				if(offset){
-					$('#out').stop(true).animate({
-						scrollTop: offset
-					}, 100);
-				}
-            }
-            var syncResultScroll = function() {
-              	if(!config.syncScroll){
-                	return ;
-                }
-                syncResultScrollAtLine(editor.lineAtHeight(editor.getScrollInfo().top,'local'));
-            };
-			
-			var building = false;
+	'use strict';
+	
+	var scrollElement = $(render.getRenderElement());
 
-            var buildScrollMap = function() {
-				scrollMap = undefined;
-				//editor.setOption("readOnly", true);
-				if(building)
-					return ;
-				building = true;
-				var offset = ($('#out').scrollTop() - $('#out').offset().top);
-				var _scrollMap = [];
-				var linesCount = editor.lineCount();
-				var lines = document.getElementById("out").querySelectorAll('[data-line]');
-				for(var i=0;i<lines.length;i++){
-					var ele = lines[i];
-					var top = ele.getBoundingClientRect().top;
-					var l = parseInt(ele.getAttribute('data-line'));
-					_scrollMap[l] = Math.round(top +offset );
-					var el = parseInt(ele.getAttribute('data-end-line'));
-					if(el != 'NaN' && el > l){
-						var scope = el-l;
-						for(var j=l;j<=el;j++){
-							var p = (j-l)/scope;
-							_scrollMap[j] = Math.round(top+ele.clientHeight*(p)  + offset)
-						}
-					}
-				}
-				
-				scrollMap = _scrollMap;
-				//editor.setOption("readOnly", false);
-				building = false;
+    var syncResultScroll = function(ms) {
+		var o = scrollElement;
+        var editorScroll = getEditorScroll();
+        let lastPosition = 0
+        let nextPosition = o.outerHeight();
+		var last;
+        if (!isUndefined(editorScroll.lastMarker)) {
+			last = getElementByLine(editorScroll.lastMarker);
+			if(!isUndefined(last)){
+				lastPosition = last.offsetTop - 10
+			}
+        }
+		var next;
+        if (!isUndefined(editorScroll.nextMarker)) {
+			next = getElementByLine(editorScroll.nextMarker) || getElementByEndLine(editorScroll.nextMarker)
+			if(!isUndefined(next)){
+				nextPosition = next.offsetTop - 10
+			}
+        }
+		var pos = nextPosition - lastPosition;
+		if(!isUndefined(last) && !isUndefined(next) && last === next){
+			pos = last.clientHeight;
+		}
+        const scrollTop = lastPosition + pos * editorScroll.percentage;
+        o.stop(true).animate({
+            scrollTop: scrollTop
+        }, ms)
+    }
+	
+	var getElementByLine = function(line){
+		return document.getElementById("out").querySelector('[data-line="'+line+'"]');
+	}
+	
+	var getElementByEndLine = function(line){
+		return document.getElementById("out").querySelector('[data-end-line="'+line+'"]');
+	}
+
+	var getLineMarker = function(){
+		return document.getElementById("out").querySelectorAll('[data-line]');
+	}
+	
+	var oldLastLine;
+    var getEditorScroll = function() {
+       
+		var lines = [];
+		var lineMarkers = getLineMarker();
+		lineMarkers.forEach(function(ele){
+			lines.push(parseInt(ele.getAttribute('data-line')));
+		});
+        var currentPosition = editor.getScrollInfo().top
+        let lastMarker
+        let nextMarker
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const height = editor.heightAtLine(line, 'local')
+            if (height < currentPosition) {
+                lastMarker = line
+            } else {
+                nextMarker = line
+                break
             }
-            return {
-              	rebuild : function(){
-                	buildScrollMap();
-                },
-              	resetAndSync:function(){
-					scrollMap = undefined;
-                  	syncResultScroll();
-                },
-                doSync: syncResultScroll,
-                doSyncAtLine: function(line) {
-                    syncResultScrollAtLine(line)
-                }
-            }
-        })(editor);
+        }
+		if(!isUndefined(lastMarker) && isUndefined(nextMarker)){
+			nextMarker = parseInt(lineMarkers[lineMarkers.length-1].getAttribute('data-end-line'));
+		}
+        let percentage = 0
+        if (!isUndefined(lastMarker) && !isUndefined(nextMarker) && lastMarker !== nextMarker) {
+            percentage = (currentPosition - editor.heightAtLine(lastMarker, 'local')) / (editor.heightAtLine(nextMarker, 'local') - editor.heightAtLine(lastMarker, 'local'))
+        }
+        return {
+            lastMarker: lastMarker,
+            nextMarker: nextMarker,
+            percentage
+        }
+    }
+	
+	var isUndefined = function(o){
+		return (typeof  o == 'undefined')
+	}
+	
+	
+	var refreshDoc = function(){
+		editor.setOption('readOnly',true);
+		var viewport = editor.getViewport();
+		var lastLine = editor.lineCount()-1;
+		while(viewport.to < lastLine && viewport.to > 0){
+			editor.scrollIntoView({line:viewport.to});
+			viewport = editor.getViewport();
+		}
+		
+		editor.scrollIntoView({line:lastLine});
+		editor.scrollIntoView({top:0});
+		editor.setOption('readOnly',false);
+	}
+	
+	if (!CodeMirror.browser.mobile) {
+		editor.on('scroll', function(){
+			 if (!config.syncScroll) {
+				return;
+			}
+			syncResultScroll(0);
+		});
+		editor.on('update', function handler(){
+			 editor.off('update', handler);
+			 refreshDoc();
+		});
+	}
+	
+	return {
+		doSync:function(ms){
+			syncResultScroll(ms);
+		},
+		setScrollElement:function(ele){
+			scrollElement = $(ele);
+		}
+	}
+	
+})(editor);

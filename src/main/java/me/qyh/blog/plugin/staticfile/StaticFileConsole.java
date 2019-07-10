@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import me.qyh.blog.core.config.ConfigServer;
 import me.qyh.blog.core.exception.LogicException;
 import me.qyh.blog.core.message.Message;
-import me.qyh.blog.core.security.EnsureLogin;
 import me.qyh.blog.file.vo.UploadedFile;
 import me.qyh.blog.plugin.staticfile.validator.StaticFileQueryParamValidator;
 import me.qyh.blog.plugin.staticfile.validator.StaticFileUploadValidator;
@@ -34,7 +33,6 @@ import me.qyh.blog.plugin.staticfile.vo.UnzipConfig;
 import me.qyh.blog.web.Webs;
 import me.qyh.blog.web.controller.console.BaseMgrController;
 
-@EnsureLogin
 @RestController
 @RequestMapping("api/console")
 public class StaticFileConsole extends BaseMgrController {

@@ -1,0 +1,218 @@
+<!DOCTYPE HTML>
+<html>
+<head th:replace="console/base/head :: head('','console/template/head')"></head>
+<body>
+	<div class="container-fluid" style="padding: 0px">
+		<div
+			style="overflow-x: auto; margin-top: 5px; margin-bottom: 5px; padding: 5px; white-space: nowrap"
+			id="toolbar">
+
+			<div class="btn-group" role="group" aria-label="Basic example">
+				<button type="button" class="btn btn-warning" id="back">返回</button>
+				<button type="button" class="btn btn-secondary" id="file">文件</button>
+				<button type="button" class="btn btn-secondary" id="pluginTemplate">默认页面</button>
+				<button type="button" class="btn btn-secondary" id="clear">清空</button>
+				<button type="button" class="btn btn-secondary" id="beautiful">美化</button>
+				<button type="button" class="btn btn-secondary" id="lock">访问锁</button>
+				<button type="button" class="btn btn-secondary" id="query">查询</button>
+				<button type="button" class="btn btn-secondary" id="save">保存</button>
+
+			</div>
+
+		</div>
+		<div
+			style="text-align: right; float: right; position: fixed; z-index: 99999; bottom: 30px; line-height: 30px; font-weight: 600; right: 30px"
+			id="auto-save-timer"></div>
+		<div>
+			<textarea style="display: none" id="editor"
+				th:text="${pluginTemplate.template}"></textarea>
+		</div>
+	</div>
+
+	<div
+		style="width: 200px; position: fixed; background-color: #fff; bottom: 58px; right: 30px; border: 1px solid #ced4da; border-radius: .25rem; padding: 5px; display: none; max-height: 150px; word-break: break-all; z-index: 9999; overflow-y: auto"
+		id="search-results"></div>
+	<input type="text" class="form-control"
+		style="position: fixed; right: 30px; bottom: 10px; max-width: 200px; z-index: 9999999"
+		id="doc-search" placeholder="搜索文档">
+	<i class="fas fa-times"
+		style="position: fixed; right: 40px; z-index: 9999999; bottom: 1.3rem; display: none; cursor: pointer"
+		id="doc-search-clear"></i>
+	<div class="card"
+		style="position: fixed; bottom: 10px; right: 30px; display: none; z-index: 9999999"
+		id="doc-card">
+		<div class="card-body">
+			<h5 class="card-title" id="doc-title"></h5>
+			<p class="card-text markdown-body"
+				style="max-height: 400px; overflow-y: auto" id="doc-content"></p>
+			<a href="javascript:void(0)" id="close-doc-card"
+				class="btn btn-primary">关闭</a>
+		</div>
+	</div>
+
+	<div class="modal" id="lookupModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">查询</h4>
+				</div>
+				<div class="modal-body">
+					<ul class="nav nav-tabs" id="myTab" role="tablist">
+						<li class="nav-item"><a class="nav-link active" id="data-tab"
+							data-toggle="tab" href="#data" role="tab" aria-controls="home"
+							aria-selected="true">数据标签</a></li>
+						<li class="nav-item"><a class="nav-link" id="fragment-tab"
+							data-toggle="tab" href="#fragment" role="tab"
+							aria-controls="profile" aria-selected="false">模板片段</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane fade show active" id="data" role="tabpanel">
+							<div class="table-responsive">
+								<table class="table" id="dataTable">
+									<tr>
+										<th data-bind="name">数据名</th>
+										<th data-bind="xx">操作</th>
+									</tr>
+								</table>
+							</div>
+						</div>
+						<div class="tab-pane fade" id="fragment" role="tabpanel">
+							<div class="table-responsive">
+								<table class="table" id="fragmentTable">
+									<tr>
+										<th data-bind="name">模板片段名</th>
+										<th data-bind="xx">操作</th>
+									</tr>
+								</table>
+							</div>
+							<div id="fragmentTable_paging"></div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="lockModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">锁</h4>
+				</div>
+				<div class="modal-body" id="lockBody"></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="templateModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">模板</h4>
+				</div>
+				<div class="modal-body" id="templateModalBody"></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="saveModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">保存</h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal">
+						<div class="form-group">
+							<label class="control-label">插件名</label>
+							<div>
+								<select class="form-control" th:data-value="${pluginTemplate.pluginName}" id="pluginName"></select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label">页面名称</label>
+							<div>
+								<select class="form-control" id="name" th:data-value="${pluginTemplate.name}"></select>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" onclick="save()">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<input type="hidden" th:value="${pluginTemplate.id}"
+		id="pluginTemplateId">
+	<div th:replace="console/base/foot"></div>
+	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
+	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
+	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
+	<script th:src="@{/static/codemirror/mode/css/css.js}"></script>
+	<script th:src="@{/static/codemirror/mode/xml/xml.js}"></script>
+	<script th:src="@{/static/codemirror/addon/edit/closetag.js}"></script>
+	<script th:src="@{/static/codemirror/addon/fold/xml-fold.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/show-hint.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/xml-hint.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/html-hint.js}"></script>
+	<script th:src="@{/static/codemirror/addon/hint/javascript-hint.js}"></script>
+	<script th:src="@{/static/codemirror/mode/htmlmixed/htmlmixed.js}"></script>
+	<script th:src="@{/static/codemirror/addon/dialog/dialog.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
+
+	<script th:src="@{/static/codemirror/addon/fold/foldcode.js}"></script>
+	<script th:src="@{/static/codemirror/addon/fold/foldgutter.js}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/scroll/annotatescrollbar.js}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/search/matchesonscrollbar.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/jump-to-line.js}"></script>
+	<script th:src="@{/static/js-beautify/beautify.min.js}"></script>
+	<script th:src="@{/static/js-beautify/beautify-css.min.js}"></script>
+	<script th:src="@{/static/js-beautify/beautify-html.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/js/canvas-to-blob.min.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
+	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
+	<script th:src="@{/static/js/clipboard.min.js}"></script>
+	<script th:src="@{/static/console/js/local_storage.js}"></script>
+	<script th:src="@{/static/js/file.js}"></script>
+	<script th:src="@{/static/console/js/page_editor.js}"></script>
+	<script th:src="@{/static/js/clipboard.min.js}"></script>
+	<script th:src="@{/static/console/js/table.js}"></script>
+	<script th:src="@{/static/console/js/pluginTemplate_build.js?v=7.1}"></script>
+	<script th:src="@{/static/console/markdowniteditor/md.js}"></script>
+	<script th:src="@{/static/console/js/query.js}"></script>
+</body>
+</html>

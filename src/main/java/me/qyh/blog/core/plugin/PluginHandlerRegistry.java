@@ -65,7 +65,7 @@ public class PluginHandlerRegistry
 
 	private ResourceLoader resourceLoader;
 
-	private final Set<String> plugins = new HashSet<>();
+	private static final Set<String> plugins = new HashSet<>();
 	private static final List<PluginHandler> handlerInstances = new ArrayList<>();
 
 	private final PluginProperties pluginProperties = PluginProperties.getInstance();
@@ -123,7 +123,7 @@ public class PluginHandlerRegistry
 		}
 	}
 
-	public Set<String> getPlugins() {
+	public static Set<String> getPlugins() {
 		return Collections.unmodifiableSet(plugins);
 	}
 

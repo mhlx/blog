@@ -69,9 +69,7 @@ var load = function() {
                 html += '<div class="col-md-4" style="margin-bottom:10px">'
                 html += '<div class="card h-100" >';
                 html += '<div class="card-body wrap" >';
-                html += '<h5 class="card-title">' + datas[i].ymd;
-
-                html += '<h5>';
+                html += '<h5 class="card-title">' + datas[i].ymd+ '</h5>';
                 var newses = datas[i].newses;
                 for (var j = 0; j < newses.length; j++) {
                     var news = newses[j];
