@@ -81,15 +81,22 @@
 	</a>
 
 	<div th:replace="console/base/foot"></div>
-	<script th:src="@{/static/console/markdowniteditor/common/iframe.js}"></script>
+	<script>
+	var rootPath = root</script>
+	<script th:src="@{/static/heather/iframe.js}"></script>
 	<script>
 	var editor = $("#editor");
-	commonEditor.bind('textarea', {
-		 basePath : '[[@{/}]]',
-		 isLogin : true,
-		 csrfToken : '[[${_csrf.token}]]',
-		csrfHeader : '[[${_csrf.headerName}]]' 
-	});
+	
+	$("#editor").click(function(){
+		var me = $(this);
+		Editor.create(this,function(editor){
+			editor.toolbarHelper.addIcon(['fas','fa-times'],function(){
+				me.val(editor.editor.getValue())
+				editor.remove();
+			});
+		});
+	})
+	
 	
 	var mode = $("#id").length > 0 ? 'update' : 'write';
 	$.ajax({
