@@ -13,33 +13,60 @@
 <link th:href="@{/static/fontawesome-free/css/all.min.css?v=7.0}"
 	rel="stylesheet">
 <title>文件编辑</title>
-<style>
-.swal2-container.swal2-shown {
-	z-index: 9999999
-}
-.modal {
-	z-index: 9999998
-}
-.modal-backdrop{
-	z-index: 9999997
-}
-</style>
 </head>
 <body>
 
 	<div class="container-fluid"
 		style="padding-left: 0px; padding-right: 0px">
-		<textarea id="code" name="code"  th:text="${file.content}" style="display:none"></textarea>
+		<textarea id="code" name="code" rows="5"
+			style="width: 100%; border: none" th:text="${file.content}"></textarea>
+		<div class="btn-group" role="group"
+			style="position: absolute; right: 10px; bottom: 10px">
+			<button type="button" id="leave-btn" class="btn btn-primary">返回</button>
+			<button type="button" id="save-btn" class="btn btn-primary">保存</button>
+		</div>
 	</div>
 
 	<div th:replace="console/base/foot"></div>
-	<script>var rootPath = root</script>
-	<script th:src="@{/static/heather/iframe.js}"></script>
+	<script th:src="@{/static/console/markdowniteditor/common/iframe.js}"></script>
 	<script>
 	var path = '[[${file.path}]]';
-	Editor.create($("#code")[0],function(editor){
-		editor.toolbarHelper.insertIcon(['fas','fa-backward'],function(){
-			swal({
+	$("#code").height($(window).height()-10);
+	var editor = $("#editor");
+	commonEditor.bind('#code', {
+		 basePath : '[[@{/}]]',
+		 isLogin : true,
+		 csrfToken : '[[${_csrf.token}]]',
+		csrfHeader : '[[${_csrf.headerName}]]' 
+	});
+	$("#save-btn").click(function(){
+		 $.ajax({
+			type : 'PUT',
+			url : root + 'api/console/staticFile',
+			data:{'path':path,'content':$("#code").val()},
+			success:function(data) {
+				swal('保存成功','','success');
+			},
+			error:function(jqXHR, textStatus, errorThrown) {
+				var data = $.parseJSON(jqXHR.responseText);
+				swal('保存失败',data.error,'error');
+			}
+		  })
+	});
+	$(document).keyup(function(e){
+
+	    if(e.keyCode === 27){
+	    	leave();
+	    }
+
+	});
+	
+	$("#leave-btn").click(function(){
+		leave();
+	})
+	
+	var leave = function(){
+		swal({
 			  title: '你确定要离开码？',
 			  text: "没有保存的内容将会丢失",
 			  type: 'warning',
@@ -53,24 +80,7 @@
 				  window.history.go(-1);
 			  }
 			});
-		});
-
-		editor.toolbarHelper.insertIcon(['fas','fa-save'],function(){
-			 $.ajax({
-				type : 'PUT',
-				url : root + 'api/console/staticFile',
-				data:{'path':path,'content':editor.editor.getValue()},
-				success:function(data) {
-					swal('保存成功','','success');
-				},
-				error:function(jqXHR, textStatus, errorThrown) {
-					var data = $.parseJSON(jqXHR.responseText);
-					swal('保存失败',data.error,'error');
-				}
-			  })
-		},2);
-	})
-	
+	}
 	</script>
 
 
