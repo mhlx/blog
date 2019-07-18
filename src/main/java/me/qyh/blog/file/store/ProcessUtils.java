@@ -2,14 +2,15 @@ package me.qyh.blog.file.store;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import me.qyh.blog.core.exception.SystemException;
+import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.core.util.Resources;
 import me.qyh.blog.core.util.Validators;
-import me.qyh.blog.file.store.local.ProcessException;
 
 public class ProcessUtils {
 
@@ -17,113 +18,130 @@ public class ProcessUtils {
 		super();
 	}
 
-	private static Optional<String> runProcess(ProcessBuilder builder, long time, TimeUnit unit)
-			throws ProcessException {
-		Process process;
-		try {
-			process = builder.start();
-		} catch (IOException e) {
-			throw new ProcessException(e.getMessage(), e);
-		}
+	private static String runProcess(ProcessBuilder builder, long time, TimeUnit unit, boolean redirectToFile)
+			throws IOException {
 
-		wait(process, time, unit);
-
-		int status = process.exitValue();
-		if (status != 0) {
-			StringBuilder errorMsg = new StringBuilder();
-			try {
-				errorMsg.append(Resources.read(process.getInputStream()));
-				errorMsg.append(System.lineSeparator());
-			} catch (IOException e) {
-				throw new ProcessException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
-			}
-			try {
-				errorMsg.append(Resources.read(process.getErrorStream()));
-			} catch (IOException e) {
-				throw new ProcessException("操作异常：" + builder.command() + "，读取错误信息失败：" + e.getMessage(), e);
-			}
-			String msg = errorMsg.toString();
-			if (!Validators.isEmptyOrNull(msg, true)) {
-				throw new ProcessException("操作异常：" + builder.command() + "错误信息：" + msg);
-			}
-			throw new ProcessException("操作异常：" + builder.command() + "，未正确执行操作，状态码:" + status);
-		}
+		Path temp = null;
 		try {
-			return Optional.of(Resources.read(process.getInputStream()));
-		} catch (IOException e) {
-			throw new ProcessException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
+			if (redirectToFile) {
+				temp = Files.createTempFile(null, null);
+				File file = temp.toFile();
+				builder.redirectOutput(file);
+				builder.redirectError(file);
+			}
+
+			Process process;
+			try {
+				process = builder.start();
+			} catch (IOException e) {
+				throw new IOException(e.getMessage(), e);
+			}
+
+			wait(process, time, unit);
+
+			int status = process.exitValue();
+			if (status != 0) {
+
+				if (redirectToFile) {
+					throw new IOException("操作异常：" + builder.command() + "错误信息：" + new String(Files.readAllBytes(temp)));
+				}
+
+				StringBuilder errorMsg = new StringBuilder();
+				try {
+					errorMsg.append(Resources.read(process.getInputStream()));
+					errorMsg.append(System.lineSeparator());
+				} catch (IOException e) {
+					throw new IOException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
+				}
+				try {
+					errorMsg.append(Resources.read(process.getErrorStream()));
+				} catch (IOException e) {
+					throw new IOException("操作异常：" + builder.command() + "，读取错误信息失败：" + e.getMessage(), e);
+				}
+				String msg = errorMsg.toString();
+				if (!Validators.isEmptyOrNull(msg, true)) {
+					throw new IOException("操作异常：" + builder.command() + "错误信息：" + msg);
+				}
+				throw new IOException("操作异常：" + builder.command() + "，未正确执行操作，状态码:" + status);
+			}
+			if (redirectToFile) {
+				return new String(Files.readAllBytes(temp));
+			}
+			try {
+				return Resources.read(process.getInputStream());
+			} catch (IOException e) {
+				throw new IOException("操作异常：" + builder.command() + "，读取信息失败：" + e.getMessage(), e);
+			}
+		} finally {
+			FileUtils.deleteQuietly(temp);
 		}
 	}
 
 	/**
-	 * <b>PIPE ONLY</b>
 	 * 
 	 * @param command
 	 * @param time
 	 * @param unit
 	 * @return
-	 * @throws ProcessException
+	 * @throws IOException
 	 */
-	public static Optional<String> runProcess(List<String> command, long time, TimeUnit unit) throws ProcessException {
+	public static String runProcess(List<String> command, long time, TimeUnit unit, boolean redirectToFile)
+			throws IOException {
 		ProcessBuilder builder = new ProcessBuilder(command);
-		return runProcess(builder, time, unit);
+		return runProcess(builder, time, unit, redirectToFile);
 	}
 
 	/**
-	 * <b>PIPE ONLY</b>
 	 * 
 	 * @param command
 	 * @return
-	 * @throws ProcessException
+	 * @throws IOException
 	 */
-	public static Optional<String> runProcess(List<String> command) throws ProcessException {
+	public static String runProcess(List<String> command, boolean redirectToFile) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder(command);
-		return runProcess(builder, -1, TimeUnit.SECONDS);
+		return runProcess(builder, -1, TimeUnit.SECONDS, redirectToFile);
 	}
 
 	/**
-	 * <b>PIPE ONLY</b>
 	 * 
 	 * @param command
 	 * @param directory
 	 * @return
-	 * @throws ProcessException
+	 * @throws IOException
 	 */
-	public static Optional<String> runProcess(List<String> command, File directory) throws ProcessException {
+	public static String runProcess(List<String> command, File directory, boolean redirectToFile) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.directory(directory);
-		return runProcess(builder, -1, TimeUnit.SECONDS);
+		return runProcess(builder, -1, TimeUnit.SECONDS, redirectToFile);
 	}
 
 	/**
-	 * <b>PIPE ONLY</b>
-	 * 
 	 * @param command
 	 * @param time
 	 * @param unit
 	 * @param directory
 	 * @return
-	 * @throws ProcessException
+	 * @throws IOException
 	 */
-	public static Optional<String> runProcess(List<String> command, long time, TimeUnit unit, File directory)
-			throws ProcessException {
+	public static String runProcess(List<String> command, long time, TimeUnit unit, File directory,
+			boolean redirectToFile) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.directory(directory);
-		return runProcess(builder, time, unit);
+		return runProcess(builder, time, unit, redirectToFile);
 	}
 
 	/**
-	 * <b>PIPE ONLY</b>
 	 * 
 	 * @param command
 	 * @param time
 	 * @param unit
 	 * @return
-	 * @throws ProcessException
+	 * @throws IOException
 	 */
-	public static Optional<String> runProcess(String[] command, long time, TimeUnit unit) throws ProcessException {
+	public static String runProcess(String[] command, long time, TimeUnit unit, boolean redirectToFile)
+			throws IOException {
 		ProcessBuilder builder = new ProcessBuilder(command);
-		return runProcess(builder, time, unit);
+		return runProcess(builder, time, unit, redirectToFile);
 	}
 
 	private static void destory(Process p) {
@@ -145,19 +163,18 @@ public class ProcessUtils {
 	 * 等待进程退出
 	 * 
 	 * @param process
-	 * @param time
-	 *            如果为-1，一直等待
+	 * @param time    如果为-1，一直等待
 	 * @param unit
-	 * @throws ProcessException
+	 * @throws IOException
 	 */
-	public static void wait(Process process, long time, TimeUnit unit) throws ProcessException {
+	public static void wait(Process process, long time, TimeUnit unit) throws IOException {
 		try {
 			if (time == -1) {
 				process.waitFor();
 			} else {
 				if (!process.waitFor(time, unit)) {
 					destory(process);
-					throw new ProcessException("操作超时:" + process.toHandle().info().commandLine().orElse(""));
+					throw new IOException("操作超时:" + process.toHandle().info().commandLine().orElse(""));
 				}
 			}
 		} catch (InterruptedException e) {

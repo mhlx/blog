@@ -28,7 +28,7 @@ public class AppContextLoaderListener extends ContextLoaderListener {
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		super.contextInitialized(event);
-		
+
 		WebApplicationContext ctx = getCurrentWebApplicationContext();
 		UrlHelper helper = ctx.getBean(UrlHelper.class);
 		ServletContext sc = event.getServletContext();
@@ -64,8 +64,16 @@ public class AppContextLoaderListener extends ContextLoaderListener {
 	private void shutdownMysqlIfAvailable() {
 		try {
 			Lookup lookup = MethodHandles.lookup();
-			Class<?> clazz = lookup.findClass("com.mysql.jdbc.AbandonedConnectionCleanupThread");
-			lookup.findStatic(clazz, "checkedShutdown", MethodType.methodType(void.class)).invoke();
+
+			try {
+				// mysql 8.x
+				Class<?> clazz = lookup.findClass("com.mysql.cj.jdbc.AbandonedConnectionCleanupThread");
+				lookup.findStatic(clazz, "checkedShutdown", MethodType.methodType(void.class)).invoke();
+			} catch (ClassNotFoundException e) {
+				// mysql 5.x
+				Class<?> clazz = lookup.findClass("com.mysql.jdbc.AbandonedConnectionCleanupThread");
+				lookup.findStatic(clazz, "checkedShutdown", MethodType.methodType(void.class)).invoke();
+			}
 		} catch (Throwable e) {
 		}
 	}

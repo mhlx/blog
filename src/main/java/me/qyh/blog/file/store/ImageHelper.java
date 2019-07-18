@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.util.FileUtils;
 
 /**
@@ -30,14 +29,10 @@ public abstract class ImageHelper {
 	 * <strong>总是缩放(即比原图小)</strong>
 	 * </p>
 	 * 
-	 * @param resize
-	 *            缩放尺寸
-	 * @param src
-	 *            原文件
-	 * @param dest
-	 *            目标文件
-	 * @throws IOException
-	 *             文件读写失败
+	 * @param resize 缩放尺寸
+	 * @param src    原文件
+	 * @param dest   目标文件
+	 * @throws IOException 文件读写失败
 	 */
 	public final void resize(Resize resize, Path src, Path dest) throws IOException {
 		formatCheck(FileUtils.getFileExtension(src));
@@ -48,11 +43,9 @@ public abstract class ImageHelper {
 	/**
 	 * 读取图片信息
 	 * 
-	 * @param file
-	 *            图片文件
+	 * @param file 图片文件
 	 * @return
-	 * @throws IOException
-	 *             文件读取失败
+	 * @throws IOException 文件读取失败
 	 */
 	public final ImageInfo read(Path file) throws IOException {
 		formatCheck(FileUtils.getFileExtension(file));
@@ -72,28 +65,12 @@ public abstract class ImageHelper {
 	public abstract boolean supportWebp();
 
 	/**
-	 * @since 5.9
+	 * 是否支持gifsicle
+	 * 
+	 * @since 7.1.3
 	 * @return
 	 */
-	public boolean supportAnimatedWebp() {
-		return false;
-	}
-
-	/**
-	 * @since 5.9
-	 * @param gif
-	 * @throws IOException
-	 */
-	public void makeAnimatedWebp(AnimatedWebpConfig config, Path gif, Path dest) throws IOException {
-		if (!supportAnimatedWebp()) {
-			throw new SystemException("not support");
-		}
-		formatCheck(FileUtils.getFileExtension(gif));
-		formatCheck(FileUtils.getFileExtension(dest));
-		doMakeAnimatedWebp(config, gif, dest);
-	}
-
-	protected abstract void doMakeAnimatedWebp(AnimatedWebpConfig config, Path gif, Path dest) throws IOException;
+	public abstract boolean supportGifsicle();
 
 	/**
 	 * 图片信息
@@ -108,12 +85,9 @@ public abstract class ImageHelper {
 
 		/**
 		 * 
-		 * @param width
-		 *            宽
-		 * @param height
-		 *            高
-		 * @param extension
-		 *            实际后缀
+		 * @param width     宽
+		 * @param height    高
+		 * @param extension 实际后缀
 		 */
 		public ImageInfo(int width, int height, String extension) {
 			super();
@@ -143,8 +117,7 @@ public abstract class ImageHelper {
 	/**
 	 * 判断图片是否为jpeg格式的图片
 	 * 
-	 * @param extension
-	 *            图片后缀
+	 * @param extension 图片后缀
 	 * @return 是: true ,否:false
 	 */
 	public static boolean isJPEG(String extension) {
@@ -154,8 +127,7 @@ public abstract class ImageHelper {
 	/**
 	 * 判断图片是否为webp格式的图片
 	 * 
-	 * @param extension
-	 *            图片后缀
+	 * @param extension 图片后缀
 	 * @return 是: true ,否:false
 	 */
 	public static boolean isWEBP(String extension) {
@@ -165,8 +137,7 @@ public abstract class ImageHelper {
 	/**
 	 * 判断图片是否为png格式的图片
 	 * 
-	 * @param extension
-	 *            图片后缀
+	 * @param extension 图片后缀
 	 * @return 是: true ,否:false
 	 */
 	public static boolean isPNG(String extension) {
@@ -176,8 +147,7 @@ public abstract class ImageHelper {
 	/**
 	 * 判断图片是否为gif格式的图片
 	 * 
-	 * @param extension
-	 *            图片后缀
+	 * @param extension 图片后缀
 	 * @return 是: true ,否:false
 	 */
 	public static boolean isGIF(String extension) {
@@ -187,8 +157,7 @@ public abstract class ImageHelper {
 	/**
 	 * 判断图片可能是允许透明的
 	 * 
-	 * @param extension
-	 *            图片后缀
+	 * @param extension 图片后缀
 	 * @return 是:true,否:false
 	 */
 	public static boolean maybeTransparentBg(String extension) {

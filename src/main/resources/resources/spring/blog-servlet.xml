@@ -50,12 +50,6 @@
 			value="/web/file/blog_image_thumb" />
 		<property name="sourceProtected" value="true" />
 		<property name="name" value="图片存储" />
-		<property name="animatedWebpConfigure">
-			<bean class="me.qyh.blog.file.store.local.AnimatedWebpConfigure">
-				<constructor-arg index="0" value="1" />
-				<property name="sec" value="20" />
-			</bean>
-		</property>
 	</bean>
 
 

@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,7 +20,6 @@ import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.message.Message;
 import me.qyh.blog.core.util.FileUtils;
 import me.qyh.blog.file.entity.CommonFile;
-import me.qyh.blog.file.store.AnimatedWebpConfig.Metadata;
 import me.qyh.blog.file.store.ImageHelper;
 import me.qyh.blog.file.store.ImageHelper.ImageInfo;
 import me.qyh.blog.file.store.Resize;
@@ -38,8 +36,6 @@ public class ImageResourceStore extends ThumbnailSupport {
 	 * 原图保护
 	 */
 	private boolean sourceProtected;
-
-	private AnimatedWebpConfigure animatedWebpConfigure;
 
 	public ImageResourceStore(String urlPatternPrefix) {
 		super(urlPatternPrefix);
@@ -125,41 +121,7 @@ public class ImageResourceStore extends ThumbnailSupport {
 	@Override
 	protected Optional<Resource> handleOriginalFile(String key, Path path, HttpServletRequest request) {
 		String ext = FileUtils.getFileExtension(path);
-		if (ImageHelper.isGIF(ext)) {
-
-			if (!supportWebp(request)) {
-				return Optional.of(new FileSystemResource(path));
-			}
-
-			Path animated = getAnimatedWebpLocation(path);
-			if (FileUtils.exists(animated)) {
-				return Optional.of(new FileSystemResource(animated));
-			}
-
-			if (animatedWebpConfigure != null && getImageHelper().supportAnimatedWebp()) {
-
-				Semaphore semaphore = animatedWebpConfigure.getSemaphore();
-				try {
-					semaphore.acquire();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new SystemException(e.getMessage(), e);
-				}
-				try {
-					getImageHelper().makeAnimatedWebp(animatedWebpConfigure.newAnimatedWebpConfig(), path, animated);
-					return Optional.of(new FileSystemResource(animated));
-				} catch (IOException e) {
-					logger.debug(e.getMessage(), e);
-					return Optional.of(new FileSystemResource(path));
-				} finally {
-					semaphore.release();
-				}
-
-			} else {
-				return Optional.of(new FileSystemResource(path));
-			}
-		}
-		if (!sourceProtected) {
+		if (ImageHelper.isGIF(ext) || !sourceProtected) {
 			return Optional.of(new FileSystemResource(path));
 		}
 		return Optional.empty();
@@ -172,40 +134,11 @@ public class ImageResourceStore extends ThumbnailSupport {
 
 	@Override
 	public boolean delete(String key) {
-		getFile(key).filter(path -> ImageHelper.isGIF(FileUtils.getFileExtension(path)))
-				.ifPresent(path -> FileUtils.deleteQuietly(getAnimatedWebpLocation(path)));
 		return super.delete(key);
-	}
-
-	@Override
-	public void moreAfterPropertiesSet() {
-		super.moreAfterPropertiesSet();
-		if (animatedWebpConfigure != null) {
-			int method = animatedWebpConfigure.getMethod();
-			if (method < 0 || method > 6) {
-				animatedWebpConfigure.setMethod(4);
-			}
-			float q = animatedWebpConfigure.getQ();
-			if (q < 0F || q > 100F) {
-				animatedWebpConfigure.setQ(75F);
-			}
-
-			if (animatedWebpConfigure.getMetadata() == null) {
-				animatedWebpConfigure.setMetadata(Metadata.NONE);
-			}
-		}
-	}
-
-	protected Path getAnimatedWebpLocation(Path gif) {
-		return gif.resolveSibling(gif.getFileName() + "." + ImageHelper.WEBP);
 	}
 
 	public void setSourceProtected(boolean sourceProtected) {
 		this.sourceProtected = sourceProtected;
-	}
-
-	public void setAnimatedWebpConfigure(AnimatedWebpConfigure animatedWebpConfigure) {
-		this.animatedWebpConfigure = animatedWebpConfigure;
 	}
 
 	protected class ImageMultipareFile implements MultipartFile {

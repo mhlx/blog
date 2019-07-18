@@ -226,6 +226,10 @@ public abstract class ArticleIndexer implements InitializingBean {
 		if (event.getApplicationContext().getParent() != null) {
 			return;
 		}
+		destroy();
+	}
+
+	private void destroy() {
 		executor.shutdown();
 		try {
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
@@ -676,13 +680,19 @@ public abstract class ArticleIndexer implements InitializingBean {
 		qboostMap.put(TITLE, boostMap.getOrDefault(TITLE, 7F));
 		qboostMap.put(SUMMARY, boostMap.getOrDefault(SUMMARY, 3F));
 		qboostMap.put(CONTENT, boostMap.getOrDefault(CONTENT, 1F));
-		// 新增标签
-		addTags(tagDao.selectAll().stream().map(Tag::getName).toArray(String[]::new));
 
 		if (commitSchedulePeriodSec <= 0) {
 			commitSchedulePeriodSec = 180;
 		}
 		taskScheduler.scheduleAtFixedRate(this::commit, commitSchedulePeriodSec * 1000L);
+
+		try {
+			addTags(tagDao.selectAll().stream().map(Tag::getName).toArray(String[]::new));
+		} catch (Exception e) {
+			// @since 7.1.3
+			destroy();
+			throw e;
+		}
 	}
 
 	private synchronized void commit() {

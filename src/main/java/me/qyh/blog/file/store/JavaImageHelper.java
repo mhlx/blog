@@ -206,13 +206,8 @@ public class JavaImageHelper extends ImageHelper {
 	}
 
 	@Override
-	public final boolean supportAnimatedWebp() {
+	public boolean supportGifsicle() {
 		return false;
-	}
-
-	@Override
-	protected void doMakeAnimatedWebp(AnimatedWebpConfig config, Path gif, Path dest) throws IOException {
-		throw new SystemException("unsupport");
 	}
 
 	private Optional<BufferedImage> autoOrient(BufferedImage originalImage, Path src)

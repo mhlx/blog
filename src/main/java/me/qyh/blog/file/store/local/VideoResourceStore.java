@@ -146,7 +146,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 		Path temp = FileUtils.appTemp(FileUtils.getFileExtension(poster));
 		String[] cmdArray = new String[] { "ffmpeg", "-loglevel", "error", "-y", "-ss", "00:00:00", "-i",
 				original.toString(), "-vframes", "1", "-q:v", "2", temp.toString() };
-		ProcessUtils.runProcess(cmdArray, timeoutSecond, TimeUnit.SECONDS);
+		ProcessUtils.runProcess(cmdArray, timeoutSecond, TimeUnit.SECONDS, false);
 		FileUtils.move(temp, poster);
 	}
 
@@ -159,7 +159,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 				return Map.of(new Message("video.width", "视频宽度"), String.valueOf(info.width),
 						new Message("video.height", "视频高度"), String.valueOf(info.height),
 						new Message("video.duration", "视频长度"), String.valueOf(info.duration) + "s");
-			} catch (ProcessException e) {
+			} catch (IOException e) {
 				return Map.of();
 			}
 
@@ -177,7 +177,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 		}
 		cmdList.addAll(Arrays.asList("-crf", String.valueOf(crf), "-max_muxing_queue_size", "9999", "-c:v", "h264",
 				"-c:a", "aac", "-map_metadata", "-1", temp.toString()));
-		ProcessUtils.runProcess(cmdList, timeoutSecond, TimeUnit.SECONDS);
+		ProcessUtils.runProcess(cmdList, timeoutSecond, TimeUnit.SECONDS, false);
 		FileUtils.move(temp, dest);
 	}
 
@@ -207,12 +207,11 @@ public class VideoResourceStore extends ThumbnailSupport {
 
 	}
 
-	protected VideoInfo getVideoInfo(Path video) throws ProcessException {
+	protected VideoInfo getVideoInfo(Path video) throws IOException {
 		// https://trac.ffmpeg.org/wiki/FFprobeTips
 		String[] cmdArray = new String[] { "ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
 				"stream=width,height,duration", "-of", "default=noprint_wrappers=1:nokey=1", video.toString() };
-		String result = ProcessUtils.runProcess(cmdArray, timeoutSecond, TimeUnit.SECONDS)
-				.orElseThrow(() -> new SystemException("没有返回预期的尺寸信息"));
+		String result = ProcessUtils.runProcess(cmdArray, timeoutSecond, TimeUnit.SECONDS, false);
 		String[] lines = result.split(System.lineSeparator());
 		if (lines.length != 3) {
 			throw new SystemException("获取视频信息失败:" + result);
@@ -224,8 +223,7 @@ public class VideoResourceStore extends ThumbnailSupport {
 		} catch (NumberFormatException e) {
 			String[] _cmdArray = new String[] { "ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
 					"default=noprint_wrappers=1:nokey=1", video.toString() };
-			String _result = ProcessUtils.runProcess(_cmdArray, timeoutSecond, TimeUnit.SECONDS)
-					.orElseThrow(() -> new SystemException("没有返回预期的时长信息"));
+			String _result = ProcessUtils.runProcess(_cmdArray, timeoutSecond, TimeUnit.SECONDS, false);
 			return new VideoInfo(width, height, (int) Math.round(Double.parseDouble(_result)));
 		}
 	}

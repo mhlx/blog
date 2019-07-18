@@ -1,22 +1,16 @@
-<link rel="stylesheet" th:href="@{/static/css/markdown.css?v=7.0}">
+<link rel="stylesheet"
+	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}"
+	th:if="${user != null}">
 <style>
-	.note-editable img{
-		margin-left:2%;
-	}
-	.note-editable video{
-		margin-left:2%;
-	}
-	  .video {
-        position: relative;
-        display: inline-block;
-    }
+.swal2-container.swal2-shown {
+	z-index: 9999999
+}
 
-    .video-icon {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        font-size:3rem;
-        transform: translate(-50%, -50%);
-        color:grey;
-    }
+.modal {
+	z-index: 9999998
+}
+
+.modal-backdrop {
+	z-index: 9999997
+}
 </style>

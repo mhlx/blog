@@ -391,11 +391,15 @@ public abstract class ThumbnailSupport extends LocalResourceRequestHandlerFileSt
 	 * @return
 	 */
 	private Optional<String> getThumbPath(String sourceExt, String path, HttpServletRequest request) {
-		boolean supportWebp = supportWebp(request);
+		boolean isGif = ImageHelper.isGIF(sourceExt);
+		boolean supportWebp = supportWebp(request) && !isGif;
 		String ext = FileUtils.getFileExtension(path);
 		boolean extEmpty = ext.strip().isEmpty();
 		if (extEmpty) {
-			return Optional.of(path + "." + (supportWebp ? ImageHelper.WEBP : ImageHelper.JPEG));
+			return Optional.of(path + "."
+					+ (supportWebp ? ImageHelper.WEBP
+							: isGif ? (getImageHelper().supportGifsicle() ? ImageHelper.GIF : ImageHelper.JPEG)
+									: ImageHelper.JPEG));
 		} else {
 			// 如果为png并且原图可能为透明
 			if (ImageHelper.isPNG(ext) && ImageHelper.maybeTransparentBg(sourceExt)) {

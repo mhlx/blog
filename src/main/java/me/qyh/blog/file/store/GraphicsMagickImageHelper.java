@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
@@ -24,14 +23,16 @@ import org.im4java.core.ImageCommand;
 import org.im4java.core.Operation;
 import org.im4java.process.ArrayListOutputConsumer;
 import org.im4java.process.ProcessStarter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.madgag.gif.fmsware.GifDecoder;
 
 import me.qyh.blog.core.exception.SystemException;
 import me.qyh.blog.core.util.FileUtils;
+import me.qyh.blog.core.util.StringUtils;
 import me.qyh.blog.core.util.Validators;
-import me.qyh.blog.file.store.local.ProcessException;
 
 /**
  * 图片处理类，基于{@link http://www.graphicsmagick.org/}，可以用来处理PNG,JPEG,GIF,WEBP等多种格式
@@ -41,6 +42,8 @@ import me.qyh.blog.file.store.local.ProcessException;
  *
  */
 public class GraphicsMagickImageHelper extends ImageHelper implements InitializingBean {
+
+	private static final Logger logger = LoggerFactory.getLogger(GraphicsMagickImageHelper.class);
 
 	/**
 	 * 在windows环境下，必须设置这个路径
@@ -67,8 +70,22 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 
 	private boolean pngQuantEnable;
 
+	/**
+	 * 用于处理gif图片
+	 * 
+	 * @since 7.1.3
+	 */
+	private String gifsicleDirPath;
+	private boolean gifsicleEnable;
+
 	@Override
 	protected void doResize(Resize resize, Path src, Path dest) throws IOException {
+		boolean gif = isGIF(FileUtils.getFileExtension(src));
+		if (gif && gifsicleEnable) {
+			resizeWithGifsicle(resize, src, dest);
+			return;
+		}
+
 		IMOperation op = new IMOperation();
 		op.addImage();
 		op.strip();
@@ -95,7 +112,7 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 			run(op, src.toAbsolutePath().toString(), temp.toAbsolutePath().toString());
 		} catch (IOException e) {
 			// 如果原图是gif图像
-			if (isGIF(FileUtils.getFileExtension(src))) {
+			if (gif) {
 				doResize(resize, getGifCoverUseJava(src), dest);
 				return;
 			} else {
@@ -108,8 +125,64 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		}
 	}
 
+	private void resizeWithGifsicle(Resize resize, Path gif, Path dest) throws IOException {
+		Path temp = FileUtils.appTemp(GIF);
+		try {
+			String cmdPath = WINDOWS ? new File(gifsicleDirPath, "gifsicle").getCanonicalPath() : "gifsicle";
+			List<String> commands = new ArrayList<>(List.of(cmdPath, "--no-warnings", "-careful"));
+
+			if (resize.getSize() != null) {
+				int size = resize.getSize();
+				commands.add("--resize-fit");
+				commands.add(size + "x" + size);
+			} else {
+				if (!resize.isKeepRatio()) {
+					commands.add("--resize");
+					commands.add(resize.getWidth() + "x" + resize.getHeight());
+				} else {
+					if (resize.getWidth() <= 0) {
+						commands.add("--resize-height");
+						commands.add(String.valueOf(resize.getHeight()));
+					} else if (resize.getHeight() <= 0) {
+						commands.add("--resize-width");
+						commands.add(String.valueOf(resize.getWidth()));
+					} else {
+						commands.add("--resize-fit");
+						commands.add(resize.getWidth() + "x" + resize.getHeight());
+					}
+				}
+			}
+			commands.addAll(List.of(gif.toString(), "-o", temp.toString()));
+			ProcessUtils.runProcess(commands, true);
+		} catch (IOException e) {
+			throw new IOException(e);
+		}
+		synchronized (this) {
+			FileUtils.move(temp, dest);
+		}
+	}
+
 	@Override
 	protected ImageInfo doRead(Path file) throws IOException {
+		boolean gif = isGIF(FileUtils.getFileExtension(file));
+		if (gif && gifsicleEnable) {
+			String cmdPath = WINDOWS ? new File(gifsicleDirPath, "gifsicle").getCanonicalPath() : "gifsicle";
+			List<String> commands = List.of(cmdPath, "--sinfo", file.toString());
+			try {
+				String info = ProcessUtils.runProcess(commands, true);
+				try {
+					String[] size = StringUtils.substringBetween(info, "screen ", "\r\n").split("x");
+					return new ImageInfo(Integer.parseInt(size[0]), Integer.parseInt(size[1]), GIF);
+				} catch (Exception e) {
+					// read fail
+					logger.warn("read gif size fail", e);
+				}
+				return new ImageInfo(-1, -1, GIF);
+			} catch (IOException e) {
+				// maybe not gif file
+				// continue;
+			}
+		}
 		IMOperation localIMOperation = new IMOperation();
 		localIMOperation.ping();
 		localIMOperation.format("%w\n%h\n%m\n");
@@ -139,8 +212,8 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		if (isPNG(ext) && pngQuantEnable) {
 			try {
 				String cmdPath = WINDOWS ? new File(pngQuantDirPath, "pngquant").getCanonicalPath() : "pngquant";
-				ProcessUtils.runProcess(Arrays.asList(cmdPath, "-f", "-o", dest.toString(), dest.toString()));
-			} catch (ProcessException e) {
+				ProcessUtils.runProcess(Arrays.asList(cmdPath, "-f", "-o", dest.toString(), dest.toString()), false);
+			} catch (IOException e) {
 				throw new IOException(e.getMessage(), e);
 			}
 		}
@@ -156,12 +229,19 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 				ProcessStarter.setGlobalSearchPath(magickPath);
 			}
 			pngQuantEnable = !Validators.isEmptyOrNull(pngQuantDirPath, true);
+			gifsicleEnable = !Validators.isEmptyOrNull(gifsicleDirPath, true);
 		} else {
 			try {
-				ProcessUtils.runProcess(Arrays.asList("pngquant", "--version"));
+				ProcessUtils.runProcess(Arrays.asList("pngquant", "--version"), false);
 				pngQuantEnable = true;
-			} catch (ProcessException e) {
+			} catch (IOException e) {
 				pngQuantEnable = false;
+			}
+			try {
+				ProcessUtils.runProcess(Arrays.asList("gifsicle", "--help"), true);
+				gifsicleEnable = true;
+			} catch (IOException e) {
+				gifsicleEnable = false;
 			}
 		}
 	}
@@ -227,6 +307,11 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		return true;
 	}
 
+	@Override
+	public boolean supportGifsicle() {
+		return gifsicleEnable;
+	}
+
 	public void setQuality(double quality) {
 		this.quality = quality;
 	}
@@ -274,34 +359,6 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		}
 	}
 
-	@Override
-	public boolean supportAnimatedWebp() {
-		return true;
-	}
-
-	/**
-	 * @see https://developers.google.com/speed/webp/docs/gif2webp
-	 */
-	@Override
-	protected void doMakeAnimatedWebp(AnimatedWebpConfig config, Path gif, Path dest) throws IOException {
-		if (!supportAnimatedWebp()) {
-			throw new SystemException("unsupport !!!");
-		}
-		Path tmp = FileUtils.appTemp(GIF);
-		try {
-			processAnimatedCommand(config, gif, tmp);
-
-			synchronized (this) {
-				FileUtils.move(tmp, dest);
-			}
-
-		} catch (ProcessException e) {
-			throw new IOException(e.getMessage(), e);
-		} finally {
-			FileUtils.deleteQuietly(tmp);
-		}
-	}
-
 	protected static List<String> buildCommand(AnimatedWebpConfig config, Path gif, Path tmp) {
 		List<String> commandList = new ArrayList<>();
 		commandList.add("gif2webp");
@@ -328,16 +385,12 @@ public class GraphicsMagickImageHelper extends ImageHelper implements Initializi
 		return commandList;
 	}
 
-	protected void processAnimatedCommand(AnimatedWebpConfig config, Path gif, Path dest) throws ProcessException {
-		List<String> command = buildCommand(config, gif, dest);
-		int sec = config.getSec();
-		if (sec <= 0) {
-			sec = 10;
-		}
-		ProcessUtils.runProcess(command, sec, TimeUnit.SECONDS);
-	}
-
 	public void setPngQuantDirPath(String pngQuantDirPath) {
 		this.pngQuantDirPath = pngQuantDirPath;
 	}
+
+	public void setGifsicleDirPath(String gifsicleDirPath) {
+		this.gifsicleDirPath = gifsicleDirPath;
+	}
+
 }

@@ -19,32 +19,25 @@
 						     http://www.springframework.org/schema/cache/spring-cache-4.0.xsd 
 						     http://www.springframework.org/schema/task
 		   					 http://www.springframework.org/schema/task/spring-task-4.0.xsd ">
-
 	<context:property-placeholder
 		location="classpath:resources/mybatis/db.properties" />
 
-	<!-- database -->
-	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
-		destroy-method="close">
-		<property name="jdbcUrl" value="${jdbc.jdbcUrl}" />
-		<property name="driverClassName" value="${jdbc.driverClass}" />
+	<bean abstract="true" class="com.zaxxer.hikari.HikariDataSource"
+		destroy-method="close" id="abstractDataSource">
+		<property name="dataSourceClassName"
+			value="${jdbc.dataSourceClassName}" />
 		<property name="username" value="${jdbc.user}" />
 		<property name="password" value="${jdbc.password}" />
 		<property name="poolName" value="blogCP" />
+	</bean>
+
+	<bean parent="abstractDataSource" id="dataSource">
 		<property name="dataSourceProperties">
-			<props>
-				<prop key="cachePrepStmts">true</prop>
-				<prop key="prepStmtCacheSize">250</prop>
-				<prop key="prepStmtCacheSqlLimit">2048</prop>
-				<prop key="useServerPrepStmts">true</prop>
-				<prop key="useLocalSessionState">true</prop>
-				<prop key="useLocalTransactionState">true</prop>
-				<prop key="rewriteBatchedStatements">true</prop>
-				<prop key="cacheResultSetMetadata">true</prop>
-				<prop key="cacheServerConfiguration">true</prop>
-				<prop key="elideSetAutoCommits">true</prop>
-				<prop key="maintainTimeStats">true</prop>
-			</props>
+			<bean
+				class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+				<property name="location"
+					value="classpath:resources/mybatis/dbPros.properties"></property>
+			</bean>
 		</property>
 	</bean>
 
@@ -86,12 +79,12 @@
 	<bean class="me.qyh.blog.core.message.Messages" />
 
 	<bean id="articleIndexer"
-		class="me.qyh.blog.core.service.impl.JcsegArticleIndexer">
+		class="me.qyh.blog.core.service.impl.JcsegArticleIndexer"
+		destroy-method="destroy">
 		<constructor-arg index="0" value="SEARCH" />
 		<property name="useRAMDirectory" value="true" />
 	</bean>
 
-	<!-- 文章缓存 -->
 	<bean id="articleService"
 		class="me.qyh.blog.core.service.impl.ArticleServiceImpl" />
 
@@ -113,6 +106,7 @@
 			value="false" />
 	</bean>
 
+
 	<task:annotation-driven executor="taskExecutor"
 		scheduler="taskScheduler" proxy-target-class="true" />
 
@@ -125,22 +119,20 @@
 
 
 	</task:scheduled-tasks>
-
 	<!-- 文件管理 -->
-	<!-- 
 	<bean class="me.qyh.blog.file.store.GraphicsMagickImageHelper">
 		<property name="magickPath"
 			value="C:/Program Files/GraphicsMagick-1.3.30-Q16" />
 		<property name="pngQuantDirPath" value="f:/pngquant" />
+		<property name="gifsicleDirPath" value="d:/" />
 	</bean>
-	 -->
-	 <bean class="me.qyh.blog.file.store.JavaImageHelper"/>
+<!-- 	<bean class="me.qyh.blog.file.store.JavaImageHelper" /> -->
 	<bean class="me.qyh.blog.file.store.DefaultFileManager" />
 
 	<bean class="me.qyh.blog.core.plugin.PluginHandlerRegistry" />
-	
-	
+
+
 	<bean class="me.qyh.blog.core.text.DefaultMarkdown2Html">
-<!-- 		<property name="url" value="http://127.0.0.1:3000/"/> -->
+		<!-- <property name="url" value="http://127.0.0.1:3000/"/> -->
 	</bean>
 </beans>      
