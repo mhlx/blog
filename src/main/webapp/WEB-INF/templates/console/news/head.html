@@ -1,16 +1,21 @@
 <link rel="stylesheet"
-	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}"
-	th:if="${user != null}">
+	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/lib/codemirror.css}">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/addon/scroll/simplescrollbars.css}">
+<link rel="stylesheet" th:href="@{/static/css/markdown.css}">
+<link rel="stylesheet" th:href="@{/static/heather/style.css}">
 <style>
 .swal2-container.swal2-shown {
-	z-index: 9999999
+	z-index: 99999999
 }
 
 .modal {
-	z-index: 9999998
+	z-index: 99999998
 }
 
 .modal-backdrop {
-	z-index: 9999997
+	z-index: 99999997
 }
 </style>

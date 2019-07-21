@@ -80,8 +80,33 @@
 		class="fas fa-angle-up"></i>
 	</a>
 
+
 	<div th:replace="console/base/foot"></div>
-		<script type="text/javascript"
+	<script>var rootPath = root</script>
+	<script th:src="@{/static/heather/js/htmlparser.js}"></script>
+	<script th:src="@{/static/heather/js/morphdom-umd.min.js}"></script>
+	<script th:src="@{/static/heather/highlight/highlight.pack.js}"></script>
+	<!--CodeMirror-->
+	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
+	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
+	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
+	<script th:src="@{/static/codemirror/mode/xml/xml.js}"></script>
+	<script th:src="@{/static/codemirror/mode/markdown/markdown.js}"></script>
+	<script th:src="@{/static/codemirror/mode/gfm/gfm.js}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/selection/mark-selection.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
+	<script th:src="@{/static/codemirror/addon/edit/continuelist.js}"></script>
+	<script th:src="@{/static/codemirror/addon/scroll/simplescrollbars.js}"></script>
+	<script th:src="@{/static/heather/js/turndown.js}"></script>
+	<script th:src="@{/static/heather/js/turndown-plugin-gfm.js}"></script>
+	<script th:src="@{/static/heather/js/jquery.touchwipe.min.js}"></script>
+	<script th:src="@{/static/heather/js/md.js}"></script>
+	<script th:src="@{/static/heather/js/fullscreen.js}"></script>
+	<script th:src="@{/static/heather/js/all.js}"></script>
+
+	<script type="text/javascript"
 		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
 	<script type="text/javascript"
 		th:src="@{/static/js/canvas-to-blob.min.js}"></script>
@@ -104,10 +129,7 @@
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
 	<script th:src="@{/static/js/file.js}"></script>
 	<script th:src="@{/static/console/js/file_insert.js}"></script>
-	<script>
-	var rootPath = root</script>
-	<script th:src="@{/static/heather/js/htmlparser.js}"></script>
-	<script th:src="@{/static/heather/iframe.js}"></script>
+	
 	<script>
 	var editor = $("#editor");
     function insertAfter(newNode, referenceNode) {
@@ -115,7 +137,20 @@
     }
 	$("#editor").click(function(){
 		var me = $(this);
-		var _editor = Editor.create(this,{toolbar_icons:[ 'toc','innerBar','new','search','config' ],render_beforeRender:function(doc){
+		var _editor = EditorWrapper.create({
+			toolbar_icons:[ 'toc','innerBar','search','config','expand' ],
+			res_mermaid_js:rootPath+'static/heather/js/mermaid.min.js',
+			res_katex_css:rootPath+'static/heather/katex/katex.min.css',
+			res_katex_js:rootPath+'static/heather/katex/katex.min.js',
+			res_hljsTheme:function(theme){
+				return rootPath + 'static/heather/highlight/styles/'+theme+".css"
+			},
+			res_editorTheme:function(theme){
+				return rootPath + 'static/codemirror/theme/'+theme+".css"
+			},
+			res_colorpickerCss:rootPath+'static/heather/colorpicker/dist/css/bootstrap-colorpicker.min.css',
+			res_colorpickerJs:rootPath+'static/heather/colorpicker/dist/js/bootstrap-colorpicker.min.js',
+			render_beforeRender:function(doc){
 			var videos = doc.getElementsByTagName('video');
 			for(var i=videos.length-1;i>=0;i--){
 				var video = videos[i];
@@ -129,19 +164,32 @@
 				insertAfter(doc2.getElementsByTagName('body')[0].getElementsByTagName('div')[0],video);
 				video.parentNode.removeChild(video);
 			}
-		}},function(wrapper){
-			wrapper.toolbar.insertIcon('fas fa-file icon',function(){
-				files.get(wrapper.editor);
-			},1);
-			wrapper.toolbar.addIcon('fas fa-times icon',function(){
-				me.val(wrapper.editor.getValue())
-				_editor.remove();
-			});
-			wrapper.editor.setValue(me.val());
+		}});
+		
+		_editor.toolbar.insertIcon('fas fa-file icon',function(){
+			files.get(_editor.editor);
+		},1);
+		_editor.toolbar.addIcon('fas fa-times icon nofullscreen',function(){
+			me.val(_editor.getValue())
+			_editor.remove();
 		});
+		_editor.setValue(me.val());
+		var codeMirrorEditor = _editor.editor;
+		codeMirrorEditor.focus();
+		var cursor = getPos(me[0]);
+		codeMirrorEditor.setCursor(cursor);
+		codeMirrorEditor.scrollTo(null,codeMirrorEditor.heightAtLine(cursor.line,'local'))
 	})
 	
-	
+	function getPos(textarea) {
+		var lines = textarea.value.substr(0, textarea.selectionStart).split(
+				"\n");
+		var lineNum = lines.length - 1;
+		return {
+			line : lineNum,
+			ch : lines[lineNum].length
+		};
+	}
 	var mode = $("#id").length > 0 ? 'update' : 'write';
 	$.ajax({
 		url : root + 'api/console/locks',

@@ -9,19 +9,27 @@
 <meta name="_csrf" th:content="${_csrf.token}" />
 <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 <link rel="stylesheet"
-	th:href="@{/static/bootstrap/css/bootstrap.min.css}" />
-<link th:href="@{/static/fontawesome-free/css/all.min.css?v=7.0}"
+	th:href="@{/static/bootstrap/css/bootstrap.min.css}">
+<link th:href="@{/static/fontawesome-free/css/all.min.css}"
 	rel="stylesheet">
+<link rel="stylesheet"
+	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/lib/codemirror.css}">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/addon/scroll/simplescrollbars.css}">
+<link rel="stylesheet" th:href="@{/static/css/markdown.css}">
+<link rel="stylesheet" th:href="@{/static/heather/style.css}">
 <title>文件编辑</title>
 <style>
 .swal2-container.swal2-shown {
-	z-index: 9999999
+	z-index: 99999999
 }
 .modal {
-	z-index: 9999998
+	z-index: 99999998
 }
 .modal-backdrop{
-	z-index: 9999997
+	z-index: 99999997
 }
 </style>
 </head>
@@ -34,42 +42,141 @@
 
 	<div th:replace="console/base/foot"></div>
 	<script>var rootPath = root</script>
-	<script th:src="@{/static/heather/iframe.js}"></script>
+	<script th:src="@{/static/console/js/dirChooser.js}"></script>
+	<script th:src="@{/static/heather/js/htmlparser.js}"></script>
+	<script th:src="@{/static/heather/js/morphdom-umd.min.js}"></script>
+	<script th:src="@{/static/heather/highlight/highlight.pack.js}"></script>
+	<!--CodeMirror-->
+	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
+	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
+	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
+	<script th:src="@{/static/codemirror/mode/xml/xml.js}"></script>
+	<script th:src="@{/static/codemirror/mode/markdown/markdown.js}"></script>
+	<script th:src="@{/static/codemirror/mode/gfm/gfm.js}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/selection/mark-selection.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
+	<script th:src="@{/static/codemirror/addon/edit/continuelist.js}"></script>
+	<script th:src="@{/static/codemirror/addon/scroll/simplescrollbars.js}"></script>
+	<script th:src="@{/static/heather/js/turndown.js}"></script>
+	<script th:src="@{/static/heather/js/turndown-plugin-gfm.js}"></script>
+	<script th:src="@{/static/heather/js/jquery.touchwipe.min.js}"></script>
+	<script th:src="@{/static/heather/js/md.js}"></script>
+	<script th:src="@{/static/heather/js/fullscreen.js}"></script>
+	<script th:src="@{/static/heather/js/all.js}"></script>
+
+	<script type="text/javascript"
+		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/static/js/canvas-to-blob.min.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/vendor/jquery.ui.widget.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.iframe-transport.js}"></script>
+	<script th:src="@{/static/jquery-file-upload/js/jquery.fileupload.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-ui.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-process.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-image.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-audio.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-video.js}"></script>
+	<script
+		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
+	<script th:src="@{/static/js/file.js}"></script>
+	<script th:src="@{/static/console/js/file_insert.js}"></script>
 	<script>
 	var path = '[[${file.path}]]';
-	Editor.create($("#code")[0],function(editor){
-		editor.toolbarHelper.insertIcon(['fas','fa-backward'],function(){
-			swal({
-			  title: '你确定要离开码？',
-			  text: "没有保存的内容将会丢失",
-			  type: 'warning',
-			  showCancelButton: true,
-			  confirmButtonColor: '#3085d6',
-			  cancelButtonColor: '#d33',
-			  confirmButtonText: '离开!',
-			  cancelButtonText: '取消'
-			}).then((result) => {
-			  if (result.value) {
-				  window.history.go(-1);
-			  }
-			});
+	function insertAfter(newNode, referenceNode) {
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+    }
+	var wrapper = EditorWrapper.create({
+		toolbar_icons:[ 'toc','innerBar','search','config','expand' ],
+		res_mermaid_js:rootPath+'static/heather/js/mermaid.min.js',
+		res_katex_css:rootPath+'static/heather/katex/katex.min.css',
+		res_katex_js:rootPath+'static/heather/katex/katex.min.js',
+		res_hljsTheme:function(theme){
+			return rootPath + 'static/heather/highlight/styles/'+theme+".css"
+		},
+		res_editorTheme:function(theme){
+			return rootPath + 'static/codemirror/theme/'+theme+".css"
+		},
+		res_colorpickerCss:rootPath+'static/heather/colorpicker/dist/css/bootstrap-colorpicker.min.css',
+		res_colorpickerJs:rootPath+'static/heather/colorpicker/dist/js/bootstrap-colorpicker.min.js',
+		render_beforeRender:function(doc){
+		var videos = doc.getElementsByTagName('video');
+		for(var i=videos.length-1;i>=0;i--){
+			var video = videos[i];
+			var poster = video.getAttribute('poster');
+			if(!poster){
+				poster = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABD4AAAJSCAYAAAArsQXOAAAPNElEQVR4nO3YwQ3AIBDAsNKlb3yYAiFF9gR5Z83M/gAAAACC/tcBAAAAALcYHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZB3EsAcIUtpjKQAAAABJRU5ErkJggg==';
+			}
+			
+			var html = '<div><a style="position: relative;display: inline-block;" ><i class="fas fa-video" style="color:blueviolet;z-index:1;    position: absolute;left: 50%;top: 50%; transform: translate(-50%, -50%);font-size: 20px !important;"></i><img class="img-fluid" src="'+poster+'"></a></div>';
+			var doc2 = $.parseHTML2(html);
+			insertAfter(doc2.getElementsByTagName('body')[0].getElementsByTagName('div')[0],video);
+			video.parentNode.removeChild(video);
+		}
+	}});
+	
+	wrapper.toolbar.insertIcon('fas fa-backward icon',function(){
+		swal({
+		  title: '你确定要离开码？',
+		  text: "没有保存的内容将会丢失",
+		  type: 'warning',
+		  showCancelButton: true,
+		  confirmButtonColor: '#3085d6',
+		  cancelButtonColor: '#d33',
+		  confirmButtonText: '离开!',
+		  cancelButtonText: '取消'
+		}).then((result) => {
+		  if (result.value) {
+			  window.history.go(-1);
+		  }
 		});
+	},0);
 
-		editor.toolbarHelper.insertIcon(['fas','fa-save'],function(){
-			 $.ajax({
-				type : 'PUT',
-				url : root + 'api/console/staticFile',
-				data:{'path':path,'content':editor.editor.getValue()},
-				success:function(data) {
-					swal('保存成功','','success');
-				},
-				error:function(jqXHR, textStatus, errorThrown) {
-					var data = $.parseJSON(jqXHR.responseText);
-					swal('保存失败',data.error,'error');
-				}
-			  })
-		},2);
-	})
+	wrapper.toolbar.insertIcon('fas fa-save icon',function(){
+		 $.ajax({
+			type : 'PUT',
+			url : root + 'api/console/staticFile',
+			data:{'path':path,'content':wrapper.editor.getValue()},
+			success:function(data) {
+				swal('保存成功','','success');
+			},
+			error:function(jqXHR, textStatus, errorThrown) {
+				var data = $.parseJSON(jqXHR.responseText);
+				swal('保存失败',data.error,'error');
+			}
+		  })
+	},2);
+	
+	wrapper.toolbar.insertIcon('fas fa-file icon',function(){
+		 files.get(wrapper.editor);
+	},3);
+	
+	wrapper.setValue($("#code").val());
+	
+	var codeMirrorEditor = wrapper.editor;
+	codeMirrorEditor.focus();
+	var cursor = getPos($("#code")[0]);
+	codeMirrorEditor.setCursor(cursor);
+	codeMirrorEditor.scrollTo(null,codeMirrorEditor.heightAtLine(cursor.line,'local'))
+	
+	
+	function getPos(textarea) {
+		var lines = textarea.value.substr(0, textarea.selectionStart).split(
+				"\n");
+		var lineNum = lines.length - 1;
+		return {
+			line : lineNum,
+			ch : lines[lineNum].length
+		};
+	}
 	
 	</script>
 

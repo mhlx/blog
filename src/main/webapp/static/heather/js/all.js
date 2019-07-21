@@ -1,4 +1,32 @@
 var EditorWrapper = (function() {
+	
+	'use strict';
+	CodeMirror.prototype.renderAllDoc = function(scrollToTop) {
+		var editor = this;
+		editor.setOption('readOnly', true);
+		var viewport = editor.getViewport();
+		var lastLine = editor.lineCount() - 1;
+		while (viewport.to < lastLine && viewport.to > 0) {
+			editor.scrollIntoView({
+				line: viewport.to
+			});
+			viewport = editor.getViewport();
+		}
+
+		editor.scrollIntoView({
+			line: lastLine
+		});
+		editor.scrollIntoView({
+			top: scrollToTop
+		});
+		editor.setOption('readOnly', false);
+	}
+
+
+	CodeMirror.keyMap.default["Shift-Tab"] = "indentLess";
+	CodeMirror.keyMap.default["Tab"] = "indentMore";
+	
+	
     function cloneAttributes(element, sourceNode) {
         let attr;
         let attributes = Array.prototype.slice.call(sourceNode.attributes);
@@ -14,36 +42,59 @@ var EditorWrapper = (function() {
     var isUndefined = function(o) {
         return (typeof o == 'undefined')
     }
-	
-	function getDefault(o,dft){
-		return isUndefined(o) ? dft : o;
-	}
+
+    function getDefault(o, dft) {
+        return isUndefined(o) ? dft : o;
+    }
 
     var Render = (function() {
-        'use strict';
 
-        function MarkdownRender(config) {
-            this.md = createMarkdownParser({
+        function MarkdownRender(config, theme) {
+            var plugins = config.render_plugins || ['footnote', 'katex', 'mermaid', 'anchor', 'task-lists', 'sup', 'sub', 'abbr'];
+            var hasMermaid = $.inArray('mermaid', plugins) != -1;
+			this.md = createMarkdownParser({
                 html: config.render_allowHtml !== false,
-                plugins: config.render_plugins || ['footnote', 'katex', 'mermaid', 'anchor', 'task-lists', 'sup', 'sub', 'abbr'],
-                lineNumber: true
+                plugins: plugins,
+                lineNumber: true,
+				highlight : function(str, lang) {
+					if(hasMermaid && lang == 'mermaid'){
+						return '<div class="mermaid-block"><div class="mermaid">'+str+'</div><div class="mermaid-source" style="display:none">'+str+'</div></div>';					
+					}
+					if (lang && hljs.getLanguage(lang)) {
+						try {
+							return '<pre class="hljs"><code>' +
+					   hljs.highlight(lang, str, true).value +
+					   '</code></pre>';
+						} catch (__) {}
+					}
+					return '';
+				}
             });
-			this.md2 = createMarkdownParser({
+            this.md2 = createMarkdownParser({
                 html: config.render_allowHtml !== false,
-                plugins: config.render_plugins || ['footnote', 'katex', 'mermaid', 'anchor', 'task-lists', 'sup', 'sub', 'abbr'],
-                lineNumber: false
+                plugins: plugins,
+                lineNumber: false,
+				highlight : function(str, lang) {
+					if(hasMermaid && lang == 'mermaid'){
+						return '<div class="mermaid">'+str+'</div>';
+					}
+					if (lang && hljs.getLanguage(lang)) {
+						return '<pre><code class="'+lang+'">'+str+'</code></pre>'
+					}
+					return '';
+				}
             });
             this.config = config;
-            this.eventHandlers = [];
+            this.theme = theme;
         }
 
         var mermaidLoading = false;
 
-        function loadMermaid() {
+        function loadMermaid(theme, config) {
             if (mermaidLoading) return;
             mermaidLoading = true;
             $('<script>').appendTo('body').attr({
-                src: rootPath+'static/heather/js/mermaid.min.js'
+                src: config.res_mermaid_js || 'js/mermaid.min.js'
             });
             var t = setInterval(function() {
                 try {
@@ -51,25 +102,27 @@ var EditorWrapper = (function() {
                         theme: theme.mermaid.theme || 'default'
                     });
                     clearInterval(t);
-                    mermaid.init({}, '#out .mermaid');
-                } catch (e) {
-
-                }
+                    try{
+						mermaid.init({}, '#editor_out .mermaid');
+					}catch(e){
+						console.log(e);
+					}
+                } catch (__) {}
             }, 20)
         }
 
         var katexLoading = false;
 
-        function loadKatex() {
+        function loadKatex(config) {
             if (katexLoading) return;
             katexLoading = true;
             $('<link>').appendTo('head').attr({
                 type: 'text/css',
                 rel: 'stylesheet',
-                href: rootPath+'static/heather/katex/katex.min.css'
+                href: config.res_katex_css || 'katex/katex.min.css'
             });
             $('<script>').appendTo('body').attr({
-                src: rootPath+'static/heather/katex/katex.min.js'
+                src: config.res_katex_js || 'katex/katex.min.js'
             });
             var t = setInterval(function() {
                 try {
@@ -77,33 +130,37 @@ var EditorWrapper = (function() {
                         throwOnError: false
                     })
                     clearInterval(t);
-                    var katexs = document.getElementById("out").querySelectorAll(".katex");
+                    var katexs = document.getElementById("editor_out").querySelectorAll(".katex");
                     for (var i = 0; i < katexs.length; i++) {
                         var block = katexs[i];
-                        block.innerHTML = katex.renderToString(block.textContent, {
-                            throwOnError: false,
-                            displayMode: true
-                        });
+                        try{
+							block.innerHTML = katex.renderToString(block.textContent, {
+								throwOnError: false,
+								displayMode: true
+							});
+						}catch(e){
+							console.log(e);
+						}
                     }
-                } catch (e) {
+                } catch (__) {
 
                 }
             }, 20)
         }
 
-		MarkdownRender.prototype.getHtml = function(markdownText){
-			return this.md2.render(markdownText);
-		}
+        MarkdownRender.prototype.getHtml = function(markdownText) {
+            return this.md2.render(markdownText);
+        }
 
         MarkdownRender.prototype.renderAt = function(markdownText, element, patch) {
             var doc = $.parseHTML2(this.md.render(markdownText));
             var hasMermaid = doc.querySelector('.mermaid') != null;
             if (hasMermaid) {
-                loadMermaid();
+                loadMermaid(this.theme, this.config);
             }
             var hasKatex = doc.querySelector(".katex") != null;
             if (hasKatex) {
-                loadKatex()
+                loadKatex(this.config)
             }
             if (this.config.render_beforeRender) {
                 this.config.render_beforeRender(doc);
@@ -136,22 +193,22 @@ var EditorWrapper = (function() {
             }
             try {
                 mermaid.initialize({
-                    theme: theme.mermaid.theme || 'default'
+                    theme: this.theme.mermaid.theme || 'default'
                 });
-                mermaid.init({}, '#out .mermaid');
-            } catch (e) {}
+                mermaid.init({}, '#editor_out .mermaid');
+            } catch (e) {if(!isUndefined(window.mermaid)) console.log(e)}
         }
 
         return {
-            create: function(config) {
-                return new MarkdownRender(config)
+            create: function(config, theme) {
+                return new MarkdownRender(config, theme)
             }
         }
     })();
 
 
     var Bar = (function() {
-        'use strict';
+        
 
         function Bar(element, config) {
             this.element = $(element);
@@ -240,7 +297,7 @@ var EditorWrapper = (function() {
 
 
     var Sync = (function(editor) {
-        'use strict';
+        
 
         function Sync(editor, scrollElement, config) {
             this.editor = editor;
@@ -330,232 +387,224 @@ var EditorWrapper = (function() {
     })();
 
 
-    EditorWrapper = (function() {
+    var EditorWrapper = (function() {
 
         var mobile = CodeMirror.browser.mobile;
         var ios = CodeMirror.browser.ios;
-
-        CodeMirror.prototype.renderAllDoc = function(scrollToTop) {
-            var editor = this;
-            editor.setOption('readOnly', true);
-            var viewport = editor.getViewport();
-            var lastLine = editor.lineCount() - 1;
-            while (viewport.to < lastLine && viewport.to > 0) {
-                editor.scrollIntoView({
-                    line: viewport.to
-                });
-                viewport = editor.getViewport();
+		
+        var Theme = (function() {
+            function Theme(config) {
+                this.toolbar = {};
+                this.bar = {};
+                this.stat = {};
+                this.editor = {};
+                this.inCss = {};
+                this.searchHelper = {};
+                this.mermaid = {};
+                this.hljs = {
+                    theme: 'github'
+                };
+                this.customCss = undefined;
+                this.timer = undefined;
+                this.config = config;
             }
 
-            editor.scrollIntoView({
-                line: lastLine
-            });
-            editor.scrollIntoView({
-                top: scrollToTop
-            });
-            editor.setOption('readOnly', false);
-        }
+            var themeKey = "markdown-editor-theme";
 
+            function saveTheme(theme, cb) {
+                var json = JSON.stringify(theme);
+                try {
+                    localStorage.setItem(themeKey, json);
+                    if (cb) cb("success");
+                } catch (e) {
+                    if (cb) cb("fail");
+                }
+            }
 
-        CodeMirror.keyMap.default["Shift-Tab"] = "indentLess";
-        CodeMirror.keyMap.default["Tab"] = "indentMore";
+            function getTheme(cb) {
+                if (!cb) return;
+                var json = localStorage.getItem(themeKey);
+                if (json == null) {
+                    cb(null)
+                } else {
+                    cb($.parseJSON(json));
+                }
+
+            }
+
+            function delTheme(cb) {
+                try {
+                    localStorage.removeItem(themeKey);
+                    if (cb) cb("success");
+                } catch (e) {
+                    if (cb) cb("fail");
+                }
+            }
+
+            Theme.prototype.store = function(callback) {
+                if (this.timer) {
+                    clearTimeout(this.timer);
+                }
+                var theme = this;
+                this.timer = setTimeout(function() {
+                    saveTheme(theme, function(cb) {
+                        if (callback) callback(cb == "success" ? true : false);
+                    });
+                }, 500)
+            }
+
+            Theme.prototype.reset = function() {
+                var theme = new Theme();
+                saveTheme(theme);
+                theme.render();
+                return theme;
+            }
+
+            Theme.prototype.clone = function() {
+                var copy = JSON.parse(JSON.stringify(this));
+                var theme = new Theme();
+                theme.toolbar = copy.toolbar;
+                theme.bar = copy.bar;
+                theme.stat = copy.stat;
+                theme.editor = copy.editor;
+                theme.inCss = copy.inCss;
+                theme.cursorHelper = copy.cursorHelper;
+                theme.searchHelper = copy.searchHelper;
+                theme.mermaid = copy.mermaid;
+                theme.customCss = copy.customCss;
+                return theme;
+            }
+
+            var getCurrentTheme = function(config) {
+                var current;
+                getTheme(function(cb) {
+                    current = cb
+                });
+                if (!current || current == null) {
+                    return new Theme(config);
+                }
+                var theme = new Theme(config);
+                theme.toolbar = current.toolbar;
+                theme.bar = current.bar;
+                theme.stat = current.stat;
+                theme.editor = current.editor;
+                theme.inCss = current.inCss;
+                theme.cursorHelper = current.cursorHelper;
+                theme.searchHelper = current.searchHelper;
+                theme.mermaid = current.mermaid;
+                theme.customCss = current.customCss;
+                return theme;
+            }
+			
+            function loadHljsTheme(theme) {
+                if (theme.hljs.theme) {
+                    var hljsTheme = theme.hljs.theme;
+                    var hljsThemeFunction = theme.config.res_hljsTheme || function(hljsTheme) {
+                        return 'highlight/styles/' + hljsTheme + '.css';
+                    }
+                    if ($('hljs-theme-' + hljsTheme + '').length == 0) {
+                        $('<link id="hljs-theme-' + hljsTheme + '" >').appendTo('head').attr({
+                            type: 'text/css',
+                            rel: 'stylesheet',
+                            href: hljsThemeFunction(hljsTheme)
+                        })
+                    }
+                }
+            }
+
+            Theme.prototype.render = function() {
+				loadEditorTheme(this);
+                loadHljsTheme(this);
+                var css = "";
+                css += "#editor_toolbar{color:" + (this.toolbar.color || 'inherit') + "}\n";
+                css += "#editor_innerBar{color:" + (this.bar.color || 'inherit') + "}\n"
+                css += "#editor_stat{color:" + (this.stat.color || 'inherit') + "}\n";
+                css += "#editor_in{background:" + (this.inCss.background || 'inherit') + "}\n";
+				var searchHelperColor = (this.searchHelper.color || 'inherit');
+                css += "#editor_searchHelper{color:" + searchHelperColor + "}\n#editor_searchHelper .form-control{color:" + searchHelperColor + "}\n#editor_searchHelper .input-group-text{color:" + searchHelperColor + "}\n#editor_searchHelper .form-control::placeholder {color: "+searchHelperColor+";opacity: 1;}\n#editor_searchHelper .form-control::-ms-input-placeholder {color: "+searchHelperColor+";}\n#editor_searchHelper .form-control::-ms-input-placeholder {color: "+searchHelperColor+";}";                             
+
+			   $("#custom_theme").remove();
+                if ($.trim(css) != '') {
+                    $("head").append("<style type='text/css' id='custom_theme'>" + css + "</style>");
+                }
+                $("#custom_css").remove();
+                $("head").append("<style type='text/css' id='custom_css'>" + (this.customCss || '') + "</style>");
+            }
+			
+            return {
+                current: function(config) {
+                    return getCurrentTheme(config)
+                }
+            };
+        })();
 		
-		var theme = (function(){
-			function Theme(){
-				this.toolbar = {};
-				this.bar = {};
-				this.stat = {};
-				this.editor = {};
-				this.inCss = {};
-				this.searchHelper = {};
-				this.mermaid = {};
-				this.hljs = {theme:'github'};
-				this.customCss = undefined;
-				this.timer = undefined;
-			}
-			
-			var themeKey = "markdown-editor-theme";
-			function saveTheme(theme,cb){
-				var json = JSON.stringify(theme);
-				try{localStorage.setItem(themeKey,json);
-				if(cb) cb("success");
-				}catch(e){
-				if(cb) cb("fail");
+		 function loadEditorTheme(theme,callback) {
+			if (theme.editor.theme) {
+				var editorTheme = theme.editor.theme;
+				var editorThemeFunction = theme.config.res_editorTheme || function(editorTheme) {
+					return 'codemirror/theme/' + editorTheme + '.css';
+				}
+				if ($('#codemirror-theme-' + editorTheme + '').length == 0) {
+					$('<link id="codemirror-theme-' + editorTheme + '" >').appendTo('head').attr({
+						type: 'text/css',
+						rel: 'stylesheet',
+						onload:function(){
+							if(callback){callback(editorTheme)}
+						},
+						href: editorThemeFunction(editorTheme)
+					})
+				} else {
+					if(callback){callback(editorTheme)}
 				}
 			}
-			function getTheme(cb){
-				if(!cb) return ;
-				var json = localStorage.getItem(themeKey);
-				if(json == null ){
-					cb(null)
-				}else{
-					cb($.parseJSON(json));
-				}
-					
-			}
-			function delTheme(cb){
-				try{
-					localStorage.removeItem(themeKey);
-					if(cb) cb("success");
-				}catch(e){if(cb) cb("fail");
-				}
-			}
-			
-			Theme.prototype.store = function(callback){
-				if(this.timer){
-					clearTimeout(this.timer);
-				}
-				var theme = this;
-				this.timer = setTimeout(function(){	
-					saveTheme(theme,function(cb){
-						if(callback) callback(cb == "success" ? true : false);
-					});
-				},500)
-			}
-			
-			Theme.prototype.reset = function(){
-				var theme = new Theme();
-				saveTheme(theme);
-				theme.render();
-				return theme;
-			}
-			
-			Theme.prototype.clone = function(){
-				var copy = JSON.parse(JSON.stringify(this));
-				var theme = new Theme();
-				theme.toolbar = copy.toolbar;
-				theme.bar = copy.bar;
-				theme.stat = copy.stat;
-				theme.editor = copy.editor;
-				theme.inCss = copy.inCss;
-				theme.cursorHelper = copy.cursorHelper;
-				theme.searchHelper = copy.searchHelper;
-				theme.mermaid = copy.mermaid;
-				theme.customCss = copy.customCss;
-				return theme;
-			}
-			
-			var getCurrentTheme = function(){
-				var current;
-				getTheme(function(cb){
-					current = cb
-				});
-				if(!current || current == null){
-					return new Theme();
-				}
-				var theme = new Theme();
-				theme.toolbar = current.toolbar;
-				theme.bar = current.bar;
-				theme.stat = current.stat;
-				theme.editor = current.editor;
-				theme.inCss = current.inCss;
-				theme.cursorHelper = current.cursorHelper;
-				theme.searchHelper = current.searchHelper;
-				theme.mermaid = current.mermaid;
-				theme.customCss = current.customCss;
-				return theme;
-			}
-			
-			Theme.prototype.loadEditorTheme = function(onLoad){
-				if(this.editor.theme){
-					var editorTheme = this.editor.theme;
-					var loadHandler = function(theme){
-						onLoad(theme);
-					}
-					if($('head link[href="'+rootPath+'static/codemirror/theme/'+editorTheme+'.css"]').length == 0){
-						$('<link id="codemirror-theme-'+editorTheme+'" >').appendTo('head').attr({
-						  type: 'text/css', 
-						  rel: 'stylesheet',
-						  onload:function(){
-							  loadHandler(editorTheme);
-						  },
-						  href: rootPath+'static/codemirror/theme/'+editorTheme+'.css'
-					   })
-					}else{
-						loadHandler(editorTheme);
-					}
-				}
-			}
-			
-			Theme.prototype.loadHljsTheme = function(onLoad){
-				if(this.hljs.theme){
-					var hljsTheme = this.hljs.theme;
-					var loadHandler = function(theme){
-						onLoad(theme);
-					}
-					if($('head link[href="'+rootPath+'static/heather/highlight/styles/'+hljsTheme+'.css"]').length == 0){
-						$('<link id="hljs-theme-'+hljsTheme+'" >').appendTo('head').attr({
-						  type: 'text/css', 
-						  rel: 'stylesheet',
-						  onload:function(){
-							  loadHandler(hljsTheme);
-						  },
-						  href: ''+rootPath+'static/heather/highlight/styles/'+hljsTheme+'.css'
-					   })
-					}else{
-						loadHandler(hljsTheme);
-					}
-				}
-			}
-			
-			
-			Theme.prototype.render = function(pro){
-				var css = "";
-				css += "#toolbar{color:"+(this.toolbar.color || 'inherit')+"}\n";
-				css += "#innerBar{color:"+(this.bar.color || 'inherit')+"}\n"
-				css += "#stat{color:"+(this.stat.color || 'inherit')+"}\n";
-				css += "#in{background:"+(this.inCss.background || 'inherit')+"}\n";
-				css += "#searchHelper{color:"+(this.searchHelper.color || 'inherit')+"}\n#searchHelper input{color:"+(this.searchHelper.color || 'inherit')+"}\n\n#searchHelper .input-group-text{background:#fff;color:"+(this.searchHelper.color || 'inherit')+"}\n";
-				if(this.customCss){
-					css += this.customCss;
-				}
-				var theme = this;
-				this.loadEditorTheme(function(theme){
-					if(pro && pro.editorThemeLoad){pro.editorThemeLoad(theme)}
-				})
-				this.loadHljsTheme(function(theme){
-					if(pro && pro.hljsThemeLoad){pro.hljsThemeLoad(theme)}
-				})
-				$("#custom_theme").remove();
-				if($.trim(css) != ''){
-					$("head").append("<style type='text/css' id='custom_theme'>"+css+"</style>");
-				}
-			}
-			
-			return getCurrentTheme();
-		})();
-		
-		theme.render();
+		}
+
 
         function EditorWrapper(config) {
+			var html = '<div id="editor_wrapper">';
+			html += '<div id="editor_toc">';
+			html += '</div>' ;
+			html += '<div id="editor_in">' ;
+			html += '<div id="editor_toolbar"></div>' ;
+			html += '<textarea  style="width: 100%; height: 100%"></textarea>' ;
+			html += '<div id="editor_stat"></div>' ;
+			html += '<div id="editor_innerBar"></div>' ;
+			html += '</div>' ;
+			html += '<div class="markdown-body" id="editor_out"></div>';	
+			html += '</div>' ;
+			var $wrapperElement = $(html);
+			$('body').append($wrapperElement);
+			$('body').addClass('editor_noscroll');
+			$('html').addClass('editor_noscroll');
+			this.wrapperElement = $wrapperElement[0]
             if (!mobile) {
-                $("#in").show();
-                $("#out").css({
+                $("#editor_in").show();
+                $("#editor_out").css({
                     'visibility': 'visible'
                 });
             }
-            $("#wrapper").animate({
-                scrollLeft: $("#toc").outerWidth()
+            $("#editor_wrapper").animate({
+                scrollLeft: $("#editor_toc").outerWidth()
             }, 0);
+
+			this.eventHandlers = [];
+            var theme = Theme.current(config);
+            theme.render();
             var scrollBarStyle = mobile ? 'native' : 'overlay';
-            var editorTheme = theme.editor.theme ? theme.editor.theme : 'default';
-            var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
-                mode: {
-                    name: "gfm"
-                },
+            var editor = CodeMirror.fromTextArea(document.getElementById('editor_wrapper').querySelector('textarea'), {
+                mode: {name: "gfm"},
                 lineNumbers: false,
                 matchBrackets: true,
                 lineWrapping: true,
                 dragDrop: true,
                 scrollbarStyle: scrollBarStyle,
-                theme: editorTheme,
+                theme: theme.editor.theme || 'default',
                 styleSelectedText: true,
                 extraKeys: {
-                    "Enter": "newlineAndIndentContinueMarkdownList",
-                    "Alt-F": "findPersistent",
-                    "Ctrl-A": "selectAll"
+                    "Enter": "newlineAndIndentContinueMarkdownList"
                 }
             });
+			
             var turndownService = config.turndownService;
 
             if (!turndownService) {
@@ -589,20 +638,39 @@ var EditorWrapper = (function() {
                     return "";
                 });
             }
-
-            this.sync = Sync.create(editor, $("#out")[0], config);
-            this.render = Render.create(config);
-            this.toolbar = Bar.create($("#toolbar")[0]);
-            var innerBar = Bar.create($("#innerBar")[0]);
+			var customChangeCssHandler = function() {
+                theme.customCss = this.textContent;
+                theme.store();
+            };
+            $('head').on('DOMSubtreeModified', '#custom_css', customChangeCssHandler);
+			this.eventHandlers.push({
+				name : 'remove',
+				handler : function(){
+					$('head').off('DOMSubtreeModified', '#custom_css', customChangeCssHandler)
+				}
+			})
+            this.theme = theme;
+            this.sync = Sync.create(editor, $("#editor_out")[0], config);
+            this.render = Render.create(config, theme);
+            this.toolbar = Bar.create($("#editor_toolbar")[0]);
+            var innerBar = Bar.create($("#editor_innerBar")[0]);
             innerBar.hide();
             this.innerBar = innerBar;
             //sync 
             var wrapper = this;
             if (!mobile) {
                 //auto render
-                var ms =  getDefault(config.render_ms,500);
+                var ms = getDefault(config.render_ms, 500);
                 var autoRenderTimer;
                 var stat_timer;
+				wrapper.eventHandlers.push({name:'remove',handler:function(){
+					if (autoRenderTimer) {
+                        clearTimeout(autoRenderTimer);
+                    }
+					if (stat_timer) {
+                        clearTimeout(stat_timer);
+                    }
+				}})
                 editor.on('change', function() {
                     if (autoRenderTimer) {
                         clearTimeout(autoRenderTimer);
@@ -613,14 +681,14 @@ var EditorWrapper = (function() {
                     var statEnable = config.stat_enable !== false;
                     if (statEnable) {
                         var formatter = config.stat_formatter || function(wrapper) {
-                            return "当前字数：" + wrapper.editor.getValue().length
+                            return "当前字数：" + wrapper.getValue().length
                         }
-                        $("#stat").html(formatter(wrapper)).show();
+                        $("#editor_stat").html(formatter(wrapper)).show();
                         if (stat_timer) {
                             clearTimeout(stat_timer);
                         }
                         stat_timer = setTimeout(function() {
-                            $("#stat").hide();
+                            $("#editor_stat").hide();
                         }, 1000);
                     }
 
@@ -632,10 +700,6 @@ var EditorWrapper = (function() {
                 var syncEnable = config.sync_enable !== false;
                 if (syncEnable) {
                     editor.on('scroll', scrollHandler);
-                    editor.on('update', function handler() {
-                        editor.off('update', handler);
-                        editor.renderAllDoc(0);
-                    });
                 }
                 this.syncEnable = syncEnable;
                 this.scrollHandler = scrollHandler;
@@ -643,7 +707,7 @@ var EditorWrapper = (function() {
 
             if (mobile) {
                 //swipe
-                $("#toc").touchwipe({
+                $("#editor_toc").touchwipe({
                     wipeLeft: function() {
                         wrapper.toEditor()
                     },
@@ -654,27 +718,55 @@ var EditorWrapper = (function() {
                     wipeLeft: function() {
                         wrapper.toPreview()
                     },
-                    wipeRight: function() {
-                        wrapper.toToc()
+                    wipeRight: function(e) {
+                        wrapper.toToc();
                     },
                     min_move_x: 10,
                     max_move_y: 5
                 });
-                $("#out").touchwipe({
-                    wipeRight: function() {
-                        wrapper.toEditor()
+				
+				function hasXScrollBar(element){
+				  var overflowX = window.getComputedStyle(element)['overflow-x'];
+				  return (overflowX === 'scroll' || overflowX === 'auto') && element.scrollWidth > element.clientWidth;
+				}
+				
+				//if an element has a x scrollbar and scrollLeft > 0 then can not wipe
+				function canWipe(element){
+					if(isUndefined(element) || element == null){
+						return true;
+					}
+					if(hasXScrollBar(element) && $(element).scrollLeft() > 0){
+						return false;
+					}
+					return canWipe(element.parentElement);
+				}
+				
+				
+                $("#editor_out").touchwipe({
+                    wipeRight: function(e) {
+						if(canWipe(e.target)){
+							wrapper.toEditor()
+						}
                     },
                     min_move_x: 10,
                     max_move_y: 5
                 });
             }
-            $("#toc").on('click', '[data-line]', function() {
+			
+			var tocClickTimer;
+			wrapper.eventHandlers.push({name:'remove',handler:function(){
+				if (tocClickTimer) {
+					clearTimeout(tocClickTimer);
+				}
+			}});
+			
+            $("#editor_toc").on('click', '[data-line]', function() {
                 var line = parseInt($(this).data('line'));
 
                 editor.scrollIntoView({
                     line: line
                 });
-                setTimeout(function() {
+                tocClickTimer = setTimeout(function() {
                     var top = editor.charCoords({
                         line: line,
                         ch: 0
@@ -686,19 +778,106 @@ var EditorWrapper = (function() {
                 }, 500)
             })
             this.editor = editor;
-			this.theme = theme;
-			this.config = config;
+            this.config = config;
             initInnerBar(this);
             initToolbar(this);
+			this.fullscreen = false;
+            if (screenfull.enabled) {
+				var screenFullChangeHandler = function() {
+					wrapper.fullscreen = screenfull.isFullscreen;
+                    changeStyleWhenFullScreenChange(wrapper, screenfull.isFullscreen);
+					if(!screenfull.isFullscreen){
+						wrapper.toEditor(undefined,0);
+						wrapper.doSync();
+					}
+                }
+				wrapper.eventHandlers.push({name:'remove',handler:function(){
+					 screenfull.off('change',screenFullChangeHandler);
+				}})
+                screenfull.on('change',screenFullChangeHandler);
+            }
+			triggerEvent(this,'load');
+        }
+		
+		function triggerEvent(wrapper,name,args){
+			for(var i=0;i<wrapper.eventHandlers.length;i++){
+				var evtHandler= wrapper.eventHandlers[i];
+				if(evtHandler.name == name){
+					try{
+						evtHandler.handler.call(this,args);
+					}catch(e){}
+				}
+			}
+		}
+
+        function changeStyleWhenFullScreenChange(wrapper, isFullscreen) {
+            if (!CodeMirror.browser.mobile) {
+                var cm = wrapper.editor;
+                var wrap = cm.getWrapperElement();
+                if (isFullscreen) {
+                    $(wrapper.getFullScreenElement()).addClass('editor_fullscreen');
+                    //from CodeMirror display fullscreen.js
+                    cm.state.fullScreenRestore = {
+                        scrollTop: window.pageYOffset,
+                        scrollLeft: window.pageXOffset,
+                        width: wrap.style.width,
+                        height: wrap.style.height
+                    };
+                    wrap.style.width = "";
+                    wrap.style.height = "auto";
+                    wrap.className += " CodeMirror-fullscreen";
+                    document.documentElement.style.overflow = "hidden";
+                    cm.refresh();
+                } else {
+                    $(wrapper.getFullScreenElement()).removeClass('editor_fullscreen');
+                    wrap.className = wrap.className.replace(/\s*CodeMirror-fullscreen\b/, "");
+                    document.documentElement.style.overflow = "";
+                    var info = cm.state.fullScreenRestore;
+                    wrap.style.width = info.width;
+                    wrap.style.height = info.height;
+                    window.scrollTo(info.scrollLeft, info.scrollTop);
+                    cm.refresh();
+                }
+            }
         }
 
         EditorWrapper.prototype.doRender = function(patch) {
-            this.render.renderAt(this.editor.getValue(), $("#out")[0], patch);
+            this.render.renderAt(this.editor.getValue(), $("#editor_out")[0], patch);
             renderToc();
         }
-
+		
+		EditorWrapper.prototype.remove = function(patch) {
+			triggerEvent(this,'remove');
+            $(this.getFullScreenElement()).removeClass('fullscreen');
+			$('body').removeClass('editor_noscroll');
+			$('html').removeClass('editor_noscroll');
+            this.wrapperElement.parentNode.removeChild(this.wrapperElement);
+			wrapperInstance.wrapper = undefined;
+			delete wrapperInstance.wrapper;
+        }
+		
         EditorWrapper.prototype.doSync = function() {
             this.sync.doSync();
+        }
+		
+		EditorWrapper.prototype.requestFullScreen = function() {
+            if(!mobile){
+				 if (screenfull.enabled) {
+					screenfull.request(this.getFullScreenElement());
+				} else {
+					swal("当前浏览器不支持全屏模式")
+				}
+			}
+        }
+		
+		EditorWrapper.prototype.getFullScreenElement = function() {
+            return document.body;
+        }
+		
+		EditorWrapper.prototype.exitFullScreen  = function() {
+			if(!mobile && screenfull.enabled){
+				screenfull.exit();
+			}
         }
 
         EditorWrapper.prototype.enableSync = function() {
@@ -707,9 +886,17 @@ var EditorWrapper = (function() {
                 this.syncEnable = true;
             }
         }
-		
-		EditorWrapper.prototype.getHtml = function() {
+
+        EditorWrapper.prototype.getHtml = function() {
             return this.render.getHtml(this.editor.getValue());
+        }
+		
+		EditorWrapper.prototype.getValue = function() {
+            return this.editor.getValue();
+        }
+		
+		EditorWrapper.prototype.setValue = function(text) {
+            return this.editor.setValue(text);
         }
 
         EditorWrapper.prototype.disableSync = function() {
@@ -719,17 +906,17 @@ var EditorWrapper = (function() {
             }
         }
 
-        EditorWrapper.prototype.toEditor = function(callback) {
-            var ms = getDefault(this.config.swipe_animateMs,500);
+        EditorWrapper.prototype.toEditor = function(callback,_ms) {
+            var ms = getDefault(_ms,getDefault(this.config.swipe_animateMs, 500));
             if (mobile) {
-                $("#wrapper").animate({
-                    scrollLeft: $("#in").width()
+                $("#editor_wrapper").animate({
+                    scrollLeft: $("#editor_in").width()
                 }, ms, function() {
                     if (callback) callback();
                 });
             } else {
-                $("#wrapper").animate({
-                    scrollLeft: $("#in").offset().left
+                $("#editor_wrapper").animate({
+                    scrollLeft: $("#editor_in").offset().left
                 }, ms, function() {
                     if (callback) callback();
                 });
@@ -737,27 +924,27 @@ var EditorWrapper = (function() {
         }
 
 
-        EditorWrapper.prototype.toToc = function(callback) {
+        EditorWrapper.prototype.toToc = function(callback,_ms) {
             this.editor.getInputField().blur();
             if (mobile) {
                 this.doRender(true);
             }
-            var ms = getDefault(this.config.swipe_animateMs,500);
-            $("#wrapper").animate({
+            var ms = getDefault(_ms,getDefault(this.config.swipe_animateMs, 500));
+            $("#editor_wrapper").animate({
                 scrollLeft: 0
             }, ms, function() {
                 if (callback) callback();
             });
         }
 
-        EditorWrapper.prototype.toPreview = function(callback) {
+        EditorWrapper.prototype.toPreview = function(callback,_ms) {
             if (mobile) {
                 this.editor.getInputField().blur();
                 this.doRender(true);
                 this.doSync();
-				var ms = getDefault(this.config.swipe_animateMs,500);
-                $("#wrapper").animate({
-                    scrollLeft: $("#out")[0].offsetLeft
+				var ms = getDefault(_ms,getDefault(this.config.swipe_animateMs, 500));
+                $("#editor_wrapper").animate({
+                    scrollLeft: $("#editor_out")[0].offsetLeft
                 }, ms, function() {
                     if (callback) callback();
                 });
@@ -769,16 +956,16 @@ var EditorWrapper = (function() {
         function initInnerBar(wrapper) {
             var innerBar = wrapper.innerBar;
             var editor = wrapper.editor;
-			var config = wrapper.config;
+            var config = wrapper.config;
 
-            var innerBarElement = $("#innerBar");
-            var icons = config.innerBar_icons || ['emoji','heading', 'bold', 'italic', 'quote', 'strikethrough', 'link', 'code', 'code-block', 'uncheck', 'check', 'table', 'undo', 'redo', 'close'];
+            var innerBarElement = $("#editor_innerBar");
+            var icons = config.innerBar_icons || ['emoji', 'heading', 'bold', 'italic', 'quote', 'strikethrough', 'link', 'code', 'code-block', 'uncheck', 'check', 'table', 'undo', 'redo', 'close'];
             var ios = CodeMirror.browser.ios;
             for (var i = 0; i < icons.length; i++) {
                 var icon = icons[i];
-				if (icon == 'emoji'){
-					addEmoji();
-				}
+                if (icon == 'emoji') {
+                    addEmoji();
+                }
                 if (icon == 'heading') {
                     addHeading();
                 }
@@ -822,31 +1009,31 @@ var EditorWrapper = (function() {
                     addTable();
                 }
             }
-			
-			function addEmoji(){
-				innerBar.addIcon('far fa-grin-alt icon', function() {
-					var emojiArray = config.emojiArray || $.trim("😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊 😋 😎 😍 😘 😗 😙 😚 ☺️ 🙂 🤗 🤔 😐 😑 😶 🙄 😏 😣 😥 😮 🤐 😯 😪 😫 😴 😌 😛 😜 😝 🤤 😒 😓 😔 😕 🙃 🤑 😲 ☹️ 🙁 😖 😞 😟 😤 😢 😭 😦 😧 😨 😩 😬 😰 😱 😳 😵 😡 😠 😷 🤒 🤕 🤢 🤧 😇 🤠 🤡 🤥 🤓 😈 👿 👹 👺 💀 👻 👽 🤖 💩 😺 😸 😹 😻 😼 😽 🙀 😿 😾").split(' ');
-					var html = '';
-					for (var i = 0; i < emojiArray.length; i++) {
-						html += '<span data-emoji style="cursor:pointer">' + emojiArray[i]
-						+ '</span>';
-					}
-					swal({
-						html : html
-					})
-					$(Swal.getContent()).find('[data-emoji]').click(function(){
-						var emoji = $(this).text();
-						var text = editor.getSelection();
-						if (text == '') {
-							editor.replaceRange(emoji, editor.getCursor());
-						} else {
-							editor.replaceSelection(emoji);
-						}
-						Swal.close();
-					})
-				});
-				
-			}
+
+            function addEmoji() {
+                innerBar.addIcon('far fa-grin-alt icon', function() {
+                    var emojiArray = config.emojiArray || $.trim("😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊 😋 😎 😍 😘 😗 😙 😚 ☺️ 🙂 🤗 🤔 😐 😑 😶 🙄 😏 😣 😥 😮 🤐 😯 😪 😫 😴 😌 😛 😜 😝 🤤 😒 😓 😔 😕 🙃 🤑 😲 ☹️ 🙁 😖 😞 😟 😤 😢 😭 😦 😧 😨 😩 😬 😰 😱 😳 😵 😡 😠 😷 🤒 🤕 🤢 🤧 😇 🤠 🤡 🤥 🤓 😈 👿 👹 👺 💀 👻 👽 🤖 💩 😺 😸 😹 😻 😼 😽 🙀 😿 😾").split(' ');
+                    var html = '';
+                    for (var i = 0; i < emojiArray.length; i++) {
+                        html += '<span data-emoji style="cursor:pointer">' + emojiArray[i] +
+                            '</span>';
+                    }
+                    swal({
+                        html: html
+                    })
+                    $(Swal.getContent()).find('[data-emoji]').click(function() {
+                        var emoji = $(this).text();
+                        var text = editor.getSelection();
+                        if (text == '') {
+                            editor.replaceRange(emoji, editor.getCursor());
+                        } else {
+                            editor.replaceSelection(emoji);
+                        }
+                        Swal.close();
+                    })
+                });
+
+            }
 
             function addHeading() {
                 innerBar.addIcon('fas fa-heading icon', function() {
@@ -1091,18 +1278,16 @@ var EditorWrapper = (function() {
                 innerBar.addIcon('fas fa-table icon', function() {
                     innerBar.hide();
                     swal({
-                        html: '<input id="swal-input1" class="swal2-input" placeholder="行">' +
-                            '<input id="swal-input2" class="swal2-input" placeholder="列">',
+                        html: '<input class="swal2-input" placeholder="行">' +
+                            '<input class="swal2-input" placeholder="列">',
                         preConfirm: function() {
                             return new Promise(function(resolve) {
+								var inputs = $(Swal.getContent()).find('input');
                                 resolve([
-                                    $('#swal-input1').val(),
-                                    $('#swal-input2').val()
+                                    inputs.eq(0).val(),  
+									inputs.eq(1).val()
                                 ])
                             })
-                        },
-                        onOpen: function() {
-                            $('#swal-input1').focus()
                         }
                     }).then(function(result) {
                         var value = result.value;
@@ -1145,9 +1330,12 @@ var EditorWrapper = (function() {
                 bar.show();
             }
 
-            var keyboardTimer;
+			wrapper.eventHandlers.push({name:'remove',handler:function(){
+				if(keyboardTimer){
+					clearInterval(keyboardTimer);
+				}
+			}})
             var mobileCursorActivityHandler = function(bar) {
-                $("html, body").scrollTop(0);
                 var lh = editor.defaultTextHeight();
                 var top = editor.cursorCoords(true, 'local').top;
                 var scrollTo = top -
@@ -1163,7 +1351,7 @@ var EditorWrapper = (function() {
                     if (elem[0].scrollHeight - elem.scrollTop() -
                         elem.outerHeight() < 0) {
                         var top = editor.cursorCoords(true).top - 2 * lh -
-                            bar.height() - $("#toolbar").height();
+                            bar.height() - $("#editor_toolbar").height();
                         if (top > 0) {
                             innerBarElement.css({
                                 "top": (editor.cursorCoords(true).top - 2 *
@@ -1192,34 +1380,7 @@ var EditorWrapper = (function() {
                             }, 50)
                         }
 
-                        if (ios) {
-                            showBar();
-                        } else {
-                            if (keyboardDetector.isOpen) {
-                                showBar();
-                            } else {
-                                if (keyboardTimer) {
-                                    waitTime = 0;
-                                    clearInterval(keyboardTimer);
-                                }
-                                keyboardTimer = setInterval(function() {
-                                    if (keyboardDetector.isOpen) {
-                                        waitTime = 0;
-                                        clearInterval(keyboardTimer);
-                                        showBar();
-                                    } else {
-                                        waitTime += 20;
-                                        if (waitTime >= 1020) {
-                                            waitTime = 0;
-                                            clearInterval(keyboardTimer);
-                                            showBar();
-                                        }
-                                    }
-                                }, 20);
-                            }
-                        }
-
-
+                        showBar();
                     }
 
                 }
@@ -1252,32 +1413,32 @@ var EditorWrapper = (function() {
                     }
                     var applyAfterResize = function() {
                         if (!ios && originalPotion !== false) {
-                            var wasWithKeyboard = $('body').hasClass('view-withKeyboard');
+                            var wasWithKeyboard = $(wrapper.wrapperElement).hasClass('view-withKeyboard');
                             var nowWithKeyboard = false;
                             var diff = Math.abs(originalPotion - ($(window).width() + $(window).height()));
                             if (diff > 100) nowWithKeyboard = true;
-                            $('body').toggleClass('view-withKeyboard', nowWithKeyboard);
+                            $(wrapper.wrapperElement).toggleClass('view-withKeyboard', nowWithKeyboard);
                             if (wasWithKeyboard != nowWithKeyboard) {
                                 onKeyboardOnOff(nowWithKeyboard);
                             }
                         }
                     }
+					
+					wrapper.eventHandlers.push({name:'remove',handler:function(){
+						 $(window).off('resize orientationchange', applyAfterResize);
+					}})
 
-                    $(window).on('resize orientationchange', function() {
-                        applyAfterResize();
-                    });
+                    $(window).on('resize orientationchange', applyAfterResize);
 
                     return {
                         isOpen: keyboardOpen
                     }
                 })();
-
-                editor.on('scroll', function() {
-                    $("html, body").scrollTop(0);
-                })
+				
                 editor.on('cursorActivity', function() {
                     mobileCursorActivityHandler(innerBar);
                 });
+				
                 editor.getScrollerElement().addEventListener('touchmove', function(evt) {
                     innerBar.hide();
                 });
@@ -1286,15 +1447,40 @@ var EditorWrapper = (function() {
 
         function initToolbar(wrapper) {
             var editor = wrapper.editor;
-			var theme = wrapper.theme;
+            var theme = wrapper.theme;
             var cm = editor;
-			var config = wrapper.config;
-            ////////////////////store 
-            var Store = (function() {
-                function Store(key) {
-                    this.key = key;
-                }
-                Store.prototype.addDocument = function(title, content) {
+            var config = wrapper.config;
+            ////////////////////backup 
+			var Backup = (function(){
+				
+				function Backup(key){
+					this.key = key;
+					var me = this;
+					wrapper.editor.on('change', function() {
+						if (me.autoSaveTimer) {
+							clearTimeout(me.autoSaveTimer);
+						}
+						me.autoSaveTimer = setTimeout(function() {
+							if (me.docName) {
+								me.addDocument(me.docName, wrapper.getValue());
+							} else {
+								me.addDocument('default', wrapper.getValue());
+							}
+						}, getDefault(config.toolbar_autoSaveMs, 500));
+					});
+					wrapper.eventHandlers.push({name:'remove',handler:function(){
+						if (me.autoSaveTimer) {
+							clearTimeout(me.autoSaveTimer);
+						}
+					}});
+					wrapper.eventHandlers.push({name:'load',handler:function(){
+						setTimeout(function(){
+							me.loadLastDocument();
+						},100)
+					}});
+				}
+				
+				Backup.prototype.addDocument = function(title, content) {
                     var documents = this.getDocuments();
                     deleteDocumentByTitle(documents, title);
                     documents.push({
@@ -1304,14 +1490,18 @@ var EditorWrapper = (function() {
                     });
                     storeDocuments(this.key, documents);
                 }
-
-                Store.prototype.deleteDocument = function(title) {
+				
+				Backup.prototype.deleteDocument = function(title) {
+					var doc = this.getDocument(title);
+					if(doc != null && this.docName == doc.title){
+						this.newDocument();
+					}
                     var documents = this.getDocuments();
                     deleteDocumentByTitle(documents, title);
                     storeDocuments(this.key, documents);
                 }
 
-                Store.prototype.getDocument = function(title) {
+                Backup.prototype.getDocument = function(title) {
                     var documents = this.getDocuments();
                     for (var i = documents.length - 1; i >= 0; i--) {
                         if (documents[i].title == title) {
@@ -1321,7 +1511,7 @@ var EditorWrapper = (function() {
                     return null;
                 }
 
-                Store.prototype.getDocuments = function() {
+                Backup.prototype.getDocuments = function() {
                     var content = localStorage.getItem(this.key);
                     if (content == null) {
                         return [];
@@ -1329,7 +1519,7 @@ var EditorWrapper = (function() {
                     return $.parseJSON(content);
                 }
 
-                Store.prototype.getLastDocument = function() {
+                Backup.prototype.getLastDocument = function() {
                     var documents = this.getDocuments();
                     documents.sort(function(a, b) {
                         var ta = a.time;
@@ -1338,7 +1528,62 @@ var EditorWrapper = (function() {
                     });
                     return documents.length > 0 ? documents[0] : null;
                 }
-
+				
+				Backup.prototype.loadLastDocument = function() {
+					var doc = this.getLastDocument();
+					loadDocument(this,doc);
+                }
+				
+				Backup.prototype.loadDocument = function(title) {
+					var doc = this.getDocument(title);
+					loadDocument(this,doc);
+                }
+				
+				function loadDocument(backup,doc){
+					if (doc != null) {
+						if (doc.title != 'default')
+							backup.docName = doc.title;
+						else
+							backup.docName = undefined;
+						wrapper.setValue(doc.content);
+						//代码高亮的同步预览中，由于codemirror只渲染当前视窗，因此会出现不同步的现象
+						//可以调用CodeMirror.renderAllDoc，但是这个方法在大文本中速度很慢，可以选择关闭
+						if(wrapper.syncEnable !== false && config.renderAllDocEnable !== false){
+							wrapper.editor.renderAllDoc(0);
+						}
+					}
+				}
+				
+				Backup.prototype.newDocument = function() {
+					this.docName = undefined;
+					wrapper.setValue("");
+                }
+				
+				Backup.prototype.backup = function() {
+					if(this.docName){
+						this.addDocument(this.docName,wrapper.getValue());
+						this.deleteDocument('default');
+						swal('保存成功');
+					} else {
+						var me = this;
+						async function requestName() {
+							const {
+								value: name
+							} = await Swal.fire({
+								title: '标题',
+								input: 'text',
+								showCancelButton: true
+							})
+							if (name) {
+								me.addDocument(name, wrapper.getValue());
+								me.docName = name;
+								me.deleteDocument('default');
+								swal('保存成功');
+							}
+						}
+						requestName();
+					}
+                }
 
                 function deleteDocumentByTitle(documents, title) {
                     for (var i = documents.length - 1; i >= 0; i--) {
@@ -1353,13 +1598,12 @@ var EditorWrapper = (function() {
                     var json = JSON.stringify(documents);
                     localStorage.setItem(key, json);
                 }
-
-                return {
-                    create: function(key) {
-                        return new Store(key);
-                    }
-                }
-            })();
+				
+				return {create : function(key){
+					return new Backup(key);
+				}}
+			})();
+			
             var themeMode = (function() {
                 var toolbarHandler = function(e) {
                     if ($(e.target).hasClass('fa-cog')) {
@@ -1464,10 +1708,11 @@ var EditorWrapper = (function() {
                         });
                         if (_theme) {
                             theme.editor.theme = _theme;
-                            theme.loadEditorTheme(function(_theme) {
+							theme.render();
+                            loadEditorTheme(theme,function(_theme) {
                                 setTimeout(function() {
                                     editor.setOption("theme", _theme);
-                                    var bgColor = window.getComputedStyle(document.body.querySelector('.CodeMirror'), null).getPropertyValue('background-color');
+                                    var bgColor = window.getComputedStyle(editor.getWrapperElement(), null).getPropertyValue('background-color');
                                     theme.inCss.background = bgColor;
                                     theme.render();
                                     theme.store();
@@ -1519,31 +1764,31 @@ var EditorWrapper = (function() {
                         id: 'colorpicker-css',
                         type: 'text/css',
                         rel: 'stylesheet',
-                        href: rootPath+'static/heather/colorpicker/dist/css/bootstrap-colorpicker.min.css'
+                        href: config.res_colorpickerCss || 'colorpicker/dist/css/bootstrap-colorpicker.min.css'
                     });
                     $('<script>').appendTo('body').attr({
                         id: 'colorpicker-js',
-                        src: rootPath+'static/heather/colorpicker/dist/js/bootstrap-colorpicker.min.js'
+                        src: config.res_colorpickerJs || 'colorpicker/dist/js/bootstrap-colorpicker.min.js'
                     });
                     editor.setOption('readOnly', true);
-                    $("#searchHelper input").attr('value', '点击设置字体颜色');
-                    $("#searchHelper").children().addClass('noclick');
+                    $("#editor_searchHelper input").attr('value', '点击设置字体颜色');
+                    $("#editor_searchHelper").children().addClass('noclick');
                     searchHelper.show();
-                    $("#searchHelper").on('click', searchHelprHandler);
-                    $("#toolbar").children().addClass('noclick');
+                    $("#editor_searchHelper").on('click', searchHelprHandler);
+                    $("#editor_toolbar").children().addClass('noclick');
                     $(configIcon).removeClass('noclick');
-                    $("#toolbar").on('click', toolbarHandler);
-                    $("#stat").text("点击设置字体颜色").show();
-                    $("#stat").on('click', statHandler);
+                    $("#editor_toolbar").on('click', toolbarHandler);
+                    $("#editor_stat").text("点击设置字体颜色").show();
+                    $("#editor_stat").on('click', statHandler);
                     editor.on('cursorActivity', changeThemeHandler);
-                    $("#out").on('click', '.mermaid', changeMemaidThemeHandler);
-                    cloneBar = $("#innerBar").clone();
+                    $("#editor_out").on('click', '.mermaid', changeMemaidThemeHandler);
+                    cloneBar = $("#editor_innerBar").clone();
                     cloneBar.css({
                         'visibility': 'visible',
                         'top': '100px'
                     });
                     cloneBar.children().addClass('noclick');
-                    $("#in").append(cloneBar);
+                    $("#editor_in").append(cloneBar);
                     cloneBar.on('click', barHandler);
                 }
 
@@ -1551,14 +1796,14 @@ var EditorWrapper = (function() {
                     isThemeMode = false;
                     cloneBar.off('click', barHandler);
                     cloneBar.remove();
-                    $("#searchHelper").off('click', searchHelprHandler);
-                    $("#searchHelper input").removeAttr('value');
+                    $("#editor_searchHelper").off('click', searchHelprHandler);
+                    $("#editor_searchHelper input").removeAttr('value');
                     searchHelper.hide();
                     editor.off('cursorActivity', changeThemeHandler);
-                    $("#toolbar").off('click', toolbarHandler);
-                    $("#stat").off('click', statHandler);
-                    $("#out").off('click', '.mermaid', changeMemaidThemeHandler);
-                    $("#stat").text("").hide();
+                    $("#editor_toolbar").off('click', toolbarHandler);
+                    $("#editor_stat").off('click', statHandler);
+                    $("#editor_out").off('click', '.mermaid', changeMemaidThemeHandler);
+                    $("#editor_stat").text("").hide();
                     $('.noclick').removeClass('noclick');
                     editor.setOption('readOnly', false);
                 }
@@ -1569,12 +1814,13 @@ var EditorWrapper = (function() {
                         const {
                             value: color
                         } = await Swal.fire({
-                            html: '<div id="colorpicker"></div>',
+                            html: '<div class="_colorpicker"></div>',
                             showCancelButton: true
                         });
                     }
                     getColor();
-                    $('#colorpicker').colorpicker({
+					var colorpickerElement = $(Swal.getContent()).find('._colorpicker');
+                    colorpickerElement.colorpicker({
                         inline: true,
                         container: true,
                         template: '<div class="colorpicker">' +
@@ -1587,9 +1833,9 @@ var EditorWrapper = (function() {
                             '</div>'
                     });
                     if (currentColor) {
-                        $('#colorpicker').colorpicker('setValue', currentColor);
+                        colorpickerElement.colorpicker('setValue', currentColor);
                     }
-                    $('#colorpicker').on('colorpickerChange', function(event) {
+                    colorpickerElement.on('colorpickerChange', function(event) {
                         if (event.color && callback) {
                             callback(event.color.toString());
                         }
@@ -1613,35 +1859,35 @@ var EditorWrapper = (function() {
 
             var searchHelper = (function() {
                 var html = '';
-                html += '<div id="searchHelper" style="position:absolute;bottom:0px;width:100%;z-index:99;display:none;padding:20px;padding-bottom:5px">';
+                html += '<div id="editor_searchHelper" style="position:absolute;bottom:10px;width:100%;z-index:99;display:none;padding:20px;padding-bottom:5px">';
                 html += '<div style="width:100%;text-align:right;margin-bottom:5px"><i class="fas fa-times icon"  style="cursor:pointer;margin-right:0px"></i></div>';
                 html += ' <form>';
                 html += '<div class="input-group mb-3">';
-                html += '<input type="text" style="outline: 0;border-width: 0 0 2px;" class="form-control" placeholder="查找内容" >';
+                html += '<input type="text" style="border:none" class="form-control" placeholder="查找内容" >';
                 html += '<div class="input-group-append" data-search>';
-                html += ' <span class="input-group-text" style="outline: 0;border-width: 0 0 2px;"><i class="fas fa-search " style="cursor:pointer"></i></span>';
+                html += ' <span class="input-group-text" ><i class="fas fa-search " style="cursor:pointer"></i></span>';
                 html += ' </div>';
                 html += '</div>';
                 html += '<div class="input-group mb-3" style="display:none">';
-                html += '<input type="text" style="outline: 0;border-width: 0 0 2px;" class="form-control" placeholder="替换内容" >';
+                html += '<input type="text" style="border:none" class="form-control" placeholder="替换内容" >';
                 html += '<div class="input-group-append" data-replace style="cursor:pointer">';
-                html += ' <span class="input-group-text" style="outline: 0;border-width: 0 0 2px;"><i class="fas fa-exchange-alt" ></i></span>';
+                html += ' <span class="input-group-text" ><i class="fas fa-exchange-alt" ></i></span>';
                 html += ' </div>';
                 html += '<div class="input-group-append" data-replace-all style="cursor:pointer">';
-                html += ' <span class="input-group-text" style="outline: 0;border-width: 0 0 2px;"><i class="fas fa-sync-alt" ></i></span>';
+                html += ' <span class="input-group-text" ><i class="fas fa-sync-alt" ></i></span>';
                 html += ' </div>';
                 html += '<div class="input-group-append" data-up style="cursor:pointer">';
-                html += ' <span class="input-group-text" style="outline: 0;border-width: 0 0 2px;"><i class="fas fa-arrow-up" ></i></span>';
+                html += ' <span class="input-group-text" ><i class="fas fa-arrow-up" ></i></span>';
                 html += ' </div>';
                 html += '<div class="input-group-append" data-down style="cursor:pointer">';
-                html += ' <span class="input-group-text" style="outline: 0;border-width: 0 0 2px;"><i class="fas fa-arrow-down" ></i></span>';
+                html += ' <span class="input-group-text" ><i class="fas fa-arrow-down" ></i></span>';
                 html += ' </div>';
                 html += '</div>';
                 html += '</form>';
                 html += '  </div>';
 
                 var ele = $(html);
-                $("#in").append(ele);
+                $("#editor_in").append(ele);
 
 
                 ele.on('click', '[data-search]', function() {
@@ -1812,14 +2058,15 @@ var EditorWrapper = (function() {
                     });
                 }
 
-                function parseString(string) {
-                    return string.replace(/\\(.)/g,
-                        function(_, ch) {
-                            if (ch == "n") return "\n"
-                            if (ch == "r") return "\r"
-                            return ch
-                        })
-                }
+				function parseString(string) {
+					return string.replace(/\\([nrt\\])/g, function(match, ch) {
+					  if (ch == "n") return "\n"
+					  if (ch == "r") return "\r"
+					  if (ch == "t") return "\t"
+					  if (ch == "\\") return "\\"
+					  return match
+					})
+				}
 
                 function parseQuery(query) {
                     if (query == '') return query;
@@ -1872,12 +2119,11 @@ var EditorWrapper = (function() {
             })();
 
             var configIcon;
-            var icons = config.toolbar_icons || ['toc', 'innerBar', 'backup', 'new', 'search', 'config'];
-            var store;
+            var icons = config.toolbar_icons || ['toc', 'innerBar', 'backup', 'search', 'config', 'expand'];
             for (var i = 0; i < icons.length; i++) {
                 var icon = icons[i];
                 if (icon == 'toc') {
-                    wrapper.toolbar.addIcon('fas fa-book icon mobile-hide', function() {
+                    wrapper.toolbar.addIcon('fas fa-book icon mobile-hide nofullscreen', function() {
                         toggleToc();
                     });
                 }
@@ -1890,12 +2136,6 @@ var EditorWrapper = (function() {
                     });
                 }
 
-                if (icon == 'new') {
-                    wrapper.toolbar.addIcon('far fa-file icon', function(ele) {
-                        newDocument();
-                    });
-                }
-
                 if (icon == 'search') {
                     wrapper.toolbar.addIcon('fas fa-search icon', function() {
                         editor.setOption('readOnly', true)
@@ -1904,21 +2144,24 @@ var EditorWrapper = (function() {
                 }
 
                 if (icon == 'backup') {
-                    store = Store.create('markdown-documents');
-                    loadLastDocument();
-                    autoSave();
-                    wrapper.toolbar.addIcon('fas icon fa-upload', function(ele) {
-                        backup();
+                    var backup = Backup.create('markdown-documents');
+                    wrapper.toolbar.addIcon('fas icon fa-upload ', function(ele) {
+                        backup.backup();
                     });
-                    wrapper.toolbar.addIcon('fas icon fa-download', function(ele) {
-                        selectDocuments();
+                    wrapper.toolbar.addIcon('fas icon fa-download ', function(ele) {
+                        selectDocuments(backup);
                     });
+					wrapper.toolbar.addIcon('far fa-file icon nofullscreen', function(ele) {
+                        newDocument(backup);
+                    });
+					wrapper.backup = backup;
                 }
 
                 if (icon == 'config') {
-                    wrapper.toolbar.addIcon('fas icon fa-cog', function() {
-                        swal({
-                            html: '<input type="checkbox"  />主题编辑模式 <p style="margin-top:0.5rem"><button style="margin-bottom:0.5rem" class="alert alert-info">自定义css</button></p>'
+                    wrapper.toolbar.addIcon('fas icon fa-cog nofullscreen', function() {
+                        
+						swal({
+                            html: '<input type="checkbox"  />主题编辑模式 <p style="margin-top:0.5rem"><button style="margin-bottom:0.5rem;border: 0;border-radius: .25em;background: initial;background-color: #3085d6;color: #fff;font-size: 1.0625em;margin: .3125em;padding: .625em 2em;font-weight: 500;box-shadow: none;">自定义css</button></p>'
                         });
                         var cb = $(Swal.getContent().querySelector('input'));
                         cb.prop('checked', themeMode.isThemeMode);
@@ -1931,6 +2174,32 @@ var EditorWrapper = (function() {
                     }, function(ele) {
                         configIcon = ele;
                     })
+                }
+
+
+                if (icon == 'expand') {
+                    wrapper.toolbar.addIcon('fas fa-expand icon mobile-hide', function(ele) {
+						if ($(ele).hasClass('fa-expand')) {
+							wrapper.requestFullScreen();
+						} else {
+							wrapper.exitFullScreen();
+						}
+                    }, function(ele) {
+                        if (screenfull.enabled) {
+							
+							var toggleHandler = function() {
+                                if (screenfull.isFullscreen) {
+                                    $(ele).removeClass('fa-expand').addClass('fa-compress');
+                                } else {
+                                    $(ele).removeClass('fa-compress').addClass('fa-expand');
+                                }
+                            };
+							wrapper.eventHandlers.push({name:'remove',handler:function(){
+								 screenfull.off('change',toggleHandler);
+							}})
+                            screenfull.on('change', toggleHandler);
+                        }
+                    });
                 }
 
             }
@@ -1960,33 +2229,73 @@ var EditorWrapper = (function() {
                     $(ele).addClass("fa-check-square").removeClass("fa-square");
                 }
             }
+			
+			function selectDocuments(backup) {
+				var documents = backup.getDocuments();
+				for (var i = documents.length - 1; i >= 0; i--) {
+					if (documents[i].title == 'default') {
+						documents.splice(i, 1);
+						break;
+					}
+				}
+				if (documents.length == 0) {
+					swal('没有保存的文档');
+				} else {
+					var html = '<table class="table">';
+					for (var i = 0; i < documents.length; i++) {
+						var doc = documents[i];
+						html += '<tr><td>' + doc.title + '</td><td><i class="fas fa-times" data-title="' + doc.title + '" style="margin-right:20px;cursor:pointer"></i><i data-title="' + doc.title + '" class="fas fa-arrow-down" style=";cursor:pointer"></i></td><tr>';
+					}
+					html += '</table>';
+					swal({
+						html: html
+					});
+					$(Swal.getContent()).find('.fa-times').click(function() {
+						var title = $(this).data('title');
+						Swal.fire({
+							title: '确定要删除吗?',
+							type: 'warning',
+							showCancelButton: true,
+							confirmButtonColor: '#3085d6',
+							cancelButtonColor: '#d33'
+						}).then((result) => {
+							if (result.value) {
+								backup.deleteDocument(title);
+								selectDocuments(backup);
+							}
+						})
+					})
+					
+					$(Swal.getContent()).find('.fa-arrow-down').click(function() {
+						var title = $(this).data('title');
+						Swal.fire({
+							title: '确定要加载吗?',
+							type: 'warning',
+							showCancelButton: true,
+							confirmButtonColor: '#3085d6',
+							cancelButtonColor: '#d33'
+						}).then((result) => {
+							if (result.value) {
+								backup.loadDocument(title);
+							}
+						})
+					})
+				}
+			}
 
-            var docName;
-
-            function backup() {
-                if (!docName) {
-                    async function save() {
-                        const {
-                            value: name
-                        } = await Swal.fire({
-                            title: '标题',
-                            input: 'text',
-                            showCancelButton: true
-                        })
-                        if (name) {
-                            store.addDocument(name, wrapper.editor.getValue());
-                            docName = name;
-                            store.deleteDocument('default');
-                            swal('保存成功');
-                        }
-                    }
-                    save();
-                } else {
-                    store.addDocument(docName, wrapper.editor.getValue());
-                    store.deleteDocument('default');
-                    swal('保存成功');
-                }
-            }
+			function newDocument(backup) {
+				Swal.fire({
+					title: '要打开一篇新文档吗?',
+					type: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33'
+				}).then((result) => {
+					if (result.value) {
+						backup.newDocument();
+					}
+				})
+			}
 
             function writeCustomCss() {
                 async function write() {
@@ -2007,128 +2316,10 @@ var EditorWrapper = (function() {
                 write();
             }
 
-            var autoSaveTimer;
-
-            function autoSave() {
-                wrapper.editor.on('change', function() {
-                    if (autoSaveTimer) {
-                        clearTimeout(autoSaveTimer);
-                    }
-                    autoSaveTimer = setTimeout(function() {
-                        if (docName) {
-                            store.addDocument(docName, wrapper.editor.getValue());
-                        } else {
-                            store.addDocument('default', wrapper.editor.getValue());
-                        }
-                    }, getDefault(config.toolbar_autoSaveMs,500));
-                });
-            }
-
-            function loadLastDocument() {
-                var doc = store.getLastDocument();
-                if (doc != null) {
-                    if (doc.title != 'default')
-                        docName = doc.title;
-                    wrapper.editor.setValue(doc.content);
-					wrapper.editor.renderAllDoc(0);
-                }
-            }
-
-
-
-
-            function selectDocuments() {
-                var documents = store.getDocuments();
-                for (var i = documents.length - 1; i >= 0; i--) {
-                    if (documents[i].title == 'default') {
-                        documents.splice(i, 1);
-                        break;
-                    }
-                }
-                if (documents.length == 0) {
-                    swal('没有保存的文档');
-                } else {
-                    var html = '<table class="table" id="doc-table">';
-                    for (var i = 0; i < documents.length; i++) {
-                        var doc = documents[i];
-                        html += '<tr><td>' + doc.title + '</td><td><i class="fas fa-times" data-title="' + doc.title + '" style="margin-right:20px;cursor:pointer"></i><i data-title="' + doc.title + '" class="fas fa-arrow-down" style=";cursor:pointer"></i></td><tr>';
-                    }
-                    html += '</table>';
-                    swal({
-                        html: html
-                    });
-
-                }
-            }
-
-            function newDocument() {
-                Swal.fire({
-                    title: '要打开一篇新文档吗?',
-                    type: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33'
-                }).then((result) => {
-                    if (result.value) {
-                        docName = undefined;
-                        wrapper.editor.setValue('');
-                    }
-                })
-            }
-
-            $(document).on('click', '#doc-table .fa-times', function() {
-                var title = $(this).data('title');
-                Swal.fire({
-                    title: '确定要删除吗?',
-                    type: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33'
-                }).then((result) => {
-                    if (result.value) {
-                        store.deleteDocument(title);
-                        if (title == docName) {
-                            var doc = store.getLastDocument();
-                            docName = undefined;
-                            if (doc == null) {
-                                wrapper.editor.setValue('');
-                            } else {
-                                if (doc.title != 'default')
-                                    docName = doc.title;
-                                wrapper.editor.setValue(doc.content);
-                            }
-                        }
-                        selectDocuments();
-                    }
-                })
-
-            })
-
-            $(document).on('click', '#doc-table .fa-arrow-down', function() {
-                var title = $(this).data('title');
-                Swal.fire({
-                    title: '确定要加载吗?',
-                    type: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33'
-                }).then((result) => {
-                    if (result.value) {
-                        var doc = store.getDocument(title);
-                        if (doc != null) {
-                            docName = doc.title;
-                            wrapper.editor.setValue(doc.content);
-                        } else {
-                            swal('要加载的文档不存在');
-                        }
-                    }
-                })
-
-            })
         }
 
         function renderToc() {
-            var headings = document.getElementById('out').querySelectorAll("h1, h2, h3, h4, h5, h6");
+            var headings = document.getElementById('editor_out').querySelectorAll("h1, h2, h3, h4, h5, h6");
             var toc = [];
             for (var i = 0; i < headings.length; i++) {
                 var head = headings[i];
@@ -2174,17 +2365,22 @@ var EditorWrapper = (function() {
             }
             try {
                 var div = document.createElement("div");
-                div.setAttribute('id', "toc");
+                div.setAttribute('id', "editor_toc");
                 div.innerHTML = html;
-                morphdom($("#toc")[0], div);
+                morphdom($("#editor_toc")[0], div);
             } catch (e) {
-                $("#toc").html(html)
+                $("#editor_toc").html(html)
             };
         }
-
+		
+		var wrapperInstance = {};
         return {
             create: function(config) {
-                return new EditorWrapper(config);
+				if(wrapperInstance.wrapper){
+					wrapperInstance.wrapper.remove();
+				}
+				wrapperInstance.wrapper = new EditorWrapper(config)
+                return wrapperInstance.wrapper;
             }
         }
     })();

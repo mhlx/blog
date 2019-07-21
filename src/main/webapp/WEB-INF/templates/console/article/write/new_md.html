@@ -13,26 +13,30 @@
 <link th:href="@{/static/fontawesome-free/css/all.min.css}"
 	rel="stylesheet">
 <link rel="stylesheet"
-	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}"
-	th:if="${user != null}">
+	th:href="@{/static/jquery-file-upload/css/jquery.fileupload.css}">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/lib/codemirror.css}">
+<link rel="stylesheet"
+	th:href="@{/static/codemirror/addon/scroll/simplescrollbars.css}">
+<link rel="stylesheet" th:href="@{/static/css/markdown.css}">
+<link rel="stylesheet" th:href="@{/static/heather/style.css}">
 <style>
 .swal2-container.swal2-shown {
-	z-index: 9999999
+	z-index: 99999999
 }
 
 .modal {
-	z-index: 9999998
+	z-index: 99999998
 }
 
 .modal-backdrop {
-	z-index: 9999997
+	z-index: 99999997
 }
 </style>
 </head>
 <body>
 	<textarea id="editor" style="display: none"
 		th:text="${article.content}"></textarea>
-
 
 	<div class="modal fade" id="baseModal" tabindex="-1" role="dialog">
 		<div class="modal-dialog" role="document">
@@ -167,13 +171,38 @@
 		        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 		    }
 	</script>
+		
+	<script>
+		var rootPath = '[[@{/}]]';
+		var root = rootPath;
+	</script>
 	<script th:src="@{/static/sweet2alert/dist/sweetalert2.all.min.js}"></script>
-	<script th:src="@{/static/heather/iframe.js}"></script>
 	<script th:src="@{/static/jquery/jquery.min.js}"></script>
 	<script th:src="@{/static/js/base.js}"></script>
 	<script th:src="@{/static/bootstrap/js/bootstrap.bundle.min.js}"></script>
-	<script th:src="@{/static/heather/js/md.js}"></script>
 	<script th:src="@{/static/console/js/dirChooser.js}"></script>
+	<script th:src="@{/static/heather/js/htmlparser.js}"></script>
+	<script th:src="@{/static/heather/js/morphdom-umd.min.js}"></script>
+	<script th:src="@{/static/heather/highlight/highlight.pack.js}"></script>
+	<!--CodeMirror-->
+	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
+	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
+	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
+	<script th:src="@{/static/codemirror/mode/xml/xml.js}"></script>
+	<script th:src="@{/static/codemirror/mode/markdown/markdown.js}"></script>
+	<script th:src="@{/static/codemirror/mode/gfm/gfm.js}"></script>
+	<script
+		th:src="@{/static/codemirror/addon/selection/mark-selection.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
+	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
+	<script th:src="@{/static/codemirror/addon/edit/continuelist.js}"></script>
+	<script th:src="@{/static/codemirror/addon/scroll/simplescrollbars.js}"></script>
+	<script th:src="@{/static/heather/js/turndown.js}"></script>
+	<script th:src="@{/static/heather/js/turndown-plugin-gfm.js}"></script>
+	<script th:src="@{/static/heather/js/jquery.touchwipe.min.js}"></script>
+	<script th:src="@{/static/heather/js/md.js}"></script>
+	<script th:src="@{/static/heather/js/fullscreen.js}"></script>
+	<script th:src="@{/static/heather/js/all.js}"></script>
 
 	<script type="text/javascript"
 		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
@@ -197,7 +226,6 @@
 	<script
 		th:src="@{/static/jquery-file-upload/js/jquery.fileupload-validate.js}"></script>
 	<script th:src="@{/static/js/file.js}"></script>
-	<script th:src="@{/static/heather/js/htmlparser.js}"></script>
 	<script th:src="@{/static/console/js/article_editor.js}"></script>
 	<script th:src="@{/static/console/js/file_insert.js}"></script>
 </body>

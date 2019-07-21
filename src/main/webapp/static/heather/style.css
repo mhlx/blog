@@ -1,12 +1,159 @@
-* {
+/*from bootstrap 4.3.1*/
+#editor_wrapper *,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+#editor_wrapper .form-control{
+	display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-clip: padding-box;
+    border-radius: .25rem;
+}
+
+#editor_wrapper .form-control:focus {
+    outline-width: 0;
+}
+
+#editor_wrapper .input-group {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  width: 100%;
+}
+
+#editor_wrapper .input-group > .form-control,
+#editor_wrapper .input-group > .form-control-plaintext{
+  position: relative;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  width: 1%;
+  margin-bottom: 0;
+}
+
+#editor_wrapper .input-group-text {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  margin-bottom: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #fff;
+  border: none;
+  border-radius: 0.25rem;
+}
+
+
+#editor_wrapper .input-group > .form-control + .form-control,
+#editor_wrapper .input-group > .form-control + .custom-select,
+#editor_wrapper .input-group > .form-control + .custom-file,
+#editor_wrapper .input-group > .form-control-plaintext + .form-control,
+#editor_wrapper .input-group > .form-control-plaintext + .custom-select,
+#editor_wrapper .input-group > .form-control-plaintext + .custom-file{
+  margin-left: -1px;
+}
+
+#editor_wrapper .input-group > .form-control:focus {
+  z-index: 3;
+}
+
+#editor_wrapper .input-group > .input-group-prepend > .btn,
+#editor_wrapper .input-group > .input-group-prepend > .input-group-text,
+#editor_wrapper .input-group > .input-group-append:not(:last-child) > .btn,
+#editor_wrapper .input-group > .input-group-append:not(:last-child) > .input-group-text,
+#editor_wrapper .input-group > .input-group-append:last-child > .btn:not(:last-child):not(.dropdown-toggle),
+#editor_wrapper .input-group > .input-group-append:last-child > .input-group-text:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+#editor_wrapper .input-group > .input-group-append > .btn,
+#editor_wrapper .input-group > .input-group-append > .input-group-text,
+#editor_wrapper .input-group > .input-group-prepend:not(:first-child) > .btn,
+#editor_wrapper .input-group > .input-group-prepend:not(:first-child) > .input-group-text,
+#editor_wrapper .input-group > .input-group-prepend:first-child > .btn:not(:first-child),
+#editor_wrapper .input-group > .input-group-prepend:first-child > .input-group-text:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+#editor_wrapper .input-group > .form-control:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+#editor_wrapper .input-group > .form-control:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+
+#editor_wrapper .input-group-prepend,
+#editor_wrapper .input-group-append {
+  display: -ms-flexbox;
+  display: flex;
+}
+
+#editor_wrapper .input-group-prepend .btn,
+#editor_wrapper .input-group-append .btn {
+  position: relative;
+  z-index: 2;
+}
+
+#editor_wrapper .input-group-prepend .btn:focus,
+#editor_wrapper .input-group-append .btn:focus {
+  z-index: 3;
+}
+
+#editor_wrapper .input-group-prepend .btn + .btn,
+#editor_wrapper .input-group-prepend .btn + .input-group-text,
+#editor_wrapper .input-group-prepend .input-group-text + .input-group-text,
+#editor_wrapper .input-group-prepend .input-group-text + .btn,
+#editor_wrapper .input-group-append .btn + .btn,
+#editor_wrapper .input-group-append .btn + .input-group-text,
+#editor_wrapper .input-group-append .input-group-text + .input-group-text,
+#editor_wrapper .input-group-append .input-group-text + .btn {
+  margin-left: -1px;
+}
+
+#editor_wrapper .input-group-prepend {
+  margin-right: -1px;
+}
+
+#editor_wrapper .input-group-append {
+  margin-left: -1px;
+}
+#editor_wrapper h1, h2, h3, h4, h5, h6{
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+/*from bootstrap end*/
+
+#editor_wrapper .table{
+	width:100%	
+}
+#editor_wrapper * {
 	-webkit-overflow-scrolling: touch;
 }
 
-.nowrap {
-	white-space: nowrap !important;
-}
-
-.CodeMirror {
+#editor_wrapper .CodeMirror {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -14,18 +161,21 @@
 	bottom: 0;
 	width: auto;
 	height: auto;
-	background-color: #f9f9f7;
 	font-size: 15px;
 	padding-top: 30px;
 }
 
-.CodeMirror-scroll {
+.CodeMirror{
+	background-color:#f9f9f7
+}
+
+#editor_wrapper .CodeMirror-scroll {
 	padding: 10px;
 	box-sizing: border-box;
 	overflow-x: hidden !important;
 }
 
-.icon {
+#editor_wrapper .icon {
 	margin-top: 5px;
 	cursor: pointer;
 	font-size: 16px;
@@ -33,40 +183,25 @@
 	margin-bottom: 5px
 }
 
-.noclick {
+#editor_wrapper .noclick{
 	pointer-events: none
 }
 
-#stat {
+#editor_stat {
 	position: absolute;
 	left: 0;
 	bottom: 0;
 	width: 100%;
 	text-align: right;
 	display: none;
-	z-index: 99999;
+	z-index: 999;
 }
 
-.styled-background {
+#editor_wrapper .styled-background {
 	background-color: #ff7 !important;
 }
 
-body {
-	background-color: #f9f9f7
-}
-
-.wrap {
-	-ms-word-break: break-all;
-	word-break: break-all;
-	/* Non standard for webkit */
-	word-break: break-word;
-	-webkit-hyphens: auto;
-	-moz-hyphens: auto;
-	-ms-hyphens: auto;
-	hyphens: auto;
-}
-
-#toolbar {
+#editor_toolbar {
 	height: 30px;
 	position: absolute;
 	left: 0;
@@ -79,29 +214,23 @@ body {
 	white-space: nowrap;
 }
 
-#wrapper {
+#editor_wrapper {
 	position: absolute;
 	top: 0;
 	left: 0;
 	bottom: 0;
 	width: 100%;
-	height: auto;
-	overflow-x: hidden
-}
-
-#docs {
-	position: absolute;
-	top: 0;
-	left: 0%;
-	bottom: 0;
-	width: 200px;
-	height: auto;
-	overflow: auto;
-	overflow-y: hidden;
+	height: 100%;
 	overflow-x: hidden;
+	z-index: 9999998;
+	background-color:#f9f9f7
 }
 
-#in {
+.swal2-container {
+	z-index: 99999999 !important
+}
+
+#editor_in {
 	position: absolute;
 	top: 0;
 	left: 200px;
@@ -112,7 +241,7 @@ body {
 	display: none;
 }
 
-#out {
+#editor_out {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -129,7 +258,7 @@ body {
 	scrollbar-width: thin
 }
 
-#toc {
+#editor_toc {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -138,10 +267,10 @@ body {
 	overflow: auto;
 	padding: 10px;
 	width: 200px;
-	padding: 10px
+	word-break: break-word;
 }
 
-#toc h1,
+#editor_toc h1,
 h2,
 h3,
 h4,
@@ -150,147 +279,141 @@ h6 {
 	cursor: pointer;
 }
 
-#toc h1 {
+#editor_toc h1 {
 	margin: 1rem 0;
 	font-size: 15px;
 }
 
-#toc h2 {
+#editor_toc h2 {
 	margin: .7rem 0;
 	margin-left: 30px;
 	font-size: 14px;
 }
 
-#toc h3 {
+#editor_toc h3 {
 	margin: .6rem 0;
 	margin-left: 45px;
 	font-size: 13px;
 }
 
-#toc h4 {
+#editor_toc h4 {
 	margin: .5rem 0;
 	margin-left: 60px;
 	font-size: 12px;
 }
 
-#toc h5 {
+#editor_toc h5 {
 	margin: .4rem 0;
 	margin-left: 75px;
 	font-size: 11px;
 }
 
-#toc h6 {
+#editor_toc h6 {
 	margin: 0.3rem 0;
 	margin-left: 90px;
 	font-size: 10px;
 }
 
-#in .CodeMirror-code {
+#editor_in .CodeMirror-code {
 	height: auto;
 	margin-bottom: 301px;
 }
 
-#helpModal td {
-	white-space: nowrap !important;
-}
-
-#out img {
+#editor_out img {
 	max-height: 200px;
 }
 
 @media (min-width:768px) {
-	
-	.pc-hide {
-		display: none;
-	}
-	
-	 ::-webkit-scrollbar {
+	#editor_wrapper ::-webkit-scrollbar {
 		width: 6px;
 	}
-	 ::-webkit-scrollbar-track {
+	#editor_wrapper ::-webkit-scrollbar-track {
 		box-shadow: none;
 		border-radius: 3px;
 	}
-	 ::-webkit-scrollbar-thumb {
+	#editor_wrapper ::-webkit-scrollbar-thumb {
 		border-radius: 10px;
 		background-color: #bcd;
+	}
+	#editor_wrapper .pc-hide {
+		display: none;
 	}
 }
 
 @media (max-width: 768px) {
-	.mobile-hide {
+	#editor_wrapper .mobile-hide {
 		display: none;
 	}
-	#in {
+	#editor_in {
 		left: 100%;
 		width: 100%;
 		display: block;
 		visibility: visible
 	}
-	#out {
+	#editor_out {
 		width: 100%;
 		left: 200%;
 		visibility: visible;
 		overflow-y: auto;
 	}
-	#toolbar {
+	#editor_toolbar {
 		height: 45px;
 		width: 100%
 	}
-	.icon {
+	#editor_wrapper .icon {
 		font-size: 30px
 	}
-	.CodeMirror-scroll {
+	#editor_wrapper .CodeMirror-scroll {
 		margin-top: 10px
 	}
-	.CodeMirror {
+	#editor_wrapper .CodeMirror {
 		font-size: 1.5rem;
 		padding-top: 40px;
 	}
-	#stat {
+	#editor_stat {
 		width: 100%
 	}
 	#fullscreen-icon {
 		display: none
 	}
-	#toc-icon {
+	#editor_toc-icon {
 		display: none
 	}
-	#toc h1 {
+	#editor_toc h1 {
 		margin: 1rem 0;
 		font-size: 1.3rem;
 	}
-	#toc h2 {
+	#editor_toc h2 {
 		margin: .7rem 0;
 		margin-left: 40px;
 		font-size: 1.2rem;
 	}
-	#toc h3 {
+	#editor_toc h3 {
 		margin: .6rem 0;
 		margin-left: 60px;
 		font-size: 1.1em;
 	}
-	#toc h4 {
+	#editor_toc h4 {
 		margin: .5rem 0;
 		margin-left: 80px;
 		font-size: 1em;
 	}
-	#toc h5 {
+	#editor_toc h5 {
 		margin: .4rem 0;
 		margin-left: 100px;
 		font-size: 0.9em;
 	}
-	#toc h6 {
+	#editor_toc h6 {
 		margin: 0.3rem 0;
 		margin-left: 120px;
 		font-size: 0.8em;
 	}
-	#toc {
+	#editor_toc {
 		display: block;
 		width: 100%;
 		overflow-y: auto;
 	}
-	#innerBar {
+	#editor_innerBar {
 		white-space: nowrap;
 		max-width: 100% !important;
 		overflow-x: auto;
@@ -299,9 +422,64 @@ h6 {
 	}
 }
 
-#innerBar {
+#editor_innerBar {
 	z-index: 99;
 	padding-left: 10px;
 	padding-right: 10px, visibility:hidden;
 	position: absolute;
+}
+
+.editor_fullscreen #editor_in{
+	position: fixed !important;
+    top: 0px !important;
+    right: 0px !important;
+    bottom: 0px !important;
+    left: 0px !important;
+    box-sizing: border-box !important;
+    min-width: 0px !important;
+    max-width: none !important;
+    min-height: 0px !important;
+    max-height: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+    margin: 0px !important;
+}
+
+.editor_fullscreen #editor_out{
+	display:none
+}
+
+.editor_fullscreen #editor_toc{
+	display:none
+}
+
+.editor_fullscreen #editor_toolbar{
+	padding-left:15%;
+	padding-right:15%;
+}
+.editor_fullscreen #editor_stat{
+	padding-left:15%;
+	padding-right:15%;
+}
+.editor_fullscreen .CodeMirror-lines{
+	padding-left:15%;
+	padding-right:15%;
+}
+.editor_fullscreen #editor_innerBar{
+	padding-left:15%;
+	padding-right:15%;
+}
+.editor_fullscreen #editor_searchHelper{
+	padding-left:15% !important;
+	padding-right:15% !important;
+}
+.editor_fullscreen .nofullscreen{
+	display:none !important;
+}
+
+.editor_noscroll{
+	margin: 0 !important; 
+	height: 100% !important; 
+	overflow:hidden !important;
 }

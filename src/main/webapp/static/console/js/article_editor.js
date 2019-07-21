@@ -1,6 +1,19 @@
-var editor ;
+var wrapper ;
 (function(){
-	editor = Editor.create(document.getElementById("editor"),{toolbar_icons:[ 'toc','innerBar','new','search','config' ],render_beforeRender:function(doc){
+	wrapper = EditorWrapper.create({
+		toolbar_icons:[ 'toc','innerBar','search','config','expand' ],
+		res_mermaid_js:rootPath+'static/heather/js/mermaid.min.js',
+		res_katex_css:rootPath+'static/heather/katex/katex.min.css',
+		res_katex_js:rootPath+'static/heather/katex/katex.min.js',
+		res_hljsTheme:function(theme){
+			return rootPath + 'static/heather/highlight/styles/'+theme+".css"
+		},
+		res_editorTheme:function(theme){
+			return rootPath + 'static/codemirror/theme/'+theme+".css"
+		},
+		res_colorpickerCss:rootPath+'static/heather/colorpicker/dist/css/bootstrap-colorpicker.min.css',
+		res_colorpickerJs:rootPath+'static/heather/colorpicker/dist/js/bootstrap-colorpicker.min.js',
+		render_beforeRender:function(doc){
 		var videos = doc.getElementsByTagName('video');
 		for(var i=videos.length-1;i>=0;i--){
 			var video = videos[i];
@@ -14,65 +27,64 @@ var editor ;
 			insertAfter(doc2.getElementsByTagName('body')[0].getElementsByTagName('div')[0],video);
 			video.parentNode.removeChild(video);
 		}
-	}},function(wrapper){
-		editor = wrapper;
-		wrapper.toolbar.insertIcon('fas fa-backward icon',function(){
-			swal({
-	           title: '你确定要返回吗？',
-	           type: 'warning',
-	           showCancelButton: true,
-	           confirmButtonColor: '#3085d6',
-	           cancelButtonColor: '#d33',
-	           confirmButtonText: '确定!',
-	           cancelButtonText: '取消'
-	       }).then((result) => {
-	           if (result.value) {
-	              window.location.href = rootPath + 'console/article';
-	           }
-	       });
-		},-1);
+	}});
+	
+	wrapper.toolbar.insertIcon('fas fa-backward icon',function(){
+		swal({
+           title: '你确定要返回吗？',
+           type: 'warning',
+           showCancelButton: true,
+           confirmButtonColor: '#3085d6',
+           cancelButtonColor: '#d33',
+           confirmButtonText: '确定!',
+           cancelButtonText: '取消'
+       }).then((result) => {
+           if (result.value) {
+              window.location.href = rootPath + 'console/article';
+           }
+       });
+	},-1);
 
-		wrapper.toolbar.insertIcon('fas fa-save icon',function(){
-			$("#baseModal").modal('show')
-		},2);
-		
-		wrapper.toolbar.insertIcon('fas fa-file icon',function(){
-			files.get(wrapper.editor);
-		},2);
-		
-		var t;
-		wrapper.editor.on('change',function(doc){
-			if(t){
-				clearTimeout(t);
-			}
-			t = setTimeout(function(){
-				save(false);
-			},3000)
-		});
-		
-		wrapper.editor.on('paste', function(editor, evt) {
-			var clipboardData, pastedData;
-			clipboardData = evt.clipboardData || window.clipboardData;
-			var files = clipboardData.files;
-			if (files.length > 0) {
-				var f = files[0];// 上传第一张
-				var type = f.type;
-				if (type.indexOf('image/') == -1) {
-					swal("只能上传图片文件");
-					return;
-				}
-				base64Upload(f);
-			}
-		});
-		
-		var extraKeys = wrapper.editor.getOption('extraKeys');
-		extraKeys['Ctrl-S'] = function(cm){
-			$("#baseModal").modal('show');
+	wrapper.toolbar.insertIcon('fas fa-save icon',function(){
+		$("#baseModal").modal('show')
+	},2);
+	
+	wrapper.toolbar.insertIcon('fas fa-file icon',function(){
+		files.get(wrapper.editor);
+	},2);
+	
+	var t;
+	wrapper.editor.on('change',function(doc){
+		if(t){
+			clearTimeout(t);
 		}
-		wrapper.editor.setOption("extraKeys",extraKeys);
-		
-		wrapper.editor.setValue($("#editor").val());
-	})
+		t = setTimeout(function(){
+			save(false);
+		},3000)
+	});
+	
+	wrapper.editor.on('paste', function(editor, evt) {
+		var clipboardData, pastedData;
+		clipboardData = evt.clipboardData || window.clipboardData;
+		var files = clipboardData.files;
+		if (files.length > 0) {
+			var f = files[0];// 上传第一张
+			var type = f.type;
+			if (type.indexOf('image/') == -1) {
+				swal("只能上传图片文件");
+				return;
+			}
+			base64Upload(f);
+		}
+	});
+	
+	var extraKeys = wrapper.editor.getOption('extraKeys');
+	extraKeys['Ctrl-S'] = function(cm){
+		$("#baseModal").modal('show');
+	}
+	wrapper.editor.setOption("extraKeys",extraKeys);
+	
+	wrapper.setValue($("#editor").val());
 })();
 
 
@@ -139,14 +151,14 @@ var base64Upload = function(f) {
 										+ large + ' "'
 										+ result.name
 										+ '")';
-								editor.editor.replaceSelection(md);
+								wrapper.editor.replaceSelection(md);
 							} else {
 								var md = '['
 										+ result.name
 										+ ']('
 										+ result.url
 										+ ')';
-								editor.editor.replaceSelection(md);
+								wrapper.editor.replaceSelection(md);
 							}
 						}
 					}
@@ -280,7 +292,7 @@ function getArticle() {
 	if ($.trim(article.title) == "") {
 		article.title = "No title";
 	}
-	article.content = editor.editor.getDoc().getValue();
+	article.content = wrapper.editor.getDoc().getValue();
 	article.from = $("#from").val();
 	article.status = $("#status").val();
 	if ($("#level").val() != '') {
