@@ -8,7 +8,7 @@ while(!广电.ISDEAD)
 
 ### 版本
 
-7.1.1 RELEASE
+7.2 RELEASE
 
 ### 功能
 
