@@ -233,7 +233,7 @@
 #editor_in {
 	position: absolute;
 	top: 0;
-	left: 200px;
+	left: 20%;
 	bottom: 0;
 	width: 50%;
 	height: auto;
@@ -245,7 +245,7 @@
 	position: absolute;
 	top: 0;
 	right: 0;
-	left: calc(50% + 200px);
+	left: 70%;
 	bottom: 0;
 	overflow: auto;
 	padding: 10px;
@@ -266,8 +266,10 @@
 	height: auto;
 	overflow: auto;
 	padding: 10px;
-	width: 200px;
+	width: 20%;
 	word-break: break-word;
+	scrollbar-color: #bcd transparent;
+	scrollbar-width: thin
 }
 
 #editor_toc h1,
@@ -429,8 +431,10 @@ h6 {
 	position: absolute;
 }
 
+.editor_fullscreen #editor_toc,
+.editor_fullscreen #editor_out,
 .editor_fullscreen #editor_in{
-	position: fixed !important;
+	position: absoulte !important;
     top: 0px !important;
     right: 0px !important;
     bottom: 0px !important;
@@ -446,12 +450,19 @@ h6 {
     margin: 0px !important;
 }
 
+.editor_fullscreen #editor_in{
+	left:100% !important;
+}
+
 .editor_fullscreen #editor_out{
-	display:none
+	left:200% !important;
+	padding-left:15% !important;
+	padding-right:15% !important;
 }
 
 .editor_fullscreen #editor_toc{
-	display:none
+	padding-left:15% !important;
+	padding-right:15% !important;
 }
 
 .editor_fullscreen #editor_toolbar{

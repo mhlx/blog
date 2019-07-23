@@ -75,9 +75,11 @@ public class H2InitPluginHandler implements PluginHandler {
 		} catch (Exception e) {
 			throw new SystemException(e.getMessage(), e);
 		}
-		String jdbcUrl = dbPros.getProperty("jdbc.jdbcUrl");
+
+		PropertiesLoaderUtils.fillProperties(dbPros, new ClassPathResource("resources/mybatis/dbPros.properties"));
+		String jdbcUrl = dbPros.getProperty("url");
 		if (jdbcUrl == null || !jdbcUrl.startsWith("jdbc:h2:")) {
-			return;
+			throw new RuntimeException("无法找到h2连接池的url属性，请检查dbPros.properties文件");
 		}
 		String user = dbPros.getProperty("jdbc.user", "root");
 		String password = dbPros.getProperty("jdbc.password", "root");
@@ -90,11 +92,6 @@ public class H2InitPluginHandler implements PluginHandler {
 			Properties pros = new Properties();
 			pros.load(is);
 			String version = pros.getProperty("version");
-
-			if (Float.parseFloat(version) > 7.0F) {
-				// 如果历史模板表仍然有template_name字段，清空所有的表数据
-				// TODO
-			}
 
 			Resource resource = new ClassPathResource("me/qyh/blog/plugin/h2init/" + version + ".sql");
 			if (resource.exists()) {

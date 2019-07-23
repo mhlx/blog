@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `blog_tag` (
 );
 
 
-CREATE TABLE IF NOT EXISTS blog_history_template (
+CREATE TABLE IF NOT EXISTS `blog_history_template` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `template_name` varchar(255) NOT NULL,
   `template_tpl` mediumtext NOT NULL,
@@ -150,5 +150,12 @@ CREATE TABLE IF NOT EXISTS `blog_news` (
   `news_write` datetime NOT NULL,
   `news_update` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-)
+);
 
+CREATE TABLE IF NOT EXISTS `blog_pluginTemplate` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pluginName` varchar(50)  NOT NULL,
+  `name` varchar(50)  NOT NULL,
+  `template` mediumtext  NOT NULL,
+  PRIMARY KEY (`id`)
+) 

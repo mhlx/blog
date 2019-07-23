@@ -30,7 +30,6 @@ public class ConfigServer implements InitializingBean {
 	private final Properties config = new Properties();
 
 	private static final Path RES_PATH = Constants.CONFIG_DIR.resolve("config.properties");
-
 	static {
 		FileUtils.createFile(RES_PATH);
 	}

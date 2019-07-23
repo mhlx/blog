@@ -1,0 +1,28 @@
+@media print{
+	#editor-out{
+		overflow:auto;
+	}
+	#editor_toc{
+		display:none !important;
+	}
+	#editor_in{
+		display:none !important;
+	}
+	.mermaid{
+		text-align:center;
+	}
+	.markdown-body table{
+		overflow:visible !important;
+	}
+	.markdown-body pre {
+		word-wrap: break-word !important;
+		white-space: pre-wrap !important;
+		word-break: break-all !important;
+	}
+	
+	.markdown-body pre code {
+		word-wrap: break-word !important;
+		white-space: pre-wrap !important;
+		word-break: break-all !important;
+	}
+}
