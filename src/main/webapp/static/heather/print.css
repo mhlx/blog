@@ -1,11 +1,12 @@
 @media print{
-	#editor-out{
-		overflow:auto;
+	#heather_out {
+		padding-bottom:0px !important;
 	}
-	#editor_toc{
+
+	#heather_toc{
 		display:none !important;
 	}
-	#editor_in{
+	#heather_in{
 		display:none !important;
 	}
 	.mermaid{

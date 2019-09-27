@@ -1,11 +1,11 @@
 /*from bootstrap 4.3.1*/
-#editor_wrapper *,
+#heather_wrapper *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-#editor_wrapper .form-control{
+#heather_wrapper .form-control{
 	display: block;
     width: 100%;
     height: calc(1.5em + .75rem + 2px);
@@ -18,11 +18,11 @@
     border-radius: .25rem;
 }
 
-#editor_wrapper .form-control:focus {
+#heather_wrapper .form-control:focus {
     outline-width: 0;
 }
 
-#editor_wrapper .input-group {
+#heather_wrapper .input-group {
   position: relative;
   display: -ms-flexbox;
   display: flex;
@@ -33,8 +33,8 @@
   width: 100%;
 }
 
-#editor_wrapper .input-group > .form-control,
-#editor_wrapper .input-group > .form-control-plaintext{
+#heather_wrapper .input-group > .form-control,
+#heather_wrapper .input-group > .form-control-plaintext{
   position: relative;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
@@ -42,7 +42,7 @@
   margin-bottom: 0;
 }
 
-#editor_wrapper .input-group-text {
+#heather_wrapper .input-group-text {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
@@ -60,100 +60,100 @@
 }
 
 
-#editor_wrapper .input-group > .form-control + .form-control,
-#editor_wrapper .input-group > .form-control + .custom-select,
-#editor_wrapper .input-group > .form-control + .custom-file,
-#editor_wrapper .input-group > .form-control-plaintext + .form-control,
-#editor_wrapper .input-group > .form-control-plaintext + .custom-select,
-#editor_wrapper .input-group > .form-control-plaintext + .custom-file{
+#heather_wrapper .input-group > .form-control + .form-control,
+#heather_wrapper .input-group > .form-control + .custom-select,
+#heather_wrapper .input-group > .form-control + .custom-file,
+#heather_wrapper .input-group > .form-control-plaintext + .form-control,
+#heather_wrapper .input-group > .form-control-plaintext + .custom-select,
+#heather_wrapper .input-group > .form-control-plaintext + .custom-file{
   margin-left: -1px;
 }
 
-#editor_wrapper .input-group > .form-control:focus {
+#heather_wrapper .input-group > .form-control:focus {
   z-index: 3;
 }
 
-#editor_wrapper .input-group > .input-group-prepend > .btn,
-#editor_wrapper .input-group > .input-group-prepend > .input-group-text,
-#editor_wrapper .input-group > .input-group-append:not(:last-child) > .btn,
-#editor_wrapper .input-group > .input-group-append:not(:last-child) > .input-group-text,
-#editor_wrapper .input-group > .input-group-append:last-child > .btn:not(:last-child):not(.dropdown-toggle),
-#editor_wrapper .input-group > .input-group-append:last-child > .input-group-text:not(:last-child) {
+#heather_wrapper .input-group > .input-group-prepend > .btn,
+#heather_wrapper .input-group > .input-group-prepend > .input-group-text,
+#heather_wrapper .input-group > .input-group-append:not(:last-child) > .btn,
+#heather_wrapper .input-group > .input-group-append:not(:last-child) > .input-group-text,
+#heather_wrapper .input-group > .input-group-append:last-child > .btn:not(:last-child):not(.dropdown-toggle),
+#heather_wrapper .input-group > .input-group-append:last-child > .input-group-text:not(:last-child) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-#editor_wrapper .input-group > .input-group-append > .btn,
-#editor_wrapper .input-group > .input-group-append > .input-group-text,
-#editor_wrapper .input-group > .input-group-prepend:not(:first-child) > .btn,
-#editor_wrapper .input-group > .input-group-prepend:not(:first-child) > .input-group-text,
-#editor_wrapper .input-group > .input-group-prepend:first-child > .btn:not(:first-child),
-#editor_wrapper .input-group > .input-group-prepend:first-child > .input-group-text:not(:first-child) {
+#heather_wrapper .input-group > .input-group-append > .btn,
+#heather_wrapper .input-group > .input-group-append > .input-group-text,
+#heather_wrapper .input-group > .input-group-prepend:not(:first-child) > .btn,
+#heather_wrapper .input-group > .input-group-prepend:not(:first-child) > .input-group-text,
+#heather_wrapper .input-group > .input-group-prepend:first-child > .btn:not(:first-child),
+#heather_wrapper .input-group > .input-group-prepend:first-child > .input-group-text:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
-#editor_wrapper .input-group > .form-control:not(:last-child) {
+#heather_wrapper .input-group > .form-control:not(:last-child) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-#editor_wrapper .input-group > .form-control:not(:first-child) {
+#heather_wrapper .input-group > .form-control:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
 
-#editor_wrapper .input-group-prepend,
-#editor_wrapper .input-group-append {
+#heather_wrapper .input-group-prepend,
+#heather_wrapper .input-group-append {
   display: -ms-flexbox;
   display: flex;
 }
 
-#editor_wrapper .input-group-prepend .btn,
-#editor_wrapper .input-group-append .btn {
+#heather_wrapper .input-group-prepend .btn,
+#heather_wrapper .input-group-append .btn {
   position: relative;
   z-index: 2;
 }
 
-#editor_wrapper .input-group-prepend .btn:focus,
-#editor_wrapper .input-group-append .btn:focus {
+#heather_wrapper .input-group-prepend .btn:focus,
+#heather_wrapper .input-group-append .btn:focus {
   z-index: 3;
 }
 
-#editor_wrapper .input-group-prepend .btn + .btn,
-#editor_wrapper .input-group-prepend .btn + .input-group-text,
-#editor_wrapper .input-group-prepend .input-group-text + .input-group-text,
-#editor_wrapper .input-group-prepend .input-group-text + .btn,
-#editor_wrapper .input-group-append .btn + .btn,
-#editor_wrapper .input-group-append .btn + .input-group-text,
-#editor_wrapper .input-group-append .input-group-text + .input-group-text,
-#editor_wrapper .input-group-append .input-group-text + .btn {
+#heather_wrapper .input-group-prepend .btn + .btn,
+#heather_wrapper .input-group-prepend .btn + .input-group-text,
+#heather_wrapper .input-group-prepend .input-group-text + .input-group-text,
+#heather_wrapper .input-group-prepend .input-group-text + .btn,
+#heather_wrapper .input-group-append .btn + .btn,
+#heather_wrapper .input-group-append .btn + .input-group-text,
+#heather_wrapper .input-group-append .input-group-text + .input-group-text,
+#heather_wrapper .input-group-append .input-group-text + .btn {
   margin-left: -1px;
 }
 
-#editor_wrapper .input-group-prepend {
+#heather_wrapper .input-group-prepend {
   margin-right: -1px;
 }
 
-#editor_wrapper .input-group-append {
+#heather_wrapper .input-group-append {
   margin-left: -1px;
 }
-#editor_wrapper h1, h2, h3, h4, h5, h6{
+#heather_wrapper h1, h2, h3, h4, h5, h6{
   margin-bottom: 0.5rem;
   font-weight: 500;
   line-height: 1.2;
 }
 /*from bootstrap end*/
 
-#editor_wrapper .table{
+#heather_wrapper .table{
 	width:100%	
 }
-#editor_wrapper * {
+#heather_wrapper * {
 	-webkit-overflow-scrolling: touch;
 }
 
-#editor_wrapper .CodeMirror {
+#heather_in .CodeMirror {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -169,13 +169,14 @@
 	background-color:#f9f9f7
 }
 
-#editor_wrapper .CodeMirror-scroll {
+#heather_in .CodeMirror-scroll {
 	padding: 10px;
 	box-sizing: border-box;
 	overflow-x: hidden !important;
 }
 
-#editor_wrapper .icon {
+#heather_wrapper .icon,
+#heather_wrapper .middle-icon {
 	margin-top: 5px;
 	cursor: pointer;
 	font-size: 16px;
@@ -183,11 +184,13 @@
 	margin-bottom: 5px
 }
 
-#editor_wrapper .noclick{
+
+
+#heather_wrapper .noclick{
 	pointer-events: none
 }
 
-#editor_stat {
+#heather_stat {
 	position: absolute;
 	left: 0;
 	bottom: 0;
@@ -197,11 +200,11 @@
 	z-index: 999;
 }
 
-#editor_wrapper .styled-background {
+#heather_wrapper .styled-background {
 	background-color: #ff7 !important;
 }
 
-#editor_toolbar {
+#heather_toolbar {
 	height: 30px;
 	position: absolute;
 	left: 0;
@@ -214,7 +217,7 @@
 	white-space: nowrap;
 }
 
-#editor_wrapper {
+#heather_wrapper {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -230,7 +233,7 @@
 	z-index: 99999999 !important
 }
 
-#editor_in {
+#heather_in {
 	position: absolute;
 	top: 0;
 	left: 20%;
@@ -241,7 +244,7 @@
 	display: none;
 }
 
-#editor_out {
+#heather_out {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -255,10 +258,30 @@
 	line-height: 1.5em;
 	visibility: hidden;
 	scrollbar-color: #bcd transparent;
-	scrollbar-width: thin
+	scrollbar-width: thin;
+	padding-bottom:301px;
 }
 
-#editor_toc {
+.heather_wysiwyg{
+	padding-top:40px !important;
+}
+
+.heather_fullscreen .heather_wysiwyg_toolbar{
+	margin-left:15%;
+	margin-right:15%
+}
+.heather_wysiwyg_toolbar{
+	z-index:9999998;
+	position:absolute;
+	background:#f9f9f7;
+	width:100%;
+	padding-top:5px;
+	top:0px;
+	height:30px;
+	left:200%;
+}
+
+#heather_toc {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -272,7 +295,7 @@
 	scrollbar-width: thin
 }
 
-#editor_toc h1,
+#heather_toc h1,
 h2,
 h3,
 h4,
@@ -281,141 +304,173 @@ h6 {
 	cursor: pointer;
 }
 
-#editor_toc h1 {
+#heather_toc h1 {
 	margin: 1rem 0;
 	font-size: 15px;
 }
 
-#editor_toc h2 {
+#heather_toc h2 {
 	margin: .7rem 0;
 	margin-left: 30px;
 	font-size: 14px;
 }
 
-#editor_toc h3 {
+#heather_toc h3 {
 	margin: .6rem 0;
 	margin-left: 45px;
 	font-size: 13px;
 }
 
-#editor_toc h4 {
+#heather_toc h4 {
 	margin: .5rem 0;
 	margin-left: 60px;
 	font-size: 12px;
 }
 
-#editor_toc h5 {
+#heather_toc h5 {
 	margin: .4rem 0;
 	margin-left: 75px;
 	font-size: 11px;
 }
 
-#editor_toc h6 {
+#heather_toc h6 {
 	margin: 0.3rem 0;
 	margin-left: 90px;
 	font-size: 10px;
 }
 
-#editor_in .CodeMirror-code {
+#heather_in .CodeMirror-code {
 	height: auto;
 	margin-bottom: 301px;
 }
 
-#editor_out img {
+#heather_out img {
 	max-height: 200px;
 }
 
 @media (min-width:768px) {
-	#editor_wrapper ::-webkit-scrollbar {
+	#heather_wrapper ::-webkit-scrollbar {
 		width: 6px;
 	}
-	#editor_wrapper ::-webkit-scrollbar-track {
+	#heather_wrapper ::-webkit-scrollbar-track {
 		box-shadow: none;
 		border-radius: 3px;
 	}
-	#editor_wrapper ::-webkit-scrollbar-thumb {
+	#heather_wrapper ::-webkit-scrollbar-thumb {
 		border-radius: 10px;
 		background-color: #bcd;
 	}
-	#editor_wrapper .pc-hide {
+	#heather_wrapper .pc-hide {
 		display: none;
+	}
+	#heather_hljs_tip .selected{
+		background-color:#70B7FD;
+	}
+	#heather_hljs_tip{
+		max-height:200px;
+		max-width:200px;
 	}
 }
 
+.markdown-body video {
+  max-width:100%;
+  height:auto;
+}
+
 @media (max-width: 768px) {
-	#editor_wrapper .mobile-hide {
+	.heather_wysiwyg_toolbar{
+		padding-left:20px;
+	}
+	.heather_contenteditable_bar {
+		width: 90%;
+		left: 5%
+	}
+	#heather_wrapper .middle-icon {
+		font-size: 24px
+	}
+	#heather_hljs_tip{
+		max-height:120px;
+		max-width:200px;
+	}
+	#heather_hljs_tip .selected{
+		background-color:inherit;
+	}
+	#heather_hljs_tip tr{
+		height:30px;
+	}
+	#heather_wrapper .mobile-hide {
 		display: none;
 	}
-	#editor_in {
+	#heather_in {
 		left: 100%;
 		width: 100%;
 		display: block;
 		visibility: visible
 	}
-	#editor_out {
+	#heather_out {
 		width: 100%;
 		left: 200%;
 		visibility: visible;
 		overflow-y: auto;
 	}
-	#editor_toolbar {
+	#heather_toolbar {
 		height: 45px;
 		width: 100%
 	}
-	#editor_wrapper .icon {
+	#heather_wrapper .icon {
 		font-size: 30px
 	}
-	#editor_wrapper .CodeMirror-scroll {
+	#heather_in .CodeMirror-scroll {
 		margin-top: 10px
 	}
-	#editor_wrapper .CodeMirror {
+	#heather_in .CodeMirror {
 		font-size: 1.5rem;
 		padding-top: 40px;
 	}
-	#editor_stat {
+	#heather_stat {
 		width: 100%
 	}
 	#fullscreen-icon {
 		display: none
 	}
-	#editor_toc-icon {
+	#heather_toc-icon {
 		display: none
 	}
-	#editor_toc h1 {
+	#heather_toc h1 {
 		margin: 1rem 0;
 		font-size: 1.3rem;
 	}
-	#editor_toc h2 {
+	#heather_toc h2 {
 		margin: .7rem 0;
 		margin-left: 40px;
 		font-size: 1.2rem;
 	}
-	#editor_toc h3 {
+	#heather_toc h3 {
 		margin: .6rem 0;
 		margin-left: 60px;
 		font-size: 1.1em;
 	}
-	#editor_toc h4 {
+	#heather_toc h4 {
 		margin: .5rem 0;
 		margin-left: 80px;
 		font-size: 1em;
 	}
-	#editor_toc h5 {
+	#heather_toc h5 {
 		margin: .4rem 0;
 		margin-left: 100px;
 		font-size: 0.9em;
 	}
-	#editor_toc h6 {
+	#heather_toc h6 {
 		margin: 0.3rem 0;
 		margin-left: 120px;
 		font-size: 0.8em;
 	}
-	#editor_toc {
+	#heather_toc {
 		display: block;
 		width: 100%;
 		overflow-y: auto;
 	}
-	#editor_innerBar {
+	#heather_innerBar {
 		white-space: nowrap;
 		max-width: 100% !important;
 		overflow-x: auto;
@@ -424,16 +479,20 @@ h6 {
 	}
 }
 
-#editor_innerBar {
+#heather_innerBar {
 	z-index: 99;
 	padding-left: 10px;
 	padding-right: 10px, visibility:hidden;
 	position: absolute;
 }
 
-.editor_fullscreen #editor_toc,
-.editor_fullscreen #editor_out,
-.editor_fullscreen #editor_in{
+.heather_status_on{
+	color:green;
+}
+
+.heather_fullscreen #heather_toc,
+.heather_fullscreen #heather_out,
+.heather_fullscreen #heather_in{
 	position: absoulte !important;
     top: 0px !important;
     right: 0px !important;
@@ -450,47 +509,178 @@ h6 {
     margin: 0px !important;
 }
 
-.editor_fullscreen #editor_in{
+.heather_fullscreen #heather_in{
 	left:100% !important;
 }
 
-.editor_fullscreen #editor_out{
+.heather_fullscreen #heather_out{
 	left:200% !important;
 	padding-left:15% !important;
 	padding-right:15% !important;
 }
 
-.editor_fullscreen #editor_toc{
+.heather_fullscreen #heather_toc{
 	padding-left:15% !important;
 	padding-right:15% !important;
 }
 
-.editor_fullscreen #editor_toolbar{
+.heather_fullscreen #heather_toolbar{
 	padding-left:15%;
 	padding-right:15%;
 }
-.editor_fullscreen #editor_stat{
+.heather_fullscreen #heather_stat{
 	padding-left:15%;
 	padding-right:15%;
 }
-.editor_fullscreen .CodeMirror-lines{
+.heather_fullscreen .CodeMirror-lines{
 	padding-left:15%;
 	padding-right:15%;
 }
-.editor_fullscreen #editor_innerBar{
+.heather_fullscreen #heather_innerBar{
 	padding-left:15%;
 	padding-right:15%;
 }
-.editor_fullscreen #editor_searchHelper{
+.heather_fullscreen #heather_searchHelper{
 	padding-left:15% !important;
 	padding-right:15% !important;
 }
-.editor_fullscreen .nofullscreen{
+
+.heather_fullscreen .CodeMirror-linewidget{
+	width:100% !important;
+}
+
+.heather_fullscreen .inline-preview{
+	opacity:0.75;
+	max-height:200px;
+	min-height: 20px;
+	overflow-y:auto;
+	margin-bottom: 20px;
+	background-color: #f5f5f5;
+	padding: 19px; 
+	border: 1px solid #e3e3e3;
+	border-radius: 4px; 
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+	margin-top:10px;
+	margin-bottom:10px;
+	left:0px;
+	margin-left:15%;
+	margin-right:15%;
+	z-index:99;
+	scrollbar-color: #bcd transparent;
+	scrollbar-width: thin;
+}
+
+.heather_fullscreen .inline-preview ::-webkit-scrollbar {
+	width: 6px;
+}
+.heather_fullscreen .inline-preview ::-webkit-scrollbar-track {
+	box-shadow: none;
+	border-radius: 3px;
+}
+.heather_fullscreen .inline-preview ::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background-color: #bcd;
+}
+
+#heather_wrapper .close {
+    position: absolute;
+    color: white;
+    top: 3px;
+    right: 3px;
+	color:#000;
+	font-size:15px;
+	cursor:pointer;
+}
+
+.heather_fullscreen .nofullscreen{
 	display:none !important;
 }
 
-.editor_noscroll{
+.heather_noscroll{
 	margin: 0 !important; 
 	height: 100% !important; 
 	overflow:hidden !important;
 }
+
+
+#heather_toc:focus,
+#heather_out:focus {
+    outline: 0px solid transparent;
+}
+
+.heather_contenteditable_bar{
+	position: absolute;
+	visibility: hidden;
+	z-index: 9999999;
+	background-color: #70B7FD;
+	border-radius: 10px;
+	padding: 5px;
+	max-width:300px;
+}
+
+.heather_progressbar {
+	position: relative;
+  background-color: #70B7FD;
+  padding: 3px;
+  text-align:center;
+  line-height:25px;
+}
+
+.heather_progressbar>div {
+	position: absolue;
+	top: 0;
+	  background-color: orange;
+	  width: 0%;
+	  height: 25px;
+}
+
+
+#heather_wrapper blockquote{
+	min-height:20px;
+}
+
+.heather-menu-dialog{
+	list-style-type:none;
+}
+
+.heather-menu-card{
+	list-style-type:none;
+	text-align:left;
+	font-size:20px;
+	padding:0px;
+}
+.heather-menu-card .off{
+	display:none;
+}
+
+.heather-menu-dialog li{
+	padding-top:10px;
+	padding-bottom:10px;
+	cursor:pointer;
+	outline:none;
+}
+.heather-menu-dialog li i{
+	margin-right:50px;
+}
+.heather-menu-breadcrums{
+	text-align:left;
+	padding:10px;
+}
+	.heather-menu-breadcrums .active{
+		color:#70B7FD
+	}
+@media (min-width:768px) {
+
+	.heather-menu-dialog .active{
+		background-color:#D3D3D3
+	}
+}
+
+
+.heather-menu-breadcrums span{
+	display:inline-block;
+	margin-right:25px;
+}
+
+

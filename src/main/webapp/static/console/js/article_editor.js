@@ -1,18 +1,21 @@
 var wrapper ;
 (function(){
+	
+    EditorWrapper.lazyRes.mermaid_js=rootPath+'static/heather/js/mermaid.min.js';
+    EditorWrapper.lazyRes.katex_css=rootPath+'static/heather/katex/katex.min.css';
+    EditorWrapper.lazyRes.katex_js=rootPath+'static/heather/katex/katex.min.js';
+    EditorWrapper.lazyRes.colorpickerCss=rootPath+'static/heather/colorpicker/dist/css/bootstrap-colorpicker.min.css';
+    EditorWrapper.lazyRes.colorpickerJs='static/heather/colorpicker/dist/js/bootstrap-colorpicker.min.js';
+    EditorWrapper.lazyRes.editorTheme=function(editorTheme) {
+     	return rootPath + 'static/codemirror/theme/'+editorTheme+".css"
+     }
+    EditorWrapper.lazyRes.hljsTheme=function(hljsTheme) {
+    	return rootPath + 'static/heather/highlight/styles/'+hljsTheme+".css"
+    }
+    
+	
 	wrapper = EditorWrapper.create({
 		toolbar_icons:[ 'toc','innerBar','search','config','expand' ],
-		res_mermaid_js:rootPath+'static/heather/js/mermaid.min.js',
-		res_katex_css:rootPath+'static/heather/katex/katex.min.css',
-		res_katex_js:rootPath+'static/heather/katex/katex.min.js',
-		res_hljsTheme:function(theme){
-			return rootPath + 'static/heather/highlight/styles/'+theme+".css"
-		},
-		res_editorTheme:function(theme){
-			return rootPath + 'static/codemirror/theme/'+theme+".css"
-		},
-		res_colorpickerCss:rootPath+'static/heather/colorpicker/dist/css/bootstrap-colorpicker.min.css',
-		res_colorpickerJs:rootPath+'static/heather/colorpicker/dist/js/bootstrap-colorpicker.min.js',
 		render_beforeRender:function(doc){
 		var videos = doc.getElementsByTagName('video');
 		for(var i=videos.length-1;i>=0;i--){

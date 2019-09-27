@@ -35,13 +35,15 @@
       var inQuote = eolState.quote !== 0;
 
       var line = cm.getLine(pos.line), match = listRE.exec(line);
+	  
       var cursorBeforeBullet = /^\s*$/.test(line.slice(0, pos.ch));
       if (!ranges[i].empty() || (!inList && !inQuote) || !match || cursorBeforeBullet) {
         cm.execCommand("newlineAndIndent");
         return;
       }
-      if (emptyListRE.test(line)) {
-        if (!/>\s*$/.test(line)) cm.replaceRange("", {
+	  var emptyQuote = line.trimEnd() == '>';
+      if (emptyListRE.test(line) || emptyQuote) {
+        if (!/>\s*$/.test(line) || emptyQuote) cm.replaceRange("", {
           line: pos.line, ch: 0
         }, {
           line: pos.line, ch: pos.ch + 1
