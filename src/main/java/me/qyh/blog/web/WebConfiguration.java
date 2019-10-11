@@ -11,10 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
@@ -28,6 +31,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ViewNameMethodReturnValueHandler;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
+import org.springframework.web.util.UrlPathHelper;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.ICacheManager;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
@@ -65,14 +70,20 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
 
 	@Bean
 	@Override
-	public TemplateRequestMappingHandlerMapping requestMappingHandlerMapping() {
-		return (TemplateRequestMappingHandlerMapping) super.requestMappingHandlerMapping();
+	public TemplateRequestMappingHandlerMapping requestMappingHandlerMapping(
+			ContentNegotiationManager mvcContentNegotiationManager, FormattingConversionService mvcConversionService,
+			ResourceUrlProvider mvcResourceUrlProvider) {
+		return (TemplateRequestMappingHandlerMapping) super.requestMappingHandlerMapping(mvcContentNegotiationManager,
+				mvcConversionService, mvcResourceUrlProvider);
 	}
 
 	@Bean
 	@Override
-	public StaticResourceUrlHandlerMapping resourceHandlerMapping() {
-		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) super.resourceHandlerMapping();
+	public StaticResourceUrlHandlerMapping resourceHandlerMapping(UrlPathHelper mvcUrlPathHelper,
+			PathMatcher mvcPathMatcher, ContentNegotiationManager mvcContentNegotiationManager,
+			FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider) {
+		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) super.resourceHandlerMapping(mvcUrlPathHelper,
+				mvcPathMatcher, mvcContentNegotiationManager, mvcConversionService, mvcResourceUrlProvider);
 		StaticResourceUrlHandlerMapping fsMapping = new StaticResourceUrlHandlerMapping();
 		fsMapping.setOrder(-100);
 		fsMapping.setUrlMap(mapping.getUrlMap());

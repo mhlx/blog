@@ -104,7 +104,7 @@ var loadFiles = function(){
 			p.html(html);
 		},
 		error : function(jqXHR){
-			swal('查询文件失败',$.parseJSON(jqXHR.responseText).error,'error');
+			Swal.fire('查询文件失败',$.parseJSON(jqXHR.responseText).error,'error');
 		}
 	})
 }
@@ -135,7 +135,7 @@ $(function() {
 	
 	$("#fileTable").on("click","[data-delete]",function(){
 		var id = $(this).data('delete');
-		swal({
+		Swal.fire({
 		  title: '你确定吗？',
 		  text: "这个操作无法被撤销",
 		  type: 'warning',
@@ -151,11 +151,11 @@ $(function() {
 				url : root + 'api/console/file/'+id,
 				success:function(data) {
 					loadFiles();
-					swal('删除成功','文件已经被删除','success');
+					Swal.fire('删除成功','文件已经被删除','success');
 				},
 				error:function(jqXHR, textStatus, errorThrown) {
 					var data = $.parseJSON(jqXHR.responseText);
-					swal('删除失败',data.error,'error');
+					Swal.fire('删除失败',data.error,'error');
 				}
 			  })
 		  }
@@ -195,7 +195,7 @@ $(function() {
 				}
 				html += "</table>";
 				html += '</div>';
-				swal({
+				Swal.fire({
 				  title: '文件属性',
 				  type: 'info',
 				  html:html,
@@ -206,7 +206,7 @@ $(function() {
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
 				var data = $.parseJSON(jqXHR.responseText);
-				swal('获取文件属性失败',data.error,'error');
+				Swal.fire('获取文件属性失败',data.error,'error');
 			}
 		  })
 	});
@@ -214,7 +214,7 @@ $(function() {
 	$("#fileTable").on("click","[data-copy]",function(){
 		var id = $(this).data('copy');
 		(async function getPath () {
-			const {value: path} = await swal({
+			const {value: path} = await Swal.fire({
 			  title: '拷贝文件',
 			  input: 'text',
 			  inputValue: '',
@@ -230,11 +230,11 @@ $(function() {
 					url : root + 'api/console/file?folderPath='+path+"&id="+id,
 					success:function(data) {
 						loadFiles();
-						swal('拷贝成功','文件已经拷贝完成','success');
+						Swal.fire('拷贝成功','文件已经拷贝完成','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('拷贝失败',data.error,'error');
+						Swal.fire('拷贝失败',data.error,'error');
 					}
 			  	})
 			}
@@ -246,7 +246,7 @@ $(function() {
 		var id = $(this).data('rename');
 		var oldname = $(this).data('oldname').split('.').slice(0, -1).join('.');
 		(async function getName () {
-			const {value:name} = await swal({
+			const {value:name} = await Swal.fire({
 			  title: '重命名文件',
 			  input: 'text',
 			  inputValue: oldname,
@@ -259,14 +259,14 @@ $(function() {
 			if (name) {
 				$.ajax({
 					type : 'PATCH',
-					url : root + 'api/console/file/'+id+"?name="+name,
+					url : root + 'api/console/file/'+id+"?name="+encodeURIComponent(name),
 					success:function(data) {
 						loadFiles();
-						swal('重命名成功','文件已经完成重命名','success');
+						Swal.fire('重命名成功','文件已经完成重命名','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('重命名失败',data.error,'error');
+						Swal.fire('重命名失败',data.error,'error');
 					}
 			  	})
 			}
@@ -277,7 +277,7 @@ $(function() {
 	$("#fileTable").on("click","[data-move]",function(){
 		var id = $(this).data('move');
 		(async function getPath () {
-			const {value: path} = await swal({
+			const {value: path} = await Swal.fire({
 			  title: '移动文件',
 			  input: 'text',
 			  inputValue: '',
@@ -293,11 +293,11 @@ $(function() {
 					url : root + 'api/console/file/'+id+"?path="+path,
 					success:function(data) {
 						loadFiles();
-						swal('移动成功','文件已经移动完成','success');
+						Swal.fire('移动成功','文件已经移动完成','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('移动失败',data.error,'error');
+						Swal.fire('移动失败',data.error,'error');
 					}
 			  	})
 			}
@@ -324,7 +324,7 @@ $(function() {
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			var data = $.parseJSON(jqXHR.responseText);
-			swal('查询存储服务器失败', data.error, 'error');
+			Swal.fire('查询存储服务器失败', data.error, 'error');
 		}
 	});
 	
@@ -345,12 +345,12 @@ $(function() {
 				if (code == 201) {
 					me.prop("disabled", false);
 					$("#folderModal").modal("hide");
-					swal('创建成功', '文件夹已经被创建', 'success');
+					Swal.fire('创建成功', '文件夹已经被创建', 'success');
 					loadFiles();
 				} else {
 					me.prop("disabled", false);
 					var data = $.parseJSON(jqXHR.responseText);
-					swal('创建失败', data.error, 'error');
+					Swal.fire('创建失败', data.error, 'error');
 				}
 			}
 		});
@@ -450,10 +450,10 @@ $(function() {
 	});
 	var clipboard=new Clipboard('[data-clipboard-text]');
 	clipboard.on('success',function(e){
-		swal('拷贝成功','','success'); e.clearSelection();
+		Swal.fire('拷贝成功','','success'); e.clearSelection();
 	});
 	clipboard.on('error',function(){
-		swal('拷贝失败','','error');
+		Swal.fire('拷贝失败','','error');
 	});
 
 });	

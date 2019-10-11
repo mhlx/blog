@@ -7248,6 +7248,7 @@
   }
 
   function onKeyPress(e) {
+	if(e.code === 'Unidentified') return ;//TODO ios 13+ can not input emoji character
     var cm = this;
     if (eventInWidget(cm.display, e) || signalDOMEvent(cm, e) || e.ctrlKey && !e.altKey || mac && e.metaKey) { return }
     var keyCode = e.keyCode, charCode = e.charCode;
@@ -7300,7 +7301,6 @@
     if (signalDOMEvent(cm, e) || display.activeTouch && display.input.supportsTouch()) { return }
     display.input.ensurePolled();
     display.shift = e.shiftKey;
-
     if (eventInWidget(display, e)) {
       if (!webkit) {
         // Briefly turn off draggability, to allow widgets to do

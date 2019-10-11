@@ -34,7 +34,7 @@ $("#lockModal").on("hide.bs.modal", function(){
 $("#syslockTable").on('click','[data-delete]',function(){
 	var me = $(this);
 	var id = me.data('delete');
-	swal({
+	Swal.fire({
 	  title: '你确定吗？',
 	  text: "这个操作无法被撤销",
 	  type: 'warning',
@@ -52,11 +52,11 @@ $("#syslockTable").on('click','[data-delete]',function(){
 			contentType : 'application/json',
 			success : function(data){
 				table.reload();
-				swal('删除成功','','success');
+				Swal.fire('删除成功','','success');
 			},
 			error : function(jqXHR){
 				var error = $.parseJSON(jqXHR.responseText).error;
-				swal('删除失败',error,'error');
+				Swal.fire('删除失败',error,'error');
 			}
 		});
 	  }
@@ -86,7 +86,7 @@ $("#syslockTable").on('click','[data-edit]',function(){
 		},
 		error:function(jqXHR){
 			var error = $.parseJSON(jqXHR.responseText).error;
-			swal('保存失败',error,'error');
+			Swal.fire('保存失败',error,'error');
 		}
 	})
 })
@@ -116,11 +116,11 @@ $("#create").click(function() {
 			success : function(data){
 				table.reload();
 				$("#lockModal").modal('hide')
-				swal('更新成功','','success');
+				Swal.fire('更新成功','','success');
 			},
 			error : function(jqXHR){
 				var error = $.parseJSON(jqXHR.responseText).error;
-				swal('更新失败',error,'error');
+				Swal.fire('更新失败',error,'error');
 			},
 			complete:function(){
 				$("#create").prop("disabled",false);
@@ -137,11 +137,11 @@ $("#create").click(function() {
 			success : function(data){
 				table.reload();
 				$("#lockModal").modal('hide')
-				swal('保存成功','','success');
+				Swal.fire('保存成功','','success');
 			},
 			error : function(jqXHR){
 				var error = $.parseJSON(jqXHR.responseText).error;
-				swal('保存失败',error,'error');
+				Swal.fire('保存失败',error,'error');
 			},
 			complete:function(){
 				$("#create").prop("disabled",false);

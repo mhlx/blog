@@ -191,7 +191,7 @@
                     }
             	},
             	error : function(jqXHR){
-            		swal('获取评论失败',$.parseJSON(jqXHR.responseText).error,'error');
+            		Swal.fire('获取评论失败',$.parseJSON(jqXHR.responseText).error,'error');
             	}
             })
         }
@@ -206,7 +206,7 @@
         		commentConfig = data;
         	},
         	error : function(jqXHR){
-        		swal('获取评论配置失败',$.parseJSON(jqXHR.responseText).error,'error');
+        		Swal.fire('获取评论配置失败',$.parseJSON(jqXHR.responseText).error,'error');
         	}
         	
         });
@@ -245,7 +245,7 @@
     	}); 
         c.on('click',"[data-del]",function(){
         	var id = $(this).data('del');
-        	swal({
+        	Swal.fire({
 				  title: '你确定吗？',
 				  text: "这个操作无法被撤销",
 				  type: 'warning',
@@ -260,12 +260,12 @@
 						type : 'DELETE',
 						url : root + 'api/console/comment/'+id,
 						success:function(data) {
-							swal('删除成功','评论已经被删除','success');
+							Swal.fire('删除成功','评论已经被删除','success');
 							loadComment(config);
 						},
 						error:function(jqXHR, textStatus, errorThrown) {
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('删除失败',data.error,'error');
+							Swal.fire('删除失败',data.error,'error');
 						}
 					  })
 				  }
@@ -273,7 +273,7 @@
         });
         c.on('click',"[data-check]",function(){
         	var id = $(this).data('check');
-        	swal({
+        	Swal.fire({
 				  title: '你确定吗？',
 				  type: 'warning',
 				  showCancelButton: true,
@@ -287,12 +287,12 @@
 						type : 'PATCH',
 						url : root + 'api/console/comment/'+id+"?status=NORMAL",
 						success:function(data) {
-							swal('审核通过','','success');
+							Swal.fire('审核通过','','success');
 							loadComment(config);
 						},
 						error:function(jqXHR, textStatus, errorThrown) {
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('审核失败',data.error,'error');
+							Swal.fire('审核失败',data.error,'error');
 						}
 					  })
 				  }
@@ -301,7 +301,7 @@
         
         c.on('click','[data-ban]',function(){
         	var id = $(this).data('ban');
-        	swal({
+        	Swal.fire({
 				  title: '你确定吗？',
 				  type: 'warning',
 				  showCancelButton: true,
@@ -316,12 +316,12 @@
 						url : root + 'api/console/comment/blacklistItem',
 						data : {"id":id},
 						success:function(data) {
-							swal('禁止成功','该IP已经被禁止评论','success');
+							Swal.fire('禁止成功','该IP已经被禁止评论','success');
 							loadComment(config);
 						},
 						error:function(jqXHR, textStatus, errorThrown) {
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('禁止失败',data.error,'error');
+							Swal.fire('禁止失败',data.error,'error');
 						}
 					  })
 				  }

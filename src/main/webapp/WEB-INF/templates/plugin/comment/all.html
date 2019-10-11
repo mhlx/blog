@@ -83,11 +83,11 @@ td img {
 	<script>
 		var clipboard = new Clipboard('[data-clipboard-text]');
 		clipboard.on('success', function(e) {
-			swal('拷贝成功', '', 'success');
+			Swal.fire('拷贝成功', '', 'success');
 			e.clearSelection();
 		});
 		clipboard.on('error', function() {
-			swal('拷贝失败', '', 'error');
+			Swal.fire('拷贝失败', '', 'error');
 		});
 	</script>
 

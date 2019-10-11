@@ -122,7 +122,7 @@ function datatable(id, config) {
 					},
 					error : function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('查询失败', data.error, 'error');
+						Swal.fire('查询失败', data.error, 'error');
 					}
 				});
 	};

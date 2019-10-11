@@ -55,13 +55,13 @@ var table = datatable("spaceTable", {
 						success : function(){
 							me.prop("disabled",false);
 							$("#spaceModal").modal("hide");
-							swal('更新成功','空间已经被更新','success');
+							Swal.fire('更新成功','空间已经被更新','success');
 							table.reload();
 						},
 						error : function(jqXHR, textStatus, errorThrown){
 							me.prop("disabled",false);
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('更新失败',data.error,'error');
+							Swal.fire('更新失败',data.error,'error');
 						}
 					});
 				}else{
@@ -76,12 +76,12 @@ var table = datatable("spaceTable", {
 							if(code == 201){
 								me.prop("disabled",false);
 								$("#spaceModal").modal("hide");
-								swal('创建成功','空间已经被创建','success');
+								Swal.fire('创建成功','空间已经被创建','success');
 								table.reload();
 							} else {
 								me.prop("disabled",false);
 								var data = $.parseJSON(jqXHR.responseText);
-								swal('创建失败',data.error,'error');
+								Swal.fire('创建失败',data.error,'error');
 							}
 						}
 					});
@@ -89,7 +89,7 @@ var table = datatable("spaceTable", {
 			});
 			$("#spaceTable").on("click","[data-delete]",function(){
 				var id = $(this).data('delete');
-				swal({
+				Swal.fire({
 				  title: '你确定吗？',
 				  text: "这个操作无法被撤销",
 				  type: 'warning',
@@ -104,12 +104,12 @@ var table = datatable("spaceTable", {
 						type : 'DELETE',
 						url : root + 'api/console/space/'+id,
 						success:function(data) {
-							swal('删除成功','空间已经被删除','success');
+							Swal.fire('删除成功','空间已经被删除','success');
 							table.reload();
 						},
 						error:function(jqXHR, textStatus, errorThrown) {
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('删除失败',data.error,'error');
+							Swal.fire('删除失败',data.error,'error');
 						}
 					  })
 				  }
@@ -134,7 +134,7 @@ var table = datatable("spaceTable", {
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('获取空间详情失败',data.error,'error');
+						Swal.fire('获取空间详情失败',data.error,'error');
 					}
 				  })
 			});
@@ -152,7 +152,7 @@ var table = datatable("spaceTable", {
 				},
 				error:function(jqXHR, textStatus, errorThrown) {
 					var data = $.parseJSON(jqXHR.responseText);
-					swal('获取访问锁失败',data.error,'error');
+					Swal.fire('获取访问锁失败',data.error,'error');
 				}
 			  })
 		});

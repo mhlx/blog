@@ -141,13 +141,13 @@ td img {
 															contentType : 'application/json',
 															success : function(
 																	data) {
-																swal('修改成功',
+																Swal.fire('修改成功',
 																		'',
 																		'success')
 															},
 															error : function(
 																	jqXHR) {
-																swal(
+																Swal.fire(
 																		'修改失败',
 																		$
 																				.parseJSON(jqXHR.responseText).error,

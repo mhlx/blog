@@ -16,7 +16,7 @@
 		var id;
 		$("#tagTable").on('click','[data-delete]',function(){
 			id = $(this).data('delete');
-			swal({
+			Swal.fire({
 				  title: '你确定吗？',
 				  text : '删除之后将无法恢复!',
 				  type: 'warning',
@@ -31,12 +31,12 @@
 					  type : 'delete',
 					  url : root + 'api/console/tag/'+id,
 					  success:function(){
-						  swal('删除成功','','success');
+						  Swal.fire('删除成功','','success');
 						  table.reload();
 					  },
 					  error:function(jqXHR){
 						  var error = $.parseJSON(responseText).error;
-						  swal('删除失败',error,'error');
+						  Swal.fire('删除失败',error,'error');
 					  }
 					  
 				  })
@@ -55,11 +55,11 @@
 				  error:function(jqXHR){
 					  var status = jqXHR.status;
 					  if(status == 404){
-						  swal('获取标签失败','标签不存在','error');
+						  Swal.fire('获取标签失败','标签不存在','error');
 						  return ;
 					  }
 					  var error = $.parseJSON(jqXHR.responseText).error;
-					  swal('获取标签失败',error,'error');
+					  Swal.fire('获取标签失败',error,'error');
 				  }
 				  
 			  })
@@ -76,13 +76,13 @@
 					dataType : "json",
 					contentType : 'application/json',
 					success : function(data){
-						swal('更新成功','','success');
+						Swal.fire('更新成功','','success');
 						table.reload();
 						me.prop("disabled",false);
 					},
 					error:function(jqXHR){
 						  var error = $.parseJSON(jqXHR.responseText).error;
-						  swal('更新失败',error,'error');
+						  Swal.fire('更新失败',error,'error');
 							me.prop("disabled",false);
 					}
 				});

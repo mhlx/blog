@@ -118,7 +118,7 @@ var load = function() {
             }
         },
         error: function(jqXHR) {
-            swal('查询动态失败', $.parseJSON(jqXHR.responseText).error, 'error');
+            Swal.fire('查询动态失败', $.parseJSON(jqXHR.responseText).error, 'error');
         }
 
     });
@@ -137,7 +137,7 @@ $(function() {
 
     $("#news-container").on("click", "[data-delete]", function() {
         var id = $(this).data('delete');
-        swal({
+        Swal.fire({
             title: '你确定吗？',
             text: "这个操作无法被撤销",
             type: 'warning',
@@ -153,11 +153,11 @@ $(function() {
                     url: root + 'api/console/news/' + id,
                     success: function(data) {
                         load()
-                        swal('删除成功', '动态已经被删除', 'success');
+                        Swal.fire('删除成功', '动态已经被删除', 'success');
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         var data = $.parseJSON(jqXHR.responseText);
-                        swal('删除失败', data.error, 'error');
+                        Swal.fire('删除失败', data.error, 'error');
                     }
                 })
             }
@@ -182,7 +182,7 @@ $(function() {
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 var data = $.parseJSON(jqXHR.responseText);
-                swal('获取动态内容失败', data.error, 'error');
+                Swal.fire('获取动态内容失败', data.error, 'error');
             }
         })
     });

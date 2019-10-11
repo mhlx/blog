@@ -148,7 +148,7 @@ var fileChooser = (function(){
 			},
 			error:function(jqXHR){
 				var message = $.parseJSON(jqXHR.responseText).error;
-				swal('获取文件存储器失败',message,'error')
+				Swal.fire('获取文件存储器失败',message,'error')
 			},
 		});
 		

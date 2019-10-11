@@ -19,12 +19,12 @@ $(document).ready(function() {
 	    				}
 	    				$("#messageBody").html(html);
 	    				$("#messages").show();
-	    				swal('导入成功','','success')
+	    				Swal.fire('导入成功','','success')
 		            },
 		            fail: function(jqXHR) {
 		            	$("#messages").hide();
 		            	var error = $.parseJSON(jqXHR.responseText).error;
-		            	swal('导入失败',error,'error');
+		            	Swal.fire('导入失败',error,'error');
 		            }
 		        });
 			})
@@ -61,12 +61,12 @@ $(document).ready(function() {
 	    				}
 	    				$("#messageBody").html(html);
 	    				$("#messages").show();
-	    				swal('预览成功','','success')
+	    				Swal.fire('预览成功','','success')
 		            },
 		            fail: function(jqXHR) {
 		            	$("#messages").hide();
 		            	var error = $.parseJSON(jqXHR.responseText).error;
-		            	swal('预览失败',error,'error');
+		            	Swal.fire('预览失败',error,'error');
 		            }
 		        });
 			})
@@ -75,12 +75,12 @@ $(document).ready(function() {
 	function readFile(callback){
 		var file = document.getElementById('file').files[0];
 		if(!file){
-			swal("请选择要导入的文件",'','error');
+			Swal.fire("请选择要导入的文件",'','error');
 			return ;
 		}
 		var fileName = document.getElementById('file').files[0].name;
 		if (fileName.indexOf('.json') == -1) {
-			swal("请选择json格式的文件",'','error');
+			Swal.fire("请选择json格式的文件",'','error');
 			return;
 		}
 		var reader = new FileReader();
@@ -99,7 +99,7 @@ $(document).ready(function() {
 	
 	$(document).ready(function(){
 		$("#clearMgrCache").click(function(){
-			swal({
+			Swal.fire({
 			  title: '你确定吗？',
 			  text: "这个操作无法被撤销",
 			  type: 'warning',
@@ -114,11 +114,11 @@ $(document).ready(function() {
 					type : 'DELETE',
 					url : root + 'api/console/template/caches',
 					success:function(data) {
-						swal('清除缓存成功','','success');
+						Swal.fire('清除缓存成功','','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('清除缓存失败',data.error,'error');
+						Swal.fire('清除缓存失败',data.error,'error');
 					}
 				  })
 			  }
@@ -126,7 +126,7 @@ $(document).ready(function() {
 		});
 		
 		$("#clearPreview").click(function(){
-			swal({
+			Swal.fire({
 			  title: '你确定吗？',
 			  text: "这个操作无法被撤销",
 			  type: 'warning',
@@ -141,11 +141,11 @@ $(document).ready(function() {
 					type : 'DELETE',
 					url : root + 'api/console/template/previews',
 					success:function(data) {
-						swal('清除预览页面成功','','success');
+						Swal.fire('清除预览页面成功','','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('清除预览页面失败',data.error,'error');
+						Swal.fire('清除预览页面失败',data.error,'error');
 					}
 				  })
 			  }

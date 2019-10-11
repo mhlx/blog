@@ -49,6 +49,7 @@ public class UserConsole extends BaseMgrController {
 	public ResponseEntity<Void> update(@RequestParam(value = "oldPassword") String oldPassword,
 			@RequestParam(value = "code", required = false) String codeStr, @Validated @RequestBody User user,
 			HttpSession session) throws LogicException {
+		
 		if (authenticator.enable() && !authenticator.checkCode(codeStr)) {
 			throw new LogicException("otp.verifyFail", "动态口令校验失败");
 		}

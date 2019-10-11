@@ -83,12 +83,10 @@
 
 	<div th:replace="console/base/foot"></div>
 	<script>var rootPath = root</script>
-	<script th:src="@{/static/heather/js/morphdom-umd.min.js}"></script>
 	<script th:src="@{/static/heather/highlight/highlight.pack.js}"></script>
 	<!--CodeMirror-->
 	<script th:src="@{/static/codemirror/lib/codemirror.js}"></script>
 	<script th:src="@{/static/codemirror/addon/mode/overlay.js}"></script>
-	<script th:src="@{/static/codemirror/mode/javascript/javascript.js}"></script>
 	<script th:src="@{/static/codemirror/mode/xml/xml.js}"></script>
 	<script th:src="@{/static/codemirror/mode/markdown/markdown.js}"></script>
 	<script th:src="@{/static/codemirror/mode/gfm/gfm.js}"></script>
@@ -97,12 +95,13 @@
 	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
 	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
 	<script th:src="@{/static/codemirror/addon/edit/continuelist.js}"></script>
-	<script th:src="@{/static/codemirror/addon/scroll/simplescrollbars.js}"></script>
-	<script th:src="@{/static/heather/js/turndown.js}"></script>
-	<script th:src="@{/static/heather/js/turndown-plugin-gfm.js}"></script>
-	<script th:src="@{/static/heather/js/jquery.touchwipe.min.js}"></script>
-	<script th:src="@{/static/heather/js/md.js}"></script>
+	<script th:src="@{/static/codemirror/addon/dialog/dialog.js}"></script>
+	<script th:src="@{/static/codemirror/addon/display/fullscreen.js}"></script>
+	<script th:src="@{/static/heather/js/markdown-it.min.js}"></script>
+	<script th:src="@{/static/heather/js/markdown-it-task-lists.min.js}"></script>
+	<script th:src="@{/static/heather/js/markdown-it-katex.min.js}"></script>
 	<script th:src="@{/static/heather/js/heather.js}"></script>
+	
 
 	<script type="text/javascript"
 		th:src="@{/static/jquery-file-upload/js/load-image.min.js}"></script>
@@ -134,61 +133,34 @@
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
     
-    EditorWrapper.lazyRes.mermaid_js=rootPath+'static/heather/js/mermaid.min.js';
-    EditorWrapper.lazyRes.katex_css=rootPath+'static/heather/katex/katex.min.css';
-    EditorWrapper.lazyRes.katex_js=rootPath+'static/heather/katex/katex.min.js';
-    EditorWrapper.lazyRes.colorpickerCss=rootPath+'static/heather/colorpicker/dist/css/bootstrap-colorpicker.min.css';
-    EditorWrapper.lazyRes.colorpickerJs='static/heather/colorpicker/dist/js/bootstrap-colorpicker.min.js';
-    EditorWrapper.lazyRes.editorTheme=function(editorTheme) {
-     	return rootPath + 'static/codemirror/theme/'+editorTheme+".css"
-     }
-    EditorWrapper.lazyRes.hljsTheme=function(hljsTheme) {
-    	return rootPath + 'static/heather/highlight/styles/'+hljsTheme+".css"
-    }
-	$("#editor").click(function(){
-		var me = $(this);
-		var _editor = EditorWrapper.create({
-			toolbar_icons:[ 'toc','innerBar','search','config','expand' ],
-			
-			render_beforeRender:function(doc){
-			var videos = doc.getElementsByTagName('video');
-			for(var i=videos.length-1;i>=0;i--){
-				var video = videos[i];
-				var poster = video.getAttribute('poster');
-				if(!poster){
-					poster = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABD4AAAJSCAYAAAArsQXOAAAPNElEQVR4nO3YwQ3AIBDAsNKlb3yYAiFF9gR5Z83M/gAAAACC/tcBAAAAALcYHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZBkfAAAAQJbxAQAAAGQZHwAAAECW8QEAAABkGR8AAABAlvEBAAAAZB3EsAcIUtpjKQAAAABJRU5ErkJggg==';
-				}
-				
-				var html = '<div><a style="position: relative;display: inline-block;" ><i class="fas fa-video" style="color:blueviolet;z-index:1;    position: absolute;left: 50%;top: 50%; transform: translate(-50%, -50%);font-size: 20px !important;"></i><img class="img-fluid" src="'+poster+'"></a></div>';
-				var doc2 = $.parseHTML2(html);
-				insertAfter(doc2.getElementsByTagName('body')[0].getElementsByTagName('div')[0],video);
-				video.parentNode.removeChild(video);
+    Heather.lazyRes.mermaid_js=rootPath+'static/heather/js/mermaid.min.js';
+    Heather.lazyRes.katex_css=rootPath+'static/heather/katex/katex.min.css';
+    Heather.lazyRes.katex_js=rootPath+'static/heather/katex/katex.min.js';
+    
+    var heather = Heather.create(document.getElementById('editor'),{
+    	markdownParser:{
+			html : true,
+			linkify:true
+		}
+    });
+
+    heather.getToolbar().addIcon('fas fa-expand heather_icon',function(){
+    	heather.setFullscreen(!heather.isFullscreen());
+    }); 
+    heather.getToolbar().addIcon('fas fa-file heather_icon',function(){
+    	files.get(heather.editor);
+    });
+    heather.getToolbar().addIcon('fas fa-eye heather_icon', function() {
+		heather.setPreview(true);
+	});
+	if(Heather.Util.mobile){
+		 heather.getToolbar().addIcon('fas fa-arrows-alt heather_icon', function() {
+			if(!heather.hasSelectionHelper()){
+				heather.openSelectionHelper();
+			} else {
+				heather.closeSelectionHelper();
 			}
-		}});
-		
-		_editor.toolbar.insertIcon('fas fa-file icon',function(){
-			files.get(_editor.editor);
-		},1);
-		_editor.toolbar.addIcon('fas fa-times icon nofullscreen',function(){
-			me.val(_editor.getValue())
-			_editor.remove();
 		});
-		_editor.setValue(me.val());
-		var codeMirrorEditor = _editor.editor;
-		codeMirrorEditor.focus();
-		var cursor = getPos(me[0]);
-		codeMirrorEditor.setCursor(cursor);
-		codeMirrorEditor.scrollTo(null,codeMirrorEditor.heightAtLine(cursor.line,'local'))
-	})
-	
-	function getPos(textarea) {
-		var lines = textarea.value.substr(0, textarea.selectionStart).split(
-				"\n");
-		var lineNum = lines.length - 1;
-		return {
-			line : lineNum,
-			ch : lines[lineNum].length
-		};
 	}
 	var mode = $("#id").length > 0 ? 'update' : 'write';
 	$.ajax({
@@ -209,7 +181,7 @@
 			}
 		},
 		error : function(jqXHR) {
-			swal('获取锁失败', $.parseJSON(jqXHR.responseText).error, 'error');
+			Swal.fire('获取锁失败', $.parseJSON(jqXHR.responseText).error, 'error');
 		}
 	})
 	$("#saveNews").click(function() {
@@ -217,7 +189,7 @@
 			me.prop('disabled', true);
 			var news = {};
 			news.editor = 'MD';
-			news.content = editor.val();
+			news.content = heather.getValue();
 			var lockId = $("#lock").val();
 			if (lockId != '')
 				news.lockId = lockId;
@@ -237,12 +209,12 @@
 						var code = jqXHR.status;
 						if (code == 201) {
 							me.prop("disabled", false);
-							swal('动态添加成功', '', 'success');
+							Swal.fire('动态添加成功', '', 'success');
 							window.location.href = root+'console/news';
 						} else {
 							me.prop("disabled", false);
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('添加失败', data.error, 'error');
+							Swal.fire('添加失败', data.error, 'error');
 						}
 					}
 				});
@@ -254,12 +226,12 @@
 					data : JSON.stringify(news),
 					success : function(data) {
 						me.prop("disabled", false);
-						swal('动态更新成功', '', 'success');
+						Swal.fire('动态更新成功', '', 'success');
 					},
 					error : function(jqXHR, textStatus, errorThrown) {
 						me.prop("disabled", false);
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('更新失败', data.error, 'error');
+						Swal.fire('更新失败', data.error, 'error');
 					}
 				});
 			}

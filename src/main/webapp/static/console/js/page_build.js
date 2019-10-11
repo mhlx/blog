@@ -27,7 +27,7 @@
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
 				var data = $.parseJSON(jqXHR.responseText);
-				swal('获取访问锁失败',data.error,'error');
+				Swal.fire('获取访问锁失败',data.error,'error');
 			}
 		  })
 		  
@@ -67,7 +67,7 @@
 
 
 	    $("#clear").click(function() {
-	        swal({
+	        Swal.fire({
 	            title: '你确定要清空吗？',
 	            type: 'warning',
 	            showCancelButton: true,
@@ -84,7 +84,7 @@
 	    });
 	    
 	    $("#back").click(function(){
-	    	 swal({
+	    	 Swal.fire({
 		            title: '你确定要返回吗？',
 		            type: 'warning',
 		            showCancelButton: true,
@@ -125,13 +125,13 @@
 	    		}
 	    		$("#historyModal").modal('show');
 	    	}else{
-	    		swal("新页面无法获取历史模板", "", "error")
+	    		Swal.fire("新页面无法获取历史模板", "", "error")
 	    	}
 	    });
 	    
 	    $("#historyTable").on('click','[data-load]',function(){
 	    	var id = $(this).data('load');
-	    	swal({
+	    	Swal.fire({
 				  title: '你确定吗？',
 				  type: 'warning',
 				  showCancelButton: true,
@@ -149,10 +149,10 @@
 						},
 						error:function(jqXHR, textStatus, errorThrown) {
 							if(jqXHR.status == 404){
-								swal('模板不存在','','error');return;
+								Swal.fire('模板不存在','','error');return;
 							}
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('保存失败',data.error,'error');
+							Swal.fire('保存失败',data.error,'error');
 						}
 					  })
 			  }
@@ -175,7 +175,7 @@
 	                },
 	                error: function(jqXHR) {
 	                    var message = $.parseJSON(jqXHR.responseText).error;
-	                    swal("获取默认页面失败", "", "error")
+	                    Swal.fire("获取默认页面失败", "", "error")
 	                }
 	            });
 	        } else {
@@ -263,7 +263,7 @@
 	        },
 	        error: function(jqXHR) {
 	            var text = jqXHR.responseText;
-	            swal($.parseJSON(text).error, '', 'error');
+	            Swal.fire($.parseJSON(text).error, '', 'error');
 	        }
 	    });
 	    
@@ -313,7 +313,7 @@
 					$("#pageId").val(data.id);
 				}
 				$("#pageKey").val("page_"+$("#pageId").val());
-				swal("保存成功",'','success');
+				Swal.fire("保存成功",'','success');
 				if(!quick){
 					$("#previewModal").modal('hide');
 				}
@@ -322,7 +322,7 @@
 				var error = $.parseJSON(jqXHR.responseText).error;
 				if(quick){
 					$("#previewModal").modal('show');
-				}swal('保存失败',error,'error')
+				}Swal.fire('保存失败',error,'error')
 			}
 		});
 	}
@@ -357,7 +357,7 @@
 		if(v != null){
 			v = $.parseJSON(v);
 			current_tpl = editor.getValue();
-			swal({
+			Swal.fire({
 				  title: '要加载备份吗？',
 				  type: 'warning',
 				  text : "系统发现在"+moment(v.time).format('YYYY-MM-DD HH:mm:ss')+"留有备份，是否加载？",
@@ -447,14 +447,14 @@
 	var clipboard=new Clipboard('[data-clipboard-target]');
 	clipboard.on('success',function(e){
 		 e.clearSelection();
-		swal('拷贝成功','','success');
+		Swal.fire('拷贝成功','','success');
 	});
 	clipboard.on('error',function(){
-		swal('拷贝失败','','error');
+		Swal.fire('拷贝失败','','error');
 	});
 	
 	function loadBak(key){
-		swal({
+		Swal.fire({
 			  title: '你确定吗？',
 			  type: 'warning',
 			  showCancelButton: true,
@@ -476,7 +476,7 @@
 	}
 	
 	function delBak(key){
-		swal({
+		Swal.fire({
 			  title: '你确定吗？',
 			  type: 'warning',
 			  showCancelButton: true,

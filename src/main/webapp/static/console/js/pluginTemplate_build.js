@@ -48,7 +48,7 @@
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
 				var data = $.parseJSON(jqXHR.responseText);
-				swal('获取访问锁失败',data.error,'error');
+				Swal.fire('获取访问锁失败',data.error,'error');
 			}
 		  })
 		  
@@ -87,7 +87,7 @@
                 },
                 error: function(jqXHR) {
                     var message = $.parseJSON(jqXHR.responseText).error;
-                    swal("获取默认页面失败", "", "error")
+                    Swal.fire("获取默认页面失败", "", "error")
                 }
         });
 	    
@@ -139,7 +139,7 @@
 
 
 	    $("#clear").click(function() {
-	        swal({
+	        Swal.fire({
 	            title: '你确定要清空吗？',
 	            type: 'warning',
 	            showCancelButton: true,
@@ -160,7 +160,7 @@
 	    });
 	    
 	    $("#back").click(function(){
-	    	 swal({
+	    	 Swal.fire({
 		            title: '你确定要返回吗？',
 		            type: 'warning',
 		            showCancelButton: true,
@@ -242,11 +242,11 @@
 				if(data){
 					$("#pluginTemplateId").val(data.id);
 				}
-				swal("保存成功",'','success');
+				Swal.fire("保存成功",'','success');
 			},error:function(jqXHR){
 				saveFlag = false;
 				var error = $.parseJSON(jqXHR.responseText).error;
-				swal('保存失败',error,'error')
+				Swal.fire('保存失败',error,'error')
 			}
 		});
 	}
@@ -277,10 +277,10 @@
 	var clipboard=new Clipboard('[data-clipboard-target]');
 	clipboard.on('success',function(e){
 		 e.clearSelection();
-		swal('拷贝成功','','success');
+		Swal.fire('拷贝成功','','success');
 	});
 	clipboard.on('error',function(){
-		swal('拷贝失败','','error');
+		Swal.fire('拷贝失败','','error');
 	});
 	
 	

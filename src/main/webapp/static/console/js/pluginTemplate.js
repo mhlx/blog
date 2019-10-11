@@ -14,7 +14,7 @@ var table = datatable("pluginTemplateTable", {
 	});
 	$("#pluginTemplateTable").on("click","[data-delete]",function(){
 		var id = $(this).data('delete');
-		swal({
+		Swal.fire({
 		  title: '你确定吗？',
 		  text: "这个操作无法被撤销",
 		  type: 'warning',
@@ -29,12 +29,12 @@ var table = datatable("pluginTemplateTable", {
 				type : 'DELETE',
 				url : root + 'api/console/template/pluginTemplate/'+id,
 				success:function(data) {
-					swal('删除成功','插件模板已经被删除','success');
+					Swal.fire('删除成功','插件模板已经被删除','success');
 					table.reload();
 				},
 				error:function(jqXHR, textStatus, errorThrown) {
 					var data = $.parseJSON(jqXHR.responseText);
-					swal('删除失败',data.error,'error');
+					Swal.fire('删除失败',data.error,'error');
 				}
 			  })
 		  }

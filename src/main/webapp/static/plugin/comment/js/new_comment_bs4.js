@@ -152,7 +152,7 @@
                 },
                 error:function(jqXHR){
                 	var message = $.parseJSON(jqXHR.responseText).error;
-	             	swal('获取会话失败',message,'error');
+	             	Swal.fire('获取会话失败',message,'error');
 	            }
         	})
         }
@@ -170,7 +170,7 @@
                      },
                      error:function(jqXHR){
                      	var message = $.parseJSON(jqXHR.responseText).error;
-                     	swal('审核失败',message,'error');
+                     	Swal.fire('审核失败',message,'error');
                      }
                  });
              });
@@ -192,7 +192,7 @@
                             },
                             error:function(jqXHR){
                             	var message = $.parseJSON(jqXHR.responseText).error;
-                            	swal('删除失败',message,'error');
+                            	Swal.fire('删除失败',message,'error');
                             }
                         });
                     });
@@ -214,7 +214,7 @@
                             },
                             error:function(jqXHR){
                             	var message = $.parseJSON(jqXHR.responseText).error;
-                            	swal('禁止IP失败',message,'error');
+                            	Swal.fire('禁止IP失败',message,'error');
                             }
                         });
                     });
@@ -503,7 +503,7 @@
                 });
                 c.on('click',"[data-del]",function(){
                 	removeComment($(this).data('del'),function(){
-                		swal('删除成功','','success');
+                		Swal.fire('删除成功','','success');
                 		loadComment(config);
                 	});
                 });
@@ -515,7 +515,7 @@
                 
                 c.on('click','[data-ban]',function(){
                 	banComment($(this).data('ban'),function(){
-                		swal('禁止成功','','success');
+                		Swal.fire('禁止成功','','success');
                 		loadComment(config);
                 	});
                 });
@@ -541,7 +541,7 @@
 	                     },
 	                     error:function(jqXHR){
                         	var error = $.parseJSON(jqXHR.responseText).error;
-                        	swal('获取评论失败',error,'error')
+                        	Swal.fire('获取评论失败',error,'error')
                         }
                 		
                 	})
@@ -604,11 +604,11 @@
 	                       			config.page = 0;
 	                       		 }
 	                       		 loadComment(config);
-                            	swal("编辑成功",'','success');
+                            	Swal.fire("编辑成功",'','success');
                             },
                             error:function(jqXHR){
                             	var error = $.parseJSON(jqXHR.responseText).error;
-                            	swal('提交失败',error,'error')
+                            	Swal.fire('提交失败',error,'error')
                             }
                         });
                 		return ;
@@ -639,9 +639,9 @@
 	                       		 loadComment(config);
 	                       	 }
 	                          if (check) {
-	                               swal('评论将会在审核通过后显示','','success');
+	                               Swal.fire('评论将会在审核通过后显示','','success');
 	                           }else{
-	                        	   swal("评论成功",'','success');
+	                        	   Swal.fire("评论成功",'','success');
 	                               $('html, body').animate({
 	                                   scrollTop: c.offset().top
 	                               }, 50);
@@ -652,7 +652,7 @@
                         },
                         error:function(jqXHR){
                         	var error = $.parseJSON(jqXHR.responseText).error;
-                        	swal('提交失败',error,'error')
+                        	Swal.fire('提交失败',error,'error')
                         },
                         complete: function() {
                         	$("#captcha-img").attr('src',basePath+'/captcha?time='+$.now());

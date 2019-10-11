@@ -33,11 +33,11 @@
 					url : root + 'api/console/staticFile',
 					data:{'path':path,'content':editor.getValue()},
 					success:function(data) {
-						swal('保存成功','','success');
+						Swal.fire('保存成功','','success');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('保存失败',data.error,'error');
+						Swal.fire('保存失败',data.error,'error');
 					}
 				  })
 			},
@@ -45,7 +45,7 @@
 				search.open();
 			},
 			"Esc" : function(){
-				swal({
+				Swal.fire({
 					  title: '你确定要离开码？',
 					  text: "没有保存的内容将会丢失",
 					  type: 'warning',

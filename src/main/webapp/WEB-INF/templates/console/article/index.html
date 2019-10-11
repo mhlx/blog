@@ -114,7 +114,7 @@
 						},
 						error : function(jqXHR) {
 							var error = $.parseJSON(jqXHR.responseText).error;
-							swal('获取空间失败', error, 'error');
+							Swal.fire('获取空间失败', error, 'error');
 						}
 					})
 					var table = datatable('articleTable', {
@@ -220,19 +220,19 @@
 							type : 'PATCH',
 							url : root + 'api/console/article/'+id+"?status=PUBLISHED",
 							success:function(data) {
-								swal('发布成功','文章已经发布','success');
+								Swal.fire('发布成功','文章已经发布','success');
 								table.reload();
 							},
 							error:function(jqXHR, textStatus, errorThrown) {
 								var data = $.parseJSON(jqXHR.responseText);
-								swal('发布失败',data.error,'error');
+								Swal.fire('发布失败',data.error,'error');
 							}
 						  })
 					});
 					
 					$("#articleTable").on('click','[data-delete]',function(){
 						var id = $(this).data('delete');
-						swal({
+						Swal.fire({
 						  title: '你确定吗？',
 						  text: "如果文章不是草稿，可以在回收站恢复这篇文章",
 						  type: 'warning',
@@ -247,12 +247,12 @@
 								type : 'PATCH',
 								url : root + 'api/console/article/'+id+"?status=DELETED",
 								success:function(data) {
-									swal('删除成功','文章已经被删除','success');
+									Swal.fire('删除成功','文章已经被删除','success');
 									table.reload();
 								},
 								error:function(jqXHR, textStatus, errorThrown) {
 									var data = $.parseJSON(jqXHR.responseText);
-									swal('删除失败',data.error,'error');
+									Swal.fire('删除失败',data.error,'error');
 								}
 							  })
 						  }
@@ -261,7 +261,7 @@
 					
 					$("#articleTable").on('click','[data-redo]',function(){
 						var id = $(this).data('redo');
-						swal({
+						Swal.fire({
 						  title: '你确定吗？',
 						  text: "文章将会被设置为草稿状态",
 						  type: 'warning',
@@ -276,12 +276,12 @@
 								type : 'PATCH',
 								url : root + 'api/console/article/'+id+"?status=DRAFT",
 								success:function(data) {
-									swal('恢复成功','文章已经被设置为草稿','success');
+									Swal.fire('恢复成功','文章已经被设置为草稿','success');
 									table.reload();
 								},
 								error:function(jqXHR, textStatus, errorThrown) {
 									var data = $.parseJSON(jqXHR.responseText);
-									swal('恢复失败',data.error,'error');
+									Swal.fire('恢复失败',data.error,'error');
 								}
 							  })
 						  }
@@ -296,7 +296,7 @@
 					});
 					$("#articleTable").on('click','[data-remove]',function(){
 						var id = $(this).data('remove');
-						swal({
+						Swal.fire({
 						  title: '你确定吗？',
 						  text: "文章将会被彻底删除",
 						  type: 'warning',
@@ -311,12 +311,12 @@
 								type : 'DELETE',
 								url : root + 'api/console/article/'+id,
 								success:function(data) {
-									swal('删除成功','文章已经被删除','success');
+									Swal.fire('删除成功','文章已经被删除','success');
 									table.reload();
 								},
 								error:function(jqXHR, textStatus, errorThrown) {
 									var data = $.parseJSON(jqXHR.responseText);
-									swal('删除失败',data.error,'error');
+									Swal.fire('删除失败',data.error,'error');
 								}
 							  })
 						  }
@@ -326,10 +326,10 @@
 		
 		var clipboard=new Clipboard('[data-clipboard-text]');
 		clipboard.on('success',function(e){
-			swal('拷贝文章访问地址成功','','success'); e.clearSelection();
+			Swal.fire('拷贝文章访问地址成功','','success'); e.clearSelection();
 		});
 		clipboard.on('error',function(){
-			swal('拷贝失败','','error');
+			Swal.fire('拷贝失败','','error');
 		});
 	</script>
 

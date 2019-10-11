@@ -80,12 +80,12 @@
 				},
 				error : function(jqXHR, textStatus, errorThrown) {
 					var data = $.parseJSON(jqXHR.responseText);
-					swal('获取用户信息失败', data.error, 'error');
+					Swal.fire('获取用户信息失败', data.error, 'error');
 				}
 			})
 			$("#update").click(function() {
 				var me = $(this);
-				var url = root + 'api/console/user?oldPassword='+$("#oldPassword").val();
+				var url = root + 'api/console/user?oldPassword='+encodeURIComponent($("#oldPassword").val());
 				if($("#otpCode").length > 0){
 					url += '&code='+$("#otpCode").val();
 				}
@@ -101,12 +101,12 @@
 					url : url,
 					success : function() {
 						me.prop("disabled", false);
-						swal('更新成功', '', 'success');
+						Swal.fire('更新成功', '', 'success');
 					},
 					error : function(jqXHR, textStatus, errorThrown) {
 						me.prop("disabled", false);
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('更新失败', data.error, 'error');
+						Swal.fire('更新失败', data.error, 'error');
 					}
 				});
 			});

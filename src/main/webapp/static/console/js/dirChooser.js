@@ -51,7 +51,7 @@ var dirChooser = (function(){
 				container.find('[data-toggle="tooltip"]').tooltip();
 			},
 			error:function(jqXHR){
-				swal('查询文件夹失败',$.parseJSON(jqXHR.responseText).val());
+				Swal.fire('查询文件夹失败',$.parseJSON(jqXHR.responseText).val());
 			}
 		})
 	}

@@ -41,17 +41,17 @@ var table = datatable("pageTable", {
 
 var clipboard=new Clipboard('[data-clipboard-text]');
 clipboard.on('success',function(){
-	swal('拷贝成功','','success');
+	Swal.fire('拷贝成功','','success');
 });
 clipboard.on('error',function(){
-	swal('拷贝失败','','error');
+	Swal.fire('拷贝失败','','error');
 });
 
 
 $(function(){
 	$("#pageTable").on("click","[data-delete]",function(){
 		var id = $(this).data('delete');
-		swal({
+		Swal.fire({
 		  title: '你确定吗？',
 		  text: "这个操作无法被撤销",
 		  type: 'warning',
@@ -66,12 +66,12 @@ $(function(){
 				type : 'DELETE',
 				url : root + 'api/console/template/page/'+id,
 				success:function(data) {
-					swal('删除成功','页面已经被删除','success');
+					Swal.fire('删除成功','页面已经被删除','success');
 					table.reload();
 				},
 				error:function(jqXHR, textStatus, errorThrown) {
 					var data = $.parseJSON(jqXHR.responseText);
-					swal('删除失败',data.error,'error');
+					Swal.fire('删除失败',data.error,'error');
 				}
 			  })
 		  }
@@ -118,7 +118,7 @@ $(function(){
 	$("#saveHistory").click(function(){
 		$("#historyModal").modal('hide');
 		(async function getRemark () {
-			const {value: text} = await swal({
+			const {value: text} = await Swal.fire({
 			  input: 'textarea',
 			  inputPlaceholder: '备注',
 			  showCancelButton: true,
@@ -129,14 +129,14 @@ $(function(){
 			if (text) {
 				 $.ajax({
 					type : 'POST',
-					url : root + 'api/console/template/page/'+_Page+'/history?remark='+text,
+					url : root + 'api/console/template/page/'+_Page+'/history?remark='+encodeURIComponent(text),
 					success:function(data) {
-						swal('保存成功','','success');
+						Swal.fire('保存成功','','success');
 						$("#historyModal").modal('show');
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('保存失败',data.error,'error');
+						Swal.fire('保存失败',data.error,'error');
 					}
 				  })
 			}else{
@@ -153,7 +153,7 @@ $(function(){
 			success:function(data) {
 				$("#historyModal").modal('hide');
 				(async function getRemark () {
-					const {value: text} = await swal({
+					const {value: text} = await Swal.fire({
 					  input: 'textarea',
 					  inputValue : data.remark,
 					  inputPlaceholder: '备注',
@@ -165,14 +165,14 @@ $(function(){
 					if (text) {
 						 $.ajax({
 							type : 'PUT',
-							url : root + 'api/console/template/history/'+data.id+"?remark="+text,
+							url : root + 'api/console/template/history/'+data.id+"?remark="+encodeURIComponent(text),
 							success:function(data) {
-								swal('更新成功','','success');
+								Swal.fire('更新成功','','success');
 								$("#historyModal").modal('show');
 							},
 							error:function(jqXHR, textStatus, errorThrown) {
 								var data = $.parseJSON(jqXHR.responseText);
-								swal('更新失败',data.error,'error');
+								Swal.fire('更新失败',data.error,'error');
 							}
 						  })
 					}else{
@@ -182,10 +182,10 @@ $(function(){
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
 				if(jqXHR.status == 404){
-					swal('模板不存在','','error');return;
+					Swal.fire('模板不存在','','error');return;
 				}
 				var data = $.parseJSON(jqXHR.responseText);
-				swal('保存失败',data.error,'error');
+				Swal.fire('保存失败',data.error,'error');
 			}
 		  })
 	});
@@ -193,7 +193,7 @@ $(function(){
 	
 	$("#historyTable").on('click','[data-delete]',function(){
 		var id = $(this).data('delete');
-		swal({
+		Swal.fire({
 			  title: '你确定吗？',
 			  text: "这个操作无法被撤销",
 			  type: 'warning',
@@ -208,14 +208,14 @@ $(function(){
 					type : 'DELETE',
 					url : root + 'api/console/template/history/'+id,
 					success:function(data) {
-						swal('删除成功','','success');
+						Swal.fire('删除成功','','success');
 						if(historyTable){
 							historyTable.reload();
 						}
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('删除失败',data.error,'error');
+						Swal.fire('删除失败',data.error,'error');
 					}
 				  })
 			  }

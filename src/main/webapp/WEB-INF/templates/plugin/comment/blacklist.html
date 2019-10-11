@@ -113,7 +113,7 @@ td img {
 	
 	$("#blacklistTable").on('click','[data-delete]',function(){
 		var ip = $(this).data('delete');
-		swal({
+		Swal.fire({
 			  title: '你确定要从黑名单中移除该IP吗？',
 			  type: 'warning',
 			  showCancelButton: true,
@@ -127,12 +127,12 @@ td img {
 					type : 'DELETE',
 					url : root + 'api/console/comment/blacklistItem/'+ip,
 					success:function(data) {
-						swal('删除成功','','success');
+						Swal.fire('删除成功','','success');
 						table.reload();
 					},
 					error:function(jqXHR, textStatus, errorThrown) {
 						var data = $.parseJSON(jqXHR.responseText);
-						swal('删除失败',data.error,'error');
+						Swal.fire('删除失败',data.error,'error');
 					}
 				  })
 			  }

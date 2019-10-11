@@ -27,7 +27,7 @@
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
 				var data = $.parseJSON(jqXHR.responseText);
-				swal('获取访问锁失败',data.error,'error');
+				Swal.fire('获取访问锁失败',data.error,'error');
 			}
 		  })
 	    $("#beautiful").click(function(){
@@ -68,7 +68,7 @@
 
 
 	    $("#clear").click(function() {
-	        swal({
+	        Swal.fire({
 	            title: '你确定要清空吗？',
 	            type: 'warning',
 	            showCancelButton: true,
@@ -84,7 +84,7 @@
 	    });
 	    
 	    $("#back").click(function(){
-	    	 swal({
+	    	 Swal.fire({
 		            title: '你确定要返回吗？',
 		            type: 'warning',
 		            showCancelButton: true,
@@ -125,13 +125,13 @@
 	    		}
 	    		$("#historyModal").modal('show');
 	    	}else{
-	    		swal("新模板片段无法获取历史模板", "", "error")
+	    		Swal.fire("新模板片段无法获取历史模板", "", "error")
 	    	}
 	    });
 	    
 	    $("#historyTable").on('click','[data-load]',function(){
 	    	var id = $(this).data('load');
-	    	swal({
+	    	Swal.fire({
 				  title: '你确定吗？',
 				  type: 'warning',
 				  showCancelButton: true,
@@ -149,10 +149,10 @@
 						},
 						error:function(jqXHR, textStatus, errorThrown) {
 							if(jqXHR.status == 404){
-								swal('模板不存在','','error');return;
+								Swal.fire('模板不存在','','error');return;
 							}
 							var data = $.parseJSON(jqXHR.responseText);
-							swal('保存失败',data.error,'error');
+							Swal.fire('保存失败',data.error,'error');
 						}
 					  })
 			  }
@@ -173,7 +173,7 @@
 	                },
 	                error: function(jqXHR) {
 	                    var message = $.parseJSON(jqXHR.responseText).error;
-	                    swal("获取默认模板片段失败", "", "error")
+	                    Swal.fire("获取默认模板片段失败", "", "error")
 	                }
 	            });
 	        } else {
@@ -237,11 +237,11 @@
 			dataType : "json",
 			contentType : 'application/json',
 			success : function(data){
-				swal('预览成功','预览成功，请自行访问拥有该模板片段的页面预览效果','success');
+				Swal.fire('预览成功','预览成功，请自行访问拥有该模板片段的页面预览效果','success');
 			},
 			error:function(jqXHR){
 				var error = $.parseJSON(jqXHR.responseText).error;
-				swal('预览失败',error,'error');
+				Swal.fire('预览失败',error,'error');
 			}
 		});
 	}
@@ -284,7 +284,7 @@
 			dataType : "json",
 			contentType : 'application/json',
 			success : function(data) {
-					swal("保存成功",'','success');
+					Swal.fire("保存成功",'','success');
 					fragment_storage.removeCurrent();
 					$("#fragmentId").val(data.id);
 					$("#fragmentKey").val("fragment_"+data.id)
@@ -297,7 +297,7 @@
 				if(quick){
 					$("#previewModal").modal('show');
 				}
-				swal('保存失败',$.parseJSON(jqXHR.responseText).error,'error');
+				Swal.fire('保存失败',$.parseJSON(jqXHR.responseText).error,'error');
 			}
 		});
 	}
@@ -335,7 +335,7 @@ var fragment_storage = (function() {
 			v = $.parseJSON(v);
 			current_tpl = editor.getValue();
 			current_tpl = editor.getValue();
-			swal({
+			Swal.fire({
 				  title: '要加载备份吗？',
 				  type: 'warning',
 				  text : "系统发现在"+moment(v.time).format('YYYY-MM-DD HH:mm:ss')+"留有备份，是否加载？",
@@ -403,14 +403,14 @@ var fragment_storage = (function() {
 	var clipboard=new Clipboard('[data-clipboard-target]');
 	clipboard.on('success',function(e){
 		 e.clearSelection();
-		swal('拷贝成功','','success');
+		Swal.fire('拷贝成功','','success');
 	});
 	clipboard.on('error',function(){
-		swal('拷贝失败','','error');
+		Swal.fire('拷贝失败','','error');
 	});
 	
 	function loadBak(key){
-		swal({
+		Swal.fire({
 			  title: '你确定吗？',
 			  type: 'warning',
 			  showCancelButton: true,
@@ -432,7 +432,7 @@ var fragment_storage = (function() {
 	}
 	
 	function delBak(key){
-		swal({
+		Swal.fire({
 			  title: '你确定吗？',
 			  type: 'warning',
 			  showCancelButton: true,

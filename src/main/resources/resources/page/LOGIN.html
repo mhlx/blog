@@ -150,7 +150,7 @@
                                                     window.location
                                                         .reload();
                                                 } else {
-                                                    swal(
+                                                    Swal.fire(
                                                         data.message,
                                                         '',
                                                         'error');
@@ -201,7 +201,7 @@
                                             if (data.success) {
                                                 window.location.href = gotoUrl;
                                             } else {
-                                                swal(
+                                                Swal.fire(
                                                     data.message,
                                                     '',
                                                     'error');

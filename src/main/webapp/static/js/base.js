@@ -33,7 +33,7 @@ jQuery.prototype.serializeObject=function(){
 
 function confirmLogout(){
 	$("#mobile-nav").hide();
-	swal({
+	Swal.fire({
 		  title: '你确定要注销吗？',
 		  type: 'warning',
 		  showCancelButton: true,

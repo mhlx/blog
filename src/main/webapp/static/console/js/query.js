@@ -29,7 +29,7 @@ var querier = (function($) {
 			url : root + 'doc/' + name,
 			dataType : "text",
 			success : function(data) {
-				var result = md.render(data);
+				var result = window.markdownit().render(data);
 				cache.push({
 					'name' : name,
 					'content' : result
@@ -92,7 +92,7 @@ var querier = (function($) {
 							result += '</pre>';
 							cb(result);
 						} else {
-							var result = md.render(data);
+							var result = window.markdownit().render(data);
 							cb(result);
 						}
 					}

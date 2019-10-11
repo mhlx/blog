@@ -54,15 +54,15 @@ $("#dataTable").on(
 			var name = me.data('name');
 			$.ajax({
 				type : 'patch',
-				url : root + 'api/console/template/data/' + name + "?callable="
+				url : root + 'api/console/template/data/' + encodeURIComponent(name) + "?callable="
 						+ callable,
 				success : function() {
-					swal('设置是否可访问成功', '', 'success');
+					Swal.fire('设置是否可访问成功', '', 'success');
 					table.reload();
 				},
 				error : function(jqXHR) {
 					var data = $.parseJSON(jqXHR.responseText);
-					swal('设置是否可访问失败', data.error, 'error');
+					Swal.fire('设置是否可访问失败', data.error, 'error');
 				}
 			});
 		});
