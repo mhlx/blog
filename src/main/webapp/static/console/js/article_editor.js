@@ -6,12 +6,7 @@ var heather ;
     Heather.lazyRes.katex_js=rootPath+'static/heather/katex/katex.min.js';
     
     
-    heather = Heather.create(document.getElementById('editor'),{
-    	markdownParser:{
-			html : true,
-			linkify:true
-		}
-    });
+    heather = Heather.create(document.getElementById('editor'));
     
     var toolbar = heather.getToolbar();
 	
@@ -38,14 +33,25 @@ var heather ;
 	toolbar.addIcon('fas fa-file heather_icon',function(){
 		files.get(heather.editor);
 	});
+
+	
+	var selectionHelperOpen = false;
+	heather.on('selectionHelperChange',function(sc){
+		selectionHelperOpen = sc;
+	});
+	
 	if(Heather.Util.mobile){
 		toolbar.addIcon('fas fa-arrows-alt heather_icon', function() {
-			if(!heather.hasSelectionHelper()){
+			if(!selectionHelperOpen){
 				heather.openSelectionHelper();
 			} else {
 				heather.closeSelectionHelper();
 			}
 		});
+	} else {
+		heather.on('fullscreenChange',function(fs){
+			heather.setSyncView(fs);
+		})
 	}
 	var t;
 	heather.on('editor.change',function(doc){

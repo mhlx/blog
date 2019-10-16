@@ -9615,6 +9615,12 @@
   TextareaInput.prototype.needsContentAttribute = false;
 
   function fromTextArea(textarea, options) {
+    var place = function (node) { return textarea.parentNode.insertBefore(node, textarea.nextSibling); };
+	return _fromTextArea(textarea,options,place);
+  }
+
+
+  function _fromTextArea(textarea, options,place) {
     options = options ? copyObj(options) : {};
     options.value = textarea.value;
     if (!options.tabindex && textarea.tabIndex)
@@ -9666,11 +9672,10 @@
     };
 
     textarea.style.display = "none";
-    var cm = CodeMirror(function (node) { return textarea.parentNode.insertBefore(node, textarea.nextSibling); },
+    var cm = CodeMirror(place,
       options);
     return cm
   }
-
   function addLegacyProps(CodeMirror) {
     CodeMirror.off = off;
     CodeMirror.on = on;

@@ -9,7 +9,9 @@
 	    fun: function() {preview()}
 	}]);
 	$(function() {
-	    editor.setSize('100%', $(window).height() - 60);
+
+		editor.setOption("fullScreen", true);
+		editor.getWrapperElement().style.top = 60+'px'
 	    
 	    $.ajax({
 			type : 'GET',

@@ -17,7 +17,7 @@
 <link rel="stylesheet"
 	th:href="@{/static/codemirror/lib/codemirror.css}">
 <link rel="stylesheet" th:href="@{/static/css/markdown.css}">
-<link rel="stylesheet" th:href="@{/static/heather/style.css}">
+<link rel="stylesheet" th:href="@{/static/heather/css/style.css}">
 <link rel="stylesheet" th:href="@{/static/heather/highlight/styles/github.css}">
 <link rel="stylesheet" th:href="@{/static/codemirror/addon/dialog/dialog.css}">
 <link rel="stylesheet" th:href="@{/static/codemirror/addon/display/fullscreen.css}">
@@ -191,6 +191,9 @@
 	<script th:src="@{/static/codemirror/mode/gfm/gfm.js}"></script>
 	<script
 		th:src="@{/static/codemirror/addon/selection/mark-selection.js}"></script>
+
+	<script
+		th:src="@{/static/codemirror/addon/selection/active-line.js}"></script>	
 	<script th:src="@{/static/codemirror/addon/search/searchcursor.js}"></script>
 	<script th:src="@{/static/codemirror/addon/search/search.js}"></script>
 	<script th:src="@{/static/codemirror/addon/edit/continuelist.js}"></script>
@@ -199,6 +202,8 @@
 	<script th:src="@{/static/heather/js/markdown-it.min.js}"></script>
 	<script th:src="@{/static/heather/js/markdown-it-task-lists.min.js}"></script>
 	<script th:src="@{/static/heather/js/markdown-it-katex.min.js}"></script>
+	<script th:src="@{/static/heather/js/markdownItAnchor.umd.js}"></script>
+	<script th:src="@{/static/heather/js/morphdom-umd.min.js}"></script>
 	<script th:src="@{/static/heather/js/heather.js}"></script>
 
 	<script type="text/javascript"
