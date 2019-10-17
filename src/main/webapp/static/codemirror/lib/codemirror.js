@@ -9760,6 +9760,7 @@
   };
 
   CodeMirror.fromTextArea = fromTextArea;
+  CodeMirror._fromTextArea = _fromTextArea;
 
   addLegacyProps(CodeMirror);
 
