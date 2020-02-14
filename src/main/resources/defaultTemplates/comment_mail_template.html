@@ -1,0 +1,83 @@
+<html>
+<head>
+<style>
+.media {
+	margin-top: 15px;
+}
+
+.media:first-child {
+	margin-top: 0;
+}
+
+.media-right, .media>.pull-right {
+	padding-left: 10px;
+}
+
+.media-left, .media>.pull-left {
+	padding-right: 10px;
+}
+
+.media-left, .media-right, .media-body {
+	display: table-cell;
+	vertical-align: top;
+}
+
+.media-body {
+	padding-left: 10px;
+}
+
+.media-middle {
+	vertical-align: middle;
+}
+
+.media-bottom {
+	vertical-align: bottom;
+}
+
+.media-heading {
+	margin-top: 0;
+	margin-bottom: 5px;
+}
+
+.media-list {
+	padding-left: 0;
+	list-style: none;
+}
+
+.alert-success {
+	color: #3c763d;
+	background-color: #dff0d8;
+	border-color: #d6e9c6;
+}
+
+.alert {
+	padding: 15px;
+	margin-bottom: 20px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+}
+</style>
+</head>
+<body>
+	<div class="panel-body">
+		<div class="media" th:each="comment : ${comments}">
+			<div class="media-body">
+				<h4 class="media-heading" th:if="${comment.parent == null}"
+					th:text="${comment.nickname}+'评论了你'"></h4>
+				<h4 class="media-heading" th:if="${comment.parent != null}"
+					th:text="${comment.nickname}+'回复了你的评论'"></h4>
+				<div th:if="${comment.parent != null}" class="alert alert-success">
+					<p>您的评论为:</p>
+					<p th:utext="${comment.parent.content}"></p>
+				</div>
+				<span th:utext="${comment.content}"></span>
+				<h5
+					th:text="${#times.format(comment.createTime, 'yyyy-MM-dd HH:mm')}"></h5>
+				<div th:if="${comment.checking}">
+					<small><span>待审核</span></small>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

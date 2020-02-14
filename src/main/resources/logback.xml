@@ -26,11 +26,20 @@
 		</encoder>
 	</appender>
 
-	<!-- 关闭这个类的日志 -->
-	<logger name="org.thymeleaf.TemplateEngine" level="OFF" />
+	<appender name="emailAppender"
+		class="me.qyh.blog.support.logback.EmailAppender">
+		<encoder>
+			<Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %n
+			</Pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
 
-	<root level="ERROR">
+	<root level="INFO">
 		<appender-ref ref="consoleAppender" />
 	</root>
-
+<!-- 	<root level="ERROR"> -->
+<!-- 		<appender-ref ref="errorDailyRollingFileAppender" /> -->
+<!-- 		<appender-ref ref="emailAppender" /> -->
+<!-- 	</root> -->
 </configuration>

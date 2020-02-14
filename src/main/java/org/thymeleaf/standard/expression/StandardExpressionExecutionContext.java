@@ -2,10 +2,9 @@ package org.thymeleaf.standard.expression;
 
 /**
  * <p>
- * 禁用thymeleaf 3.0.10限制模式
+ * disable thymeleaf restricted mode！
  * </p>
  * 
- * @since 7.0
  * @author wwwqyhme
  *
  */

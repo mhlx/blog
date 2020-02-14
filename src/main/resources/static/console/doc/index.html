@@ -1,0 +1,2260 @@
+<h1 id="%E6%A8%A1%E6%9D%BF">模板</h1>
+<p>系统允许用户自定义模板来完成主题、自定义页面等，模板可以是一个完整的页面，也可以是一个片段，在模板的渲染过程中，可以通过标签来控制数据的加载或者模板之间的跳转</p>
+<h2 id="%E4%BC%98%E5%85%88%E7%BA%A7">优先级</h2>
+<p>用户自定义模板拥有最高的优先级，<strong>而且不会对自定义模板的路径优先级和系统内置的路径的优先级进行匹配</strong>。
+假设用户自定义模板路径:<code>/**</code>，那么这个模板将会覆盖所有的系统内置的模板路径，因为系统首先会去寻找匹配的自定义模板，一旦寻找到，就会直接渲染该模板，只有在无法匹配到自定义模板的情况下，才会去寻找内置路径。因此<code>/**</code>这种模板应该<strong>谨慎</strong>使用(一旦创建并且启用，由于缓存原因，只有手动删除数据库记录并且重启服务器才能正常访问其他路径)</p>
+<h2 id="%E6%A8%A1%E6%9D%BF%E5%88%86%E7%B1%BB">模板分类</h2>
+<h3 id="%E8%B7%AF%E5%BE%84%E6%A8%A1%E6%9D%BF">路径模板</h3>
+<p>路径模板是指模板路径属性不为空的模板，它可以被直接访问，它支持pathVariable或者通配符，例如 <code>/article/{idOrAlias}</code>(在页面中可以通过<code>${idOrAlias}</code>获取路径值)，<strong>它不能作为片段在另一个路径模板中调用</strong></p>
+<h3 id="%E7%89%87%E6%AE%B5%E6%A8%A1%E6%9D%BF">片段模板</h3>
+<p>路径模板是指模板名称属性不为空的模板，它不能被直接访问，只能在路径模板中被调用(可以用过thymeleaf的语法来调用，例如<code>&lt;div th:replace=&quot;模板名称&quot;&gt;&lt;/div&gt;</code>)，更多的时候，它作为一种公共的模板用以复用。</p>
+<h2 id="%E9%BB%98%E8%AE%A4%E6%A8%A1%E6%9D%BF">默认模板</h2>
+<h3 id="%E5%9F%BA%E6%9C%AC%E6%A8%A1%E6%9D%BF">基本模板</h3>
+<p>在系统启动时，会去检查默认模板，如果不存在，会自动创建(<strong>这个行为只会在第一次启动时发生</strong>)，默认的模板如下：</p>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/</td>
+<td></td>
+<td>首页</td>
+</tr>
+<tr>
+<td>/articles/{idOrAlias}</td>
+<td></td>
+<td>显示文章详情</td>
+</tr>
+<tr>
+<td>/moments</td>
+<td></td>
+<td>显示动态列表</td>
+</tr>
+<tr>
+<td>/moments/{id}</td>
+<td></td>
+<td>显示动态详情</td>
+</tr>
+<tr>
+<td>/archive</td>
+<td></td>
+<td>显示文章归档</td>
+</tr>
+<tr>
+<td></td>
+<td>nav</td>
+<td>用于顶部导航</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E5%BC%82%E5%B8%B8%E6%B8%B2%E6%9F%93%E6%A8%A1%E6%9D%BF">异常渲染模板</h3>
+<p>所有的异常渲染模板都由错误处理器(路径<code>/error</code>)负责调用显示，因此<code>/error</code>这个路径无法被覆盖。</p>
+<p>异常渲染模板都是片段类型的模板，因此，如果需要覆盖默认的异常模板，需要指定模板的名称，而不是模板的路径，默认的异常渲染模板都可以被覆盖，但是当删除自定义的异常渲染模板后，默认的异常渲染模板仍然会正常工作。</p>
+<h4 id="error%2F*">error/*</h4>
+<p>这个模板用于显示全局的异常信息，例如，如果错误码为500，那么首先会去寻找名称为 error/500 的模板，如果无法找到，会去寻找 名称为error/* 的模板，因此，当仅需要额外渲染 500 错误码的异常时，只需要额外创建一个名称为 error/500 的模板，而无需覆盖 error/*</p>
+<h4 id="unlock">unlock</h4>
+<p>这个模板用于访问需要解锁的资源，这个模板下，通过<code>${id}</code>可以获得被保护资源的id，通过<code>${url}</code>可以获得被保护资源的访问路径</p>
+<h4 id="errorpageerror">errorPageError</h4>
+<p>这个模板用于渲染在 error/* 模板处理发生的异常，<strong>这个模板不应该被覆盖</strong></p>
+<h1 id="%E6%A0%87%E7%AD%BE">标签</h1>
+<h2 id="%E6%8E%A7%E5%88%B6%E6%A0%87%E7%AD%BE">控制标签</h2>
+<h3 id="%E6%A6%82%E8%BF%B0">概述</h3>
+<p>控制标签用于页面的跳转</p>
+<h3 id="private-%E6%A0%87%E7%AD%BE">private 标签</h3>
+<p>如果该标签被解析，那么只有登录后才能访问目标页面</p>
+<h4 id="%E5%BC%95%E7%94%A8">引用</h4>
+<p><code>&lt;private/&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7">标签属性</h4>
+<p>该标签不支持任何属性</p>
+<h3 id="password-%E6%A0%87%E7%AD%BE">password 标签</h3>
+<p>如果该标签被解析，那么只有在输入正确的访问密码之后才能访问</p>
+<h4 id="%E5%BC%95%E7%94%A8-2">引用</h4>
+<p><code>&lt;password/&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-2">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>value</td>
+<td>密码</td>
+<td>String</td>
+<td>是</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="redirect%E6%A0%87%E7%AD%BE">redirect标签</h3>
+<p>如果该标签被解析，那么请求将会被重定向</p>
+<h4 id="%E5%BC%95%E7%94%A8-3">引用</h4>
+<p><code>&lt;redirect/&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-3">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>url</td>
+<td>目标地址(必须是一个绝对地址)</td>
+<td>String</td>
+<td>是</td>
+<td></td>
+</tr>
+<tr>
+<td>permanently</td>
+<td>是否302跳转</td>
+<td>Boolean</td>
+<td>否</td>
+<td>false</td>
+</tr>
+</tbody>
+</table>
+<h3 id="status%E6%A0%87%E7%AD%BE">status标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-4">引用</h4>
+<p><code>&lt;status /&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-4">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>code</td>
+<td>跳转的状态码(必须为4xx或者5xx)</td>
+<td>int</td>
+<td>是</td>
+<td></td>
+</tr>
+<tr>
+<td>msgCode</td>
+<td>错误code</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>defaultMsg</td>
+<td>错误code对应的默认文本</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>在目标页面通过<code>${errors}</code>获取错误信息</strong></p>
+<h2 id="%E6%95%B0%E6%8D%AE%E6%A0%87%E7%AD%BE">数据标签</h2>
+<h3 id="%E6%A6%82%E8%BF%B0-2">概述</h3>
+<p>数据标签用于向页面传递数据，假设有数据标签<code>&lt;data name=&quot;dataName&quot;&gt;&lt;/a&gt;</code>，那么在页面中通过<code>${dataName}</code>即可访问标签传递的数据，如果数据标签名称存在重复，可以通过指定alias属性，例如<code>&lt;data name=&quot;dataName&quot; alias=&quot;dataName1&quot;&gt;&lt;/a&gt;</code>，此时通过 <code>${dataName1}</code>获取数据</p>
+<h3 id="%E5%88%86%E7%B1%BB%E4%B8%8B%E6%96%87%E7%AB%A0%E6%95%B0%E7%BB%9F%E8%AE%A1%E6%A0%87%E7%AD%BE">分类下文章数统计标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-5">引用</h4>
+<p><code>&lt;data name=&quot;articleCategoryStatistics&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-5">标签属性</h4>
+<p>该标签不支持任何属性</p>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>List&lt;ArticleCategoryStatistic&gt;</code></p>
+<h5 id="articlecategorystatistic%E5%B1%9E%E6%80%A7">ArticleCategoryStatistic属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>category</td>
+<td>分类</td>
+<td>Category</td>
+<td>否</td>
+</tr>
+<tr>
+<td>count</td>
+<td>分类下文章数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="category%E5%B1%9E%E6%80%A7">Category属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>分类ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>分类名</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>createTime</td>
+<td>分类创建时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>最后一次修改分类时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E6%96%87%E7%AB%A0%E6%98%8E%E7%BB%86%E6%A0%87%E7%AD%BE">文章明细标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-6">引用</h4>
+<p><code>&lt;data name=&quot;article&quot;&gt;&lt;/a&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-6">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>idOrAlias</td>
+<td>文章ID或者别名</td>
+<td>String</td>
+<td>是</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-2">返回值</h4>
+<p>返回一个<strong>可能为null</strong>的<code>Article</code></p>
+<h5 id="article%E5%B1%9E%E6%80%A7">Article属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>文章ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>title</td>
+<td>文章标题</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>content</td>
+<td>文章内容(html)</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>pubDate</td>
+<td>文章发布日期</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>lastModifyDate</td>
+<td>文章最后一次修改日期</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+<tr>
+<td>isPrivate</td>
+<td>是否是私有文章</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>hits</td>
+<td>文章点击数</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>comments</td>
+<td>文章评论数</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>summary</td>
+<td>文章摘要(html)</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>level</td>
+<td>文章置顶级别</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>alias</td>
+<td>文章访问别名</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>allowComment</td>
+<td>是否允许评论</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>password</td>
+<td>文章访问密码</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>status</td>
+<td>文章状态(固定为ArticleStatus.PUBLISHED)</td>
+<td>ArticleStatus</td>
+<td>否</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>文章标签</td>
+<td><code>Set&lt;Tag&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>categories</td>
+<td>文章分类</td>
+<td><code>Set&lt;Category&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>featureImage</td>
+<td>特征图像</td>
+<td>String</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h6 id="tag-%E5%B1%9E%E6%80%A7">Tag 属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>标签ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>标签名</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>createTime</td>
+<td>标签创建时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>最后一次修改标签时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h6 id="category%E5%B1%9E%E6%80%A7-2">Category属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>分类ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>分类名</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>createTime</td>
+<td>分类创建时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>最后一次修改分类时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E6%96%87%E7%AB%A0%E5%88%97%E8%A1%A8%E6%A0%87%E7%AD%BE">文章列表标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-7">引用</h4>
+<p><code>&lt;data name=&quot;articlePage&quot;/&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-7">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>begin</td>
+<td>文章发布的开始时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>end</td>
+<td>文章发布的结束时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>queryPrivate</td>
+<td>是否查询私人文章(登录有效)</td>
+<td>Boolean</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>queryPasswordProtected</td>
+<td>是否查询密码保护的内容(登录有效)</td>
+<td>Boolean</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>query</td>
+<td>查询内容(标题、摘要、内容)</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>category</td>
+<td>分类名</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>tag</td>
+<td>标签名</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-3">返回值</h4>
+<p>返回一个<strong>不为null</strong>的<code>PageResult&lt;Article&gt;</code></p>
+<h5 id="article%E5%B1%9E%E6%80%A7-2">Article属性</h5>
+<p>请见 <a href="#article%E5%B1%9E%E6%80%A7">Article标签</a>，<strong>content属性始终为null</strong></p>
+<h5 id="pageresult%E5%B1%9E%E6%80%A7">PageResult属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>datas</td>
+<td>文章列表</td>
+<td><code>List&lt;Article&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalPage</td>
+<td>总分页数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页码</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalRow</td>
+<td>总记录数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>param</td>
+<td>分页查询参数</td>
+<td><code>ArticleQueryParam</code></td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h5 id="pageresult%E6%96%B9%E6%B3%95">PageResult方法</h5>
+<ol>
+<li>hasResult-&gt;boolean 是否有结果</li>
+<li>isHasNext()-&gt;boolean是否有下一页</li>
+<li>isHasPrevious()-&gt;boolean是否有上一页</li>
+<li>isHasPaging()-&gt;boolean是否需要分页</li>
+</ol>
+<h6 id="articlequeryparam%E5%B1%9E%E6%80%A7">ArticleQueryParam属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>begin</td>
+<td>文章发布的开始时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+<tr>
+<td>end</td>
+<td>文章发布的结束时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+<tr>
+<td>queryPrivate</td>
+<td>是否查询私人文章</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>queryPasswordProtected</td>
+<td>是否查询密码保护的内容</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>query</td>
+<td>查询内容</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>status</td>
+<td>文章状态(固定为ArticleStatus.PUBLISHED)</td>
+<td><code>ArticleStatus</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>category</td>
+<td>分类名</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>tag</td>
+<td>标签名</td>
+<td>String</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E6%A0%87%E7%AD%BE%E4%B8%8B%E6%96%87%E7%AB%A0%E6%95%B0%E7%BB%9F%E8%AE%A1%E6%A0%87%E7%AD%BE">标签下文章数统计标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-8">引用</h4>
+<p><code>&lt;data name=&quot;articleTagStatistic&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-8">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>category</td>
+<td>分类名称</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-4">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>List&lt;ArticleTagStatistic&gt;</code></p>
+<h5 id="articletagstatistic%E5%B1%9E%E6%80%A7">ArticleTagStatistic属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tag</td>
+<td>标签</td>
+<td>Tag</td>
+<td>否</td>
+</tr>
+<tr>
+<td>count</td>
+<td>标签下文章数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="tag-%E5%B1%9E%E6%80%A7-2">Tag 属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>标签ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>标签名</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>createTime</td>
+<td>标签创建时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>最后一次修改标签时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E5%88%86%E7%B1%BB%E5%88%97%E8%A1%A8%E6%A0%87%E7%AD%BE">分类列表标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-9">引用</h4>
+<p><code>&lt;data name=&quot;categories&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-9">标签属性</h4>
+<p>该标签不支持任何属性</p>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-5">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>List&lt;Category&gt;</code></p>
+<h5 id="category%E5%B1%9E%E6%80%A7-3">Category属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>分类ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>分类名</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>createTime</td>
+<td>分类创建时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>最后一次修改分类时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E5%88%86%E7%B1%BB%E6%98%8E%E7%BB%86%E6%A0%87%E7%AD%BE">分类明细标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-10">引用</h4>
+<p><code>&lt;data name=&quot;category&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-10">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>分类名称</td>
+<td>String</td>
+<td>是</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-6">返回值</h4>
+<p>返回一个<strong>可能为null</strong>的 <code>Category</code></p>
+<h5 id="category%E5%B1%9E%E6%80%A7-4">Category属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>分类ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>分类名</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>createTime</td>
+<td>分类创建时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>最后一次修改分类时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E8%AF%84%E8%AE%BA%E5%88%97%E8%A1%A8%E6%A0%87%E7%AD%BE">评论列表标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-11">引用</h4>
+<p><code>&lt;data name=&quot;commentPage&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-11">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>parent</td>
+<td>父评论ID</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>checking</td>
+<td>是否审核</td>
+<td>Boolean</td>
+<td>否</td>
+<td>false</td>
+</tr>
+<tr>
+<td><a href="http://module.id">module.id</a></td>
+<td>模块ID</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://module.name">module.name</a></td>
+<td>模块名称</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>contain</td>
+<td>必须包含的某条评论ID</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>asc</td>
+<td>是否按照评论时间顺序展示</td>
+<td>boolean</td>
+<td>false</td>
+<td></td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页</td>
+<td>Integer</td>
+<td>false</td>
+<td></td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页数目</td>
+<td>Integer</td>
+<td>false</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-7">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>PageResult&lt;Comment&gt;</code></p>
+<h5 id="comment%E5%B1%9E%E6%80%A7">Comment属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>评论ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>nickname</td>
+<td>评论人昵称</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>gravatar</td>
+<td>邮箱MD5值</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>admin</td>
+<td>是否是管理员评论</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>module</td>
+<td>评论模块</td>
+<td>CommentModule</td>
+<td>否</td>
+</tr>
+<tr>
+<td>content</td>
+<td>评论内容(html)</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>website</td>
+<td>评论人网址</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>email</td>
+<td>评论人邮箱</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>ip</td>
+<td>评论人IP</td>
+<td>String</td>
+<td>是(登录可见)</td>
+</tr>
+<tr>
+<td>parent</td>
+<td>父评论</td>
+<td>Comment</td>
+<td>是</td>
+</tr>
+<tr>
+<td>checking</td>
+<td>是否正在审核(固定为false)</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>replyNum</td>
+<td>评论下回复数目</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>target</td>
+<td>评论模块明细</td>
+<td>Object</td>
+<td>否</td>
+</tr>
+<tr>
+<td>createTime</td>
+<td>评论时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>评论最后一次修改时间</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h6 id="%E7%88%B6%E8%AF%84%E8%AE%BA%E5%B1%9E%E6%80%A7">父评论属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>评论ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>nickname</td>
+<td>评论人昵称</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>gravatar</td>
+<td>邮箱MD5值</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>admin</td>
+<td>是否是管理员评论</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="commentmodule%E5%B1%9E%E6%80%A7">CommentModule属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>模块ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>模块名称</td>
+<td>String</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="%E6%A8%A1%E5%9D%97%E6%98%8E%E7%BB%86%E5%B1%9E%E6%80%A7">模块明细属性</h6>
+<p>如果模块名称为 article,target 为 <code>Article</code></p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>文章ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>alias</td>
+<td>文章访问别名</td>
+<td>String</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<p>如果模块名称为 moment,target 为 <code>Moment</code></p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>文章ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p>如果模块名称为 template,target为 <code>Template</code></p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pattern</td>
+<td>模板路径</td>
+<td>String</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h5 id="pageresult%E5%B1%9E%E6%80%A7-2">PageResult属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>datas</td>
+<td>文章列表</td>
+<td><code>List&lt;Comment&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalPage</td>
+<td>总分页数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页码</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalRow</td>
+<td>总记录数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>param</td>
+<td>分页查询参数</td>
+<td><code>CommentQueryParam</code></td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h5 id="pageresult%E6%96%B9%E6%B3%95-2">PageResult方法</h5>
+<ol>
+<li>hasResult-&gt;boolean 是否有结果</li>
+<li>isHasNext()-&gt;boolean是否有下一页</li>
+<li>isHasPrevious()-&gt;boolean是否有上一页</li>
+<li>isHasPaging()-&gt;boolean是否需要分页</li>
+</ol>
+<h5 id="commentqueryparam%E5%B1%9E%E6%80%A7">CommentQueryParam属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>parent</td>
+<td>父评论ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>checking</td>
+<td>是否审核</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>module</td>
+<td>模块</td>
+<td>CommentModule</td>
+<td>是</td>
+</tr>
+<tr>
+<td>contain</td>
+<td>必须包含的某条评论ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>asc</td>
+<td>是否按照评论时间顺序展示</td>
+<td>boolean</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="commentmodule%E5%B1%9E%E6%80%A7-2">CommentModule属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>模块ID</td>
+<td>Integer</td>
+<td>是</td>
+</tr>
+<tr>
+<td>name</td>
+<td>模块名称</td>
+<td>String</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E6%9C%80%E8%BF%91%E8%AF%84%E8%AE%BA%E6%A0%87%E7%AD%BE">最近评论标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-12">引用</h4>
+<p><code>&lt;data name=&quot;lastComments&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-12">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>num</td>
+<td>评论抓取数量</td>
+<td>Integer</td>
+<td>否</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-8">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>List&lt;Comment&gt;</code></p>
+<h5 id="comment%E5%B1%9E%E6%80%A7-2">Comment属性</h5>
+<p>请见 <a href="#comment%E5%B1%9E%E6%80%A7">评论列表标签</a></p>
+<h3 id="%E5%8A%A8%E6%80%81%E6%98%8E%E7%BB%86%E6%A0%87%E7%AD%BE">动态明细标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-13">引用</h4>
+<p><code>&lt;data name=&quot;moment&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-13">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>动态ID</td>
+<td>Integer</td>
+<td>是</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-9">返回值</h4>
+<p>返回一个<strong>可能为null</strong>的 <code>Moment</code></p>
+<h5 id="moment%E5%B1%9E%E6%80%A7">Moment属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>动态ID</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>content</td>
+<td>动态内容(html)</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>time</td>
+<td>动态日期</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>modifyTime</td>
+<td>动态修改日期</td>
+<td>LocalDateTime</td>
+<td>是</td>
+</tr>
+<tr>
+<td>isPrivate</td>
+<td>是否私有</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>allowComment</td>
+<td>是否允许评论</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>password</td>
+<td>访问密码</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>hits</td>
+<td>文章点击数</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>comments</td>
+<td>文章评论数</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E5%8A%A8%E6%80%81%E5%BD%92%E6%A1%A3%E5%88%97%E8%A1%A8%E6%A0%87%E7%AD%BE">动态归档列表标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-14">引用</h4>
+<p><code>&lt;data name=&quot;momentArchivePage&quot;/&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-14">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>begin</td>
+<td>动态发布的开始时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>end</td>
+<td>动态发布的结束时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>queryPrivate</td>
+<td>是否查询私人文章(登录有效)</td>
+<td>Boolean</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>queryPasswordProtected</td>
+<td>是否查询密码保护的内容(登录有效)</td>
+<td>Boolean</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>query</td>
+<td>动态内容查询</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-10">返回值</h4>
+<p>返回一个<strong>不为null</strong>的<code>PageResult&lt;MomentArchive&gt;</code></p>
+<h5 id="momentarchive%E5%B1%9E%E6%80%A7">MomentArchive属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>moments</td>
+<td>动态列表</td>
+<td><code>List&lt;Moment&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>date</td>
+<td>日期</td>
+<td>LocalDate</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="moment%E5%B1%9E%E6%80%A7-2">Moment属性</h6>
+<p>请见 <a href="#moment%E5%B1%9E%E6%80%A7">动态明细标签</a></p>
+<h5 id="pageresult%E5%B1%9E%E6%80%A7-3">PageResult属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>datas</td>
+<td>文章列表</td>
+<td><code>List&lt;MomentArchive&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalPage</td>
+<td>总分页数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页码</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalRow</td>
+<td>总记录数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>param</td>
+<td>分页查询参数</td>
+<td><code>MomentArchiveQueryParam</code></td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h5 id="pageresult%E6%96%B9%E6%B3%95-3">PageResult方法</h5>
+<ol>
+<li>hasResult-&gt;boolean 是否有结果</li>
+<li>isHasNext()-&gt;boolean是否有下一页</li>
+<li>isHasPrevious()-&gt;boolean是否有上一页</li>
+<li>isHasPaging()-&gt;boolean是否需要分页</li>
+</ol>
+<h6 id="momentarchivequeryparam%E5%B1%9E%E6%80%A7">MomentArchiveQueryParam属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>begin</td>
+<td>动态发布的开始时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>end</td>
+<td>动态发布的结束时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>queryPrivate</td>
+<td>是否查询私人文章</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>queryPasswordProtected</td>
+<td>是否查询密码保护的内容</td>
+<td>Boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>query</td>
+<td>查询内容</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>Integer</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E4%B8%8A%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0%E6%A0%87%E7%AD%BE">上一篇文章标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-15">引用</h4>
+<p><code>&lt;data name=&quot;prevArticle&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-15">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>idOrAlias</td>
+<td>当前文章ID或者别名</td>
+<td>String</td>
+<td>是</td>
+<td></td>
+</tr>
+<tr>
+<td>categories</td>
+<td>分类(如果有多个以,号分割)</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>tags</td>
+<td>标签(如果有多个以,号分割)</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-11">返回值</h4>
+<p>返回一个<strong>可能为null</strong>的 <code>Article</code></p>
+<h5 id="article%E5%B1%9E%E6%80%A7-3">Article属性</h5>
+<p>请见 <a href="#article%E5%B1%9E%E6%80%A7-2">Article列表标签</a></p>
+<h3 id="%E4%B8%8B%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0%E6%A0%87%E7%AD%BE">下一篇文章标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-16">引用</h4>
+<p><code>&lt;data name=&quot;nextArticle&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-16">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>idOrAlias</td>
+<td>当前文章ID或者别名</td>
+<td>String</td>
+<td>是</td>
+<td></td>
+</tr>
+<tr>
+<td>categories</td>
+<td>分类(如果有多个以,号分割)</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>tags</td>
+<td>标签(如果有多个以,号分割)</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-12">返回值</h4>
+<p>返回一个<strong>可能为null</strong>的 <code>Article</code></p>
+<h5 id="article%E5%B1%9E%E6%80%A7-4">Article属性</h5>
+<p>请见 <a href="#article%E5%B1%9E%E6%80%A7-2">Article列表标签</a></p>
+<h3 id="%E4%B8%8A%E4%B8%80%E6%9D%A1%E5%8A%A8%E6%80%81%E6%A0%87%E7%AD%BE">上一条动态标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-17">引用</h4>
+<p><code>&lt;data name=&quot;prevMoment&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-17">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>当前动态ID</td>
+<td>Integer</td>
+<td>是</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-13">返回值</h4>
+<p>返回一个<strong>可能为null</strong>的 <code>Comment</code></p>
+<h5 id="comment%E5%B1%9E%E6%80%A7-3">Comment属性</h5>
+<p>请见 <a href="#moment%E5%B1%9E%E6%80%A7">动态明细标签</a></p>
+<h3 id="%E4%B8%8B%E4%B8%80%E6%9D%A1%E5%8A%A8%E6%80%81%E6%A0%87%E7%AD%BE">下一条动态标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-18">引用</h4>
+<p><code>&lt;data name=&quot;nextMoment&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-18">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>当前动态ID</td>
+<td>Integer</td>
+<td>是</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-14">返回值</h4>
+<p>返回一个<strong>可能为null</strong>的 <code>Moment</code></p>
+<h5 id="moment%E5%B1%9E%E6%80%A7-3">Moment属性</h5>
+<p>请见 <a href="#moment%E5%B1%9E%E6%80%A7">动态明细标签</a></p>
+<h3 id="%E9%85%8D%E7%BD%AE%E7%9A%84%E7%94%A8%E6%88%B7%E6%98%8E%E7%BB%86%E6%A0%87%E7%AD%BE">配置的用户明细标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-19">引用</h4>
+<p><code>&lt;data name=&quot;user&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-19">标签属性</h4>
+<p>该标签不支持任何属性</p>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-15">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>User</code></p>
+<h5 id="user%E5%B1%9E%E6%80%A7">User属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>用户名(如果没有配置昵称，则为登录名)</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>email</td>
+<td>配置的邮箱</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>gravatar</td>
+<td>邮箱md5</td>
+<td>String</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E6%96%87%E4%BB%B6%E5%88%97%E8%A1%A8%E6%A0%87%E7%AD%BE">文件列表标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-20">引用</h4>
+<p><code>&lt;data name=&quot;filePage&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-20">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>path</td>
+<td>路径</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>extensions</td>
+<td>后缀(如果有多个以,号分割)</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td><code>_name</code></td>
+<td>文件名</td>
+<td>String</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>querySubDir</td>
+<td>是否查询子文件夹</td>
+<td>boolean</td>
+<td>否</td>
+<td>false</td>
+</tr>
+<tr>
+<td>sortByLastModify</td>
+<td>是否根据修改时间倒叙排序</td>
+<td>boolean</td>
+<td>否</td>
+<td>true</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页数目</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>igorePaging</td>
+<td>是否不分页而抓取全部符合条件的文件</td>
+<td>boolean</td>
+<td>否</td>
+<td>false</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-16">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>FilePageResult</code></p>
+<h5 id="filepageresult%E5%B1%9E%E6%80%A7">FilePageResult属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>datas</td>
+<td>文件列表</td>
+<td><code>List&lt;FileInfo&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalPage</td>
+<td>总分页数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页码</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalRow</td>
+<td>总记录数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>param</td>
+<td>分页查询参数</td>
+<td><code>FileQueryParam</code></td>
+<td></td>
+</tr>
+<tr>
+<td>paths</td>
+<td>文件导航</td>
+<td><code>List&lt;FileInfo&gt;</code></td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h5 id="filepageresult%E6%96%B9%E6%B3%95">FilePageResult方法</h5>
+<ol>
+<li>hasResult-&gt;boolean 是否有结果</li>
+<li>isHasNext()-&gt;boolean是否有下一页</li>
+<li>isHasPrevious()-&gt;boolean是否有上一页</li>
+<li>isHasPaging()-&gt;boolean是否需要分页</li>
+</ol>
+<h6 id="filequeryparam%E5%B1%9E%E6%80%A7">FileQueryParam属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>path</td>
+<td>路径</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>extensions</td>
+<td>后缀</td>
+<td><code>Set&lt;String&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>文件名</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>querySubDir</td>
+<td>是否查询子文件夹</td>
+<td>boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>sortByLastModify</td>
+<td>是否根据修改时间倒叙排序</td>
+<td>boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>igorePaging</td>
+<td>是否不分页而抓取全部符合条件的文件</td>
+<td>boolean</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="fileinfo%E5%B1%9E%E6%80%A7">FileInfo属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>path</td>
+<td>路径</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>name</td>
+<td>名称</td>
+<td>String</td>
+<td>否</td>
+</tr>
+<tr>
+<td>ext</td>
+<td>后缀</td>
+<td>String</td>
+<td>是</td>
+</tr>
+<tr>
+<td>dir</td>
+<td>是否是文件夹</td>
+<td>boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>editable</td>
+<td>是否可编辑</td>
+<td>boolean</td>
+<td>否</td>
+</tr>
+<tr>
+<td>thumbPath</td>
+<td>缩略图地址</td>
+<td>String</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<h6 id="fileinfo%E6%96%B9%E6%B3%95">FileInfo方法</h6>
+<ol>
+<li>is(String ext)-&gt;boolean判断是否匹配某个后缀</li>
+</ol>
+<h3 id="%E6%96%87%E7%AB%A0%E5%BD%92%E6%A1%A3%E6%A0%87%E7%AD%BE">文章归档标签</h3>
+<h4 id="%E5%BC%95%E7%94%A8-21">引用</h4>
+<p><code>&lt;data name=&quot;articleArchivePage&quot;&gt;&lt;/data&gt;</code></p>
+<h4 id="%E6%A0%87%E7%AD%BE%E5%B1%9E%E6%80%A7-21">标签属性</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>begin</td>
+<td>开始时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>end</td>
+<td>结束时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>queryPrivate</td>
+<td>是否查询私有文章</td>
+<td>boolean</td>
+<td>否</td>
+<td>false</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页数目</td>
+<td>Integer</td>
+<td>否</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E8%BF%94%E5%9B%9E%E5%80%BC-17">返回值</h4>
+<p>返回一个<strong>不为null</strong>的 <code>PageResult&lt;ArticleArchive&gt;</code></p>
+<h5 id="pageresult%E5%B1%9E%E6%80%A7-4">PageResult属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>datas</td>
+<td>文章归档列表</td>
+<td><code>List&lt;ArticleArchive&gt;</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalPage</td>
+<td>总分页数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>currentPage</td>
+<td>当前页码</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>每页显示数目</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>totalRow</td>
+<td>总记录数</td>
+<td>int</td>
+<td>否</td>
+</tr>
+<tr>
+<td>param</td>
+<td>分页查询参数</td>
+<td><code>ArticleArchiveQueryParam</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5 id="pageresult%E6%96%B9%E6%B3%95-4">PageResult方法</h5>
+<ol>
+<li>hasResult-&gt;boolean 是否有结果</li>
+<li>isHasNext()-&gt;boolean是否有下一页</li>
+<li>isHasPrevious()-&gt;boolean是否有上一页</li>
+<li>isHasPaging()-&gt;boolean是否需要分页</li>
+</ol>
+<h6 id="articlearchivequeryparam%E5%B1%9E%E6%80%A7">ArticleArchiveQueryParam属性</h6>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>begin</td>
+<td>开始时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>end</td>
+<td>结束时间</td>
+<td>LocalDateTime</td>
+<td>否</td>
+</tr>
+<tr>
+<td>queryPrivate</td>
+<td>是否查询私有文章</td>
+<td>boolean</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h5 id="articlearchive%E5%B1%9E%E6%80%A7">ArticleArchive属性</h5>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+<th>类型</th>
+<th>是否可能为null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>date</td>
+<td>日期</td>
+<td>LocalDate</td>
+<td>否</td>
+</tr>
+<tr>
+<td>articles</td>
+<td>文章列表</td>
+<td><code>List&lt;Article&gt;</code></td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h6 id="article%E5%B1%9E%E6%80%A7-5">Article属性</h6>
+<p>请见 <a href="#article%E5%B1%9E%E6%80%A7">Article标签</a>，<strong>content属性始终为null</strong></p>
+<h2 id="%E5%85%B6%E4%BB%96">其他</h2>
+<h3 id="%E5%88%A4%E6%96%AD%E7%94%A8%E6%88%B7%E6%98%AF%E5%90%A6%E7%99%BB%E5%BD%95">判断用户是否登录</h3>
+<p><code>${session == null or session.authed == null}</code>如果返回true，代表用户没有登录</p>
+<h3 id="%E8%8E%B7%E5%8F%96%E4%BF%A1%E6%81%AFcode%E5%AF%B9%E5%BA%94%E7%9A%84%E5%86%85%E5%AE%B9">获取信息code对应的内容</h3>
+<p><code>${#messager.getMessage(MessageSourceResolvable messageSourceResolvable)}</code></p>
+<p><code>${#messager.getMessage(String code,String defaultMessage)}</code></p>
+<h3 id="%E8%BE%85%E5%8A%A9%E5%88%86%E9%A1%B5">辅助分页</h3>
+<p><code>${#pagings.step(PageResult&lt;?&gt; page,int num)}</code></p>
+<p>用于控制显示多少分页页码</p>
+<h4 id="%E7%A4%BA%E4%BE%8B">示例</h4>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"pagination pagination-simple  justify-content-center"</span>
+  <span class="hljs-attr">th:if</span>=<span class="hljs-string">"${page.hasPaging}"</span>
+  <span class="hljs-attr">th:with</span>=<span class="hljs-string">"paging=${#pagings.step(page,5)}"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">th:each</span>=<span class="hljs-string">" i : ${paging}"</span>
+      <span class="hljs-attr">th:class</span>=<span class="hljs-string">"${(i == page.currentPage) ? 'page-item active' : 'page-item'}"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span>
+      <span class="hljs-attr">class</span>=<span class="hljs-string">"page-link"</span> <span class="hljs-attr">th:onclick</span>=<span class="hljs-string">"'paging(\''+${i}+'\')'"</span>
+      <span class="hljs-attr">href</span>=<span class="hljs-string">"javascript:void(0)"</span> <span class="hljs-attr">th:text</span>=<span class="hljs-string">"${i}"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+                    
+</code></pre>
+<p>显示效果</p>
+<p>1 2 <strong>3当前页</strong> 4 5<br>
+3 4 <strong>5当前页</strong> 6 7<br>
+5 6 <strong>7当前页</strong> 8 9</p>
+<h3 id="java8%E6%97%B6%E9%97%B4%E8%BE%85%E5%8A%A9">java8时间辅助</h3>
+<h4 id="%E6%A0%BC%E5%BC%8F%E5%8C%96">格式化</h4>
+<p><code>${#times.format(Temporal temporal, String pattern)}</code></p>
+<h4 id="%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E6%97%B6%E9%97%B4">获取当前时间</h4>
+<p><code>${#times.now()}</code></p>
+<h4 id="%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E6%97%A5%E6%9C%9F">获取当前日期</h4>
+<p><code>${#times.nowDate()}</code></p>
+<h4 id="%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E6%97%B6%E9%97%B4%E6%88%B3">获取当前时间戳</h4>
+<p><code>${#times.millis()}</code></p>
+<h4 id="%E5%B0%86%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A7%A3%E6%9E%90%E4%B8%BA%E6%97%B6%E9%97%B4">将字符串解析为时间</h4>
+<p><code>${#times.parse(String text,String pattern)}</code>或者<code>${#times.parse(String text)}</code></p>
+<p><strong>解析后的结果为<code>LocalDateTime</code>，因此text必须包含时间信息</strong></p>
+<h3 id="%E9%93%BE%E6%8E%A5%E8%BE%85%E5%8A%A9">链接辅助</h3>
+<h4 id="%E8%8E%B7%E5%8F%96%E6%9F%90%E4%B8%AA%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%AE%BF%E9%97%AE%E5%9C%B0%E5%9D%80(%E7%9B%B8%E5%AF%B9%E5%9C%B0%E5%9D%80)">获取某个对象的访问地址(相对地址)</h4>
+<p><code>@{${#urls.getUrl(comment.target)}}</code></p>
+<p><strong>这个对象一般用于需要获取链接的对象不明确的时候，例如 comment 的target</strong></p>
+<p><code>#urls.getUrl(object)</code>实际上会去寻找并执行一个表达式，表达式的key为<code>Object.getClass().getSimpleName()</code>，如果没有对应key的表达式，则返回null，否则将对象放入解析上下文中，属性名为o，然后返回表达式的计算结果，如果需要注册或覆盖一个表达式，可以通过
+<code>#urls.setUrlExpression('key','expression')</code>，例如
+<code>#urls.setUrlExpression(&quot;Article&quot;,&quot;'/articles/'+${o.id}&quot;)</code>
+<strong>注册或者覆盖表达式是针对当前请求的一个临时的行为</strong></p>
+<h3 id="jsoup%E8%BE%85%E5%8A%A9">Jsoup辅助</h3>
+<h4 id="body%E6%A0%B9%E5%85%83%E7%B4%A0%E6%9E%84%E5%BB%BAjsoup%E6%96%87%E6%A1%A3">body根元素构建Jsoup文档</h4>
+<p><code>${#jsoups.body(String html)}</code></p>
+<p><code>${#jsoups.body(String html,String baseUri)}</code></p>
+<h4 id="html%E6%A0%B9%E5%85%83%E7%B4%A0%E6%9E%84%E5%BB%BAjsoup%E6%96%87%E6%A1%A3">html根元素构建Jsoup文档</h4>
+<p><code>${#jsoups.html(String html)}</code></p>
+<p><code>${#jsoups.html(String html,String baseUri)}</code></p>
+<h4 id="%E6%96%87%E6%A1%A3%E8%BE%85%E5%8A%A9">文档辅助</h4>
+<p>documentParser = <code>${#jsoups.parser(Document document)}</code></p>
+<p>文档辅助方法：</p>
+<ol>
+<li>getText()-&gt;String获取纯文本内容</li>
+<li>getImages()-&gt;<code>List&lt;String&gt;</code> 获取所有img标签的地址</li>
+<li>getImage()-&gt;<code>Optioanl&lt;String&gt;</code> 获取第一个img标签的地址</li>
+<li>getVideoPosters()-&gt;<code>List&lt;String&gt;</code>获取所有视频的封面地址</li>
+<li>getVideoPoster()-&gt;<code>Optional&lt;String&gt;</code>获取第一个视频的封面地址</li>
+<li>getFirstImage()-&gt;<code>Optional&lt;String&gt;</code>获取第一张图片|视频封面的地址</li>
+<li>getDocument()-&gt;Document获取Jsoup文档</li>
+</ol>
+<h3 id="%E6%A8%A1%E6%9D%BF%E8%BE%85%E5%8A%A9">模板辅助</h3>
+<p>获取当前模板ID : <code>${this.id}</code></p>
+<h3 id="%E6%A0%BC%E5%BC%8F%E5%8C%96%E8%BE%85%E5%8A%A9">格式化辅助</h3>
+<h4 id="%E5%B0%86%E5%AD%97%E8%8A%82%E8%BD%AC%E5%8C%96%E4%B8%BA%E6%9B%B4%E4%B8%BA%E5%8F%AF%E8%AF%BB%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2">将字节转化为更为可读的字符串</h4>
+<p><code>${#formats.formatByte(long bytes)}</code></p>

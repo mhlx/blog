@@ -1,0 +1,47 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.mapper.ArticleCategoryMapper">
+
+	<resultMap type="ArticleCategoryStatistic" id="ArticleCategoryStatisticMap">
+		<id column="id"/>
+		<result column="count" property="count"/>
+		<association property="category" javaType="Category">
+			<result column="id" property="id"/>
+			<result column="name" property="name"/>
+			<result column="createTime" property="createTime"/>
+			<result column="modifyTime" property="modifyTime"/>
+		</association>
+	</resultMap>
+
+	<delete id="deleteByArticle">
+		delete from blog_article_category where articleId = #{articleId}
+	</delete>
+	
+	<insert id="insert">
+		insert into blog_article_category(articleId,categoryId) values(#{articleId},#{categoryId})
+	</insert>
+	
+	<delete id="deleteByCategory">
+		delete from blog_article_category where categoryId = #{categoryId}
+	</delete>
+
+	<select id="isArticleExists" resultType="boolean">
+		SELECT EXISTS(SELECT 1
+			FROM blog_article_category WHERE categoryId = #{categoryId} limit 1)
+	</select>
+	
+	
+	<select id="selectCount" resultMap="ArticleCategoryStatisticMap">
+		select c.id,c.name,c.createTime,c.modifyTime,count from blog_category c inner join (
+		select categoryId,count(bac.articleId) as count from blog_article_category bac
+		left join blog_article ba on bac.articleId = ba.id
+		where ba.status = 0
+			<if test="queryPrivate">
+				AND ba.isPrivate = false
+			</if>
+		group by categoryId
+		) as a on a.categoryId = c.id
+		order by count desc
+	</select>
+</mapper>

@@ -1,214 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>me.qyh</groupId>
 	<artifactId>blog</artifactId>
+	<version>8</version>
 	<packaging>war</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>blog Maven Webapp</name>
-	<url>http://maven.apache.org</url>
+
 	<properties>
-		<h2.version>1.4.197</h2.version>
-		<commonmark.version>0.13.0</commonmark.version>
-		<spring.version>5.2.0.RELEASE</spring.version>
-		<mybatis.version>3.5.2</mybatis.version>
-		<mybatis-spring.version>2.0.2</mybatis-spring.version>
-		<mysql.connector.version>8.0.11</mysql.connector.version>
-		<hikaricp.version>3.4.1</hikaricp.version>
-		<lucene.version>7.1.0</lucene.version>
-		<lionsoul.version>2.4.0</lionsoul.version>
-		<cage.version>1.0</cage.version>
-		<javax.mail.version>1.6.2</javax.mail.version>
+		<java.version>11</java.version>
+		<commonmark.version>0.13.1</commonmark.version>
+		<lucene.version>8.4.0</lucene.version>
 		<jsoup.version>1.12.1</jsoup.version>
-		<gson.version>2.8.5</gson.version>
-		<commons.logging>1.2</commons.logging>
-		<logback.version>1.2.3</logback.version>
-		<im4java.version>1.4.0</im4java.version>
-		<animated.gif.version>1.4</animated.gif.version>
-		<thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
-		<javax.servlet.version>3.1.0</javax.servlet.version>
-		<rome.version>1.12.0</rome.version>
-		<caffeine.version>2.8.0</caffeine.version>
-		<commons.fileupload.version>1.4</commons.fileupload.version>
-		<metadata-extractor>2.11.0</metadata-extractor>
+		<mybatis-spring-boot.version>2.1.1</mybatis-spring-boot.version>
+		<bucket4j.version>4.7.0</bucket4j.version>
+		<cage.version>1.0</cage.version>
 	</properties>
+
+	<!-- Inherit defaults from Spring Boot -->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.2.RELEASE</version>
+	</parent>
+
+
+	<!-- Add typical dependencies for a web application -->
 	<dependencies>
-		<!-- spring -->
+
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aspects</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-tx</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<!-- mybatis -->
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
-			<version>${mybatis.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis-spring</artifactId>
-			<version>${mybatis-spring.version}</version>
-		</dependency>
-		<!-- mysql driver -->
-		<!-- http://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.connector.version}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-			<version>${hikaricp.version}</version>
-			<scope>compile</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter -->
+		<dependency>
+			<groupId>org.mybatis.spring.boot</groupId>
+			<artifactId>mybatis-spring-boot-starter</artifactId>
+			<version>${mybatis-spring-boot.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			
+		</dependency>
 
-		<!-- captcha -->
+		<!-- https://mvnrepository.com/artifact/com.github.vladimir-bukhtoyarov/bucket4j-core -->
+		<dependency>
+			<groupId>com.github.vladimir-bukhtoyarov</groupId>
+			<artifactId>bucket4j-core</artifactId>
+			<version>${bucket4j.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.github.cage</groupId>
 			<artifactId>cage</artifactId>
 			<version>${cage.version}</version>
 		</dependency>
-		<!-- mail -->
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
-			<version>${javax.mail.version}</version>
-		</dependency>
-		<!-- jsoup -->
-		<dependency>
-			<groupId>org.jsoup</groupId>
-			<artifactId>jsoup</artifactId>
-			<version>${jsoup.version}</version>
-		</dependency>
-		<!-- gson -->
-		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>${gson.version}</version>
-		</dependency>
-
-		<!-- <dependency> <groupId>commons-logging</groupId> <artifactId>commons-logging</artifactId> 
-			<version>${commons.logging}</version> </dependency> -->
-
-		<!-- logback -->
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
-		</dependency>
-
-		<!-- GraphcisMagick -->
-		<dependency>
-			<groupId>org.im4java</groupId>
-			<artifactId>im4java</artifactId>
-			<version>${im4java.version}</version>
-		</dependency>
-
-		<!-- lucene -->
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>${lucene.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
-			<version>${lucene.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-highlighter</artifactId>
-			<version>${lucene.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.lionsoul</groupId>
-			<artifactId>jcseg-core</artifactId>
-			<version>${lionsoul.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.lionsoul</groupId>
-			<artifactId>jcseg-analyzer</artifactId>
-			<version>${lionsoul.version}</version>
-		</dependency>
 
 
-		<!-- Gif -->
-		<dependency>
-			<groupId>com.madgag</groupId>
-			<artifactId>animated-gif-lib</artifactId>
-			<version>${animated.gif.version}</version>
-		</dependency>
-
-
-		<!-- 模板引擎 -->
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf</artifactId>
-			<version>${thymeleaf.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring5</artifactId>
-			<version>${thymeleaf.version}</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/com.rometools/rome -->
-		<dependency>
-			<groupId>com.rometools</groupId>
-			<artifactId>rome</artifactId>
-			<version>${rome.version}</version>
-		</dependency>
-
-		<!-- servlet api -->
-		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>${javax.servlet.version}</version>
-		</dependency>
-
-
-		<!-- markdown -->
 
 		<dependency>
 			<groupId>com.atlassian.commonmark</groupId>
@@ -236,63 +101,70 @@
 			<version>${commonmark.version}</version>
 		</dependency>
 
-		<!-- h2 database -->
+
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>${h2.version}</version>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>${jsoup.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-smartcn -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-smartcn</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<version>${caffeine.version}</version>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
+
 
 		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>${commons.fileupload.version}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>com.drewnoakes</groupId>
-			<artifactId>metadata-extractor</artifactId>
-			<version>${metadata-extractor}</version>
-		</dependency>
-
 
 
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>10</source>
-					<target>10</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
-
-	<!-- https://blog.csdn.net/sayyy/article/details/80447757 -->
 	<repositories>
 		<repository>
 			<id>central</id>
 			<name>aliyun maven</name>
 			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
 		</repository>
 	</repositories>
+
+
+	<!-- Package as an executable jar -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>

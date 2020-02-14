@@ -1,0 +1,317 @@
+
+.heather_top{
+	position:absolute;
+	top:0px;
+	width:100%;
+	z-index:99;
+}
+
+.heather_toolbar_bar,
+.heather_command_bar {
+	overflow-y: auto;
+	white-space: nowrap;
+}
+
+.heather_toolbar_bar{
+	padding:5px;
+}
+
+.heather_command_bar {
+	z-index: 99;
+	position: absolute;
+	left: 0px !important;
+}
+
+.heather_command_bar :first-child {
+  margin-left:5px;
+}
+
+.heather_hljs_tip .selected {
+	background-color: #70B7FD;
+}
+
+.heather_hljs_tip {
+	max-height: 200px;
+	max-width: 200px;
+}
+
+.heather_preview {
+	overflow-y: auto;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	background: #fff;
+	top: 0;
+	left: 0;
+	z-index: 100;/*bigger than heather_toolbar*/
+}
+
+.heather_preview_close {
+	position: absolute;
+	right: 18px;
+	top: 5px;
+	z-index:999;
+	width:24px;
+	height:24px;
+	background-repeat:no-repeat;
+	background-image:url(../svg/eye_close.svg);
+	cursor:pointer;
+	background-size: 24px 24px;
+}
+
+.heather_progressbar {
+	position: relative;
+	background-color: #70B7FD;
+	padding: 3px;
+	text-align: center;
+	line-height: 25px;
+}
+
+.heather_progressbar>div {
+	position: absolue;
+	top: 0;
+	background-color: orange;
+	width: 0%;
+	height: 25px;
+}
+
+
+.heather_selection_marked {
+	background: lightblue;
+}
+
+.heather_editor_wrapper .CodeMirror-fullscreen {
+	z-index: 9999999
+}
+
+.heather_hljs_tip {
+	position: absolute;
+	z-index: 99;
+	overflow: auto;
+	background-color: #fff
+}
+
+.heather_sync_view_editor {
+	width: 50% !important;
+}
+
+.heather_sync_view {
+	width: 50%;
+	position: absolute;
+	left: 50%;
+	height: 100%;
+	overflow-y: auto;
+	top: 0;
+	z-index: 9999999;
+	background: white
+}
+
+.heather_sync_view_container {
+	padding: 15px;
+}
+
+.heather_editor_wrapper {
+	position: relative
+}
+
+.heather_sync_view_container img,
+.heather_sync_view_container video {
+	max-width: 200px;
+	height: auto;
+}
+
+.heather_sync_view_container a {
+	pointer-events: none;
+}
+
+.heather_editor_wrapper .CodeMirror-dialog-top {
+	z-index: 100
+}
+
+.heather_command_box {
+	z-index: 99;
+	background-color:white;
+	word-break:keep-all;
+}
+
+.heather_command_box ul {
+	list-style: none;
+	padding: 5px;
+	margin: 0;
+	border: 1px solid #000;
+}
+
+.heather_command_box ul .active {
+	background: #e8f2ff;
+	overflow:auto;
+}
+
+.heather_command_box ul{
+	overflow:auto;
+}
+
+.heather_command_box ul li{
+	word-break:keep-all;
+}
+
+@media (max-width :768px) {
+	.heather_command_box ul{
+		font-size:24px
+	}
+}
+
+.heather_selection_helper{
+	position: absolute;
+	z-index: 99;
+	left:20%;
+	right:20%;
+	-webkit-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none; 
+    -ms-user-select: none; 
+	opacity:0.7
+}
+
+.heather_selection_helper_wrap {
+  position: absolute;
+  top: 0;
+  left: 25%;
+  height: 25%;
+  width: 50%;
+  overflow: hidden;
+}
+.heather_selection_helper_touch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 200%;
+  width: 200%;
+  transform: rotate(45deg);
+  transform-origin: top left;
+  background: gray;
+
+}
+.heather_selection_helper_wrap:nth-child(2) {
+  transform: rotate(90deg);
+  transform-origin: top left;
+  top: 25%;
+  left: 100%;
+}
+.heather_selection_helper_wrap:nth-child(3) {
+  transform: rotate(180deg);
+  transform-origin: top left;
+  top: 100%;
+  left: 75%;
+}
+.heather_selection_helper_wrap:nth-child(4) {
+  transform: rotate(-90deg);
+  transform-origin: top left;
+  top: 75%;
+  left: 0;
+}
+.heather_selection_helper_touch:hover {
+  background: tomato;
+}
+.heather_selection_helper_close{
+	position:absolute;
+	top: calc(50% - 12px);
+    left: calc(50% - 11px);
+	opacity:0.7;
+	width:24px;
+	height:24px;
+	background-repeat:no-repeat;
+	background-image:url(../svg/delete.svg);
+	background-size: 24px 24px;
+}
+.heather_sync_view table th{
+	word-break:keep-all;
+}
+
+.heather_preview img,
+.heather_preview video {
+	max-width: 200px;
+	height: auto;
+}
+
+.heather_svg_icon{
+	width:24px;
+	height:24px;
+	background-repeat:no-repeat;
+	margin-right:10px;
+	cursor:pointer;
+	display:inline-block;
+	background-size: 24px 24px;
+}
+
+.heather_upload_stop_icon{
+	width:18px;
+	height:18px;
+	background-repeat:no-repeat;
+	background-image:url(../svg/delete.svg);
+	background-size: 18px 18px;
+	cursor:pointer;
+}
+
+@media (min-width:768px) {
+	.heather_svg_icon{
+		width:16px;
+		height:16px;
+		background-size: 16px 16px;
+	}
+}
+
+
+.heather_svg_command{
+	background-image:url(../svg/command.svg)
+}
+.heather_svg_link{
+	background-image:url(../svg/link.svg)
+}
+.heather_svg_code{
+	background-image:url(../svg/code.svg)
+}
+.heather_svg_undo{
+	background-image:url(../svg/undo.svg)
+}
+.heather_svg_redo{
+	background-image:url(../svg/redo.svg)
+}
+.heather_svg_eye_close{
+	background-image:url(../svg/eye_close.svg)
+}
+.heather_svg_eye{
+	background-image:url(../svg/eye.svg)
+}
+.heather_svg_file{
+	background-image:url(../svg/file.svg)
+}
+.heather_svg_save{
+	background-image:url(../svg/save.svg)
+}
+.heather_svg_cursor{
+	background-image:url(../svg/cursor.svg)
+}
+.heather_svg_delete{
+	background-image:url(../svg/delete.svg)
+}
+.heather_svg_fullscreen{
+	background-image:url(../svg/fullscreen.svg)
+}
+.heather_svg_italic{
+	background-image:url(../svg/italic.svg)
+}
+.heather_svg_bold{
+	background-image:url(../svg/bold.svg)
+}
+.heather_svg_return{
+	background-image:url(../svg/return.svg)
+}
+.heather_svg_strike{
+	background-image:url(../svg/strike.svg)
+}
+.heather_svg_upload{
+	background-image:url(../svg/upload.svg)
+}
+.heather_svg_book{
+	background-image:url(../svg/book.svg)
+}

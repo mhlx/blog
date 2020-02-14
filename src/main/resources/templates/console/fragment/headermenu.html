@@ -1,0 +1,50 @@
+<div class="header collapse d-lg-flex p-0" id="headerMenuCollapse"
+	data-th-fragment="frag(active)">
+	<div class="container">
+		<div class="row align-items-center">
+			<div class="col-lg order-lg-first">
+				<ul class="nav nav-tabs border-0 flex-column flex-lg-row">
+					<li class="nav-item"><a th:href="@{/console/articles}"
+						class="nav-link"
+						th:classappend="${active == 'article'} ? 'active' : null"><i
+							class="fe fe-book"></i>文章管理</a></li>
+					<li class="nav-item"><a th:href="@{/console/moments}"
+						class="nav-link"
+						th:classappend="${active == 'moment'} ? 'active' : null"><i
+							class="fe fe-book-open"></i>动态管理</a></li>
+					<li class="nav-item" th:if="${blogPros.fileEnable}"><a
+						th:href="@{/console/files}" class="nav-link"
+						th:classappend="${active == 'file'} ? 'active' : null"><i
+							class="fe fe-file"></i>文件管理</a></li>
+
+					<li class="nav-item"><a href="javascript:void(0)"
+						class="nav-link"
+						th:classappend="${active == 'template'} ? 'active' : null"
+						data-toggle="dropdown"><i class="fe fe-copy"></i> 模板管理</a>
+						<div class="dropdown-menu dropdown-menu-arrow">
+							<a th:href="@{/console/templates}" class="dropdown-item ">普通模板</a><a
+								th:href="@{/console/previewTemplates}" class="dropdown-item ">预览模板</a>
+						</div></li>
+
+					<li class="nav-item"><a th:href="@{/console/comments}"
+						class="nav-link"
+						th:classappend="${active == 'comments'} ? 'active' : null"><i
+							class="far fa-comment"></i>评论管理</a></li>
+
+					<li class="nav-item"><a th:href="@{/console/categories}"
+						class="nav-link"
+						th:classappend="${active == 'category'} ? 'active' : null"><i
+							class="fe fe-aperture"></i>类别管理</a></li>
+					<li class="nav-item"><a th:href="@{/console/tags}"
+						class="nav-link"
+						th:classappend="${active == 'tag'} ? 'active' : null"><i
+							class="fe fe-tag"></i>标签管理</a></li>
+					<li class="nav-item"><a th:href="@{/console/blackips}"
+						class="nav-link"
+						th:classappend="${active == 'blackip'} ? 'active' : null"><i
+							class="fe fe-minus-circle"></i>黑名单管理</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>

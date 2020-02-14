@@ -1,0 +1,35 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.mapper.CategoryMapper">
+	
+	<select id="selectById" resultType="Category">
+		select id,name,createTime,modifyTime from blog_category where id = #{id}
+	</select>
+	
+	<select id="selectAll" resultType="Category">
+		select id,name,createTime,modifyTime from blog_category 
+	</select>
+	
+	<select id="selectByName" resultType="Category">
+		select id,name,createTime,modifyTime from blog_category where name = #{name}
+	</select>
+	
+	<delete id="deleteById">
+		delete from blog_category where id = #{id}
+	</delete>
+	
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		insert into blog_category(name,createTime) values(#{name},#{createTime})
+	</insert>
+
+	<update id="update">
+		update blog_category
+		set
+			name = #{name},
+			modifyTime = #{modifyTime}
+		where id = #{id}
+	</update>
+
+</mapper>

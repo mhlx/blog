@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Content-Language" content="en" />
+<meta name="msapplication-TileColor" content="#2d89ef">
+<meta name="theme-color" content="#4188c9">
+<meta name="apple-mobile-web-app-status-bar-style"
+	content="black-translucent" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+
+
+<title>模板创建</title>
+<link rel="stylesheet" th:href="@{/static/fontawesome/css/all.min.css}" />
+<link th:href="@{/static/tabler/dist/assets/css/dashboard.css}"
+	rel="stylesheet" />
+<script th:src="@{/static/tabler/dist/assets/js/dashboard.js}"></script>
+<link th:href="@{/static/heather/codemirror/lib/codemirror.css}"
+	rel="stylesheet">
+<link
+	th:href="@{/static/heather/codemirror/addon/display/fullscreen.css}"
+	rel="stylesheet">
+<link rel="stylesheet"
+	th:href="@{/static/heather/codemirror/addon/dialog/dialog.css}">
+<link rel="stylesheet"
+	th:href="@{/static/heather/codemirror/addon/hint/show-hint.css}">
+<link rel="stylesheet"
+	th:href="@{/static/heather/codemirror/addon/search/matchesonscrollbar.css}">
+<link rel="stylesheet" th:href="@{/static/heather/css/markdown.css}" />
+<link rel="stylesheet"
+	th:href="@{/static/heather/highlight/styles/github.css}">
+<style>
+#search-result-container ul {
+	position: relative;
+	-ms-flex: 1 1 auto;
+	flex: 1 1 auto;
+	width: 1%;
+	margin-bottom: 0;
+	padding-left: 0.75rem;
+	background: #fff;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+#search-result-container ul li {
+	list-style: none;
+	padding: 5px;
+	cursor: pointer
+}
+#docModal .modal-body {
+    max-height: calc(100vh - 210px);
+    overflow-y: auto;
+}
+</style>
+</head>
+<body class="">
+	<div class="page">
+		<div class="flex-fill">
+			<div th:replace="console/fragment/profile"></div>
+			<div th:replace="console/fragment/headermenu('template')"></div>
+			<div class="my-3 my-md-5">
+				<div class="container">
+					<div class="mb-3" style="text-align: right">
+						<button type="button" class="btn btn-danger" id="back-btn">返回</button>
+						<button type="button" class="btn btn-primary" id="submit-btn">提交</button>
+					</div>
+					<div id="toolbar" style="padding-left: 30px" class="mb-3">
+						<button th:if="${blogPros.fileEnable}" class="mr-3 btn btn-primary"
+							data-file style="padding: 5px">文件</button> <button
+							class="mr-3 btn btn-primary" data-default-templates
+							style="padding: 5px">默认模板</button> <button
+							class="mr-3 btn btn-primary" data-beautify style="padding: 5px">美化</button>
+						<button class="mr-3 btn btn-primary" data-doc style="padding: 5px" onclick="$('#docModal').modal('show')">文档</button>
+					</div>
+					<div class="mb-3">
+						<textarea class="form-control" id="editor"
+							th:utext="${template.content}"></textarea>
+						<div class="invalid-feedback" data-invalid-target="content"></div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">路径</label> <input type="text"
+							id="pattern" class="form-control" th:value="${template.pattern}">
+						<div class="invalid-feedback" data-invalid-target="pattern"></div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">名称</label> <input type="text" id="name"
+							th:value="${template.name}" class="form-control">
+						<div class="invalid-feedback" data-invalid-target="name"></div>
+					</div>
+					<div class="mb-3">
+						<label class="form-check"> <input class="form-check-input"
+							id="enable" type="checkbox"
+							th:attr="checked=${template.enable?'checked':null}"> <span
+							class="form-check-label">启用</span>
+						</label>
+					</div>
+					<div class="mb-3">
+						<label class="form-check"> <input class="form-check-input"
+							id="allowComment" type="checkbox"
+							th:attr="checked=${template.allowComment?'checked':null}">
+							<span class="form-check-label">允许评论</span>
+						</label>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">描述</label>
+						<textarea class="form-control" id="description"
+							th:text="${template.description}"></textarea>
+						<div class="invalid-feedback" data-invalid-target="description"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" tabindex="-1" id="docModal" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">文档</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="container" style="padding-top: 0.75rem">
+						<div style="position: fixed">
+							<div class="input-group">
+								<input type="text" class="form-control "> <span
+									class="input-group-append"> <span
+									class="input-group-text" style="cursor: pointer" id="search">搜索</span>
+								</span>
+							</div>
+							<div class="input-group" style="display: none"
+								id="search-result-container">
+								<ul>
+								</ul>
+								<span class="input-group-append" style="visibility: hidden;">
+									<span class="input-group-text" style="cursor: pointer">搜索</span>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="container markdown-body" id="doc-content" style="margin-top: 50px"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="console/fragment/footer"></footer>
+	<script th:src="@{/static/heather/codemirror/lib/codemirror.js}"></script>
+	<script th:src="@{/static/heather/codemirror/addon/dialog/dialog.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/addon/search/searchcursor.js}"></script>
+	<script th:src="@{/static/heather/codemirror/addon/search/search.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/addon/scroll/annotatescrollbar.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/addon/search/matchesonscrollbar.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/addon/search/jump-to-line.js}"></script>
+	<script th:src="@{/static/heather/codemirror/addon/hint/show-hint.js}"></script>
+	<script th:src="@{/static/heather/codemirror/addon/edit/closetag.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/addon/display/fullscreen.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/addon/edit/matchbrackets.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/addon/selection/active-line.js}"></script>
+
+	<script
+		th:src="@{/static/heather/codemirror/mode/javascript/javascript.js}"></script>
+	<script th:src="@{/static/heather/codemirror/mode/css/css.js}"></script>
+	<script th:src="@{/static/heather/codemirror/mode/xml/xml.js}"></script>
+	<script
+		th:src="@{/static/heather/codemirror/mode/htmlmixed/htmlmixed.js}"></script>
+	<script th:src="@{/static/tabler/dist/assets/js/beautify.min.js}"></script>
+	<script th:src="@{/static/tabler/dist/assets/js/beautify-css.min.js}"></script>
+	<script th:src="@{/static/tabler/dist/assets/js/beautify-html.min.js}"></script>
+	<script th:src="@{/static/console/js/upload.js}"></script>
+	<script th:src="@{/static/console/js/fileSelector.js}"></script>
+	<script type="text/javascript">
+		var id = '[[${template.id}]]'
+	</script>
+	<script th:src="@{/static/console/js/template_edit.js}"></script>
+</body>
+</html>

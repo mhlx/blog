@@ -1,0 +1,113 @@
+<data name="momentArchivePage" alias="page"
+	th:currentPage="${param.currentPage}" pageSize="10"></data>
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Content-Language" content="en" />
+<meta name="msapplication-TileColor" content="#2d89ef">
+<meta name="theme-color" content="#4188c9">
+<meta name="apple-mobile-web-app-status-bar-style"
+	content="black-translucent" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+
+
+<title>动态</title>
+<link rel="stylesheet" th:href="@{/static/fontawesome/css/all.min.css}" />
+<link th:href="@{/static/tabler/dist/assets/css/dashboard.css}"
+	rel="stylesheet" />
+</head>
+<body style="overflow-y: auto">
+	<div class="page">
+		<div class="flex-fill">
+			<div th:replace="nav('moment')"></div>
+			<div class="my-3 my-md-5">
+				<div class="container">
+					<div th:each="data : ${page.datas}">
+						<h2 th:text="${#times.format(data.date,'yyyy-MM-dd')}"
+							style="margin-bottom: 0px"></h2>
+						<hr style="margin-top: 1rem; margin-bottom: 1rem">
+						<div class="row row-cards row-deck">
+							<div class="col-sm-4 col-lg-4 col-xl-4"
+								th:each="moment : ${data.moments}">
+								<div class="card" th:data-momentid="${moment.id}"
+									style="cursor: pointer"
+									th:with="parser=${moment.content != null ? #jsoups.parser(#jsoups.body(moment.content)) : null}">
+									<div th:remove="tag"
+										th:with="img=${parser != null ? parser.firstImage : null}">
+										<a href="javascript:void(0)"
+											th:if="${img != null && img.present}"> <img
+											class="card-img-top" th:src="${img.get()}">
+										</a>
+									</div>
+									<div class="card-body d-flex flex-column">
+										<div class="text-muted"
+											th:with="text=${parser != null ? parser.text : null}">
+											<i class="fas fa-lock mr-2" th:if="${moment.hasPassword}"></i>
+											<p th:remove="tag" th:if="${text != null}">[[${text.length()
+												> 50 ? text.substring(0,50)+'...':text}]]</p>
+											<p th:if="${moment.hasPassword && moment.content == null}"
+												th:remove="tag">内容受到密码保护</p>
+										</div>
+										<div class="d-flex align-items-center pt-5 mt-auto">
+											<small class="d-block text-muted">[[${#times.format(moment.time,'HH:mm')}]]</small>
+											<div class="ml-auto text-muted">
+												<small> <span class="badge  mr-1"
+													style="color: inherit"><i
+														class="far fa-comment mr-1"></i>[[${moment.comments}]]<i
+														class="fas fa-fire mr-1 ml-2"></i>[[${moment.hits}]]</span>
+												</small>
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+					<ul class="pagination pagination-simple  justify-content-center"
+						th:if="${page.hasPaging}"
+						th:with="paging=${#pagings.step(page,5)}">
+						<li th:each=" i : ${paging}"
+							th:class="${(i == page.currentPage) ? 'page-item active' : 'page-item'}"><a
+							class="page-link" th:href="@{/moments?currentPage=}+${i}"
+							th:text="${i}"></a></li>
+					</ul>
+					<input type="hidden" name="currentPage"
+						th:value="${page.currentPage}"> <input type="hidden"
+						name="pageSize" th:value="${page.pageSize}">
+				</div>
+			</div>
+		</div>
+
+		<footer class="footer">
+			<div class="container">
+				<div class="row align-items-center flex-row-reverse">
+					<div class="col-auto ml-lg-auto"></div>
+					<div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+						Copyright © [[${#times.format(#times.now(),'yyyy')}]]</div>
+				</div>
+			</div>
+		</footer>
+	</div>
+	<script
+		th:src="@{/static/tabler/dist/assets/js/vendors/jquery-3.2.1.min.js}"></script>
+	<script
+		th:src="@{/static/tabler/dist/assets/js/vendors/bootstrap.bundle.min.js}"></script>
+	<script
+		th:src="@{/static/tabler/dist/assets/js/vendors/sweetalert2.all.min.js}"></script>
+	<script>
+		var rootPath = '[[@{/}]]';
+		for(const elem of document.querySelectorAll('[data-momentid]')){
+			elem.addEventListener('click',function(){
+				window.location.href = rootPath + 'moments/'+this.dataset.momentid;
+			});
+		}
+	</script>
+</body>

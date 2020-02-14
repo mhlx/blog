@@ -1,0 +1,194 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.mapper.MomentMapper">
+	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
+		INSERT
+		INTO blog_moment(content,time,isPrivate,allowComment,password)
+		VALUES(#{content},#{time},#{isPrivate},#{allowComment},#{password})
+	</insert>
+
+	<update id="increaseHits">
+		update blog_moment set hits = hits + #{hits} where id = #{id}
+	</update>
+	
+	<update id="update">
+		UPDATE blog_moment
+		SET
+			content = #{content},
+			time = #{time},
+			isPrivate = #{isPrivate},
+			allowComment = #{allowComment},
+			password = #{password},
+			modifyTime = #{modifyTime}
+		WHERE id = #{id}
+	</update>
+
+
+	<select id="selectDaysCount" resultType="int">
+		select count(distinct(substr(time,1,10))) from blog_moment
+		<where>
+			<if test="!queryPrivate">
+				isPrivate = false
+			</if>
+			<if test="query != null and query != ''">
+				<choose>
+					<when test="queryPasswordProtected">
+						AND content LIKE CONCAT('%', #{query},'%')
+					</when>
+					<otherwise>
+						AND password is null
+					</otherwise>
+				</choose>
+			</if>
+			<if test="begin != null">
+				AND time >= #{begin}
+			</if>
+			<if test="end != null">
+				AND time <![CDATA[ <= ]]> #{end}
+			</if>
+		</where>
+	</select>
+
+
+
+	<select id="selectDays" resultType="java.time.LocalDate">
+		select substr(time,1,10) as time from blog_moment
+		<where>
+			<if test="!queryPrivate">
+				isPrivate = false
+			</if>
+			<if test="query != null and query != ''">
+				<choose>
+					<when test="queryPasswordProtected">
+						AND content LIKE CONCAT('%', #{query},'%')
+					</when>
+					<otherwise>
+						AND password is null
+					</otherwise>
+				</choose>
+			</if>
+			<if test="begin != null">
+				AND time >= #{begin}
+			</if>
+			<if test="end != null">
+				AND time <![CDATA[ <= ]]> #{end}
+			</if>
+		</where>
+		GROUP BY substr(time,1,10)
+		<choose>
+			<when test="asc">
+				ORDER BY time
+			</when>
+			<otherwise>
+				ORDER BY time DESC
+			</otherwise>
+		</choose>
+		LIMIT #{offset},#{pageSize}
+	</select>
+
+
+
+	<select id="selectPage" resultType="Moment">
+		<include refid="sql1"></include>
+		<where>
+			<if test="begin != null and begin != null">
+				time BETWEEN #{begin} AND #{end}
+			</if>
+			<if test="!queryPrivate">
+				AND isPrivate = false
+			</if>
+			<if test="query != null and query != ''">
+				<choose>
+					<when test="queryPasswordProtected">
+						AND content LIKE CONCAT('%', #{query},'%')
+					</when>
+					<otherwise>
+						AND password is null
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+		<choose>
+			<when test="asc">
+				ORDER BY time,id
+			</when>
+			<otherwise>
+				ORDER BY time DESC,id DESC
+			</otherwise>
+		</choose>
+		<if test="!ignorePaging">
+			LIMIT #{offset},#{pageSize}
+		</if>
+	</select>
+	
+	<select id="selectCount" resultType="int">
+		SELECT COUNT(id)  FROM blog_moment
+		<where>
+			<if test="begin != null and begin != null">
+				time BETWEEN #{begin} AND #{end}
+			</if>
+			<if test="!queryPrivate">
+				AND isPrivate = false
+			</if>
+			<if test="query != null and query != ''">
+				<choose>
+					<when test="queryPasswordProtected">
+						AND content LIKE CONCAT('%', #{query},'%')
+					</when>
+					<otherwise>
+						AND password is null
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectById" resultType="Moment">
+		<include refid="sql1"></include>
+		where id = #{id}
+	</select>
+	
+	<delete id="deleteById">
+		delete from blog_moment where id = #{id}
+	</delete>
+	
+	<select id="selectPrev" resultType="Moment">
+		<include refid="sql1"></include>
+		where time >= #{moment.time}
+		and id <![CDATA[ <> ]]> #{moment.id}
+		<if test="!queryPrivate">
+			and isPrivate = false
+		</if>
+		order by time,id
+		limit 1
+	</select>
+	
+	<select id="selectNext" resultType="Moment">
+		<include refid="sql1"></include>
+		where time <![CDATA[ <= ]]> #{moment.time}
+		and id <![CDATA[ <> ]]> #{moment.id}
+		<if test="!queryPrivate">
+			and isPrivate = false
+		</if>
+		order by time desc,id desc
+		limit 1
+	</select>
+	
+	
+	<select id="selectStatistic" resultType="MomentStatistic">
+		select min(time) as first,max(time) as last,max(modifyTime) as lastModify,sum(hits) as hits ,
+		(select count(*) from blog_comment bc inner join blog_moment bm on bc.module_id = bm.id 
+		where module_name = 'moment'  
+		<if test="!queryPrivate">
+			and bm.isPrivate = false
+		</if>
+		) as comments
+		from blog_moment 
+	</select>
+
+	<sql id="sql1">
+		select id,content,time,modifyTime,hits,isPrivate,allowComment,password,(select count(1) from blog_comment where module_name = 'moment' and module_id = b.id and checking = false) as comments from blog_moment b
+	</sql>
+
+</mapper>

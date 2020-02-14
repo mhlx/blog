@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias
+			type="org.apache.ibatis.type.EnumOrdinalTypeHandler"
+			alias="EnumOrdinalTypeHandler" />
+
+		<typeAlias type="me.qyh.blog.mapper.TagIdsTypeHandler"
+			alias="TagIdsTypeHandler" />
+		<typeAlias type="me.qyh.blog.mapper.CategoryIdsTypeHandler"
+			alias="CategoryIdsTypeHandler" />
+		<typeAlias type="me.qyh.blog.entity.Article$ArticleStatus"
+			alias="ArticleStatus" />
+		<package name="me.qyh.blog.entity" />
+		<package name="me.qyh.blog.vo" />
+	</typeAliases>
+	<typeHandlers>
+		<typeHandler
+			handler="me.qyh.blog.mapper.CategoryIdsTypeHandler" />
+		<typeHandler
+			handler="me.qyh.blog.mapper.TagIdsTypeHandler" />
+	</typeHandlers>
+	<mappers>
+		<mapper resource="mybatis/mapper/ArticleMapper.xml" />
+		<mapper resource="mybatis/mapper/ArticleCategoryMapper.xml" />
+		<mapper resource="mybatis/mapper/ArticleTagMapper.xml" />
+		<mapper resource="mybatis/mapper/MomentMapper.xml" />
+		<mapper resource="mybatis/mapper/CommentMapper.xml" />
+		<mapper resource="mybatis/mapper/CategoryMapper.xml" />
+		<mapper resource="mybatis/mapper/TagMapper.xml" />
+		<mapper resource="mybatis/mapper/TemplateMapper.xml" />
+		<mapper resource="mybatis/mapper/BlackIpMapper.xml" />
+	</mappers>
+</configuration>

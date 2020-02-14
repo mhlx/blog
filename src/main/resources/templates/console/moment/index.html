@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+<head th:replace="console/fragment/head('动态管理')"></head>
+<body style="height: 100% !important;">
+	<div class="page">
+		<div class="flex-fill">
+			<div th:replace="console/fragment/profile"></div>
+			<div th:replace="console/fragment/headermenu('moment')"></div>
+			<div class="my-3 my-md-5">
+				<div class="container">
+					<form th:action="@{/console/moments}">
+						<div class="page-header">
+							<div class="page-options d-flex">
+								<div class="input-icon ml-2">
+									<span class="input-icon-addon"> <i class="fe fe-search"></i>
+									</span> <input type="text" name="query" class="form-control w-10"
+										th:value="${page.param.query}" placeholder="动态内容">
+								</div>
+								<a class="btn btn-primary"
+									onclick="$('#statModal').modal('show')"
+									style="margin-left: 20px"> <i class="fas fa-chart-bar"
+									style="color: #fff"></i>
+								</a> <a class="btn btn-primary" th:href="@{/console/moment/write}"
+									style="margin-left: 20px"> <i class="far fa-plus-square"></i>
+								</a>
+							</div>
+						</div>
+						<div th:each="data : ${page.datas}">
+							<h2 th:text="${#times.format(data.date,'yyyy-MM-dd')}"
+								style="margin-bottom: 0px"></h2>
+							<hr style="margin-top: 1rem; margin-bottom: 1rem">
+							<div class="row row-cards row-deck">
+								<div class="col-sm-4 col-lg-4 col-xl-4"
+									th:each="moment : ${data.moments}">
+									<div class="card" th:data-momentid="${moment.id}"
+										th:with="parser=${#jsoups.parser(#jsoups.body(moment.content))}">
+										<div th:remove="tag" th:with="img=${parser.firstImage}">
+											<a href="javascript:void(0)" th:if="${img.present}"> <img
+												class="card-img-top" th:src="${img.get()}">
+											</a>
+										</div>
+										<div class="card-body d-flex flex-column">
+											<div class="text-muted" th:with="text=${parser.text}">
+												<i class="fas fa-eye-slash mr-2" th:if="${moment.isPrivate}"></i>
+												<i class="fas fa-lock mr-2" th:if="${moment.hasPassword}"></i>[[${text.length()
+												> 200 ? text.substring(0,200)+'...':text}]]
+											</div>
+											<div class="d-flex align-items-center pt-5 mt-auto">
+												<small class="d-block text-muted">[[${#times.format(moment.time,'HH:mm')}]]
+													<span class="badge  mr-1 ml-3" style="color: inherit"><i
+														class="far fa-comment mr-1"></i>[[${moment.comments}]]<i
+														class="fas fa-fire mr-1 ml-2"></i>[[${moment.hits}]]</span>
+												</small>
+												<div class="ml-auto text-muted">
+													<a href="javascript:void(0)"
+														class="icon d-md-inline-block ml-3"
+														th:data-trash="${moment.id}"><i
+														class="fe fe-delete mr-1"></i></a> <a
+														th:href="@{/console/moments/}+${moment.id}+'/edit'"
+														class="icon d-md-inline-block ml-3"><i
+														class="fe fe-edit mr-1"></i></a>
+												</div>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+						<ul class="pagination pagination-simple  justify-content-center"
+							th:if="${page.hasPaging}"
+							th:with="paging=${#pagings.step(page,5)}">
+							<li th:each=" i : ${paging}"
+								th:class="${(i == page.currentPage) ? 'page-item active' : 'page-item'}"><a
+								class="page-link" th:onclick="'paging(\''+${i}+'\')'"
+								href="javascript:void(0)" th:text="${i}"></a></li>
+						</ul>
+						<input type="hidden" name="currentPage"
+							th:value="${page.currentPage}"> <input type="hidden"
+							name="pageSize" th:value="${page.pageSize}">
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="console/fragment/footer"></footer>
+	<div class="modal fade" id="momentModal" tabindex="-1" role="dialog"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body markdown-body"></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="modal fade" id="statModal" tabindex="-1" role="dialog"
+		aria-labelledby="proModal" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">统计</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="table-responsive">
+						<table class="table">
+							<tr>
+								<th>首次发布日期</th>
+								<td><span th:if="${statistic.first != null}"
+									th:remove="tag">[[${#times.format(statistic.first,'yyyy-MM-dd
+										HH:mm')}]]</span></td>
+							</tr>
+							<tr>
+								<th>最后发布日期</th>
+								<td><span th:if="${statistic.last != null}" th:remove="tag">[[${#times.format(statistic.last,'yyyy-MM-dd
+										HH:mm')}]]</span></td>
+							</tr>
+							<tr>
+								<th>最后修改日期</th>
+								<td><span th:if="${statistic.lastModify != null}"
+									th:remove="tag">[[${#times.format(statistic.lastModify,'yyyy-MM-dd
+										HH:mm')}]]</span></td>
+							</tr>
+							<tr>
+								<th>总点击数</th>
+								<td>[[${statistic.hits}]]</td>
+							</tr>
+							<tr>
+								<th>总评论数</th>
+								<td>[[${statistic.comments}]]</td>
+							</tr>
+						</table>
+					</div>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.querySelector('input[name="query"]').addEventListener(
+				'keydown', function(e) {
+					if (e.key == 'Enter')
+						document.querySelector('form').submit();
+				})
+		function paging(page) {
+			document.querySelector('input[name="currentPage"]').value = page;
+			document.querySelector('form').submit();
+		}
+		
+		//
+		
+		for(const ele of document.querySelectorAll('[data-momentid]')){
+			ele.addEventListener('click',function(e){
+				var target = e.target;
+				while(target != null){
+					if(target.hasAttribute('data-trash')
+							|| target.classList.contains('icon')){
+						return ;
+					}
+					target = target.parentElement;
+				}
+				var id = this.dataset.momentid;
+				$.ajax({
+					type : 'post',
+					url : rootPath + 'console/moments/'+id,
+					success:function(data) {
+						var modal = $('#momentModal');
+						modal.find('.modal-body').html(data.content);
+						modal.modal('show');
+					}
+				  })
+			})
+		}
+		
+		for(const ele of document.querySelectorAll('[data-trash]')){
+			ele.addEventListener('click',function(e){
+				var id = this.dataset.trash;
+				Swal.fire({
+					  title: '确定删除吗？',
+					  icon: 'warning',
+					  showCancelButton: true,
+					  confirmButtonColor: '#3085d6',
+					  cancelButtonColor: '#d33'
+					}).then((result) => {
+					  if (result.value) {
+						  	$.ajax({
+								type : 'post',
+								url : rootPath + 'console/moments/'+id+'/delete',
+								success:function(data) {
+									toast('删除成功');
+									setTimeout(function(){
+										window.location.reload();
+									},800)
+								}
+							  })
+					  }
+					})
+			});
+		}
+	</script>
+</body>
+</html>

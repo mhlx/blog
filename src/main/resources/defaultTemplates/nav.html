@@ -1,0 +1,39 @@
+<div data-th-fragment="frag(active)" th:remove="tag">
+	<div class="header py-4 d-lg-none">
+		<div class="container">
+			<div class="d-flex">
+				<div class="d-flex order-lg-2 ml-auto"></div>
+				<a href="#" class="header-toggler d-lg-none ml-3 ml-lg-0"
+					data-toggle="collapse" data-target="#headerMenuCollapse"> <span
+					class="header-toggler-icon"></span>
+				</a>
+			</div>
+		</div>
+	</div>
+	<div class="header collapse d-lg-flex p-0" id="headerMenuCollapse">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col-lg order-lg-first">
+					<ul class="nav nav-tabs border-0 flex-column flex-lg-row">
+						<li class="nav-item"
+							th:classappend="${active == 'index'} ? 'active' : null"><a
+							th:href="@{/}" class="nav-link "><i class="fe fe-home"></i>
+								主页</a></li>
+						<li class="nav-item"
+							th:classappend="${active == 'moment'} ? 'active' : null"><a
+							th:href="@{/moments}" class="nav-link "><i
+								class="fe fe-book-open"></i> 动态</a></li>
+						<li class="nav-item"
+							th:if="${session != null and session.authed != null}"><a
+							th:href="@{/console/articles}" class="nav-link"><i
+								class="fas fa-terminal mr-2"></i> 控制台</a></li>
+						<li class="nav-item"
+							th:if="${session == null or session.authed == null}"><a
+							th:href="@{/login}" class="nav-link"><i
+								class="fas fa-sign-in-alt mr-2"></i> 登录</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

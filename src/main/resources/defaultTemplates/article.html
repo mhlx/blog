@@ -1,0 +1,172 @@
+<data name="article" th:idOrAlias="${idOrAlias}"></data>
+<status code="404" th:if="${article == null}"></status>
+<data name="prevArticle" alias="prev" th:idOrAlias="${idOrAlias}"></data>
+<data name="nextArticle" alias="next" th:idOrAlias="${idOrAlias}"></data>
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Content-Language" content="en" />
+<meta name="msapplication-TileColor" content="#2d89ef">
+<meta name="theme-color" content="#4188c9">
+<meta name="apple-mobile-web-app-status-bar-style"
+	content="black-translucent" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<title>文章</title>
+<link rel="stylesheet" th:href="@{/static/fontawesome/css/all.min.css}" />
+<link th:href="@{/static/tabler/dist/assets/css/dashboard.css}"
+	rel="stylesheet" />
+<link rel="stylesheet" th:href="@{/static/heather/css/markdown.css}" />
+<link th:href="@{/static/heather/highlight/styles/github.css}"
+	rel="stylesheet" />
+<style>
+.noborder .card-body {
+	border: none
+}
+
+.noborder, .noborder .card {
+	border: none;
+	background-color: transparent;
+	box-shadow: none;
+	background-color: transparent;
+}
+
+.noborder .card-header {
+	border: none
+}
+
+.noborder .card-body video {
+	max-width: 200px;
+}
+
+.noborder .card-body video {
+	height: auto;
+	max-width: 100% !important;
+	max-height: 400px !important;
+}
+
+.noborder .card-body img {
+	max-width: 100%;
+	max-height: 400px;
+}
+</style>
+</head>
+<body style="overflow-y: auto">
+	<div class="page">
+		<div class="flex-fill">
+			<div th:replace="nav('index')"></div>
+			<div class="my-3 my-md-5">
+				<div class="container">
+					<h2>[[${article.title}]]</h2>
+					<div class="markdown-body mb-4" th:utext="${article.content}"></div>
+					<div class="row row-cards row-deck"
+						th:if="${prev != null or next != null}">
+						<div class="col-lg-3 col-sm-6" th:if="${prev != null}">
+							<div class="card" style="cursor: pointer">
+								<span class="badge " style="position: absolute; color: #467fcf">上一篇</span>
+								<img class="card-img-top" th:src="@{${prev.featureImage}}"
+									th:if="${prev.featureImage != null}">
+								<div class="card-body d-flex flex-column">
+									<h4>
+										<a
+											th:href="@{/articles/}+${prev.alias == null ? prev.id : prev.alias}">[[${prev.title}]]</a>
+									</h4>
+									<div class="text-muted" th:if="${prev.summary != null}">[[${#jsoups.parser(prev.summary).text}]]</div>
+									<div class="text-muted"
+										th:if="${prev.summary == null and prev.password != null}">内容受到密码保护</div>
+									<div class="d-flex align-items-center pt-5 mt-auto">
+										<div class="ml-auto text-muted">
+											<small> <span class="badge  mr-1"
+												style="color: inherit"><i class="far fa-comment mr-1"></i>[[${prev.comments}]]<i
+													class="fas fa-fire mr-1 ml-2"></i>[[${prev.hits}]]</span>
+											</small>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="col-lg-3 col-sm-6" th:if="${next != null}">
+							<div class="card" style="cursor: pointer">
+								<span class="badge " style="position: absolute; color: #467fcf">下一篇</span>
+								<img class="card-img-top" th:src="@{${next.featureImage}}"
+									th:if="${next.featureImage != null}">
+								<div class="card-body d-flex flex-column">
+									<h4>
+										<a
+											th:href="@{/articles/}+${next.alias == null ? next.id : next.alias}">[[${next.title}]]</a>
+									</h4>
+									<div class="text-muted" th:if="${next.summary != null}">[[${#jsoups.parser(next.summary).text}]]</div>
+									<div class="text-muted"
+										th:if="${next.summary == null and next.password != null}">内容受到密码保护</div>
+									<div class="d-flex align-items-center pt-5 mt-auto">
+										<div class="ml-auto text-muted">
+											<small> <span class="badge  mr-1"
+												style="color: inherit"><i class="far fa-comment mr-1"></i>[[${next.comments}]]<i
+													class="fas fa-fire mr-1 ml-2"></i>[[${next.hits}]]</span>
+											</small>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<div id="comment-container" class="noborder"></div>
+				</div>
+
+			</div>
+		</div>
+
+		<footer class="footer">
+			<div class="container">
+				<div class="row align-items-center flex-row-reverse">
+					<div class="col-auto ml-lg-auto"></div>
+					<div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+						Copyright © [[${#times.format(#times.now(),'yyyy')}]]</div>
+				</div>
+			</div>
+		</footer>
+	</div>
+	<script
+		th:src="@{/static/tabler/dist/assets/js/vendors/jquery-3.2.1.min.js}"></script>
+	<script
+		th:src="@{/static/tabler/dist/assets/js/vendors/bootstrap.bundle.min.js}"></script>
+	<script
+		th:src="@{/static/tabler/dist/assets/js/vendors/sweetalert2.all.min.js}"></script>
+	<script>
+		var rootPath = '[[@{/}]]';
+	</script>
+	<script th:src="@{/static/js/comment.js}"></script>
+	<script th:src="@{/static/heather/js/heather_lazy.js}"></script>
+	<script>
+		$.ajax({
+			type : "get",
+			url : rootPath + 'isAuthenticated',
+			success : function(data) {
+				new Comment('article', '[[${article.id}]]', {
+					container : 'comment-container',
+					authenticated : data
+				})
+			}
+		});
+
+		if (sessionStorage.getItem('article.' + '[[${article.id}]]') == null) {
+			$.ajax({
+				type : "post",
+				url : rootPath + 'articles/' + '[[${article.id}]]' + '/hit',
+				complete : function(data) {
+					sessionStorage.setItem('article.' + '[[${article.id}]]',
+							'1');
+				}
+			});
+		}
+	</script>
+</body>

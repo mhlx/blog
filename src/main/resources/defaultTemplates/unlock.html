@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Content-Language" content="en" />
+<meta name="msapplication-TileColor" content="#2d89ef">
+<meta name="theme-color" content="#4188c9">
+<meta name="apple-mobile-web-app-status-bar-style"
+	content="black-translucent" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+
+
+<title>解锁</title>
+<link rel="stylesheet" th:href="@{/static/fontawesome/css/all.min.css}" />
+<link th:href="@{/static/tabler/dist/assets/css/dashboard.css}"
+	rel="stylesheet" />
+<script th:src="@{/static/tabler/dist/assets/js/dashboard.js}"></script>
+</head>
+<body class="">
+	<div class="page">
+		<div class="page-single">
+			<div class="container">
+				<div class="row">
+					<div class="col col-login mx-auto">
+						<form class="card" method="post" th:action="@{/unlock}">
+							<div class="card-body p-6">
+								<div class="card-title">解锁然后访问</div>
+								<div th:if="${error != null}" class="alert alert-danger" th:text="${#messager.getMessage(error)}"></div>
+								<div class="form-group">
+									<label class="form-label"> 密码 </label> <input type="password"
+										name="password" class="form-control" placeholder="密码">
+								</div>
+								<div class="form-group">
+									<label class="form-label"> 验证码 </label> <input type="text"
+										name="captcha" class="form-control" id="captcha"
+										placeholder="验证码"> <img
+										th:src="@{/captcha?time=}+${#times.millis()}"
+										class="img-fluid" />
+								</div>
+								<div class="form-footer">
+									<button type="submit" id="login-btn"
+										class="btn btn-primary btn-block">解锁</button>
+								</div>
+								<input type="hidden" th:value="${id}" name="id" /> <input
+									type="hidden" th:value="${url}" name="url" />
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script
+		th:src="@{/static/tabler/dist/assets/js/vendors/jquery-3.2.1.min.js}"></script>
+	<script>
+		var rootPath = '[[@{/}]]';
+	</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.mapper.ArticleMapper">
+
+	<resultMap type="Article" id="ArticleMap">
+		<id column="id" property="id" />
+		<result property="status" column="status"
+			typeHandler="EnumOrdinalTypeHandler" />
+		<result column="title" property="title" />
+		<result column="content" property="content" />
+		<result column="pubDate" property="pubDate" />
+		<result column="lastModifyDate" property="lastModifyDate" />
+		<result column="isPrivate" property="isPrivate" />
+		<result column="hits" property="hits" />
+		<result column="comments" property="comments" />
+		<result column="featureImage" property="featureImage" />
+		<result column="summary" property="summary" />
+		<result column="level" property="level" />
+		<result column="alias" property="alias" />
+		<result column="allowComment" property="allowComment" />
+		<result column="password" property="password" />
+		<result column="category_ids" property="categories" typeHandler="CategoryIdsTypeHandler"/>
+		<result column="tag_ids" property="tags" typeHandler="TagIdsTypeHandler"/>
+		<result property="status" column="status" typeHandler="EnumOrdinalTypeHandler" />
+	</resultMap>
+	
+	<resultMap type="ArticleStatusStatistic" id="ArticleStatusStatisticMap">
+		<result column="count" property="count" />
+		<result property="status" column="status" typeHandler="EnumOrdinalTypeHandler" />
+	</resultMap>
+	
+	<update id="update">
+		update
+		blog_article
+		set
+			content = #{content},
+			featureImage = #{featureImage},
+			title = #{title},
+			isPrivate = #{isPrivate},
+			pubDate = #{pubDate},
+			summary = #{summary},
+			level = #{level},
+			password = #{password},
+			status = #{status,javaType=ArticleStatus,typeHandler=EnumOrdinalTypeHandler},
+			allowComment = #{allowComment},
+			lastModifyDate = #{lastModifyDate},
+			alias = #{alias}
+		WHERE id = #{id}
+	</update>
+	
+
+	<select id="selectMinimumScheduleDate" resultType="java.time.LocalDateTime">
+		select min(pubDate) from blog_article where  status = 2
+	</select>
+	
+	<select id="selectScheduled" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		where ba.status = 2 and ba.pubDate  <![CDATA[ <= ]]> #{max}
+	</select>
+	
+	<select id="selectByTag" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		inner join (select articleId from blog_article_tag where tagId = #{tagId}) as bat2 on bat2.articleId = ba.id
+	</select>
+
+	<select id="selectByCategory" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		inner join (select articleId from blog_article_category where categoryId = #{categoryId}) as bac2 on bac2.articleId = ba.id
+	</select>
+	
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		insert into
+		blog_article(alias,title,content,pubDate,isPrivate,summary,level,allowComment,password,status,featureImage)
+		values(#{alias},#{title},#{content},#{pubDate},#{isPrivate},#{summary},#{level},#{allowComment},#{password},#{status,javaType=ArticleStatus,typeHandler=EnumOrdinalTypeHandler},#{featureImage})
+	</insert>
+	
+	<select id="selectById" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		where ba.id = #{id}
+	</select>
+	
+	<select id="selectByIds" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		where ba.id in 
+		<foreach collection="list" open="(" close=")" separator="," item="id">
+			#{id}
+		</foreach>
+	</select>
+	
+	<select id="selectByAlias" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		where ba.alias = #{alias}
+	</select>
+	
+	<select id="selectCount" resultType="int">
+		select count(ba.id) from blog_article  ba
+		<if test="tagId != null">
+			inner join (select articleId from blog_article_tag where tagId = #{tagId}) as bat on bat.articleId = ba.id
+		</if>
+		<if test="categoryId != null">
+			inner join (select articleId from blog_article_category where categoryId = #{categoryId}) as bac on bac.articleId = ba.id
+		</if>
+		<where>
+			<if test="begin != null">
+				and ba.pubDate >= #{begin}
+			</if>
+			<if test="end != null">
+				and ba.pubDate <![CDATA[ <= ]]> #{end}
+			</if>
+			<if test="!queryPrivate">
+				and ba.isPrivate = false
+			</if>
+			<if test="status != null">
+				and ba.status = #{status,javaType=ArticleStatus,typeHandler=EnumOrdinalTypeHandler}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectPage" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		<if test="tagId != null">
+			inner join (select articleId from blog_article_tag where tagId = #{tagId}) as bat2 on bat2.articleId = ba.id
+		</if>
+		<if test="categoryId != null">
+			inner join (select articleId from blog_article_category where categoryId = #{categoryId}) as bac2 on bac2.articleId = ba.id
+		</if>
+		<where>
+			<if test="begin != null">
+				and ba.pubDate >= #{begin}
+			</if>
+			<if test="end != null">
+				and ba.pubDate <![CDATA[ <= ]]> #{end}
+			</if>
+			<if test="!queryPrivate">
+				and ba.isPrivate = false
+			</if>
+			<if test="status != null">
+				and ba.status = #{status,javaType=ArticleStatus,typeHandler=EnumOrdinalTypeHandler}
+			</if>
+		</where>
+		<choose>
+			<when test="ignoreLevel">
+				order by pubDate desc
+			</when><otherwise>
+				order by level desc,pubDate desc
+			</otherwise>
+		</choose>
+		
+		<if test="!ignorePaging">
+		limit #{offset},#{pageSize}
+		</if>
+	</select>
+	
+	<select id="selectPublished" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		where ba.status = 0
+	</select>
+	
+	<delete id="deleteById">
+		delete from blog_article where id = #{id}
+	</delete>
+	
+	<update id="increaseHits">
+		update blog_article set hits = hits + #{hits} where id = #{id}
+	</update>
+	
+	<select id="selectPrev" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		where ba.id = (
+			select t1.id from blog_article t1  
+			left join blog_article_category t2 on t1.id = t2.articleId
+			left join blog_article_tag t3 on t1.id = t3.articleId
+			where t1.status = 0
+			and t1.pubDate <![CDATA[ >= ]]> #{article.pubDate}
+			and t1.id <![CDATA[ <> ]]> #{article.id}
+			<if test="categories != null">
+				and t2.categoryId in
+				<foreach collection="categories" open="(" close=")" item="category">
+					#{category}
+				</foreach>
+			</if>
+			<if test="tags != null">
+				and t3.tagId in
+				<foreach collection="tags" open="(" close=")" item="tag">
+					#{tag}
+				</foreach>
+			</if>
+			<if test="!queryPrivate">
+				and t1.isPrivate = false
+			</if>
+			order by t1.pubDate,t1.id
+			limit 1)
+	</select>
+	
+	<select id="selectNext" resultMap="ArticleMap">
+		<include refid="fullQuery"></include>
+		where ba.id = (
+			select t1.id from blog_article t1  
+			left join blog_article_category t2 on t1.id = t2.articleId
+			left join blog_article_tag t3 on t1.id = t3.articleId
+			where t1.status = 0
+			and t1.pubDate <![CDATA[ <= ]]> #{article.pubDate}
+			and t1.id <![CDATA[ <> ]]> #{article.id}
+			<if test="categories != null">
+				and t2.categoryId in
+				<foreach collection="categories" open="(" close=")" item="category">
+					#{category}
+				</foreach>
+			</if>
+			<if test="tags != null">
+				and t3.tagId in
+				<foreach collection="tags" open="(" close=")" item="tag">
+					#{tag}
+				</foreach>
+			</if>
+			<if test="!queryPrivate">
+				and t1.isPrivate = false
+			</if>
+			order by t1.pubDate desc,t1.id desc
+			limit 1)
+	</select>
+	
+	<select id="selectStatusStatistic" resultMap="ArticleStatusStatisticMap">
+		select status,count(id) count from blog_article 
+		<if test="!queryPrivate">
+		where status = 0 and isPrivate = false
+		</if>
+		group by status
+	</select>
+	
+	
+	
+	<select id="selectDaysCount" resultType="int">
+		select count(distinct(substr(pubDate,1,10))) from blog_article
+		where status = 0
+			<if test="!queryPrivate">
+				AND isPrivate = false
+			</if>
+			<if test="begin != null">
+				AND pubDate >= #{begin}
+			</if>
+			<if test="end != null">
+				AND pubDate <![CDATA[ <= ]]> #{end}
+			</if>
+	</select>
+
+
+
+	<select id="selectDays" resultType="java.time.LocalDate">
+		select substr(pubDate,1,10) as pubDate from blog_article
+		where status = 0
+			<if test="!queryPrivate">
+				AND isPrivate = false
+			</if>
+			<if test="begin != null">
+				AND pubDate >= #{begin}
+			</if>
+			<if test="end != null">
+				AND pubDate <![CDATA[ <= ]]> #{end}
+			</if>
+		GROUP BY substr(pubDate,1,10)
+		ORDER BY pubDate DESC
+		LIMIT #{offset},#{pageSize}
+	</select>
+	
+	
+	<select id="selectStatistic" resultType="ArticleStatistic">
+		select min(pubDate) as firstPubDate,max(pubDate) as lastPubDate,max(LASTMODIFYDATE) as lastModifyDate,sum(hits) as hits ,
+		(
+		select count(*) from blog_comment  bc 
+		inner join blog_article ba on bc.MODULE_ID = ba.ID
+		where module_name = 'article'
+		<if test="!queryPrivate">
+			and ba.isPrivate = false
+		</if>
+		and ba.status = 0
+		) as comments
+		from blog_article where status = 0;
+		<if test="!queryPrivate">
+			AND isPrivate = false
+		</if>
+	</select>
+	
+	<sql id="fullQuery">
+		select ba.id,ba.title,ba.alias,ba.content,ba.pubDate,ba.isPrivate,ba.summary,ba.level,ba.allowComment,ba.password,ba.status,ba.lastModifyDate,ba.featureImage,ba.hits,
+		(select count(1) from blog_comment where module_name = 'article' and module_id = ba.id and checking = false) as comments,
+		(select group_concat(bac.categoryId) from blog_article_category bac where bac.articleId = ba.id group by bac.articleId) as category_ids,
+		(select group_concat(bat.tagId) from blog_article_tag bat where bat.articleId = ba.id group by bat.articleId) as tag_ids
+		from blog_article ba
+	</sql>
+</mapper>

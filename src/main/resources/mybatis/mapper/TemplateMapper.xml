@@ -1,0 +1,81 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.mapper.TemplateMapper">
+
+	<select id="selectEnabledByName" resultType="Template">
+		SELECT
+		id,pattern,name,content,createTime,modifyTime,enable,description,allowComment FROM
+		blog_template WHERE name = #{name} and enable = true
+	</select>
+
+	<select id="selectById" resultType="Template">
+		SELECT
+		id,pattern,name,content,createTime,modifyTime,enable,description,allowComment FROM
+		blog_template WHERE id = #{id}
+	</select>
+
+	<select id="selectEnabledByPattern"
+		resultType="Template">
+		SELECT
+		id,pattern,name,content,createTime,modifyTime,enable,description,allowComment FROM
+		blog_template WHERE pattern = #{pattern} and enable = true
+	</select>
+
+	<delete id="deleteById">
+		DELETE FROM blog_template WHERE id = #{id}
+	</delete>
+
+	<insert id="insert" keyColumn="id" keyProperty="id"
+		useGeneratedKeys="true">
+		INSERT INTO
+		blog_template(pattern,name,content,createTime,enable,description,allowComment)
+		VALUES(#{pattern},#{name},#{content},#{createTime},#{enable},#{description},#{allowComment})
+	</insert>
+
+	<update id="update">
+		UPDATE blog_template
+		SET
+		pattern = #{pattern},
+		name = #{name},
+		content = #{content},
+		enable = #{enable},
+		description = #{description},
+		modifyTime = #{modifyTime},
+		allowComment = #{allowComment}
+		WHERE id = #{id}
+	</update>
+
+
+	<select id="selectPage" resultType="Template">
+		SELECT
+		id,pattern,name,createTime,modifyTime,enable,description,allowComment
+		FROM
+		blog_template
+		<where>
+			<if test="query != null">
+				pattern LIKE CONCAT('%', #{query},'%') or name LIKE CONCAT('%', #{query},'%') 
+			</if>
+		</where>
+		ORDER BY createTime desc,id desc
+		LIMIT #{offset},#{pageSize}
+	</select>
+
+	<select id="selectCount" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		blog_template
+		<where>
+			<if test="query != null">
+				pattern LIKE CONCAT('%', #{query},'%') or name LIKE CONCAT('%', #{query},'%') 
+			</if>
+		</where>
+	</select>
+	<select id="selectEnabled"
+		resultType="Template">
+		SELECT
+		id,pattern,name,content,createTime,modifyTime,enable,description,allowComment FROM
+		blog_template WHERE  enable = true order by createTime desc,id desc
+	</select>
+</mapper>

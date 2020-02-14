@@ -1,0 +1,195 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.qyh.blog.mapper.CommentMapper">
+
+	<resultMap type="Comment" id="CommentDetail">
+		<id property="id" column="id" />
+		<result column="replyNum" property="replyNum" />
+		<result column="parentPath" property="parentPath" />
+		<result column="content" property="content" />
+		<result column="createTime" property="createTime" />
+		<result column="checking" property="checking" />
+		<result column="nickname" property="nickname" />
+		<result column="email" property="email" />
+		<result column="ip" property="ip" />
+		<result column="admin" property="admin" />
+		<result column="gravatar" property="gravatar" />
+		<result column="website" property="website" />
+		<result column="modifyTime" property="modifyTime" />
+		<association property="module" javaType="CommentModule">
+			<result column="module_id" property="id" />
+			<result column="module_name" property="name" />
+		</association>
+		<association property="parent" javaType="Comment">
+			<result column="parent_id" property="id" />
+			<result column="parent_nickname" property="nickname" />
+			<result column="parent_gravatar" property="gravatar" />
+			<result column="parent_admin" property="admin" />
+		</association>
+	</resultMap>
+
+	<select id="selectById" resultMap="CommentDetail">
+		<include refid="sql"></include>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="isIpCommentsAnyChecked" resultType="boolean">
+		SELECT EXISTS(SELECT 1
+		FROM blog_comment WHERE ip = #{ip} and checking = false)
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
+		keyColumn="id">
+		INSERT INTO
+		blog_comment(parent,parentPath,content,module_name,module_id,createTime,checking,nickname,email,ip,admin,gravatar,website)
+		VALUES(#{parent.id},#{parentPath},#{content},#{module.name},#{module.id},#{createTime},#{checking},#{nickname},#{email},#{ip},#{admin},#{gravatar},#{website})
+	</insert>
+
+	<update id="update">
+		UPDATE blog_comment
+		<set>
+			<if test="content != null">
+				content = #{content},
+			</if>
+			<if test="checking != null">
+				checking = #{checking},
+			</if>
+			modifyTime = #{modifyTime}
+		</set>
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByModule">
+		DELETE FROM blog_comment where module_id = #{id} and module_name = #{name}
+	</delete>
+	
+	<select id="selectLastByModuleAndIp" resultMap="CommentDetail">
+		<include refid="sql"></include>
+		WHERE a.module_id = #{module.id}
+		AND a.module_name = #{module.name}
+		AND a.ip = #{ip}
+		ORDER BY createTime desc,id desc
+		LIMIT 1
+	</select>
+	
+	<select id="selectCount" resultType="int">
+		select count(1) from blog_comment
+		<where>
+			<if test="checking != null">
+				checking = #{checking}
+			</if>
+			<if test="parent != null">
+				AND parent = #{parent}
+			</if>
+			<if test="module != null">
+				AND module_id = #{module.id}
+				AND module_name = #{module.name}
+			</if>
+			<if test="!queryAdmin">
+				AND admin = false
+			</if>
+		</where> 
+	</select>
+	
+	<select id="selectPage" resultMap="CommentDetail">
+		<include refid="sql"></include>
+		<where>
+			<if test="checking != null">
+				a.checking = #{checking}
+			</if>
+			<if test="parent != null">
+				AND a.parent = #{parent}
+			</if>
+			<if test="module != null">
+				AND a.module_id = #{module.id}
+				AND a.module_name = #{module.name}
+			</if>
+			<if test="!queryAdmin">
+				AND a.admin = false
+			</if>
+		</where> 
+		<choose>
+			<when test="asc">
+				ORDER BY createTime,id
+			</when>
+			<otherwise>
+				ORDER BY createTime DESC,id desc
+			</otherwise>
+		</choose>
+		LIMIT #{offset},#{pageSize}
+	</select>
+	
+	<select id="selectChildren" resultMap="CommentDetail">
+		<include refid="sql"></include>
+		where a.parentPath like concat('/',#{parent},'/%')
+		<if test="checking != null">
+		AND a.checking = #{checking}
+		</if>
+	</select>
+	
+	<delete id="deleteById">
+		delete from blog_comment where id = #{id}
+	</delete>
+	
+	<delete id="deleteChildren">
+		delete from blog_comment where parentPath like concat('/',#{id},'/%')
+	</delete>
+	
+	<select id="selectRank" resultType="Integer">
+	select rank from (
+		select 
+		id,RANK() OVER (
+			<choose>
+				<when test="asc">
+					ORDER BY createTime,id
+				</when>
+				<otherwise>
+					ORDER BY createTime DESC,id desc
+				</otherwise>
+			</choose>
+		)  rank
+		 from blog_comment
+			<where>
+				<if test="checking != null">
+					checking = #{checking}
+				</if>
+				<if test="parent != null">
+					AND parent = #{parent}
+				</if>
+				<if test="module != null">
+					AND module_id = #{module.id}
+					AND module_name = #{module.name}
+				</if>
+			</where> 
+		) as a  where a.id = #{contain}
+	</select>
+	
+	<sql id="sql">
+		SELECT
+		a.id,
+		a.parent,
+		a.parentPath,
+		a.content,
+		a.module_name,
+		a.module_id,
+		a.createTime,
+		a.checking,
+		a.nickname,
+		a.email,
+		a.ip,
+		a.admin,
+		a.gravatar,
+		a.website,
+		a.modifyTime,
+		p.id as parent_id,
+		p.nickname as parent_nickname,
+		p.gravatar as parent_gravatar,
+		p.admin as parent_admin,
+		(select count(id) from blog_comment where parentPath like concat(a.parentPath,a.id,'/%')) as replyNum
+		FROM
+		blog_comment a
+		left join blog_comment p on a.parent = p.id
+	</sql>
+</mapper>

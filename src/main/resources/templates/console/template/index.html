@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head th:replace="console/fragment/head('模板管理')"></head>
+<body class="">
+	<div class="page">
+		<div class="flex-fill">
+			<div th:replace="console/fragment/profile"></div>
+			<div th:replace="console/fragment/headermenu('template')"></div>
+			<div class="my-3 my-md-5">
+				<div class="container">
+					<form th:action="@{/console/templates}">
+						<div class="page-header">
+							<div class="page-options d-flex">
+								<div class="input-icon ml-2">
+									<span class="input-icon-addon"> <i class="fe fe-search"></i>
+									</span> <input type="text" name="query" class="form-control w-10"
+										th:value="${page.param.query}" placeholder="名称|路径">
+								</div>
+								<a class="btn btn-primary" th:href="@{/console/template/write}"
+									style="margin-left: 20px"> <i class="far fa-plus-square"></i>
+								</a>
+							</div>
+						</div>
+						<div class="row row-deck">
+							<div class="col-12">
+								<div class="card">
+									<div class="table-responsive">
+										<table class="table card-table table-vcenter text-nowrap">
+											<thead>
+												<tr>
+													<th>路径</th>
+													<th>名称</th>
+													<th>是否启用</th>
+													<th>创建时间</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr th:each="template : ${page.datas}">
+													<td th:text="${template.pattern}"></td>
+													<td th:text="${template.name}"></td>
+													<td th:text="${template.enable ? '是' :'否'}"></td>
+													<td
+														th:text="${#times.format(template.createTime,'yyyy-MM-dd HH:mm')}"></td>
+													<td><a href="javascript:void(0)"
+														th:data-trash="${template.id}"><i class="fas fa-trash"></i></a><span
+														class="mr-3"></span><a
+														th:href="@{/console/templates/}+${template.id}+'/edit'"><i
+															class="fas fa-edit"></i></a><span class="mr-3"></span></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<ul class="pagination pagination-simple  justify-content-center"
+							th:if="${page.hasPaging}"
+							th:with="paging=${#pagings.step(page,5)}">
+							<li th:each=" i : ${paging}"
+								th:class="${(i == page.currentPage) ? 'page-item active' : 'page-item'}"><a
+								class="page-link" th:onclick="'paging(\''+${i}+'\')'"
+								href="javascript:void(0)" th:text="${i}"></a></li>
+						</ul>
+						<input type="hidden" name="currentPage"
+							th:value="${page.currentPage}"> <input type="hidden"
+							name="pageSize" th:value="${page.pageSize}">
+					</form>
+				</div>
+			</div>
+		</div>
+		<footer th:replace="console/fragment/footer"></footer>
+	</div>
+	<script>
+		document.querySelector('input[name="query"]').addEventListener(
+				'keydown', function(e) {
+					if (e.key == 'Enter')
+						document.querySelector('form').submit();
+				})
+		function paging(page) {
+			document.querySelector('input[name="currentPage"]').value = page;
+			document.querySelector('form').submit();
+		}
+		
+		for(const ele of document.querySelectorAll('[data-trash]')){
+			ele.addEventListener('click',function(){
+				var id = this.dataset.trash;
+				Swal.fire({
+					  title: '确定删除吗？',
+					  icon: 'warning',
+					  showCancelButton: true,
+					  confirmButtonColor: '#3085d6',
+					  cancelButtonColor: '#d33'
+					}).then((result) => {
+					  if (result.value) {
+						  	$.ajax({
+								type : 'post',
+								url : rootPath + 'console/templates/'+id+'/delete',
+								success:function(data) {
+									toast('删除成功');
+									setTimeout(function(){
+										window.location.reload();
+									},800)
+								}
+							  })
+					  }
+					})
+			});
+		}
+	</script>
+</body>
+</html>
