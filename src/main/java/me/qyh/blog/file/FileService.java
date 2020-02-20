@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -67,7 +68,7 @@ import me.qyh.blog.utils.StringUtils;
 public class FileService {
 
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private final ConcurrentHashMap<String, Boolean> handleMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, CountDownLatch> handleMap = new ConcurrentHashMap<>();
 
 	private static final int MAX_NAME_LENGTH = 255;
 	private static final Set<String> editableExts = Set.of("js", "css", "json", "txt", "xml", "html", "md");
@@ -311,7 +312,7 @@ public class FileService {
 			Path compressed = thumb.resolve(root.relativize(file)).resolve(file.getFileName().toString() + ".mp4");
 			if (Files.exists(compressed))
 				return Optional.of(new _ReadablePath(compressed));
-			boolean isHandled = handleFile(compressed, true, new Runnable() {
+			handleFile(compressed, true, new Runnable() {
 
 				@Override
 				public void run() {
@@ -323,7 +324,7 @@ public class FileService {
 				}
 			});
 
-			return isHandled ? Optional.of(new _ReadablePath(compressed)) : Optional.empty();
+			return Optional.of(new _ReadablePath(compressed));
 		}
 		return Optional.of(new _ReadablePath(file));
 	}
@@ -374,7 +375,7 @@ public class FileService {
 					.resolve(FileUtils.getNameWithoutExtension(file.getFileName().toString()) + "@." + MediaTool.PNG);
 
 			if (!Files.exists(poster)) {
-				boolean isHandled = handleFile(poster, false, new Runnable() {
+				handleFile(poster, false, new Runnable() {
 
 					@Override
 					public void run() {
@@ -385,8 +386,6 @@ public class FileService {
 						}
 					}
 				});
-				if (!isHandled)
-					return Optional.empty();
 			}
 
 			dest = poster;
@@ -395,8 +394,11 @@ public class FileService {
 		}
 		if (dest == null)
 			return Optional.empty();
+		// check again
+		if (!mediaTool.canHandle(FileUtils.getFileExtension(dest)))
+			return Optional.empty();
 		final Path source = dest;
-		boolean isHandled = handleFile(dest, false, new Runnable() {
+		handleFile(dest, false, new Runnable() {
 
 			@Override
 			public void run() {
@@ -409,7 +411,7 @@ public class FileService {
 
 		});
 
-		return isHandled ? Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt)) : Optional.empty();
+		return Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt));
 	}
 
 	/**
@@ -697,27 +699,39 @@ public class FileService {
 		return editableExts.stream().anyMatch(p -> p.equalsIgnoreCase(ext));
 	}
 
-	private boolean handleFile(Path file, boolean video, Runnable runnable) {
+	private void handleFile(Path file, boolean video, Runnable runnable) {
 		String key = file.toString();
-		if (handleMap.putIfAbsent(key, Boolean.TRUE) == null) {
-			int semNum = video ? fileProperties.getVideoSemPer() : fileProperties.getImageSemPer();
-			boolean releaseSem = true;
+		CountDownLatch cdl = new CountDownLatch(1);
+		CountDownLatch current = handleMap.putIfAbsent(key, cdl);
+		if (current != null) {
 			try {
-				sem.acquire(semNum);
-				runnable.run();
+				current.await();
 			} catch (InterruptedException e) {
-				releaseSem = false;
 				Thread.currentThread().interrupt();
 				throw new RuntimeException(e);
-			} finally {
-				if (releaseSem) {
-					sem.release(semNum);
-				}
-				handleMap.remove(key);
 			}
-			return true;
+			return;
 		}
-		return false;
+		int semNum = video ? fileProperties.getVideoSemPer() : fileProperties.getImageSemPer();
+		boolean releaseSem = true;
+		try {
+			sem.acquire(semNum);
+			try {
+				Thread.sleep(10000);
+				runnable.run();
+			} finally {
+				cdl.countDown();
+			}
+		} catch (InterruptedException e) {
+			releaseSem = false;
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		} finally {
+			if (releaseSem) {
+				sem.release(semNum);
+			}
+			handleMap.remove(key);
+		}
 	}
 
 	/**

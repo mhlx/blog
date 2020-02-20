@@ -22,7 +22,7 @@ var Heather = (function() {
         var headingTagNames = ["H1", "H2", "H3", "H4", "H5", "H6"];
 
         var isUndefined = function(o) {
-            return (typeof o == 'undefined')
+            return (typeof o === 'undefined')
         }
 
         return {
@@ -144,7 +144,8 @@ var Heather = (function() {
             handler: function(heather) {
                 heather.execCommand('mermaid');
             }
-        }]
+        }],
+		commandBarItems:['command','bold','italic','link','code','strike','undo','redo']
     }
 
     String.prototype.replaceAll = function(search, replacement) {
@@ -265,6 +266,30 @@ var Heather = (function() {
 	
 	Heather.prototype.getRootNode = function(){
 		return this.rootNode;
+	}
+	
+	Heather.prototype.getHtml = function(callback){
+		var node = Util.parseHTML(this.markdownParser.mdCopy.render(this.getValue()));
+		var inlines = node.querySelectorAll(".katex-inline");
+        var blocks = node.querySelectorAll(".katex-block");
+        if (inlines.length > 0 || blocks.length > 0) {
+            LazyLoader.loadKatex(function() {
+                for (var i = 0; i < inlines.length; i++) {
+                    var inline = inlines[i];
+                    var expression = inline.textContent;
+                    var result = parseKatex(expression, false);
+                    inline.outerHTML = result;
+                }
+                for (var i = 0; i < blocks.length; i++) {
+                    var block = blocks[i];
+                    var expression = block.textContent;
+                    var result = parseKatex(expression, true);
+                    block.outerHTML = result;
+                }
+				callback.call(null,node.innerHTML);
+            });
+        } else 
+			callback.call(null,node.innerHTML);
 	}
 	
     Heather.prototype.getHtmlNode = function() {
@@ -468,7 +493,7 @@ var Heather = (function() {
             }
             var x = e.clientX;
             var y = e.clientY;
-            changeTastListStatus(cm, x, y);
+            changeTastListStatus(cm, x, y ,e);
         })
 
         heather.on('touchstart', function(cm, e) {
@@ -478,7 +503,7 @@ var Heather = (function() {
             }
             var x = e.touches[0].clientX;
             var y = e.touches[0].clientY;
-            changeTastListStatus(cm, x, y);
+			changeTastListStatus(cm, x, y ,e);
         });
         //file upload 
         heather.on('paste', function(editor, evt) {
@@ -567,7 +592,7 @@ var Heather = (function() {
             "Cmd-B": 'bold',
             "Cmd-I": 'italic',
             "Cmd-L": 'link',
-            "Cmd-/": 'commands',
+            "Cmd-/": 'command',
             "Cmd-Enter": toggleFullscreen,
             "Cmd-P": togglePreview,
             "Cmd-Q": fold,
@@ -576,7 +601,7 @@ var Heather = (function() {
             "Ctrl-B": 'bold',
             "Ctrl-I": 'italic',
             "Ctrl-L": 'link',
-            "Alt-/": 'commands',
+            "Alt-/": 'command',
             "Ctrl-Enter": toggleFullscreen,
             "Ctrl-P": togglePreview,
             "Ctrl-Q": fold,
@@ -1023,7 +1048,7 @@ var Heather = (function() {
             this.heather = heather;
             this.eventUnregisters = [];
             this.config = config;
-            this.bar = createBar(this.heather);
+            this.bar = createBar(this.heather,this.config);
             this.bar.getElement().setAttribute('data-widget', '');
             this.bar.getElement().style.display = 'none';
             this.heather.addWidget({
@@ -1090,43 +1115,21 @@ var Heather = (function() {
             this.keepHidden = keepHidden === true;
         }
 
-        function createBar(cm) {
+        function createBar(cm,config) {
             var div = document.createElement('div');
             div.classList.add('heather_command_bar')
             var bar = new Bar(div);
-
-            bar.addElement(Util.createBarIcon('command', function() {
-                cm.execCommand('commands');
-            }));
-
-            bar.addElement(Util.createBarIcon('bold', function() {
-                cm.execCommand('bold');
-            }));
-
-            bar.addElement(Util.createBarIcon('italic', function() {
-                cm.execCommand('italic');
-            }));
-
-            bar.addElement(Util.createBarIcon('link', function() {
-                cm.execCommand('link');
-            }));
-
-            bar.addElement(Util.createBarIcon('code', function() {
-                cm.execCommand('code');
-            }));
-
-
-            bar.addElement(Util.createBarIcon('strike', function() {
-                cm.execCommand('strike');
-            }));
-
-            bar.addElement(Util.createBarIcon('undo', function() {
-                cm.execCommand('undo');
-            }));
-
-            bar.addElement(Util.createBarIcon('redo', function() {
-                cm.execCommand('redo');
-            }));
+			
+			var items = config.commandBarItems || [];
+			for(const item of items){
+				if(typeof item === "string"){
+					bar.addElement(Util.createBarIcon(item, function() {
+						cm.execCommand(item);
+					}));
+				} else {
+					bar.addElement(item);
+				}
+			}
 
             div.addEventListener('click', function(e) {
                 var cursor = cm.coordsChar({
@@ -1148,7 +1151,7 @@ var Heather = (function() {
         function MarkdownParser(config) {
             config = config || {};
             config.highlight = function(str, lang) {
-                if (lang == 'mermaid') {
+                if (lang === 'mermaid') {
                     return createUnparsedMermaidElement(str).outerHTML;
                 }
                 if (lang && hljs.getLanguage(lang)) {
@@ -1156,10 +1159,30 @@ var Heather = (function() {
                 }
             }
             var md = window.markdownit(config);
-            if (config.callback)
+			var mdCopy = window.markdownit(config);
+			var fenceRule =  mdCopy.renderer.rules.fence;
+			var newFenceRule = function(tokens, idx, options, env, slf){
+				var token = tokens[idx],
+                    info = token.info ? md.utils.unescapeAll(token.info).trim() : '',
+                    langName = '';
+                if (info) {
+                    langName = info.split(/\s+/g)[0];
+                }
+				if(langName === 'mermaid'){
+					return '<div class="mermaid">'+token.content+'</div>'
+				}
+				return fenceRule.call(null,tokens, idx, options, env, slf);
+			}
+			mdCopy.renderer.rules.fence = newFenceRule;
+			mdCopy.copy = true;
+			
+            if (config.callback){
                 config.callback(md);
+                config.callback(mdCopy);
+			}
             addLineNumberAttribute(md);
             this.md = md;
+			this.mdCopy = mdCopy;
         }
 
         MarkdownParser.prototype.render = function(markdown) {
@@ -1826,8 +1849,8 @@ var Heather = (function() {
 
         function TableHelper(heather) {
 
-            var commandsHandler = commands['commands'];
-            commands['commands'] = function(heather) {
+            var commandsHandler = commands['command'];
+            commands['command'] = function(heather) {
                 var context = getTableMenuContext(heather);
                 if (context === 'no') {
                     commandsHandler(heather);
@@ -2224,7 +2247,7 @@ var Heather = (function() {
         cm.focus();
     }
 
-    commands['commands'] = function(heather) {
+    commands['command'] = function(heather) {
         var items = heather.commandBoxItems;
         if (items.length === 0) return;
         var box = new CommandBox(heather, items);
@@ -2695,7 +2718,7 @@ var Heather = (function() {
                 //ios will scroll screen when focused
                 window.scrollTo(0, 0);
             }
-            if (Util.mobile) {
+            if (Util.mobile || heather.config.focusedBehavior !== 'smooth') {
                 cm.scrollTo(null, space);
             } else {
                 var minHeight = height / 2;
@@ -2875,6 +2898,8 @@ var Heather = (function() {
                 line: 0,
                 ch: 0
             }, div);
+			
+			heather.focus();
             box.state = {
                 element: div,
                 keyMap: keyMap,
@@ -3132,7 +3157,7 @@ var Heather = (function() {
         }
     }
 
-    function changeTastListStatus(cm, x, y) {
+    function changeTastListStatus(cm, x, y ,e) {
         var cursor = cm.coordsChar({
             left: x,
             top: y
@@ -3152,11 +3177,11 @@ var Heather = (function() {
                 break;
             }
         }
-        if (Util.isUndefined(startCh) || Util.isUndefined(endCh)) return;
+        if (Util.isUndefined(startCh) || Util.isUndefined(endCh)) return ;
         var lineStr = lineHandle.text;
-        if (cursor.ch <= startCh || cursor.ch >= endCh) return;
+        if (cursor.ch <= startCh || cursor.ch >= endCh) return ;
         var text = lineStr.substring(startCh, endCh);
-        if (text !== '[ ]' && text !== '[x]' && text !== '[X]') return;
+        if (text !== '[ ]' && text !== '[x]' && text !== '[X]') return ;
         cm.setSelection({
             line: cursor.line,
             ch: startCh + 1
@@ -3169,6 +3194,9 @@ var Heather = (function() {
         } else {
             cm.replaceSelection("x");
         }
+		e.preventDefault();
+		e.stopPropagation();
+		return;
     }
 
     function createUnparsedMermaidElement(expression) {
@@ -3281,7 +3309,7 @@ var Heather = (function() {
     Heather.lazyRes = lazyRes;
     Heather.Util = Util;
     Heather.defaultConfig = defaultConfig;
-    Heather.version = '2.2';
+    Heather.version = '2.2.1';
 
     return Heather;
 })();

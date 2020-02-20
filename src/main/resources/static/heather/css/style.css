@@ -152,6 +152,7 @@
 
 .heather_command_box ul li{
 	word-break:keep-all;
+	cursor:pointer;
 }
 
 @media (max-width :768px) {

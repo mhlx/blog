@@ -259,7 +259,7 @@ public class FileUtils {
 					Files.createDirectories(path.getParent());
 					Files.createFile(path);
 				} catch (IOException e) {
-					throw new RuntimeException("创建文件夹：" + path + "失败:" + e.getMessage(), e);
+					throw new RuntimeException("创建文件：" + path + "失败:" + e.getMessage(), e);
 				}
 			} else {
 				if (!Files.isRegularFile(path)) {
