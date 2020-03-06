@@ -78,14 +78,14 @@ public class Resize {
 
 	public boolean isInvalid() {
 		if (size != null) {
-			if (size < 0)
+			if (size <= 0)
 				return true;
 		} else {
 			if (width == null && height == null)
 				return true;
-			if (width != null && width < 0)
+			if (width != null && width <= 0)
 				return true;
-			if (height != null && height < 0)
+			if (height != null && height <= 0)
 				return true;
 		}
 		return false;

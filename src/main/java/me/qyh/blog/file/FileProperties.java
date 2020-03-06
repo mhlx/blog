@@ -33,7 +33,7 @@ public class FileProperties {
 	private int videoSemPer = 5;
 	private int[] imageSizes = new int[] { 64, 200, 400, 600, 900, 960, 1920 };
 	@Min(50)
-	private int videoSize = 960;
+	private int videoHeight = 720;
 	// 缩略图尺寸
 	@Min(16)
 	private int smallThumbSize = 200;
@@ -122,12 +122,12 @@ public class FileProperties {
 		this.imageSizes = imageSizes;
 	}
 
-	public int getVideoSize() {
-		return videoSize;
+	public int getVideoHeight() {
+		return videoHeight;
 	}
 
-	public void setVideoSize(int videoSize) {
-		this.videoSize = videoSize;
+	public void setVideoHeight(int videoHeight) {
+		this.videoHeight = videoHeight;
 	}
 
 	public int getSmallThumbSize() {

@@ -296,17 +296,32 @@ public class FileService {
 	 * </p>
 	 * 
 	 * @param path
+	 * @param supportWEBP
 	 * @return
 	 */
-	public Optional<ReadablePath> getProcessedFile(String path) {
-		this.sm.check(FileUtils.cleanPath(path));
-		Optional<Path> op = lookupFile(Lookup.newLookup(path).setMustRegularFile(true));
+	public Optional<ReadablePath> getProcessedFile(String path, boolean supportWEBP) {
+		PathParser pp = new PathParser(path);
+		if (pp.invalid()) {
+			return Optional.empty();
+		}
+		this.sm.check(FileUtils.cleanPath(pp.sourcePath));
+		Optional<Path> op = lookupFile(Lookup.newLookup(pp.sourcePath).setMustRegularFile(true));
 		if (op.isEmpty())
 			return Optional.empty();
 		Path file = op.get();
-		if (thumb == null)
+		if (thumb == null) {
 			return Optional.of(new _ReadablePath(file));
+		}
 		String ext = FileUtils.getFileExtension(file);
+		Resize resize = pp.resize;
+		if (resize == null) {
+			if (MediaTool.isProcessableImage(ext) && fileProperties.isSourceProtect()) {
+				return Optional.empty();
+			}
+		} else {
+			return getThumbnail(file, resize, supportWEBP);
+		}
+
 		if (mediaTool.canHandle(ext) && MediaTool.isProcessableVideo(ext)) {
 			// compress video
 			Path compressed = thumb.resolve(root.relativize(file)).resolve(file.getFileName().toString() + ".mp4");
@@ -317,7 +332,7 @@ public class FileService {
 				@Override
 				public void run() {
 					try {
-						mediaTool.toMP4(fileProperties.getVideoSize(), file, compressed);
+						mediaTool.toMP4(fileProperties.getVideoHeight(), -1, file, compressed);
 					} catch (IOException e) {
 						throw new RuntimeException(e.getMessage(), e);
 					}
@@ -327,91 +342,6 @@ public class FileService {
 			return Optional.of(new _ReadablePath(compressed));
 		}
 		return Optional.of(new _ReadablePath(file));
-	}
-
-	/**
-	 * 获取目标文件的缩略图文件
-	 * <p>
-	 * <b>如果目标文件是可被处理的视频文件，那么将返回视频的封面的缩略图</b>
-	 * </p>
-	 * 
-	 * @param path   文件路径
-	 * @param resize 缩略图尺寸信息
-	 * @param toWEBP 是否转化为webp文件
-	 * @return
-	 * @throws IOException
-	 */
-	public Optional<ReadablePath> getThumbnail(String path, Resize resize, boolean toWEBP) {
-		if (thumb == null)
-			return Optional.empty();
-		this.sm.check(FileUtils.cleanPath(path));
-		Optional<Path> op = lookupFile(Lookup.newLookup(path).setMustRegularFile(true));
-		if (op.isEmpty())
-			return Optional.empty();
-		Path file = op.get();
-
-		// valid resize
-		Integer size = resize.getSize();
-		if (size == null || (size != fileProperties.getSmallThumbSize() && size != fileProperties.getMiddleThumbSize()
-				&& size != fileProperties.getLargeThumbSize()
-				&& !Arrays.stream(fileProperties.getImageSizes()).anyMatch(allowSize -> allowSize == size)))
-			return Optional.empty();
-
-		Path thumbFile = getThumbPath(file, resize, toWEBP);
-		String ext = FileUtils.getFileExtension(file);
-		String sourceExt = toWEBP ? MediaTool.WEBP : MediaTool.isProcessableVideo(ext) ? MediaTool.PNG : ext;
-
-		if (Files.exists(thumbFile)) {
-			return Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt));
-		}
-
-		if (!mediaTool.canHandle(ext))
-			return Optional.empty();
-
-		Path dest = null;
-		if (MediaTool.isProcessableVideo(ext)) {
-			// find poster of video
-			Path poster = thumb.resolve(root.relativize(file))
-					.resolve(FileUtils.getNameWithoutExtension(file.getFileName().toString()) + "@." + MediaTool.PNG);
-
-			if (!Files.exists(poster)) {
-				handleFile(poster, false, new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							mediaTool.getVideoPoster(file, poster);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-				});
-			}
-
-			dest = poster;
-		} else if (MediaTool.isProcessableImage(ext)) {
-			dest = file;
-		}
-		if (dest == null)
-			return Optional.empty();
-		// check again
-		if (!mediaTool.canHandle(FileUtils.getFileExtension(dest)))
-			return Optional.empty();
-		final Path source = dest;
-		handleFile(dest, false, new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					mediaTool.resizeImage(resize, source, thumbFile, toWEBP);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-
-		});
-
-		return Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt));
 	}
 
 	/**
@@ -717,7 +647,6 @@ public class FileService {
 		try {
 			sem.acquire(semNum);
 			try {
-				Thread.sleep(10000);
 				runnable.run();
 			} finally {
 				cdl.countDown();
@@ -1206,6 +1135,170 @@ public class FileService {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
+	}
+
+	/**
+	 * 获取目标文件的缩略图文件
+	 * <p>
+	 * <b>如果目标文件是可被处理的视频文件，那么将返回视频的封面的缩略图</b>
+	 * </p>
+	 * 
+	 * @param path   文件路径
+	 * @param resize 缩略图尺寸信息
+	 * @param toWEBP 是否转化为webp文件
+	 * @return
+	 * @throws IOException
+	 */
+	private Optional<ReadablePath> getThumbnail(Path file, Resize resize, boolean supportWEBP) {
+		// valid resize
+		Integer size = resize.getSize();
+		if (!BlogContext.isAuthenticated() && (size == null || (size != fileProperties.getSmallThumbSize()
+				&& size != fileProperties.getMiddleThumbSize() && size != fileProperties.getLargeThumbSize()
+				&& !Arrays.stream(fileProperties.getImageSizes()).anyMatch(allowSize -> allowSize == size))))
+			return Optional.empty();
+		String ext = FileUtils.getFileExtension(file);
+		boolean toWEBP = supportWEBP && (MediaTool.isJPEG(ext) || MediaTool.isPNG(ext));
+		Path thumbFile = getThumbPath(file, resize, toWEBP);
+		String sourceExt = toWEBP ? MediaTool.WEBP : MediaTool.isProcessableVideo(ext) ? MediaTool.PNG : ext;
+
+		if (Files.exists(thumbFile)) {
+			return Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt));
+		}
+
+		if (!mediaTool.canHandle(ext))
+			return Optional.empty();
+
+		Path dest = null;
+		if (MediaTool.isProcessableVideo(ext)) {
+			// find poster of video
+			Path poster = thumb.resolve(root.relativize(file))
+					.resolve(FileUtils.getNameWithoutExtension(file.getFileName().toString()) + "@." + MediaTool.PNG);
+
+			if (!Files.exists(poster)) {
+				handleFile(poster, false, new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							mediaTool.getVideoPoster(file, poster);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				});
+			}
+
+			dest = poster;
+		} else if (MediaTool.isProcessableImage(ext)) {
+			dest = file;
+		}
+		if (dest == null)
+			return Optional.empty();
+		// check again
+		if (!mediaTool.canHandle(FileUtils.getFileExtension(dest)))
+			return Optional.empty();
+		final Path source = dest;
+		handleFile(dest, false, new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					mediaTool.resizeImage(resize, source, thumbFile, toWEBP);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+		});
+
+		return Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt));
+	}
+
+	/**
+	 * <ul>
+	 * <li>123.png=>empty</li>
+	 * <li>123.png/200=>new Resize(200)</li>
+	 * <li>123.png/200x300=>new Resize(200,300,true)</li>
+	 * <li>123.png/200x300!=>new Resize(200,300,false)</li>
+	 * <li>123.png/x300=>new Resize(null,300,true)</li>
+	 * <li>123.png/200x=>new Resize(200,null,true)</li>
+	 * </ul>
+	 * 
+	 */
+	private static final class PathParser {
+
+		private static final String CONCAT = "x";
+		private static final String FORCE = "!";
+		private static final Resize INVALID_RESIZE = new Resize(-1);
+
+		private final String sourcePath;
+		private final Resize resize;
+		private final String path;
+
+		public PathParser(String path) {
+			super();
+			this.path = path;
+			this.resize = getResizeFromPath(path);
+			this.sourcePath = getSourcePathByResizePath(path);
+		}
+
+		public boolean invalid() {
+			return (this.resize == null && !this.path.equals(this.sourcePath)) || INVALID_RESIZE == this.resize
+					|| (this.resize != null && this.resize.isInvalid());
+		}
+
+		private String getSourcePathByResizePath(String path) {
+			String ext = FileUtils.getFileExtension(path);
+			if (!ext.strip().isEmpty())
+				return path;
+			String sourcePath = path;
+			int index = path.lastIndexOf('/');
+			if (index != -1) {
+				sourcePath = path.substring(0, index);
+			}
+			return sourcePath;
+		}
+
+		private Resize getResizeFromPath(String path) {
+
+			String ext = FileUtils.getFileExtension(path);
+			if (!ext.strip().isEmpty())
+				return null;
+
+			String name = FileUtils.getNameWithoutExtension(path);
+			if (name.indexOf(CONCAT) == -1)
+				try {
+					return new Resize(Integer.parseInt(name));
+				} catch (NumberFormatException e) {
+					return INVALID_RESIZE;
+				}
+			// only height
+			if (name.startsWith(CONCAT))
+				try {
+					return new Resize(null, Integer.parseInt(name.substring(1)), true);
+				} catch (NumberFormatException e) {
+					return INVALID_RESIZE;
+				}
+			// only width
+			if (name.endsWith(CONCAT))
+				try {
+					return new Resize(Integer.parseInt(name.substring(0, name.length() - 1)), null, true);
+				} catch (NumberFormatException e) {
+					return INVALID_RESIZE;
+				}
+			boolean keepRatio = !name.endsWith(FORCE);
+			String sizeInfo = keepRatio ? name : name.substring(0, name.length() - 1);
+			// both
+			String[] array = sizeInfo.split(CONCAT);
+			if (array.length != 2)
+				return INVALID_RESIZE;
+			try {
+				return new Resize(Integer.parseInt(array[0]), Integer.parseInt(array[1]), keepRatio);
+			} catch (NumberFormatException e) {
+				return INVALID_RESIZE;
+			}
+		}
+
 	}
 
 	private final class SecurityPath implements PasswordProtect, PrivateProtect {

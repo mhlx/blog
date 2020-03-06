@@ -230,17 +230,21 @@ class MediaTool {
 	 * @param output
 	 * @throws IOException
 	 */
-	public void toMP4(int size, Path src, Path output) throws IOException {
+	public void toMP4(int height, int seconds, Path src, Path output) throws IOException {
 		VideoInfo info = readVideo(src);
 		List<String> cmdList = new ArrayList<>(
 				Arrays.asList(getFfmpegPath("ffmpeg"), "-i", src.toString(), "-loglevel", "error", "-y"));
-		if (info.getWidth() > size || info.getHeight() > size) {
+		if (info.getHeight() > height) {
 			cmdList.add("-vf");
-			cmdList.add("scale=w=" + size + ":h=" + size + ":force_original_aspect_ratio=decrease");
+			cmdList.add("scale=-2:" + height + ":force_original_aspect_ratio=decrease");
+		}
+		if (seconds > 1) {
+			cmdList.add("-t");
+			cmdList.add(String.valueOf(seconds));
 		}
 		Path temp = Files.createTempFile(null, ".mp4");
 		try {
-			cmdList.addAll(Arrays.asList("-crf", String.valueOf(30), "-max_muxing_queue_size", "9999", "-c:v", "h264",
+			cmdList.addAll(Arrays.asList("-crf", String.valueOf(28), "-max_muxing_queue_size", "9999", "-c:v", "h264",
 					"-c:a", "aac", "-map_metadata", "-1", temp.toString()));
 			execCommands(cmdList);
 			FileUtils.move(temp, output);

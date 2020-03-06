@@ -28,10 +28,10 @@ public class FileConfig implements WebMvcConfigurer {
 
 	@Bean
 	public SimpleUrlHandlerMapping fileMapping(FileService fileService, ResourceProperties resourceProperties,
-			FileProperties fileProperties, ContentNegotiationManager contentNegotiationManager,
+			ContentNegotiationManager contentNegotiationManager,
 			@Qualifier("mvcUrlPathHelper") UrlPathHelper urlPathHelper,
 			@Qualifier("mvcPathMatcher") PathMatcher pathMatcher, WebApplicationContext context) throws Exception {
-		FileResourceResolver resolver = new FileResourceResolver(fileService, fileProperties);
+		FileResourceResolver resolver = new FileResourceResolver(fileService);
 		FileResourceHttpRequestHandler handler = new FileResourceHttpRequestHandler(resolver, resourceProperties);
 		handler.setApplicationContext(context);
 		handler.setServletContext(context.getServletContext());
