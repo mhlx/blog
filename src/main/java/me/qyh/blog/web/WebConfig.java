@@ -28,7 +28,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.TemplateEngine;
@@ -122,11 +121,6 @@ public class WebConfig implements WebMvcConfigurer {
 		resolver.setCache(properties.isCache());
 		resolver.setViewClass(TemplateView.class);
 		return resolver;
-	}
-
-	@Override
-	public void configurePathMatch(PathMatchConfigurer configurer) {
-		configurer.setUseSuffixPatternMatch(false);
 	}
 
 	@Override
