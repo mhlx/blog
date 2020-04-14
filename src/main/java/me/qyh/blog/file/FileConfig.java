@@ -38,9 +38,6 @@ public class FileConfig implements WebMvcConfigurer {
 		if (urlPathHelper != null) {
 			handler.setUrlPathHelper(urlPathHelper);
 		}
-		if (contentNegotiationManager != null) {
-			handler.setContentNegotiationManager(contentNegotiationManager);
-		}
 		handler.afterPropertiesSet();
 		SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping(Map.of("/**", handler));
 		mapping.setOrder(Ordered.LOWEST_PRECEDENCE);

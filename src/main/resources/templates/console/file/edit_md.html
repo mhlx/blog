@@ -178,7 +178,7 @@
 		}
 		heather.setFullscreen(true);
 		var timer;
-		heather.on('editor.change',function(){
+		heather.on('change',function(){
 			clearTimeout(timer);
 			timer = setTimeout(function(){
 				save(true);

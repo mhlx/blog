@@ -13,7 +13,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.thymeleaf.util.StringUtils;
 
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.encoder.Encoder;
@@ -21,6 +20,7 @@ import me.qyh.blog.Blog;
 import me.qyh.blog.entity.BlogConfig;
 import me.qyh.blog.service.BlogConfigService;
 import me.qyh.blog.utils.FileUtils;
+import me.qyh.blog.utils.StringUtils;
 
 public class EmailAppender<E> extends UnsynchronizedAppenderBase<E> {
 
@@ -114,7 +114,7 @@ public class EmailAppender<E> extends UnsynchronizedAppenderBase<E> {
 	private void sendAsync() {
 		try {
 			final BlogConfig config = configService.getConfig();
-			if (StringUtils.isEmptyOrWhitespace(config.getEmail())) {
+			if (StringUtils.isNullOrBlank(config.getEmail())) {
 				return;
 			}
 			Path copy;

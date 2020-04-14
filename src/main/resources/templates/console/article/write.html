@@ -265,12 +265,32 @@
 					+ 'static/heather/katex/katex.min.css';
 			Heather.lazyRes.katex_js = rootPath
 					+ 'static/heather/katex/katex.min.js';
-			var heather = new Heather(document.getElementById('editor'), {
+			
+			var heather = new Heather(document.getElementById('editor'),{
 				editor : {
 					lineNumbers : false
 				},
-				partPreviewEnable :false
-			});
+				upload:{
+					validate:function(file){
+						return file.type.startsWith('image/');
+					},
+					url:function(){
+						return rootPath + 'console/file/upload?dirPath='+fs.getPath()
+					},
+					uploadFinish:function(resp){
+						resp = JSON.parse(resp);
+						if(resp.errors){
+							return null;
+						}
+						insertFiles([resp],heather);
+					},
+					fileNameGen:function(file){
+						if(file.from === 'paste')
+							return new Date().getTime() + '.'+file.name.split('.').pop();
+						return file.name;
+					}
+				}
+			})
 			
 			var summary = new Heather(document.getElementById('summary'), {
 				editor : {
@@ -368,7 +388,7 @@
 			var autoSave = (function(){
 				var timer;
 				var stoped = false;
-				heather.on('editor.change',function(){
+				heather.on('change',function(){
 					if(stoped) return ;
 					if(timer){
 						clearTimeout(timer);

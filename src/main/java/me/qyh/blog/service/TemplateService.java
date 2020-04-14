@@ -426,7 +426,12 @@ public class TemplateService
 		Template moments = new Template(null, "/moments", momentsTemplate);
 		Template moment = new Template(null, "/moments/{id}", momentTemplate);
 		Template archive = new Template(null, "/archive", archiveTemplate);
-		return List.of(nav, index, article, moments, moment, archive);
+		List<Template> defaultTemplates = List.of(nav, index, article, moments, moment, archive);
+		defaultTemplates.forEach(t -> {
+			t.setEnable(true);
+			t.setAllowComment(false);
+		});
+		return defaultTemplates;
 	}
 
 	/**

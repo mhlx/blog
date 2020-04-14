@@ -32,7 +32,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
-import org.thymeleaf.util.StringUtils;
 
 import me.qyh.blog.BlogContext;
 import me.qyh.blog.BlogProperties;
@@ -56,6 +55,7 @@ import me.qyh.blog.service.SimpleCacheManager.SimpleCache;
 import me.qyh.blog.service.event.CategoryDeleteEvent;
 import me.qyh.blog.service.event.TagDeleteEvent;
 import me.qyh.blog.utils.JsoupUtils;
+import me.qyh.blog.utils.StringUtils;
 import me.qyh.blog.vo.ArticleArchive;
 import me.qyh.blog.vo.ArticleArchiveQueryParam;
 import me.qyh.blog.vo.ArticleCategoryStatistic;
@@ -261,7 +261,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	@Transactional(readOnly = true)
 	public List<ArticleTagStatistic> getArticleTagStatistic(String category) {
 		Integer categoryId = null;
-		if (!StringUtils.isEmptyOrWhitespace(category)) {
+		if (!StringUtils.isNullOrBlank(category)) {
 			categoryId = categoryCache.getAll().stream().filter(c -> c.getName().equals(category)).map(Category::getId)
 					.findAny().orElse(null);
 			if (categoryId == null) {
@@ -348,7 +348,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	public PageResult<Article> queryArticle(ArticleQueryParam queryParam) {
 		Integer categoryId = null, tagId = null;
 
-		if (!StringUtils.isEmptyOrWhitespace(queryParam.getCategory())) {
+		if (!StringUtils.isNullOrBlank(queryParam.getCategory())) {
 			for (Category category : categoryCache.getAll()) {
 				if (category.getName().equals(queryParam.getCategory())) {
 					categoryId = category.getId();
@@ -360,7 +360,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			}
 		}
 
-		if (!StringUtils.isEmptyOrWhitespace(queryParam.getTag())) {
+		if (!StringUtils.isNullOrBlank(queryParam.getTag())) {
 			for (Tag tag : tagCache.getAll()) {
 				if (tag.getName().equals(queryParam.getTag())) {
 					tagId = tag.getId();
@@ -382,7 +382,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 
 		String query = param.getQuery();
 		PageResult<Article> articlePage;
-		if (StringUtils.isEmptyOrWhitespace(query)) {
+		if (StringUtils.isNullOrBlank(query)) {
 			int count = articleMapper.selectCount(param);
 			if (count == 0) {
 				articlePage = new PageResult<>(param, 0, List.of());
@@ -504,10 +504,10 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	private void processArticleContents(List<Article> articles) {
 		Map<Integer, String> markdownMap = new HashMap<>();
 		for (Article article : articles) {
-			if (!StringUtils.isEmptyOrWhitespace(article.getSummary())) {
+			if (!StringUtils.isNullOrBlank(article.getSummary())) {
 				markdownMap.put(article.getId(), article.getSummary());
 			}
-			if (!StringUtils.isEmptyOrWhitespace(article.getContent())) {
+			if (!StringUtils.isNullOrBlank(article.getContent())) {
 				markdownMap.put(-article.getId(), article.getContent());
 			}
 		}
