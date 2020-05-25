@@ -20,6 +20,7 @@ import org.commonmark.ext.heading.anchor.HeadingAnchorExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,7 +36,7 @@ class DefaultMarkdown2Html implements Markdown2Html {
 	public DefaultMarkdown2Html(BlogProperties blogProperties, ObjectMapper mapper) {
 		super();
 		this.mapper = mapper;
-		if (blogProperties.getMarkdownServiceUrl() != null) {
+		if (StringUtils.hasText(blogProperties.getMarkdownServiceUrl())) {
 			this.delegate = new MarkdownItConverter(blogProperties.getMarkdownServiceUrl());
 		} else {
 			this.delegate = new CommonMarkdown2Html();
@@ -99,34 +100,12 @@ class DefaultMarkdown2Html implements Markdown2Html {
 			if (markdown == null) {
 				return "";
 			}
-			try {
-				String json = post(url, mapper.writeValueAsString(Map.of(1, markdown)));
-				JsonNode node = mapper.readTree(json);
-				if (node.get("success").asBoolean()) {
-					JsonNode dataNode = node.get("data");
-					return mapper.convertValue(dataNode, new TypeReference<Map<Integer, String>>() {
-					}).get(1);
-				}
-				throw new RuntimeException("fail to convert markdown to html:" + node);
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
+			return toMap(Map.of(1, markdown)).get(1);
 		}
 
 		@Override
 		public Map<Integer, String> toHtmls(Map<Integer, String> markdownMap) {
-			try {
-				String json = post(url, mapper.writeValueAsString(markdownMap));
-				JsonNode node = mapper.readTree(json);
-				if (node.get("success").asBoolean()) {
-					JsonNode dataNode = node.get("data");
-					return mapper.convertValue(dataNode, new TypeReference<Map<Integer, String>>() {
-					});
-				}
-				throw new RuntimeException("fail to convert markdown to html:" + node);
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
+			return toMap(markdownMap);
 		}
 
 		private String post(String uri, String data) throws IOException {
@@ -141,6 +120,21 @@ class DefaultMarkdown2Html implements Markdown2Html {
 			}
 			try (InputStream is = http.getInputStream()) {
 				return StreamUtils.toString(is);
+			}
+		}
+
+		private Map<Integer, String> toMap(Map<Integer, String> markdownMap) {
+			try {
+				String json = post(url, mapper.writeValueAsString(markdownMap));
+				JsonNode node = mapper.readTree(json);
+				if (node.get("success").asBoolean()) {
+					JsonNode dataNode = node.get("data");
+					return mapper.convertValue(dataNode, new TypeReference<Map<Integer, String>>() {
+					});
+				}
+				throw new RuntimeException("fail to convert markdown to html:" + node);
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 

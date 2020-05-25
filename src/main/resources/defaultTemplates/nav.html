@@ -24,13 +24,11 @@
 							th:href="@{/moments}" class="nav-link "><i
 								class="fe fe-book-open"></i> 动态</a></li>
 						<li class="nav-item"
-							th:if="${session != null and session.authed != null}"><a
-							th:href="@{/console/articles}" class="nav-link"><i
-								class="fas fa-terminal mr-2"></i> 控制台</a></li>
-						<li class="nav-item"
-							th:if="${session == null or session.authed == null}"><a
-							th:href="@{/login}" class="nav-link"><i
-								class="fas fa-sign-in-alt mr-2"></i> 登录</a></li>
+							th:classappend="${active == 'archive'} ? 'active' : null"><a
+							th:href="@{/archive}" class="nav-link "><i
+								class="fe fe-layers mr-2"></i>归档</a></li>
+						<li class="nav-item"><a th:href="@{/console/index.html}"
+							class="nav-link"><i class="fas fa-terminal mr-2"></i> 控制台</a></li>
 					</ul>
 				</div>
 			</div>

@@ -17,7 +17,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +79,8 @@ public class FileService {
 	private final FileProperties fileProperties;
 	private final SecurityManager sm = new SecurityManager();
 
+	private final String urlPrefix;
+
 	public FileService(FileProperties fileProperties) throws IOException {
 		this.fileProperties = fileProperties;
 		this.mediaTool = new MediaTool(fileProperties);
@@ -92,6 +93,11 @@ public class FileService {
 			FileUtils.forceMkdir(this.thumb);
 		}
 		sem = new Semaphore(fileProperties.getTotalSem());
+		if (fileProperties.getUrlPrefix() == null) {
+			throw new IllegalStateException("启用了文件管理，请指定：blog.file.url-prefix");
+		}
+		this.urlPrefix = fileProperties.getUrlPrefix().endsWith("/") ? fileProperties.getUrlPrefix()
+				: fileProperties.getUrlPrefix() + '/';
 	}
 
 	/**
@@ -108,13 +114,12 @@ public class FileService {
 	 * 
 	 * @return
 	 */
-	public FileInfoDetail getFileInfoDetail(String path) {
+	public Optional<FileInfoDetail> getFileInfoDetail(String path) {
 		this.sm.check(FileUtils.cleanPath(path));
 		lock.readLock().lock();
 		try {
-			Path file = lookupFile(Lookup.newLookup(path).setIgnoreRoot(false).setMustExists(true))
-					.orElseThrow(() -> new ResourceNotFoundException("file.notExists", "文件不存在"));
-			return getFileInfoDetail(file);
+			return lookupFile(Lookup.newLookup(path).setIgnoreRoot(false).setMustExists(true))
+					.map(this::getFileInfoDetail);
 		} finally {
 			lock.readLock().unlock();
 		}
@@ -130,7 +135,7 @@ public class FileService {
 		lock.writeLock().lock();
 		try {
 			Path p = lookupFile(Lookup.newLookup(path).setMustExists(true).setIgnoreRoot(true))
-					.orElseThrow(() -> new ResourceNotFoundException("fileService.update.notExists", "要更新文件不存在"));
+					.orElseThrow(() -> new ResourceNotFoundException("file.notExists", "文件不存在"));
 
 			if (!StringUtils.isNullOrBlank(update.getDirPath())) {
 				Path destDir = lookupFile(Lookup.newLookup(validatePath(update.getDirPath())))
@@ -145,6 +150,8 @@ public class FileService {
 			if (update.getContent() != null) {
 				writeContent(p, update.getContent());
 			}
+
+			makeFileSecurity(path, update.isPrivate(), update.getPassword());
 
 		} finally {
 			lock.writeLock().unlock();
@@ -186,6 +193,8 @@ public class FileService {
 					throw new RuntimeException(e.getMessage(), e);
 				}
 			}
+
+			makeFileSecurity(fc.getPath(), fc.isPrivate(), fc.getPassword());
 
 			return getFileInfoDetail(file);
 		} finally {
@@ -283,7 +292,10 @@ public class FileService {
 			Path toDelete = lookupFile(Lookup.newLookup(path).setIgnoreRoot(true))
 					.orElseThrow(() -> new LogicException("fileService.delete.invalidPath", "无效的文件路径"));
 			FileUtils.deleteQuietly(toDelete);
-			afterRemove(toDelete);
+
+			if (!Files.exists(toDelete)) {
+				afterRemove(toDelete);
+			}
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -314,7 +326,7 @@ public class FileService {
 		}
 		String ext = FileUtils.getFileExtension(file);
 		Resize resize = pp.resize;
-		if (resize == null) {
+		if (resize == null || resize.isInvalid()) {
 			if (MediaTool.isProcessableImage(ext) && fileProperties.isSourceProtect()) {
 				return Optional.empty();
 			}
@@ -354,7 +366,7 @@ public class FileService {
 		lock.writeLock().lock();
 		try {
 			Path p = lookupFile(Lookup.newLookup(path).setIgnoreRoot(true).setMustExists(true))
-					.orElseThrow(() -> new ResourceNotFoundException("fileService.copy.notExists", "需要拷贝的文件不存在"));
+					.orElseThrow(() -> new ResourceNotFoundException("file.notExists", "文件不存在"));
 
 			Path dir = lookupFile(Lookup.newLookup(validatePath(dirPath)))
 					.orElseThrow(() -> new LogicException("fileService.copy.invalidDestPath", "无效的目标路径"));
@@ -381,7 +393,7 @@ public class FileService {
 	 * 
 	 * @return
 	 */
-	public FileStatistic queryFileStatistic() {
+	public FileStatistic getFileStatistic() {
 		lock.readLock().lock();
 		try {
 			return getFileStatistic(root);
@@ -390,34 +402,6 @@ public class FileService {
 		} finally {
 			lock.readLock().unlock();
 		}
-	}
-
-	/**
-	 * 使路径受保护
-	 * 
-	 * @param path
-	 * @param password 访问密码，如果为空，则为私有访问(不能为null)
-	 */
-	public void makePathSecurity(String path, String password) {
-		this.sm.makePathSecurity(path, password);
-	}
-
-	/**
-	 * 删除受保护的路径
-	 * 
-	 * @param path
-	 */
-	public void deleteSecurityPath(String path) {
-		this.sm.removeSecurityPath(path);
-	}
-
-	/**
-	 * 获取受保护的路径列表
-	 * 
-	 * @return
-	 */
-	public Map<SecurityType, List<String>> getSecurityPaths() {
-		return this.sm.getSecurityPaths();
 	}
 
 	/**
@@ -706,6 +690,7 @@ public class FileService {
 			fi.setEditable(isEditable(fi.getExt()));
 		}
 		fi.setPath(getRelativePath(this.root, path));
+		fi.setUrl(this.urlPrefix + fi.getPath());
 		List<SecurityType> types = this.sm.getSecurityTypes(fi.getPath());
 		for (SecurityType type : types) {
 			if (type.equals(SecurityType.PRIVATE)) {
@@ -718,12 +703,15 @@ public class FileService {
 				&& (MediaTool.isProcessableImage(fi.getExt()) || MediaTool.isProcessableVideo(fi.getExt()))) {
 			Path smallThumbFile = getThumbPath(path, new Resize(fileProperties.getSmallThumbSize()), false);
 			fi.setSmallThumbPath(getRelativePath(thumb, smallThumbFile));
+			fi.setSmallThumbUrl(this.urlPrefix + fi.getSmallThumbPath());
 
 			Path middleThumbFile = getThumbPath(path, new Resize(fileProperties.getMiddleThumbSize()), false);
 			fi.setMiddleThumbPath(getRelativePath(thumb, middleThumbFile));
+			fi.setMiddleThumbUrl(this.urlPrefix + fi.getMiddleThumbPath());
 
 			Path largeThumbFile = getThumbPath(path, new Resize(fileProperties.getLargeThumbSize()), false);
 			fi.setLargeThumbPath(getRelativePath(thumb, largeThumbFile));
+			fi.setLargeThumbUrl(this.urlPrefix + fi.getLargeThumbPath());
 		}
 		return fi;
 	}
@@ -922,6 +910,9 @@ public class FileService {
 		LongAdder filesAdder = new LongAdder();
 		Map<String, TypeAdder> typeGroupingAdder = new ConcurrentHashMap<>();
 		Files.walk(path).parallel().forEach(p -> {
+			if (p == path) {
+				return;
+			}
 			if (Files.isRegularFile(p)) {
 				filesAdder.add(1);
 				long size = FileUtils.size(p);
@@ -1052,20 +1043,6 @@ public class FileService {
 			}
 		}
 
-		public Map<SecurityType, List<String>> getSecurityPaths() {
-			Map<SecurityType, List<String>> map = new HashMap<>();
-			securityPaths.forEach((k, v) -> {
-				SecurityType type = v.isEmpty() ? SecurityType.PRIVATE : SecurityType.PASSWORD;
-				List<String> paths = map.get(type);
-				if (paths == null) {
-					paths = new ArrayList<>();
-				}
-				paths.add(k);
-				map.put(type, paths);
-			});
-			return map;
-		}
-
 		public List<SecurityType> getSecurityTypes(String path) {
 			List<SecurityType> types = new ArrayList<>();
 			securityPaths.forEach((k, v) -> {
@@ -1084,15 +1061,15 @@ public class FileService {
 
 		public void makePathSecurity(String path, String password) {
 			lookupFile(Lookup.newLookup(path).setMustExists(true))
-					.orElseThrow(() -> new ResourceNotFoundException("path.notExists", "路径不存在"));
+					.orElseThrow(() -> new ResourceNotFoundException("file.notExists", "文件不存在"));
 			String clean = FileUtils.cleanPath(path);
 			securityPaths.forEach((k, v) -> {
 				if (clean.startsWith(k + "/")) {
 					if (!v.isEmpty() && !password.isEmpty()) {
-						throw new LogicException("path.protected", "路径:" + k + "已经设置密码保护了");
+						throw new LogicException("securityPath.protected", "路径:" + k + "已经设置密码保护了", k);
 					}
 					if (v.isEmpty()) {
-						throw new LogicException("path.private", "路径:" + k + "已经私有化了");
+						throw new LogicException("securityPath.private", "路径:" + k + "已经私有化了", k);
 					}
 				}
 				if (k.startsWith(clean + "/") && (!v.isEmpty() || (v.isEmpty() && password.isEmpty()))) {
@@ -1214,6 +1191,18 @@ public class FileService {
 		return Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt));
 	}
 
+	private void makeFileSecurity(String path, boolean isPrivate, String password) {
+		this.sm.removeSecurityPath(path);
+
+		if (isPrivate) {
+			this.sm.makePathSecurity(path, "");
+		} else {
+			if (!StringUtils.isNullOrBlank(password)) {
+				this.sm.makePathSecurity(path, password);
+			}
+		}
+	}
+
 	/**
 	 * <ul>
 	 * <li>123.png=>empty</li>
@@ -1243,8 +1232,10 @@ public class FileService {
 		}
 
 		public boolean invalid() {
-			return (this.resize == null && !this.path.equals(this.sourcePath)) || INVALID_RESIZE == this.resize
-					|| (this.resize != null && this.resize.isInvalid());
+			if (this.resize == null || this.resize == INVALID_RESIZE) {
+				return !this.path.equals(this.sourcePath);
+			}
+			return this.resize != null && this.resize.isInvalid();
 		}
 
 		private String getSourcePathByResizePath(String path) {

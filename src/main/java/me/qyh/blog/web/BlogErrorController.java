@@ -10,13 +10,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
+
+import me.qyh.blog.utils.WebUtils;
 
 @Controller
 @RequestMapping("/error")
@@ -34,8 +35,13 @@ public class BlogErrorController implements ErrorController {
 		return "/error";
 	}
 
-	@RequestMapping(produces = MediaType.TEXT_HTML_VALUE)
-	public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
+	@RequestMapping
+	public Object error(HttpServletRequest request, HttpServletResponse response) {
+
+		if (WebUtils.isAjaxRequest(request) || WebUtils.isApiRequest(request)) {
+			return ajaxError(request, response);
+		}
+
 		HttpStatus status = getStatus(request);
 		if (!status.isError()) {
 			return new ModelAndView("redirect:/");
@@ -57,14 +63,14 @@ public class BlogErrorController implements ErrorController {
 		return new ModelAndView(viewName.toString(), map);
 	}
 
-	@RequestMapping
-	public ResponseEntity<Map<String, Object>> error(HttpServletRequest request, HttpServletResponse response) {
+	private ResponseEntity<Map<String, Object>> ajaxError(HttpServletRequest request, HttpServletResponse response) {
 		HttpStatus status = getStatus(request);
 		if (!status.isError()) {
 			return new ResponseEntity<>(status);
 		}
 		Map<String, Object> attributes = errorAttributes.getErrorAttributes(new ServletWebRequest(request), false);
-		return new ResponseEntity<>(attributes, status);
+		return CollectionUtils.isEmpty(attributes) ? new ResponseEntity<>(status)
+				: new ResponseEntity<>(attributes, status);
 	}
 
 	private HttpStatus getStatus(HttpServletRequest request) {

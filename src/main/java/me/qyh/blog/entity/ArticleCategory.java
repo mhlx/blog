@@ -1,6 +1,12 @@
 package me.qyh.blog.entity;
 
-public class ArticleCategory {
+import java.io.Serializable;
+
+public class ArticleCategory implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private Integer articleId;
 	private Integer categoryId;

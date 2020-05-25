@@ -31,23 +31,26 @@
 						<form class="card" method="post" th:action="@{/unlock}">
 							<div class="card-body p-6">
 								<div class="card-title">解锁然后访问</div>
-								<div th:if="${error != null}" class="alert alert-danger" th:text="${#messager.getMessage(error)}"></div>
+								<div th:if="${errors != null}">
+									<div th:each="error : ${errors}" class="alert alert-danger"
+										th:text="${#messager.getMessage(error)}"></div>
+								</div>
 								<div class="form-group">
 									<label class="form-label"> 密码 </label> <input type="password"
 										name="password" class="form-control" placeholder="密码">
 								</div>
 								<div class="form-group">
 									<label class="form-label"> 验证码 </label> <input type="text"
-										name="captcha" class="form-control" id="captcha"
-										placeholder="验证码"> <img
-										th:src="@{/captcha?time=}+${#times.millis()}"
-										class="img-fluid" />
+										name="captcha_value" class="form-control" id="captcha"
+										placeholder="验证码"> <img id="captcha-image"
+										class="img-fluid" style="display: none" />
 								</div>
 								<div class="form-footer">
 									<button type="submit" id="login-btn"
 										class="btn btn-primary btn-block">解锁</button>
 								</div>
-								<input type="hidden" th:value="${id}" name="id" /> <input
+								<input type="hidden" name="captcha_key" id="captcha_key" /> <input
+									type="hidden" th:value="${id}" name="id" /> <input
 									type="hidden" th:value="${url}" name="url" />
 							</div>
 						</form>
@@ -60,6 +63,11 @@
 		th:src="@{/static/tabler/dist/assets/js/vendors/jquery-3.2.1.min.js}"></script>
 	<script>
 		var rootPath = '[[@{/}]]';
+		$.post(rootPath + 'api/captcha', {}, function(data) {
+			$("#captcha_key").val(data)
+			$('#captcha-image').attr('src', rootPath + 'api/captchas/' + data)
+					.show();
+		});
 	</script>
 </body>
 </html>

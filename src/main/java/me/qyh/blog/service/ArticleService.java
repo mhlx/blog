@@ -44,16 +44,17 @@ import me.qyh.blog.entity.Category;
 import me.qyh.blog.entity.Comment;
 import me.qyh.blog.entity.CommentModule;
 import me.qyh.blog.entity.Tag;
+import me.qyh.blog.event.CategoryDeleteEvent;
+import me.qyh.blog.event.TagDeleteEvent;
 import me.qyh.blog.exception.LogicException;
 import me.qyh.blog.exception.ResourceNotFoundException;
 import me.qyh.blog.mapper.ArticleCategoryMapper;
 import me.qyh.blog.mapper.ArticleMapper;
 import me.qyh.blog.mapper.ArticleTagMapper;
+import me.qyh.blog.mapper.CategoryMapper;
 import me.qyh.blog.mapper.CommentMapper;
+import me.qyh.blog.mapper.TagMapper;
 import me.qyh.blog.security.SecurityChecker;
-import me.qyh.blog.service.SimpleCacheManager.SimpleCache;
-import me.qyh.blog.service.event.CategoryDeleteEvent;
-import me.qyh.blog.service.event.TagDeleteEvent;
 import me.qyh.blog.utils.JsoupUtils;
 import me.qyh.blog.utils.StringUtils;
 import me.qyh.blog.vo.ArticleArchive;
@@ -76,9 +77,8 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	private final ArticleTagMapper articleTagMapper;
 	private final ArticleCategoryMapper articleCategoryMapper;
 	private final CommentMapper commentMapper;
-
-	private SimpleCache<Category> categoryCache = SimpleCacheManager.get().getCache(CategoryService.class.getName());
-	private SimpleCache<Tag> tagCache = SimpleCacheManager.get().getCache(TagService.class.getName());
+	private final TagMapper tagMapper;
+	private final CategoryMapper categoryMapper;
 
 	private static final Logger logger = LoggerFactory.getLogger(ArticleService.class.getName());
 
@@ -86,8 +86,8 @@ public class ArticleService implements CommentModuleHandler<Article> {
 
 	public ArticleService(ArticleMapper articleMapper, Markdown2Html markdown2Html,
 			PlatformTransactionManager transactionManager, ArticleTagMapper articleTagMapper,
-			ArticleCategoryMapper articleCategoryMapper, BlogProperties blogProperties, CommentMapper commentMapper)
-			throws IOException {
+			ArticleCategoryMapper articleCategoryMapper, BlogProperties blogProperties, CommentMapper commentMapper,
+			TagMapper tagMapper, CategoryMapper categoryMapper) throws IOException {
 		this.articleIndexer = new ArticleIndexer();
 		this.articleMapper = articleMapper;
 		this.markdown2Html = markdown2Html;
@@ -95,6 +95,8 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		this.articleCategoryMapper = articleCategoryMapper;
 		this.scheduleManager = new ScheduleManager(transactionManager);
 		this.commentMapper = commentMapper;
+		this.tagMapper = tagMapper;
+		this.categoryMapper = categoryMapper;
 		if (blogProperties.isRebuildIndexWhenStartup()) {
 			try {
 				List<Article> articles = articleMapper.selectPublished();
@@ -111,7 +113,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	public void updateArticle(Article article) {
 		Optional<Article> opOld = articleMapper.selectById(article.getId());
 		if (opOld.isEmpty()) {
-			throw new LogicException("articleService.update.notExists", "文章不存在");
+			throw new ResourceNotFoundException("article.notExists", "文章不存在");
 		}
 		if (article.getAlias() != null) {
 			Optional<Article> opArticle = articleMapper.selectByAlias(article.getAlias());
@@ -255,17 +257,23 @@ public class ArticleService implements CommentModuleHandler<Article> {
 
 	@Transactional(readOnly = true)
 	public Optional<Article> getArticleForEdit(int id) {
-		return articleMapper.selectById(id);
+		Optional<Article> opArticle = articleMapper.selectById(id);
+		if (opArticle.isPresent()) {
+			Article article = opArticle.get();
+			article.setTags(
+					article.getTags().stream().map(Tag::getId).map(tagMapper::selectById).filter(Optional::isPresent)
+							.map(Optional::get).collect(Collectors.toCollection(LinkedHashSet::new)));
+		}
+		return opArticle;
 	}
 
 	@Transactional(readOnly = true)
 	public List<ArticleTagStatistic> getArticleTagStatistic(String category) {
 		Integer categoryId = null;
 		if (!StringUtils.isNullOrBlank(category)) {
-			categoryId = categoryCache.getAll().stream().filter(c -> c.getName().equals(category)).map(Category::getId)
-					.findAny().orElse(null);
+			categoryId = categoryMapper.selectByName(category).map(Category::getId).orElse(null);
 			if (categoryId == null) {
-				return List.of();
+				throw new ResourceNotFoundException("category.notExists", "分类不存在");
 			}
 		}
 		return articleTagMapper.selectCount(BlogContext.isAuthenticated(), categoryId);
@@ -282,8 +290,10 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		ArticleStatistic stat = articleMapper.selectStatistic(queryPrivate);
 		List<ArticleCategoryStatistic> categoryStatistics = articleCategoryMapper.selectCount(queryPrivate);
 		List<ArticleStatusStatistic> statusStatistics = articleMapper.selectStatusStatistic(queryPrivate);
+		List<ArticleTagStatistic> tagStatistics = articleTagMapper.selectCount(queryPrivate, null);
 		stat.setCategoryStatistics(categoryStatistics);
 		stat.setStatusStatistics(statusStatistics);
+		stat.setTagStatistics(tagStatistics);
 		return stat;
 	}
 
@@ -298,27 +308,6 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	}
 
 	private Optional<Article> prevOrNext(String idOrAlias, Set<String> categories, Set<String> tags, boolean prev) {
-		Set<Integer> categorySet = null;
-		Set<Integer> tagSet = null;
-
-		if (!CollectionUtils.isEmpty(categories)) {
-			categorySet = categories.stream()
-					.map(name -> categoryCache.getAll().stream().filter(c -> c.getName().equals(name)).findAny())
-					.filter(Optional::isPresent).map(Optional::get).map(Category::getId).collect(Collectors.toSet());
-			if (categorySet.isEmpty()) {
-				return Optional.empty();
-			}
-		}
-
-		if (!CollectionUtils.isEmpty(tags)) {
-			tagSet = tags.stream()
-					.map(name -> tagCache.getAll().stream().filter(c -> c.getName().equals(name)).findAny())
-					.filter(Optional::isPresent).map(Optional::get).map(Tag::getId).collect(Collectors.toSet());
-			if (tagSet.isEmpty()) {
-				return Optional.empty();
-			}
-		}
-
 		Optional<Article> opArticle;
 		try {
 			int id = Integer.parseInt(idOrAlias);
@@ -326,22 +315,42 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		} catch (NumberFormatException e) {
 			opArticle = articleMapper.selectByAlias(idOrAlias);
 		}
-		if (opArticle.isPresent()) {
-			Article article = opArticle.get();
-			if (!ArticleStatus.PUBLISHED.equals(article.getStatus())) {
+		if (opArticle.isEmpty()) {
+			throw new ResourceNotFoundException("article.notExists", "文章不存在");
+		}
+
+		Set<Integer> categorySet = null;
+		Set<Integer> tagSet = null;
+
+		if (!CollectionUtils.isEmpty(categories)) {
+			categorySet = categories.stream().map(categoryMapper::selectByName).filter(Optional::isPresent)
+					.map(Optional::get).map(Category::getId).collect(Collectors.toSet());
+			if (categorySet.isEmpty()) {
 				return Optional.empty();
 			}
-			SecurityChecker.check(article);
-			boolean queryPrivate = BlogContext.isAuthenticated();
-			Optional<Article> op = prev ? articleMapper.selectPrev(article, categorySet, tagSet, queryPrivate)
-					: articleMapper.selectNext(article, categorySet, tagSet, queryPrivate);
-			if (op.isPresent()) {
-				processArticles(List.of(op.get()), queryPrivate);
-				op.get().setContent(null);
-			}
-			return op;
 		}
-		return opArticle;
+
+		if (!CollectionUtils.isEmpty(tags)) {
+			tagSet = tags.stream().map(tagMapper::selectByName).filter(Optional::isPresent).map(Optional::get)
+					.map(Tag::getId).collect(Collectors.toSet());
+			if (tagSet.isEmpty()) {
+				return Optional.empty();
+			}
+		}
+
+		Article article = opArticle.get();
+		if (!ArticleStatus.PUBLISHED.equals(article.getStatus())) {
+			return Optional.empty();
+		}
+		SecurityChecker.check(article);
+		boolean queryPrivate = BlogContext.isAuthenticated();
+		Optional<Article> op = prev ? articleMapper.selectPrev(article, categorySet, tagSet, queryPrivate)
+				: articleMapper.selectNext(article, categorySet, tagSet, queryPrivate);
+		if (op.isPresent()) {
+			processArticles(List.of(op.get()), queryPrivate);
+			op.get().setContent(null);
+		}
+		return op;
 	}
 
 	@Transactional(readOnly = true)
@@ -349,24 +358,14 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		Integer categoryId = null, tagId = null;
 
 		if (!StringUtils.isNullOrBlank(queryParam.getCategory())) {
-			for (Category category : categoryCache.getAll()) {
-				if (category.getName().equals(queryParam.getCategory())) {
-					categoryId = category.getId();
-					break;
-				}
-			}
+			categoryId = categoryMapper.selectByName(queryParam.getCategory()).map(Category::getId).orElse(null);
 			if (categoryId == null) {
 				return new PageResult<>(queryParam, 0, List.of());
 			}
 		}
 
 		if (!StringUtils.isNullOrBlank(queryParam.getTag())) {
-			for (Tag tag : tagCache.getAll()) {
-				if (tag.getName().equals(queryParam.getTag())) {
-					tagId = tag.getId();
-					break;
-				}
-			}
+			tagId = tagMapper.selectByName(queryParam.getTag()).map(Tag::getId).orElse(null);
 			if (tagId == null) {
 				return new PageResult<>(queryParam, 0, List.of());
 			}
@@ -480,8 +479,8 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		articleCategoryMapper.deleteByArticle(article.getId());
 		if (!CollectionUtils.isEmpty(article.getCategories())) {
 			for (Category category : article.getCategories()) {
-				if (categoryCache.get(category.getId()) == null) {
-					throw new LogicException("articleService.category.notExists", "分类不存在");
+				if (categoryMapper.selectById(category.getId()).isEmpty()) {
+					throw new LogicException("category.notExists", "分类不存在");
 				}
 				articleCategoryMapper.insert(new ArticleCategory(article.getId(), category.getId()));
 			}
@@ -489,10 +488,18 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		articleTagMapper.deleteByArticle(article.getId());
 		if (!CollectionUtils.isEmpty(article.getTags())) {
 			for (Tag tag : article.getTags()) {
-				if (tagCache.get(tag.getId()) == null) {
-					throw new LogicException("articleService.tag.notExists", "标签不存在");
+				String tagName = tag.getName().strip();
+				Optional<Tag> opTag = tagMapper.selectByName(tagName);
+				Tag dbTag;
+				if (opTag.isPresent()) {
+					dbTag = opTag.get();
+				} else {
+					dbTag = new Tag();
+					dbTag.setCreateTime(LocalDateTime.now());
+					dbTag.setName(tagName);
+					tagMapper.insert(dbTag);
 				}
-				articleTagMapper.insert(new ArticleTag(article.getId(), tag.getId()));
+				articleTagMapper.insert(new ArticleTag(article.getId(), dbTag.getId()));
 			}
 		}
 	}
@@ -528,10 +535,12 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			articles.stream().filter(SecurityChecker::locked).forEach(Article::clearProtected);
 		}
 		for (Article article : articles) {
-			article.setCategories(article.getCategories().stream().map(Category::getId).map(categoryCache::get)
-					.filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new)));
-			article.setTags(article.getTags().stream().map(Tag::getId).map(tagCache::get).filter(Objects::nonNull)
+			article.setCategories(article.getCategories().stream().map(Category::getId).map(categoryMapper::selectById)
+					.filter(Optional::isPresent).map(Optional::get)
 					.collect(Collectors.toCollection(LinkedHashSet::new)));
+			article.setTags(
+					article.getTags().stream().map(Tag::getId).map(tagMapper::selectById).filter(Optional::isPresent)
+							.map(Optional::get).collect(Collectors.toCollection(LinkedHashSet::new)));
 		}
 		processArticleContents(articles);
 		for (Article article : articles) {

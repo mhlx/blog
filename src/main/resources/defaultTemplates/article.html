@@ -1,7 +1,6 @@
-<data name="article" th:idOrAlias="${idOrAlias}"></data>
-<status code="404" th:if="${article == null}"></status>
-<data name="prevArticle" alias="prev" th:idOrAlias="${idOrAlias}"></data>
-<data name="nextArticle" alias="next" th:idOrAlias="${idOrAlias}"></data>
+<data th:path="'api/articles/'+${idOrAlias}" alias="article"></data>
+<data th:path="'api/articles/'+${idOrAlias}+'/previous'" alias="prev" ignoreException="true"></data>
+<data th:path="'api/articles/'+${idOrAlias}+'/next'" alias="next" ignoreException="true"></data>
 <!doctype html>
 <html>
 <head>
@@ -161,7 +160,7 @@
 		if (sessionStorage.getItem('article.' + '[[${article.id}]]') == null) {
 			$.ajax({
 				type : "post",
-				url : rootPath + 'articles/' + '[[${article.id}]]' + '/hit',
+				url : rootPath + 'api/articles/' + '[[${article.id}]]' + '/hit',
 				complete : function(data) {
 					sessionStorage.setItem('article.' + '[[${article.id}]]',
 							'1');

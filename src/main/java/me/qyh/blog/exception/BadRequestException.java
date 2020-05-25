@@ -9,14 +9,13 @@ public class BadRequestException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	private final Message error;
 
-	public BadRequestException(String code, String defaultMessage, Object... args) {
+	public BadRequestException(Message error) {
 		super(null, null, false, false);
-		this.error = new Message(code, defaultMessage, args);
+		this.error = error;
 	}
 
-	public BadRequestException(Message error) {
-		super();
-		this.error = error;
+	public BadRequestException(String code, String defaultMessage, Object... args) {
+		this(new Message(code, defaultMessage, args));
 	}
 
 	public Message getError() {

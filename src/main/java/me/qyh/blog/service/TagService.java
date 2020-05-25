@@ -1,9 +1,6 @@
 package me.qyh.blog.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,15 +8,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import me.qyh.blog.entity.Tag;
-import me.qyh.blog.exception.LogicException;
+import me.qyh.blog.event.TagDeleteEvent;
 import me.qyh.blog.exception.ResourceNotFoundException;
 import me.qyh.blog.mapper.TagMapper;
-import me.qyh.blog.service.SimpleCacheManager.SimpleCache;
-import me.qyh.blog.service.event.TagDeleteEvent;
 
 @Service
 public class TagService {
@@ -27,43 +20,20 @@ public class TagService {
 	private final TagMapper tagMapper;
 	private final ApplicationEventPublisher publisher;
 
-	private SimpleCache<Tag> cache = SimpleCacheManager.get().getCache(TagService.class.getName());
-
 	public TagService(TagMapper tagMapper, ApplicationEventPublisher publisher) {
 		super();
 		this.tagMapper = tagMapper;
 		this.publisher = publisher;
-		for (Tag tag : tagMapper.selectAll()) {
-			cache.put(tag.getId(), tag);
-		}
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
-	public int saveTag(Tag tag) {
-		if (tagMapper.selectByName(tag.getName()).isPresent()) {
-			throw new LogicException("tagService.save.exists", "标签已经存在");
-		}
-		tag.setCreateTime(LocalDateTime.now());
-		tagMapper.insert(tag);
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-
-			@Override
-			public void afterCommit() {
-				cache.put(tag.getId(), tag);
-			}
-
-		});
-		return tag.getId();
-	}
-
+	@Transactional(readOnly = true)
 	public List<Tag> getAllTags() {
-		List<Tag> categories = new ArrayList<>(cache.getAll());
-		categories.sort(Comparator.comparing(Tag::getCreateTime).reversed());
-		return Collections.unmodifiableList(categories);
+		return tagMapper.selectAll();
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<Tag> getTag(int id) {
-		return Optional.ofNullable(cache.get(id));
+		return tagMapper.selectById(id);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -74,21 +44,13 @@ public class TagService {
 		}
 		tagMapper.deleteById(id);
 		publisher.publishEvent(new TagDeleteEvent(this, opTag.get()));
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-
-			@Override
-			public void afterCommit() {
-				cache.remove(id);
-			}
-
-		});
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void updateTag(final Tag tag) {
 		Optional<Tag> opTag = tagMapper.selectById(tag.getId());
 		if (opTag.isEmpty()) {
-			throw new ResourceNotFoundException("tagService.delete.notExists", "标签不存在");
+			throw new ResourceNotFoundException("tag.notExists", "标签不存在");
 		}
 		Tag old = opTag.get();
 		if (old.getName().equals(tag.getName())) {
@@ -97,13 +59,5 @@ public class TagService {
 		old.setName(tag.getName());
 		old.setModifyTime(LocalDateTime.now());
 		tagMapper.update(old);
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-
-			@Override
-			public void afterCommit() {
-				cache.put(old.getId(), old);
-			}
-
-		});
 	}
 }

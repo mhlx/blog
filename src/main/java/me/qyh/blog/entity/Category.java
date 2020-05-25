@@ -1,5 +1,6 @@
 package me.qyh.blog.entity;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -7,8 +8,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-public class Category {
+public class Category implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer id;
 	@NotBlank(message = "类别名称不能为空")
 	@Size(max = 20, message = "类别名称不能超过20个字符")

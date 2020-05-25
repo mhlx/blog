@@ -14,6 +14,7 @@ public class ArticleStatistic {
 
 	private List<ArticleCategoryStatistic> categoryStatistics = new ArrayList<>();
 	private List<ArticleStatusStatistic> statusStatistics = new ArrayList<>();
+	private List<ArticleTagStatistic> tagStatistics = new ArrayList<>();
 
 	public List<ArticleCategoryStatistic> getCategoryStatistics() {
 		return categoryStatistics;
@@ -69,6 +70,14 @@ public class ArticleStatistic {
 
 	public void setStatusStatistics(List<ArticleStatusStatistic> statusStatistics) {
 		this.statusStatistics = statusStatistics;
+	}
+
+	public List<ArticleTagStatistic> getTagStatistics() {
+		return tagStatistics;
+	}
+
+	public void setTagStatistics(List<ArticleTagStatistic> tagStatistics) {
+		this.tagStatistics = tagStatistics;
 	}
 
 }

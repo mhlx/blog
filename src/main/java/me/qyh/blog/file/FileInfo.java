@@ -16,6 +16,10 @@ public class FileInfo {
 	private LocalDateTime lastModify;
 	private boolean isPrivate;
 	private boolean isProtected;
+	private String url;
+	private String smallThumbUrl;
+	private String middleThumbUrl;
+	private String largeThumbUrl;
 
 	public FileInfo() {
 		super();
@@ -33,6 +37,10 @@ public class FileInfo {
 		this.smallThumbPath = fi.smallThumbPath;
 		this.middleThumbPath = fi.middleThumbPath;
 		this.largeThumbPath = fi.largeThumbPath;
+		this.smallThumbUrl = fi.smallThumbUrl;
+		this.middleThumbUrl = fi.middleThumbUrl;
+		this.largeThumbUrl = fi.largeThumbUrl;
+		this.url = fi.url;
 	}
 
 	public String getPath() {
@@ -121,6 +129,38 @@ public class FileInfo {
 
 	public void setProtected(boolean isProtected) {
 		this.isProtected = isProtected;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getSmallThumbUrl() {
+		return smallThumbUrl;
+	}
+
+	public void setSmallThumbUrl(String smallThumbUrl) {
+		this.smallThumbUrl = smallThumbUrl;
+	}
+
+	public String getMiddleThumbUrl() {
+		return middleThumbUrl;
+	}
+
+	public void setMiddleThumbUrl(String middleThumbUrl) {
+		this.middleThumbUrl = middleThumbUrl;
+	}
+
+	public String getLargeThumbUrl() {
+		return largeThumbUrl;
+	}
+
+	public void setLargeThumbUrl(String largeThumbUrl) {
+		this.largeThumbUrl = largeThumbUrl;
 	}
 
 	/**

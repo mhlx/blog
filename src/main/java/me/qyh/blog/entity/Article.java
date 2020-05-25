@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -29,7 +28,6 @@ public class Article implements Serializable, PrivateProtect, PasswordProtect {
 	private Integer id;
 	private String title;
 	private String content;
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime pubDate;
 	private LocalDateTime lastModifyDate;
 	private Boolean isPrivate;

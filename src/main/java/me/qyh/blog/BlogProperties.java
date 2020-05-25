@@ -1,14 +1,17 @@
 package me.qyh.blog;
 
+import java.net.URI;
 import java.time.Duration;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.URL;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -37,17 +40,21 @@ public class BlogProperties {
 	private int commentLimitSec = 60;
 	@Min(1)
 	private int captchaNum = 4;
-	@URL(message = "无效的markdown转化服务地址")
+	@URL(message = "blog.core.markdown-service-url不是一个有效的地址")
 	private String markdownServiceUrl;
 	@Min(1)
 	private int commentEmailNotifySecond = 600;// comment email notify every 600 second
 	@Size(min = 1)
 	private String commentEmailTemplateLocation;
-
+	private String tokenHeader = "Token";
+	private String passwordHeader = "Password";
 	private boolean rebuildIndexWhenStartup;
-
 	private Bucket commentBucket;
 	private Bucket loginBucket;
+	@NotNull(message = "请指定blog.core.url-prefix")
+	@URL(message = "blog.core.url-prefix不是一个有效的地址")
+	private String urlPrefix;
+	private boolean cors = false;
 
 	public boolean isFileEnable() {
 		return fileEnable;
@@ -188,5 +195,45 @@ public class BlogProperties {
 			}
 		}
 		return loginBucket;
+	}
+
+	public String getTokenHeader() {
+		return tokenHeader;
+	}
+
+	public void setTokenHeader(String tokenHeader) {
+		this.tokenHeader = tokenHeader;
+	}
+
+	public String getUrlPrefix() {
+		return urlPrefix;
+	}
+
+	public void setUrlPrefix(String urlPrefix) {
+		this.urlPrefix = urlPrefix;
+	}
+
+	public String getPasswordHeader() {
+		return passwordHeader;
+	}
+
+	public void setPasswordHeader(String passwordHeader) {
+		this.passwordHeader = passwordHeader;
+	}
+
+	public boolean isCors() {
+		return cors;
+	}
+
+	public void setCors(boolean cors) {
+		this.cors = cors;
+	}
+
+	public URI buildUrl(String path) {
+		return UriComponentsBuilder.fromUriString(this.urlPrefix).path(path).build().toUri();
+	}
+
+	public String buildUrlString(String path) {
+		return UriComponentsBuilder.fromUriString(this.urlPrefix).path(path).build().toUriString();
 	}
 }

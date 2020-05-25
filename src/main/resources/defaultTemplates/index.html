@@ -1,11 +1,11 @@
-<data name="articlePage" alias="page"
+<data path="api/articles" alias="page"
 	th:currentPage="${param.currentPage}" pageSize="10"
 	th:query="${param.query}" th:tag="${param.tag}"
 	th:category="${param.category}" status="PUBLISHED" queryPrivate="true"
 	queryPasswordProtected="true"></data>
-<data name="momentArchivePage" currentPage="1" pageSize="1" />
-<data name="categories" />
-<data name="lastComments" />
+<data path="api/moment/archives" currentPage="1" pageSize="1" alias="momentArchivePage"/>
+<data path="api/categories" alias="categories"/>
+<data path="api/lastComments" alias="lastComments" />
 <!doctype html>
 <html>
 <head>

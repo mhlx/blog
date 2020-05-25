@@ -14,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -28,7 +29,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import me.qyh.blog.FieldMessageSourceResolvable;
 import me.qyh.blog.Message;
 import me.qyh.blog.exception.BadRequestException;
-import me.qyh.blog.exception.InvalidCaptchaException;
 
 class BadRequestReader {
 
@@ -38,7 +38,7 @@ class BadRequestReader {
 			MissingServletRequestParameterException.class, MissingServletRequestPartException.class,
 			TypeMismatchException.class, ServletRequestBindingException.class, InvalidPropertyException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentNotValidException.class,
-			ConstraintViolationException.class, InvalidCaptchaException.class, BadRequestException.class);
+			ConstraintViolationException.class, BadRequestException.class, HttpMediaTypeNotAcceptableException.class);
 
 	public static boolean isBadRequestException(Throwable ex) {
 		return classes.stream().anyMatch(clazz -> clazz.isAssignableFrom(ex.getClass()));
@@ -97,9 +97,6 @@ class BadRequestReader {
 			}
 		}
 
-		if (ex instanceof InvalidCaptchaException) {
-			errors.add(CAPTCHA_INVALID_MSG);
-		}
 		if (ex instanceof BadRequestException) {
 			errors.add(((BadRequestException) ex).getError());
 		}

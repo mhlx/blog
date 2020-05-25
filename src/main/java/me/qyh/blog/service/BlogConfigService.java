@@ -17,7 +17,6 @@ import org.springframework.util.DigestUtils;
 
 import me.qyh.blog.entity.BlogConfig;
 import me.qyh.blog.entity.BlogConfig.CommentCheckStrategy;
-import me.qyh.blog.exception.AuthenticationException;
 import me.qyh.blog.exception.LogicException;
 import me.qyh.blog.utils.BCrypt;
 import me.qyh.blog.utils.FileUtils;
@@ -69,16 +68,16 @@ public class BlogConfigService {
 		return new BlogConfig(this.config);
 	}
 
-	public User authenticate(String name, String password) {
+	public boolean authenticate(String name, String password) {
 		loadConfig();
 		if (StringUtils.isNullOrBlank(this.config.getLoginName())
 				|| StringUtils.isNullOrBlank(this.config.getPassword())) {
-			throw new AuthenticationException();
+			return false;
 		}
 		if (!this.config.getLoginName().equals(name) || !BCrypt.checkpw(password, this.config.getPassword())) {
-			throw new AuthenticationException();
+			return false;
 		}
-		return getUser();
+		return true;
 	}
 
 	public User getUser() {
@@ -141,5 +140,4 @@ public class BlogConfigService {
 		config.setNickname(StringUtils.isNullOrBlank(nickname) ? null : nickname);
 		config.setGravatar(gravatar);
 	}
-
 }

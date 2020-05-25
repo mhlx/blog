@@ -16,11 +16,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.StampedLock;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -105,45 +105,16 @@ public class TemplateService
 	private final TransactionTemplate readOnlyTemplate;
 	private final TransactionTemplate writeTemplate;
 
-	// default error template
-	private static final Template error;
-	// error page has an error
-	private static final Template errorPageError;
-	// unlock
-	private static final Template unlock;
-
-	public static String ERROR_PAGE_ERROR_TEMPLATE_NAME = "errorPageError";
-	public static String UNLOCK_TEMPLATE_NAME = "unlock";
-
 	private static final String ALL_ERROR_TEMPLATE_NAME = "error/*";
 	private static final String COMMENT_MODULE_NAME = "template";
 	private static final String ERROR_PATH = "/error";
+
+	private List<SystemTemplate> defaultTemplates;
 
 	private int previewId;
 
 	private final CommentMapper commentMapper;
 	private final TemplateCache templateCache = new TemplateCache();
-
-	static {
-		String errorContent = readResourceToString(new ClassPathResource("defaultTemplates/error.html"));
-		error = new Template();
-		error.setName(ALL_ERROR_TEMPLATE_NAME);
-		error.setContent(errorContent);
-		error.setEnable(true);
-
-		String errorPageErrorContent = readResourceToString(
-				new ClassPathResource("defaultTemplates/errorPageError.html"));
-		errorPageError = new Template();
-		errorPageError.setName(ERROR_PAGE_ERROR_TEMPLATE_NAME);
-		errorPageError.setContent(errorPageErrorContent);
-		errorPageError.setEnable(true);
-
-		String unlockContent = readResourceToString(new ClassPathResource("defaultTemplates/unlock.html"));
-		unlock = new Template();
-		unlock.setName(UNLOCK_TEMPLATE_NAME);
-		unlock.setContent(unlockContent);
-		unlock.setEnable(true);
-	}
 
 	public TemplateService(TemplateMapper templateMapper, PlatformTransactionManager transactionManager,
 			CommentMapper commentMapper) {
@@ -154,9 +125,9 @@ public class TemplateService
 		this.writeTemplate = new TransactionTemplate(transactionManager);
 		this.writeTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		registerAllDefaultTemplates();
-		fragmentMap.put(unlock.getName(), unlock);
-		fragmentMap.put(error.getName(), error);
-		fragmentMap.put(errorPageError.getName(), errorPageError);
+		this.getDefaultTemplates().stream().filter(t -> {
+			return t.resetAfterRemove && t.getName() != null;
+		}).forEach(t -> fragmentMap.put(t.getName(), t));
 		registerAllEnabledTemplates();
 	}
 
@@ -232,8 +203,8 @@ public class TemplateService
 		try {
 			writeTemplate.executeWithoutResult(status -> {
 				// find old template
-				Template old = templateMapper.selectById(template.getId()).orElseThrow(
-						() -> new ResourceNotFoundException("templateService.update.notExists", "要更新的模板不存在"));
+				Template old = templateMapper.selectById(template.getId())
+						.orElseThrow(() -> new ResourceNotFoundException("template.notExists", "模板不存在"));
 				disableEnable(template);
 				template.setModifyTime(LocalDateTime.now());
 				templateMapper.update(template);
@@ -274,7 +245,7 @@ public class TemplateService
 	 * 
 	 * @param template
 	 */
-	public void registerPreviewTemplate(Template template) {
+	public int registerPreviewTemplate(Template template) {
 		checkReservedPattern(template);
 		long stamp = lock.writeLock();
 		try {
@@ -287,6 +258,7 @@ public class TemplateService
 				previewFragmentMap.put(template.getName(), template);
 			}
 			previewIp = BlogContext.getIP().orElse(null);
+			return template.getId();
 		} finally {
 			lock.unlockWrite(stamp);
 		}
@@ -413,25 +385,51 @@ public class TemplateService
 	 * 
 	 * @return
 	 */
-	public List<Template> getDefaultTemplates() {
-		String navTemplate = readResourceToString(new ClassPathResource("defaultTemplates/nav.html"));
-		String indexTemplate = readResourceToString(new ClassPathResource("defaultTemplates/index.html"));
-		String articleTemplate = readResourceToString(new ClassPathResource("defaultTemplates/article.html"));
-		String momentsTemplate = readResourceToString(new ClassPathResource("defaultTemplates/moments.html"));
-		String momentTemplate = readResourceToString(new ClassPathResource("defaultTemplates/moment.html"));
-		String archiveTemplate = readResourceToString(new ClassPathResource("defaultTemplates/archive.html"));
-		Template nav = new Template("nav", null, navTemplate);
-		Template index = new Template(null, "/", indexTemplate);
-		Template article = new Template(null, "/articles/{idOrAlias}", articleTemplate);
-		Template moments = new Template(null, "/moments", momentsTemplate);
-		Template moment = new Template(null, "/moments/{id}", momentTemplate);
-		Template archive = new Template(null, "/archive", archiveTemplate);
-		List<Template> defaultTemplates = List.of(nav, index, article, moments, moment, archive);
-		defaultTemplates.forEach(t -> {
-			t.setEnable(true);
-			t.setAllowComment(false);
-		});
-		return defaultTemplates;
+	public List<SystemTemplate> getDefaultTemplates() {
+		if (this.defaultTemplates == null) {
+			synchronized (this) {
+				if (this.defaultTemplates == null) {
+					String indexTemplate = readResourceToString(new ClassPathResource("defaultTemplates/index.html"));
+					String articleTemplate = readResourceToString(
+							new ClassPathResource("defaultTemplates/article.html"));
+					String momentsTemplate = readResourceToString(
+							new ClassPathResource("defaultTemplates/moments.html"));
+					String momentTemplate = readResourceToString(new ClassPathResource("defaultTemplates/moment.html"));
+					String archiveTemplate = readResourceToString(
+							new ClassPathResource("defaultTemplates/archive.html"));
+					String navTemplate = readResourceToString(new ClassPathResource("defaultTemplates/nav.html"));
+					String errorContent = readResourceToString(new ClassPathResource("defaultTemplates/error.html"));
+					String errorPageErrorContent = readResourceToString(
+							new ClassPathResource("defaultTemplates/errorPageError.html"));
+					String unlockContent = readResourceToString(new ClassPathResource("defaultTemplates/unlock.html"));
+					String markdownRenderContent = readResourceToString(
+							new ClassPathResource("defaultTemplates/markdown_render.html"));
+
+					SystemTemplate index = new SystemTemplate(null, "/", indexTemplate, true, false);
+					SystemTemplate article = new SystemTemplate(null, "/articles/{idOrAlias}", articleTemplate, true,
+							false);
+					SystemTemplate moments = new SystemTemplate(null, "/moments", momentsTemplate, true, false);
+					SystemTemplate moment = new SystemTemplate(null, "/moments/{id}", momentTemplate, true, false);
+					SystemTemplate archive = new SystemTemplate(null, "/archive", archiveTemplate, true, false);
+
+					SystemTemplate nav = new SystemTemplate("nav", null, navTemplate, true, false);
+					SystemTemplate error = new SystemTemplate(ALL_ERROR_TEMPLATE_NAME, null, errorContent, false, true);
+					SystemTemplate errorPageError = new SystemTemplate("errorPageError", null, errorPageErrorContent,
+							false, true);
+					SystemTemplate unlock = new SystemTemplate("unlock", null, unlockContent, false, true);
+					SystemTemplate markdownRender = new SystemTemplate("markdown_render", null, markdownRenderContent,
+							false, true);
+					List<SystemTemplate> defaultTemplates = List.of(index, article, moments, moment, archive, nav,
+							error, errorPageError, unlock, markdownRender);
+					defaultTemplates.forEach(t -> {
+						t.setEnable(true);
+						t.setAllowComment(false);
+					});
+					this.defaultTemplates = defaultTemplates;
+				}
+			}
+		}
+		return this.defaultTemplates;
 	}
 
 	/**
@@ -510,7 +508,7 @@ public class TemplateService
 	}
 
 	public boolean isPreviewRequest(HttpServletRequest request) {
-		return this.previewIp != null && Objects.equals(this.previewIp, BlogContext.getIP().orElse(null));
+		return this.previewIp != null && this.previewIp.equals(BlogContext.getIP().orElse(null));
 	}
 
 	@Override
@@ -733,22 +731,17 @@ public class TemplateService
 
 	private void removeFragment(String alias) {
 		fragmentMap.remove(alias);
-		if (alias.equals(ALL_ERROR_TEMPLATE_NAME)) {
-			fragmentMap.put(ALL_ERROR_TEMPLATE_NAME, error);
-		}
-		if (alias.equals(ERROR_PAGE_ERROR_TEMPLATE_NAME)) {
-			fragmentMap.put(ERROR_PAGE_ERROR_TEMPLATE_NAME, errorPageError);
-		}
-		if (alias.equals(UNLOCK_TEMPLATE_NAME)) {
-			fragmentMap.put(UNLOCK_TEMPLATE_NAME, unlock);
-		}
+		getDefaultTemplates().stream().filter(t -> {
+			return t.resetAfterRemove && alias.equals(t.getName());
+		}).findAny().ifPresent(t -> fragmentMap.put(alias, t));
 	}
 
 	private void registerAllDefaultTemplates() {
 		if (Files.exists(regPath)) {
 			return;
 		}
-		List<Template> defaultTemplates = getDefaultTemplates();
+		List<SystemTemplate> defaultTemplates = getDefaultTemplates().stream().filter(t -> t.regWhenFirstStartup)
+				.collect(Collectors.toList());
 		writeTemplate.executeWithoutResult(status -> {
 			for (Template template : defaultTemplates) {
 				if ((template.getName() != null && templateMapper.selectEnabledByName(template.getName()).isEmpty())
@@ -785,6 +778,24 @@ public class TemplateService
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	public final class SystemTemplate extends Template {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private boolean regWhenFirstStartup;
+		private boolean resetAfterRemove;
+
+		public SystemTemplate(String name, String pattern, String content, boolean regWhenFirstStartup,
+				boolean resetAfterRemove) {
+			super(name, pattern, content);
+			this.regWhenFirstStartup = regWhenFirstStartup;
+			this.resetAfterRemove = resetAfterRemove;
+		}
+
 	}
 
 	public final class TemplateResource implements ITemplateResource {
@@ -846,7 +857,7 @@ public class TemplateService
 		Optional<Template> opTemplate = templateMapper.selectById(module.getId()).filter(Template::getEnable);
 
 		if (opTemplate.isEmpty()) {
-			throw new ResourceNotFoundException("template.notExists", "页面不存在");
+			throw new ResourceNotFoundException("template.notExists", "模板不存在");
 		}
 
 		return opTemplate.get();

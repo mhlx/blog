@@ -1,7 +1,6 @@
-<data name="moment" th:id="${id}"></data>
-<status code="404" th:if="${moment == null}"></status>
-<data name="prevMoment" alias="prev" th:id="${id}"></data>
-<data name="nextMoment" alias="next" th:id="${id}"></data>
+<data th:path="'api/moments/' + ${id}" alias="moment"></data>
+<data th:path="'api/moments/' + ${id} + '/previous'" alias="prev" ignoreException="true"></data>
+<data th:path="'api/moments/' + ${id} + '/next'" alias="next" ignoreException="true"></data>
 <!doctype html>
 <html>
 <head>
@@ -180,8 +179,8 @@
 		if (sessionStorage.getItem('moment.' + '[[${moment.id}]]') == null) {
 			$
 					.ajax({
-						type : "post",
-						url : rootPath + 'moments/' + '[[${moment.id}]]'
+						type : "patch",
+						url : rootPath + 'api/moments/' + '[[${moment.id}]]'
 								+ '/hit',
 						complete : function(data) {
 							sessionStorage.setItem('moment.'

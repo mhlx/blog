@@ -14,7 +14,6 @@ import org.springframework.util.StringUtils;
 import org.thymeleaf.exceptions.TemplateProcessingException;
 import org.thymeleaf.spring5.view.ThymeleafView;
 
-import me.qyh.blog.service.TemplateService;
 import me.qyh.blog.web.BlogHandlerExceptionResolver;
 import me.qyh.blog.web.template.tag.RedirectException;
 
@@ -51,7 +50,7 @@ public class TemplateView extends ThymeleafView {
 				return;
 			}
 
-			if (templateName.equals(TemplateService.ERROR_PAGE_ERROR_TEMPLATE_NAME)) {
+			if (templateName.equals("errorPageError")) {
 				logger.error(e.getMessage(), e);
 				throw e;
 			}

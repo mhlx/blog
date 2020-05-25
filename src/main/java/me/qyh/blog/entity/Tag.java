@@ -1,5 +1,6 @@
 package me.qyh.blog.entity;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -7,7 +8,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-public class Tag {
+public class Tag implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer id;
 	@NotBlank(message = "标签名不能为空")
 	@Size(max = 20, message = "标签长度不能超过20个字符")
@@ -15,7 +20,6 @@ public class Tag {
 	private String name;
 	private LocalDateTime createTime;
 	private LocalDateTime modifyTime;
-	private Boolean deleted;
 
 	public Tag() {
 		super();
@@ -56,14 +60,6 @@ public class Tag {
 
 	public void setModifyTime(LocalDateTime modifyTime) {
 		this.modifyTime = modifyTime;
-	}
-
-	public Boolean getDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(Boolean deleted) {
-		this.deleted = deleted;
 	}
 
 	@Override

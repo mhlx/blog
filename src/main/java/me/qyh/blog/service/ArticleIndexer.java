@@ -33,7 +33,9 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.MMapDirectory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
@@ -47,6 +49,7 @@ import me.qyh.blog.utils.TimeUtils;
 import me.qyh.blog.vo.HandledArticleQueryParam;
 import me.qyh.blog.vo.PageResult;
 
+@SuppressWarnings("deprecation")
 public class ArticleIndexer {
 
 	protected static final String TITLE = "title";
@@ -79,9 +82,16 @@ public class ArticleIndexer {
 	private SearcherManager searcherManager;
 
 	public ArticleIndexer() throws IOException {
-		IndexWriterConfig config = new IndexWriterConfig(createAnalyzer());
+		Analyzer analyzer = createAnalyzer();
 		this.directory = createDirectory();
-		this.indexWriter = new IndexWriter(directory, config);
+		IndexWriter writer;
+		try {
+			writer = new IndexWriter(directory, new IndexWriterConfig(analyzer));
+		} catch (LockObtainFailedException e) {
+			System.err.println(e + "...we use RAMDirectory instead");
+			writer = new IndexWriter(new RAMDirectory(), new IndexWriterConfig(analyzer));
+		}
+		this.indexWriter = writer;
 		this.boosts = Map.copyOf(createBoosts());
 		this.searcherManager = new SearcherManager(indexWriter, null);
 	}

@@ -13,6 +13,7 @@ import org.springframework.transaction.TransactionStatus;
 public class ProcessContext {
 
 	private static final ThreadLocal<TransactionStatus> transactionStatusLocal = new ThreadLocal<>();
+	private static final ThreadLocal<TemplateDataRequest> dataRequestStatusLocal = new ThreadLocal<>();
 
 	public static void setTransactionStatus(TransactionStatus status) {
 		transactionStatusLocal.set(status);
@@ -26,4 +27,11 @@ public class ProcessContext {
 		transactionStatusLocal.remove();
 	}
 
+	public static TemplateDataRequest getTemplateDataRequest() {
+		return dataRequestStatusLocal.get();
+	}
+
+	public static void setTemplateDataRequest(TemplateDataRequest request) {
+		dataRequestStatusLocal.set(request);
+	}
 }

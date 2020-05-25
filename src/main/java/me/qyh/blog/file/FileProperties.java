@@ -3,6 +3,7 @@ package me.qyh.blog.file;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+import org.hibernate.validator.constraints.URL;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.validation.annotation.Validated;
@@ -41,6 +42,9 @@ public class FileProperties {
 	private int middleThumbSize = 600;
 	@Min(16)
 	private int largeThumbSize = 900;
+
+	@URL(message = "blog.file.url-prefix不是一个有效的地址")
+	private String urlPrefix;
 
 	public String getPngQuantPath() {
 		return pngQuantPath;
@@ -160,6 +164,14 @@ public class FileProperties {
 
 	public void setSourceProtect(boolean sourceProtect) {
 		this.sourceProtect = sourceProtect;
+	}
+
+	public String getUrlPrefix() {
+		return urlPrefix;
+	}
+
+	public void setUrlPrefix(String urlPrefix) {
+		this.urlPrefix = urlPrefix;
 	}
 
 }

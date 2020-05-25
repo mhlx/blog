@@ -18,12 +18,11 @@ public class LogicException extends RuntimeException {
 	private final Message error;
 
 	public LogicException(String code, String defaultMessage, Object... args) {
-		super(null, null, false, false);
-		this.error = new Message(code, defaultMessage, args);
+		this(new Message(code, defaultMessage, args));
 	}
 
 	public LogicException(Message error) {
-		super();
+		super(null, null, false, false);
 		this.error = error;
 	}
 

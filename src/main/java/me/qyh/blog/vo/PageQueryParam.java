@@ -27,14 +27,6 @@ public class PageQueryParam {
 		this.pageSize = pageSize;
 	}
 
-	public boolean hasPageSize() {
-		return pageSize > 0;
-	}
-
-	public boolean hasCurrentPage() {
-		return currentPage > 0;
-	}
-
 	public final int getOffset() {
 		return getPageSize() * (getCurrentPage() - 1);
 	}

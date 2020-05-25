@@ -3,6 +3,7 @@ package me.qyh.blog.utils;
 import java.net.URI;
 import java.util.Arrays;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.AntPathMatcher;
@@ -35,9 +36,13 @@ public class WebUtils {
 		return request instanceof MultipartHttpServletRequest;// ??
 	}
 
-	public static boolean isConsoleRequest(HttpServletRequest request) {
+	public static boolean isApiRequest(HttpServletRequest request) {
 		String path = request.getRequestURI().substring(request.getContextPath().length() + 1);
-		if (path.startsWith("console/")) {
+		if (path.startsWith("api/")) {
+			return true;
+		}
+		String forward = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+		if (forward != null && forward.startsWith("/api/")) {
 			return true;
 		}
 		return false;

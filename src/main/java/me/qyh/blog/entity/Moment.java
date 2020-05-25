@@ -7,7 +7,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -27,7 +26,6 @@ public class Moment implements Serializable, PasswordProtect, PrivateProtect {
 	@Size(max = 2000, message = "动态内容不能超过2000个字符")
 	private String content;
 	@NotNull(message = "动态日期不能为空")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime time;
 	private LocalDateTime modifyTime;
 	@NotNull(message = "动态是否只允许私人访问不能为空")

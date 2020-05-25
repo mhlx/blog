@@ -39,9 +39,9 @@ import me.qyh.blog.Constants;
 import me.qyh.blog.Message;
 import me.qyh.blog.exception.AuthenticationException;
 import me.qyh.blog.exception.LogicException;
+import me.qyh.blog.exception.LoginFailException;
 import me.qyh.blog.exception.PasswordProtectException;
 import me.qyh.blog.exception.ResourceNotFoundException;
-import me.qyh.blog.service.TemplateService;
 import me.qyh.blog.utils.FileUtils;
 import me.qyh.blog.web.template.TemplateUtils;
 import me.qyh.blog.web.template.tag.HttpStatusException;
@@ -73,6 +73,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		resolvers.add(new HttpMediaTypeNotSupportedExceptionResolver());
 		resolvers.add(new MultipartExceptionResolver(multipartProperties));
 		resolvers.add(new TemplateProcessingExceptionResolver());
+		resolvers.add(new LoginFailExceptionResolver());
 	}
 
 	@Override
@@ -135,7 +136,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 				attributes.put("stackTrace", getStackTrace(ex));
 				attributes.put("status", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				attributes.put("errors", List.of(new Message("preview.errorPageError", "预览时错误处理页面发生了一个异常")));
-				attributes.put("viewName", TemplateService.ERROR_PAGE_ERROR_TEMPLATE_NAME);
+				attributes.put("viewName", "errorPageError");
 				request.setAttribute(ERROR_ATTRIBUTES, attributes);
 				request.getRequestDispatcher("/error").forward(request, response);
 			} catch (Throwable e) {
@@ -177,6 +178,18 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 			PasswordProtectException _ex = (PasswordProtectException) ex;
 			String url = ServletUriComponentsBuilder.fromRequest(request).toUriString();
 			String id = _ex.getId();
+
+			if (me.qyh.blog.utils.WebUtils.isAjaxRequest(request) || me.qyh.blog.utils.WebUtils.isApiRequest(request)) {
+				Map<String, Object> errors = new HashMap<>();
+				errors.put("id", id);
+				if (_ex.isMissPassword()) {
+					errors.put("errors", List.of(new Message("password.require", "需要密码才能访问")));
+				} else {
+					errors.put("errors", List.of(new Message("password.incorrect", "密码不正确")));
+				}
+				return errors;
+			}
+
 			HttpSession session = request.getSession(false);
 			if (session != null) {
 				synchronized (WebUtils.getSessionMutex(session)) {
@@ -322,7 +335,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 
 		@Override
 		public int getStatus(HttpServletRequest request, Exception ex) {
-			return HttpServletResponse.SC_CONFLICT;
+			return HttpServletResponse.SC_BAD_REQUEST;
 		}
 
 		@Override
@@ -404,6 +417,25 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		public int getStatus(HttpServletRequest request, Exception ex) {
 			return HttpServletResponse.SC_BAD_REQUEST;
 		}
+	}
+
+	private class LoginFailExceptionResolver implements ExceptionResolver {
+
+		@Override
+		public boolean match(Exception ex) {
+			return ex instanceof LoginFailException;
+		}
+
+		@Override
+		public Map<String, Object> readErrors(HttpServletRequest request, Exception ex) {
+			return Map.of("errors", List.of(((LoginFailException) ex).getError()));
+		}
+
+		@Override
+		public int getStatus(HttpServletRequest reques, Exception exception) {
+			return HttpServletResponse.SC_UNAUTHORIZED;
+		}
+
 	}
 
 	@SuppressWarnings("unchecked")

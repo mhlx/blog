@@ -45,14 +45,4 @@ public class FileConfig implements WebMvcConfigurer {
 		mapping.setUrlPathHelper(urlPathHelper);
 		return mapping;
 	}
-
-	@Bean
-	public FilesDataProvider filesDataProvider(final FileService fileService) {
-		return new FilesDataProvider(fileService);
-	}
-
-	@Bean
-	public FileDataProvider fileDataProvider(final FileService fileService) {
-		return new FileDataProvider(fileService);
-	}
 }

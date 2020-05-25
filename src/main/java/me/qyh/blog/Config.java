@@ -1,5 +1,8 @@
 package me.qyh.blog;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,7 +19,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import me.qyh.blog.security.HtmlClean;
-import me.qyh.blog.web.thymeleaf.expression.BlogExpressionObjectFactory;
+import me.qyh.blog.web.template.expression.BlogExpressionObjectFactory;
 
 @Configuration
 public class Config {
@@ -28,7 +31,11 @@ public class Config {
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(MessageSourceResolvable.class, new MessageSourceResolvableSerializer(messageSource));
 		mapper.registerModule(module);
-		mapper.registerModule(new JavaTimeModule());
+		JavaTimeModule javaTimeModule = new JavaTimeModule();
+		javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+		javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+		javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
+		mapper.registerModule(javaTimeModule);
 		return mapper;
 	}
 

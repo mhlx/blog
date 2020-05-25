@@ -2,7 +2,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="me.qyh.blog.mapper.TagMapper">
-	
+	<cache />
 	<select id="selectById" resultType="Tag">
 		select id,name,createTime,modifyTime from blog_tag where id = #{id}
 	</select>

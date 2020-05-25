@@ -24,6 +24,8 @@ public class ArticleValidator implements Validator {
 	private static final int MAX_CATEGORIES_SIZE = 5;
 	private static final String ALIAS_PATTERN = "^[0-9a-zA-Z_-]+$";
 	private static final int MAX_FEATURE_IMAGE_LENGTH = 200;
+	private static final String TAG_NAME_PATTERN = "^[A-Za-z0-9_-\\u4E00-\\u9FA5 ]+$";
+	private static final int MAX_TAG_NAME_LENGTH = 20;
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -123,32 +125,45 @@ public class ArticleValidator implements Validator {
 			if (tags.size() > MAX_TAGS_SIZE) {
 				errors.rejectValue("tags", "Size", new Object[] { MAX_TAGS_SIZE }, "文章标签不能超过" + MAX_TAGS_SIZE + "个");
 			} else {
+				int i = 0;
 				for (Tag tag : tags) {
-					if (tag == null || tag.getId() == null) {
-						errors.rejectValue("tags", "NotBlank", "不支持空标签");
+					if (tag == null || StringUtils.isNullOrBlank(tag.getName())) {
+						errors.rejectValue("tags[" + i + "]", "NotBlank", "不支持空标签");
 						break;
 					}
+					if (tag.getName().length() > MAX_TAG_NAME_LENGTH) {
+						errors.rejectValue("tags[" + i + "]", "Size", new Object[] { MAX_TAG_NAME_LENGTH },
+								"单个标签不能超过" + MAX_TAG_NAME_LENGTH + "个字符");
+						break;
+					}
+					if (!tag.getName().matches(TAG_NAME_PATTERN)) {
+						errors.rejectValue("tags[" + i + "]", "Invalid", "标签名只能是中英文字符、数字以及_-和空格");
+						break;
+					}
+					i++;
 				}
 			}
 		}
 
 		Set<Category> categories = article.getCategories();
 		if (CollectionUtils.isEmpty(categories)) {
-			
-			if(!ArticleStatus.DRAFT.equals(article.getStatus())) {
+
+			if (!ArticleStatus.DRAFT.equals(article.getStatus())) {
 				errors.rejectValue("categories", "NotEmpty", "必须为文章指定一个分类");
 			}
-			
+
 		} else {
 			if (categories.size() > MAX_CATEGORIES_SIZE) {
 				errors.rejectValue("categories", "Size", new Object[] { MAX_CATEGORIES_SIZE },
 						"文章分类不能超过" + MAX_CATEGORIES_SIZE + "个");
 			} else {
+				int i = 0;
 				for (Category category : categories) {
 					if (category == null || category.getId() == null) {
-						errors.rejectValue("categories", "NotBlank", "不支持空分类");
+						errors.rejectValue("categories[" + i + "]", "NotBlank", "不支持空分类");
 						break;
 					}
+					i++;
 				}
 			}
 		}

@@ -1,7 +1,10 @@
 package me.qyh.blog.utils;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 import java.util.Locale;
 import java.util.Map;
@@ -25,7 +28,17 @@ public class TimeUtils {
 	}
 
 	public static LocalDateTime parse(String text, String pattern) {
-		return LocalDateTime.parse(text, getFormatter(pattern));
+		DateTimeFormatter dtf = getFormatter(pattern);
+		try {
+			return LocalDateTime.parse(text, dtf);
+		} catch (DateTimeParseException ex) {
+			try {
+				LocalDate localDate = LocalDate.parse(text, dtf);
+				return localDate.atStartOfDay();
+			} catch (DateTimeException e) {
+				throw ex;
+			}
+		}
 	}
 
 	private static DateTimeFormatter getFormatter(String pattern) {

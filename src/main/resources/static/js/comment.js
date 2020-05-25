@@ -141,7 +141,7 @@ var Comment = (function(){
 				for(const data of comment.cache){
 					if(data.id == id){
 						if(action == 'conversation'){
-							$.get(rootPath+'comments/'+id+'/conversation',function(datas){
+							$.get(rootPath+'api/comments/'+id+'/conversation',function(datas){
 								var html = '';
 								for(const data of datas){
 									html += processOne(data,comment,true);
@@ -156,7 +156,7 @@ var Comment = (function(){
 							})
 						}
 						if(action == 'edit'){
-							$.get(rootPath+'comments/'+id,function(data){
+							$.get(rootPath+'api/editableComments/'+id,function(data){
 								toCommentBox(null,comment);
 								var inputs = comment.tabs[1].querySelectorAll('input');
 								inputs[2].value = id;
@@ -172,8 +172,11 @@ var Comment = (function(){
 						if(action == 'check')
 							$.ajax({
 								type : 'post',
-								url : rootPath + 'console/comments/'+id+'/check',
-								success:function(data) {
+								url : rootPath + 'api/comments/'+id,
+								data:{
+									checking: true
+								},
+								success:function() {
 									toast('审核成功');
 									comment.reload();
 								}
@@ -189,9 +192,9 @@ var Comment = (function(){
 								}).then((result) => {
 								  if (result.value) {
 									  	$.ajax({
-											type : 'post',
-											url : rootPath + 'console/comments/'+id+'/delete',
-											success:function(data) {
+											type : 'delete',
+											url : rootPath + 'api/comments/'+id,
+											success:function() {
 												toast('删除成功');
 												comment.reload();
 											}
@@ -211,8 +214,8 @@ var Comment = (function(){
 								  if (result.value) {
 									  $.ajax({
 											type : 'post',
-											url : rootPath + 'console/blackip/save?ip='+data.ip,
-											success:function(data) {
+											url : rootPath + 'api/blackip?ip='+data.ip,
+											success:function() {
 												toast('操作成功');
 												comment.reload();
 											}
@@ -234,12 +237,13 @@ var Comment = (function(){
 			data.nickname = comment.authenticated ? 'admin' : inputs[0].value;
 			data.email = inputs[1].value;
 			data.content = comment.editor.getValue();
-			var url = inputs[2].value == '' ? rootPath + 'commentModule/'+comment.name+'/'+comment.id+'/comment/add' : rootPath + 'console/comments/'+inputs[2].value+'/update';
+			var url = inputs[2].value == '' ? rootPath + 'api/commentModule/'+comment.name+'/'+comment.id+'/comment' : rootPath + 'api/comments/'+inputs[2].value+'/update';
+			var type = inputs[2].value == '' ? 'post' : 'patch'
 			if(captcha){
 				url += "?captcha="+captcha;
 			}
 			$.ajax({
-				type : 'post',
+				type : type,
 				url : url,
 	            contentType: 'application/json',
 				data:JSON.stringify(data),
@@ -420,7 +424,7 @@ var Comment = (function(){
 	
 	Comment.prototype.loadTarget = function(id){
 		var pageSize = this.pageSize;
-		var url = rootPath + 'commentModule/'+this.name+'/'+this.id+'/comments';
+		var url = rootPath + 'api/commentModule/'+this.name+'/'+this.id+'/comments';
 		var me = this;
 		$.ajax({
 			type: "get",
@@ -439,7 +443,7 @@ var Comment = (function(){
 	
 	Comment.prototype.load = function(page){
 		var pageSize = this.pageSize;
-		var url = rootPath + 'commentModule/'+this.name+'/'+this.id+'/comments';
+		var url = rootPath + 'api/commentModule/'+this.name+'/'+this.id+'/comments';
 		var me = this;
 		$.ajax({
 			type: "get",
@@ -543,11 +547,6 @@ var Comment = (function(){
 			html += '<a href="javascript:void(0)" class="text-muted" data-action="reply" data-target="'+data.id+'"><i class="fas fa-reply"></i></a><span class="mr-1"></span> ';
 			if(data.parent){
 				html += '<span class="mr-1"></span> <a href="javascript:void(0)" data-action="conversation" data-target="'+data.id+'" class="text-muted"><i class="fas fa-comment"></i></a><span class="mr-1"></span>';
-			}
-			
-			if(comment.authenticated){
-				if(data.admin)
-					html += '<span class="mr-1"></span> <a href="javascript:void(0)" data-action="edit" data-target="'+data.id+'" class="text-muted"><i class="fas fa-edit"></i></a>';
 			}
 			
 			html += '</div>';

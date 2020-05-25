@@ -177,7 +177,7 @@
 	
 	
 	<select id="selectStatistic" resultType="MomentStatistic">
-		select min(time) as first,max(time) as last,max(modifyTime) as lastModify,sum(hits) as hits ,
+		select count(*) as count,min(time) as first,max(time) as last,max(modifyTime) as lastModify,sum(hits) as hits ,
 		(select count(*) from blog_comment bc inner join blog_moment bm on bc.module_id = bm.id 
 		where module_name = 'moment'  
 		<if test="!queryPrivate">

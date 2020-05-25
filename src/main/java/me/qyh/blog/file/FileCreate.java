@@ -15,6 +15,9 @@ public class FileCreate {
 	@Path(message = "非法的文件路径")
 	private String path;
 
+	private String password;
+	private boolean isPrivate;
+
 	public Type getType() {
 		return type;
 	}
@@ -29,6 +32,22 @@ public class FileCreate {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public boolean isPrivate() {
+		return isPrivate;
+	}
+
+	public void setPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
 	}
 
 }

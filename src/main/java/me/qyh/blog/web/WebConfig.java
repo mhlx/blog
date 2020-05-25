@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.DispatcherType;
@@ -15,8 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,12 +24,15 @@ import org.springframework.core.Ordered;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.MimeType;
 import org.springframework.validation.MessageCodesResolver;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.ICacheManager;
 import org.thymeleaf.dialect.AbstractProcessorDialect;
@@ -44,23 +47,19 @@ import org.thymeleaf.standard.StandardDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import me.qyh.blog.BlogContext;
 import me.qyh.blog.BlogProperties;
-import me.qyh.blog.Constants;
-import me.qyh.blog.security.BlackIpFilter;
-import me.qyh.blog.security.BlackIpService;
-import me.qyh.blog.security.CageCaptchaController;
-import me.qyh.blog.security.CaptchaValidator;
 import me.qyh.blog.service.TemplateService;
-import me.qyh.blog.utils.WebUtils;
 import me.qyh.blog.web.template.PreTemplateHandler;
 import me.qyh.blog.web.template.TemplateHandlerAdapter;
+import me.qyh.blog.web.template.TemplateRequestMappingHandlerAdapter;
+import me.qyh.blog.web.template.TemplateRequestMappingHandlerMapping;
 import me.qyh.blog.web.template.TemplateUtils;
 import me.qyh.blog.web.template.TemplateView;
 import me.qyh.blog.web.template.ThymeleafEngineContextFactory;
-import me.qyh.blog.web.template.tag.DataProvider;
 import me.qyh.blog.web.template.tag.DataTagProcessor;
 import me.qyh.blog.web.template.tag.PasswordTagProcessor;
 import me.qyh.blog.web.template.tag.PrivateTagProcessor;
@@ -68,7 +67,7 @@ import me.qyh.blog.web.template.tag.RedirectTagProcessor;
 import me.qyh.blog.web.template.tag.StatusTagProcessor;
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer {
+public class WebConfig implements WebMvcConfigurer, WebMvcRegistrations {
 
 	private final BlogHandlerExceptionResolver blogHandlerExceptionResolver;
 	private final BlogProperties blogProperties;
@@ -90,7 +89,6 @@ public class WebConfig implements WebMvcConfigurer {
 	@Bean
 	SpringTemplateEngine templateEngine(ThymeleafProperties properties,
 			ObjectProvider<ITemplateResolver> templateResolvers, ObjectProvider<IDialect> dialects,
-			final ObjectProvider<DataProvider<?>> dataProvider,
 			final ObjectProvider<ICacheManager> cacheManagerProvider,
 			PlatformTransactionManager platformTransactionManager) {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
@@ -99,7 +97,7 @@ public class WebConfig implements WebMvcConfigurer {
 		engine.setRenderHiddenMarkersBeforeCheckboxes(properties.isRenderHiddenMarkersBeforeCheckboxes());
 		cacheManagerProvider.ifAvailable(engine::setCacheManager);
 		templateResolvers.orderedStream().forEach(engine::addTemplateResolver);
-		for (IDialect dialect : createDialects(dataProvider, platformTransactionManager)) {
+		for (IDialect dialect : createDialects(platformTransactionManager)) {
 			engine.addDialect(dialect);
 		}
 		dialects.orderedStream().forEach(engine::addDialect);
@@ -129,41 +127,11 @@ public class WebConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public FilterRegistrationBean<BlogContextFilter> contextFilter() {
+	public FilterRegistrationBean<BlogContextFilter> contextFilter(ObjectMapper objectMapper) {
 		FilterRegistrationBean<BlogContextFilter> registration = new FilterRegistrationBean<>();
-		registration.setFilter(new BlogContextFilter(blogProperties));
+		registration.setFilter(new BlogContextFilter(blogProperties, objectMapper));
 		registration.setDispatcherTypes(EnumSet.allOf(DispatcherType.class));
 		registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
-		return registration;
-	}
-
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(new HandlerInterceptor() {
-
-			@Override
-			public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-					throws Exception {
-				if (WebUtils.isConsoleRequest(request) && !BlogContext.isAuthenticated()) {
-					request.setAttribute(Constants.REDIRECT_URL_ATTRIBUTE,
-							ServletUriComponentsBuilder.fromRequest(request).build().toString());
-					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-					return false;
-				}
-
-				request.setAttribute("blogPros", Map.of("fileEnable", blogProperties.isFileEnable(), "totpEnable",
-						blogProperties.isTotpEnable()));
-				return true;
-			}
-		}).addPathPatterns("/console/**");
-	}
-
-	@Bean
-	public FilterRegistrationBean<BlackIpFilter> authencationFilter(BlackIpService blackIpService) {
-		FilterRegistrationBean<BlackIpFilter> registration = new FilterRegistrationBean<>();
-		registration.setFilter(new BlackIpFilter(blackIpService));
-		registration.setDispatcherTypes(EnumSet.allOf(DispatcherType.class));
-		registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
 		return registration;
 	}
 
@@ -174,12 +142,6 @@ public class WebConfig implements WebMvcConfigurer {
 		registration.setDispatcherTypes(EnumSet.allOf(DispatcherType.class));
 		registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
 		return registration;
-	}
-
-	@Bean
-	@ConditionalOnMissingBean(CaptchaValidator.class)
-	public CaptchaValidator defaultCaptchaValidator() {
-		return new CageCaptchaController(blogProperties);
 	}
 
 	// override fielderror|objecterror codesresolver
@@ -193,6 +155,34 @@ public class WebConfig implements WebMvcConfigurer {
 		return new TemplateHandlerAdapter();
 	}
 
+	@Override
+	public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
+		return TemplateRequestMappingHandlerMapping.getRequestMappingHandlerMapping();
+	}
+
+	@Override
+	public RequestMappingHandlerAdapter getRequestMappingHandlerAdapter() {
+		return TemplateRequestMappingHandlerAdapter.getRequestMappingHandlerAdapter();
+	}
+
+	@Bean
+	@ConditionalOnProperty(prefix = "blog.core", name = "cors", havingValue = "true")
+	public CorsFilter corsFilter() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedOrigin(CorsConfiguration.ALL);
+		config.setAllowCredentials(true);
+		config.addAllowedMethod(CorsConfiguration.ALL);
+		config.addAllowedHeader(CorsConfiguration.ALL);
+		UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
+		configSource.registerCorsConfiguration("/api/**", config);
+		return new CorsFilter(configSource);
+	}
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/console/**").addResourceLocations("classpath:/console/");
+	}
+
 	private String appendCharset(MimeType type, String charset) {
 		if (type.getCharset() != null) {
 			return type.toString();
@@ -203,8 +193,7 @@ public class WebConfig implements WebMvcConfigurer {
 		return new MimeType(type, parameters).toString();
 	}
 
-	private Set<IDialect> createDialects(final ObjectProvider<DataProvider<?>> provider,
-			final PlatformTransactionManager platformTransactionManager) {
+	private Set<IDialect> createDialects(final PlatformTransactionManager platformTransactionManager) {
 		IDialect preProcessDialect = new IPreProcessorDialect() {
 
 			@Override
@@ -228,10 +217,9 @@ public class WebConfig implements WebMvcConfigurer {
 
 			@Override
 			public Set<IProcessor> getProcessors(String dialectPrefix) {
-				DataTagProcessor dtp = new DataTagProcessor(dialectPrefix, platformTransactionManager);
-				provider.orderedStream().forEach(dtp::registerDataProvider);
-				return Set.of(dtp, new StatusTagProcessor(dialectPrefix), new RedirectTagProcessor(dialectPrefix),
-						new PasswordTagProcessor(dialectPrefix), new PrivateTagProcessor(dialectPrefix));
+				return Set.of(new StatusTagProcessor(dialectPrefix), new RedirectTagProcessor(dialectPrefix),
+						new PasswordTagProcessor(dialectPrefix), new PrivateTagProcessor(dialectPrefix),
+						new DataTagProcessor(dialectPrefix, platformTransactionManager));
 			}
 		};
 		return Set.of(preProcessDialect, dataDialect);

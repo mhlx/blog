@@ -115,10 +115,10 @@ public class CommentService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void checkComment(int id) {
+	public void checkComment(int id, boolean checking) {
 		Comment comment = commentMapper.selectById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("comment.notExists", "评论不存在"));
-		comment.setChecking(false);
+		comment.setChecking(checking);
 		comment.setModifyTime(LocalDateTime.now());
 		commentMapper.update(comment);
 	}
@@ -166,10 +166,15 @@ public class CommentService {
 			CommentModuleHandler<?> handler = handlers.stream().filter(h -> h.getModuleName().equals(module.getName()))
 					.findAny().orElseThrow();
 			Object target = handler.checkBeforeQuery(module);
-			processCommentsBaseInfo(List.of(comment), target);
+			processCommentsContentAndBaseInfo(List.of(comment), target);
 			return opComment;
 		}
 		return Optional.empty();
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<Comment> getCommentForEdit(int id) {
+		return commentMapper.selectById(id);
 	}
 
 	@Transactional(readOnly = true)
@@ -179,7 +184,7 @@ public class CommentService {
 		if (param.getParent() != null) {
 			Optional<Comment> opParent = commentMapper.selectById(param.getParent());
 			if (opParent.isEmpty()) {
-				throw new ResourceNotFoundException("comment.notExists", "评论不存在");
+				throw new ResourceNotFoundException("comment.parent.notExists", "父评论不存在");
 			}
 			module = opParent.get().getModule();
 			Optional<CommentModuleHandler<?>> opHandler = handlers.stream()
@@ -251,7 +256,7 @@ public class CommentService {
 	public SavedComment saveComment(Comment comment) {
 		CommentModule module = comment.getModule();
 		CommentModuleHandler<?> handler = handlers.stream().filter(h -> h.getModuleName().equals(module.getName()))
-				.findAny().orElseThrow(() -> new ResourceNotFoundException("comment.module.notExists", "评论模块不存在"));
+				.findAny().orElseThrow(() -> new LogicException("comment.module.notExists", "评论模块不存在"));
 		handler.checkBeforeSave(comment, module);
 		String content = comment.getContent();
 		if (contentChecker != null) {
