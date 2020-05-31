@@ -235,8 +235,19 @@ class MediaTool {
 		List<String> cmdList = new ArrayList<>(
 				Arrays.asList(getFfmpegPath("ffmpeg"), "-i", src.toString(), "-loglevel", "error", "-y"));
 		if (info.getHeight() > height) {
+			if (height % 2 != 0) {
+				throw new IllegalArgumentException("height can not divide by 2");
+			}
 			cmdList.add("-vf");
-			cmdList.add("scale=-2:" + height + ":force_original_aspect_ratio=decrease");
+			// get width
+			int width = (int) ((double) height / info.getHeight() * info.getWidth());
+			if (width % 2 != 0) {
+				int fullWidth = width + 1;
+				cmdList.add("scale=" + width + ":" + height + ":force_original_aspect_ratio=decrease,pad=" + fullWidth
+						+ ":" + height + ":(ow-iw)/2:(oh-ih)/2,setsar=1");
+			} else {
+				cmdList.add("scale=" + width + ":" + height + ":force_original_aspect_ratio=decrease");
+			}
 		}
 		if (seconds > 1) {
 			cmdList.add("-t");
@@ -456,5 +467,4 @@ class MediaTool {
 			ffmpegEnable = false;
 		}
 	}
-
 }
