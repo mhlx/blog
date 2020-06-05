@@ -38,6 +38,10 @@ public class Moment implements Serializable, PasswordProtect, PrivateProtect {
 	private String password;
 	private Integer hits;
 	private Integer comments;
+	/**
+	 * @since 9.0
+	 */
+	private String firstImage;
 
 	public Integer getId() {
 		return id;
@@ -122,5 +126,13 @@ public class Moment implements Serializable, PasswordProtect, PrivateProtect {
 	@Override
 	public String getResId() {
 		return "moment-" + this.id;
+	}
+
+	public String getFirstImage() {
+		return firstImage;
+	}
+
+	public void setFirstImage(String firstImage) {
+		this.firstImage = firstImage;
 	}
 }

@@ -141,7 +141,7 @@ var Comment = (function(){
 				for(const data of comment.cache){
 					if(data.id == id){
 						if(action == 'conversation'){
-							$.get(rootPath+'api/comments/'+id+'/conversation',function(datas){
+							$.get(rootPath+'api/commentModule/'+data.module.name+'/'+data.module.id+'/comments/'+id+'/conversation',function(datas){
 								var html = '';
 								for(const data of datas){
 									html += processOne(data,comment,true);

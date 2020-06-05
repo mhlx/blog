@@ -62,79 +62,42 @@
 			<div th:replace="nav('moment')"></div>
 			<div class="my-3 my-md-5">
 				<div class="container">
-					<div class="markdown-body mb-4" th:utext="${moment.content}"></div>
+					<div class="markdown-body my-4" th:utext="${moment.content}"></div>
+                  
 					<div class="row row-cards row-deck"
 						th:if="${prev != null or next != null}">
-						<div class="col-lg-3 col-sm-6" th:if="${prev != null}">
-							<div class="card" th:data-momentid="${prev.id}"
-								style="cursor: pointer"
-								th:with="parser=${prev.content != null ? #jsoups.parser(#jsoups.body(prev.content)) : null}">
-								<span class="badge " style="position: absolute; color: #467fcf">上一条</span>
-								<div th:remove="tag"
-									th:with="img=${parser != null ? parser.firstImage : null}">
-									<a href="javascript:void(0)"
-										th:if="${img != null && img.present}"> <img
-										class="card-img-top" th:src="${img.get()}">
-									</a>
-								</div>
-								<div class="card-body d-flex flex-column">
-									<div class="text-muted"
-										th:with="text=${parser != null ? parser.text : null}">
-										<i class="fas fa-lock mr-2" th:if="${prev.hasPassword}"></i>
-										<p th:remove="tag" th:if="${text != null}">[[${text.length()
-											> 50 ? text.substring(0,50)+'...':text}]]</p>
-										<p th:if="${prev.hasPassword && prev.content == null}"
-											th:remove="tag">内容受到密码保护</p>
-									</div>
-									<div class="d-flex align-items-center pt-5 mt-auto">
-										<small class="d-block text-muted">[[${#times.format(prev.time,'yyyy-MM-dd
-											HH:mm')}]]</small>
-										<div class="ml-auto text-muted">
-											<small> <span class="badge  mr-1"
-												style="color: inherit"><i class="far fa-comment mr-1"></i>[[${prev.comments}]]<i
-													class="fas fa-fire mr-1 ml-2"></i>[[${prev.hits}]]</span>
-											</small>
-										</div>
-									</div>
-								</div>
-							</div>
-
+						<div class="col-lg-6 col-sm-6 my-2" th:if="${prev != null}" style="cursor:pointer" th:onclick="'window.location.href='+'\''+@{${#urls.getUrl(prev)}+'\''}">
+							<div class="row align-items-center">
+                              <div class="col">
+                                <div>
+                                  <span th:href="@{${#urls.getUrl(prev)}}" class="text-inherit">上一条</span>
+                                </div>
+                                <small class="d-block item-except text-sm text-muted h-1x alert alert-warning" th:if="${prev.hasPassword}">
+                               		内容受保护
+                                </small>
+                                <small class="d-block item-except text-sm text-muted h-1x" th:if="${prev.content != null}">
+                                  	<img style="max-width:64px;max-height:64px;border-radius:3px" th:src="${prev.firstImage}" th:if="${prev.firstImage != null}"/>
+                               		[[${#jsoups.parser(#jsoups.body(prev.content)).text}]]
+                                </small>
+                              </div>
+                            </div>
 						</div>
 
-						<div class="col-lg-3 col-sm-6" th:if="${next != null}">
-							<div class="card" th:data-momentid="${next.id}"
-								style="cursor: pointer"
-								th:with="parser=${next.content != null ? #jsoups.parser(#jsoups.body(next.content)) : null}">
-								<span class="badge " style="position: absolute; color: #467fcf">下一条</span>
-								<div th:remove="tag"
-									th:with="img=${parser != null ? parser.firstImage : null}">
-									<a href="javascript:void(0)"
-										th:if="${img != null && img.present}"> <img
-										class="card-img-top" th:src="${img.get()}">
-									</a>
-								</div>
-								<div class="card-body d-flex flex-column">
-									<div class="text-muted"
-										th:with="text=${parser != null ? parser.text : null}">
-										<i class="fas fa-lock mr-2" th:if="${next.hasPassword}"></i>
-										<p th:remove="tag" th:if="${text != null}">[[${text.length()
-											> 50 ? text.substring(0,50)+'...':text}]]</p>
-										<p th:if="${next.hasPassword && next.content == null}"
-											th:remove="tag">内容受到密码保护</p>
-									</div>
-									<div class="d-flex align-items-center pt-5 mt-auto">
-										<small class="d-block text-muted">[[${#times.format(next.time,'yyyy-MM-dd
-											HH:mm')}]]</small>
-										<div class="ml-auto text-muted">
-											<small> <span class="badge  mr-1"
-												style="color: inherit"><i class="far fa-comment mr-1"></i>[[${next.comments}]]<i
-													class="fas fa-fire mr-1 ml-2"></i>[[${next.hits}]]</span>
-											</small>
-										</div>
-									</div>
-								</div>
-							</div>
-
+						<div class="col-lg-6 col-sm-6 my-2" th:if="${next != null}" style="cursor:pointer" th:onclick="'window.location.href='+'\''+@{${#urls.getUrl(next)}+'\''}">
+							<div class="row align-items-center">
+                              <div class="col">
+                                <div>
+                                  <span class="text-inherit">下一条</span>
+                                </div>
+                                <small class="d-block item-except text-sm text-muted h-1x alert alert-warning" th:if="${next.hasPassword}">
+                               		内容受保护
+                                </small>
+                                <small class="d-block item-except text-sm text-muted h-1x" th:if="${next.content != null}">
+                                  	<img style="max-width:64px;max-height:64px;border-radius:3px" th:src="${next.firstImage}" th:if="${next.firstImage != null}"/>
+                               		[[${#jsoups.parser(#jsoups.body(next.content)).text}]]
+                                </small>
+                              </div>
+                            </div>
 						</div>
 					</div>
 					<div id="comment-container" class="noborder"></div>

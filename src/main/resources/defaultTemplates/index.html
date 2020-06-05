@@ -1,9 +1,8 @@
 <data path="api/articles" alias="page"
 	th:currentPage="${param.currentPage}" pageSize="10"
-	th:query="${param.query}" th:tag="${param.tag}"
-	th:category="${param.category}" status="PUBLISHED" queryPrivate="true"
+	th:query="${param.query}" th:tag="${param.tag}" status="PUBLISHED" queryPrivate="true"
 	queryPasswordProtected="true"></data>
-<data path="api/moment/archives" currentPage="1" pageSize="1" alias="momentArchivePage"/>
+<data path="api/momentArchives" currentPage="1" pageSize="1" alias="momentArchivePage"/>
 <data path="api/categories" alias="categories"/>
 <data path="api/lastComments" alias="lastComments" />
 <!doctype html>
@@ -38,13 +37,13 @@
 							<div class="card card-aside" th:each="article : ${page.datas}">
 								<div th:if="${article.featureImage != null}" th:remove="tag">
 									<a href="#" class="card-aside-column"
-										th:style="'background-image: url('+@{${article.featureImage}}+')'"></a>
+										th:style="'background-image: url(\''+@{${article.featureImage}}+'\')'"></a>
 								</div>
 
 								<div class="card-body d-flex flex-column">
 									<h4 style="word-break: break-all">
 										<a
-											th:href="@{/articles/}+${article.alias == null ? article.id : article.alias}">[[${article.title}]]</a>
+											th:href="@{${#urls.getUrl(article)}}">[[${article.title}]]</a>
 									</h4>
 									<div class="text-muted mb-1">
 										<small> <a th:href="@{/(category=${category.name})}"
@@ -58,18 +57,14 @@
 											th:each="tag : ${article.tags}">[[${tag.name}]]</a>
 										</small>
 									</div>
-									<div th:if="${article.password != null}" th:remove="tag">
-										<div class="text-muted mb-1">
-											<b>文章受密码保护</b>
-										</div>
-									</div>
-									<div
-										th:if="${article.password == null && article.summary != null}"
-										th:remove="tag">
-										<div class="text-muted mb-1"
-											th:with="parser=${#jsoups.parser(#jsoups.body(article.summary))}">
-											[[${parser.text}]]</div>
-									</div>
+									<div style="word-break: break-all">
+                                      <p class="alert alert-warning" th:if="${article.hasPassword}">
+                                        内容受保护
+                                      </p>
+                                      <p th:if="${article.summary != null}" th:with="parser=${#jsoups.parser(#jsoups.body(article.summary))}">
+                                        [[${parser.text}]]
+                                      </p>
+                                  </div>
 									<div class="text-muted">
 										<small> <span class="badge  mr-1"
 											style="color: inherit"><i class="far fa-comment mr-1"></i>[[${article.comments}]]<i
@@ -128,8 +123,7 @@
 							<div th:unless="${lastComments.empty}" class="card">
 								<div class="card-header">评论</div>
 								<div class="card-body">
-									<div class="d-flex mb-5" th:each="comment:${lastComments}"
-										th:data-comment-url="@{${#urls.getUrl(comment.target)}}">
+									<div class="d-flex mb-5" th:each="comment:${lastComments}" data-comment th:data-module-name="${comment.module.name}" th:data-module-id="${comment.module.id}">
 										<div class="mr-4">
 											<span class="avatar"
 												th:style="'background-image: url('+${comment.gravatar == null ? '/static/img/guest.png' : 'https://secure.gravatar.com/avatar/'+comment.gravatar}+')'">
@@ -194,14 +188,32 @@
 			document.getElementById('currentPage').value = i;
 			document.getElementById('queryForm').submit();
 		}
-		for(const elem of document.querySelectorAll('[data-momentid]')){
+      for(const elem of document.querySelectorAll('[data-momentid]')){
 			elem.addEventListener('click',function(){
 				window.location.href = rootPath + 'moments/'+this.dataset.momentid;
 			});
 		}
-      for(const elem of document.querySelectorAll('[data-comment-url]')){
+      for(const elem of document.querySelectorAll('[data-comment]')){
 			elem.addEventListener('click',function(){
-				window.location.href = this.dataset.commentUrl;
+				var name = this.dataset.moduleName;
+              	var id = this.dataset.moduleId;
+              	if(name === 'moment'){
+                	window.location.href = rootPath + 'moments/'+id
+                } else {
+                	$.get(rootPath + 'api/commentModule/'+name+'/'+id,{},function(data){
+                    	if(name === 'article'){
+                        	if(data.alias){
+                				window.location.href = rootPath + 'articles/'+data.alias
+                            } else {
+                				window.location.href = rootPath + 'articles/'+data.id
+                            }
+                        } else {
+                        	if(data.definitelyPattern === true){
+                				window.location.href = rootPath + data.pattern.splice(1)
+                            }
+                        }
+                    });
+                }
 			});
 		}
 	</script>

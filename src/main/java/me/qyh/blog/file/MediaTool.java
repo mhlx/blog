@@ -231,23 +231,31 @@ class MediaTool {
 	 * @throws IOException
 	 */
 	public void toMP4(int height, int seconds, Path src, Path output) throws IOException {
-		VideoInfo info = readVideo(src);
+		try {
+			this.toMp4(null, height, seconds, src, output);
+		} catch (IOException e) {
+			String message = e.getMessage().split(System.lineSeparator())[0];
+			if (message.contains("divisible by 2")) {
+				// get width
+				Integer width = Integer
+						.parseInt(message.substring(message.lastIndexOf('(') + 1, message.lastIndexOf('x')));
+				this.toMp4(width + 1, height, seconds, src, output);
+			}
+		}
+	}
+
+	private void toMp4(Integer padWidth, int height, int seconds, Path src, Path output) throws IOException {
+		if (height % 2 != 0) {
+			throw new IllegalArgumentException("height not divisible by 2");
+		}
 		List<String> cmdList = new ArrayList<>(
 				Arrays.asList(getFfmpegPath("ffmpeg"), "-i", src.toString(), "-loglevel", "error", "-y"));
-		if (info.getHeight() > height) {
-			if (height % 2 != 0) {
-				throw new IllegalArgumentException("height can not divide by 2");
-			}
-			cmdList.add("-vf");
-			// get width
-			int width = (int) ((double) height / info.getHeight() * info.getWidth());
-			if (width % 2 != 0) {
-				int fullWidth = width + 1;
-				cmdList.add("scale=" + width + ":" + height + ":force_original_aspect_ratio=decrease,pad=" + fullWidth
-						+ ":" + height + ":(ow-iw)/2:(oh-ih)/2,setsar=1");
-			} else {
-				cmdList.add("scale=" + width + ":" + height + ":force_original_aspect_ratio=decrease");
-			}
+		cmdList.add("-vf");
+		if (padWidth != null) {
+			cmdList.add("scale=-2:" + height + ":force_original_aspect_ratio=decrease,pad=" + padWidth + ":" + height
+					+ ":(ow-iw)/2:(oh-ih)/2,setsar=1");
+		} else {
+			cmdList.add("scale=-2:" + height + ":force_original_aspect_ratio=decrease");
 		}
 		if (seconds > 1) {
 			cmdList.add("-t");
@@ -255,8 +263,8 @@ class MediaTool {
 		}
 		Path temp = Files.createTempFile(null, ".mp4");
 		try {
-			cmdList.addAll(Arrays.asList("-crf", String.valueOf(28), "-max_muxing_queue_size", "9999", "-c:v", "h264",
-					"-c:a", "aac", "-map_metadata", "-1", temp.toString()));
+			cmdList.addAll(Arrays.asList("-crf", "28", "-max_muxing_queue_size", "9999", "-c:v", "h264", "-c:a", "aac",
+					"-map_metadata", "-1", temp.toString()));
 			execCommands(cmdList);
 			FileUtils.move(temp, output);
 		} finally {

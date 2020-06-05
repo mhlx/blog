@@ -22,6 +22,7 @@ import me.qyh.blog.exception.ResourceNotFoundException;
 import me.qyh.blog.mapper.CommentMapper;
 import me.qyh.blog.mapper.MomentMapper;
 import me.qyh.blog.security.SecurityChecker;
+import me.qyh.blog.utils.JsoupUtils;
 import me.qyh.blog.vo.MomentArchive;
 import me.qyh.blog.vo.MomentArchiveQueryParam;
 import me.qyh.blog.vo.MomentQueryParam;
@@ -212,7 +213,10 @@ public class MomentService implements CommentModuleHandler<Moment> {
 			return;
 		}
 		Map<Integer, String> markdownMap = markdown2Html.toHtmls(contentMap);
-		moments.forEach(m -> m.setContent(markdownMap.get(m.getId())));
+		moments.forEach(m -> {
+			m.setContent(markdownMap.get(m.getId()));
+			JsoupUtils.getFirstImage(m.getContent()).ifPresent(m::setFirstImage);
+		});
 	}
 
 	@Override

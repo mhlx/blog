@@ -3,7 +3,6 @@ package me.qyh.blog.web.controller;
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +27,7 @@ public class BlogSettingController {
 	}
 
 	@GetMapping
-	public BlogConfig index(Model model) {
+	public BlogConfig index() {
 		return configService.getConfig();
 	}
 

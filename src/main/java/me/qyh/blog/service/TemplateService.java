@@ -395,8 +395,6 @@ public class TemplateService
 					String momentsTemplate = readResourceToString(
 							new ClassPathResource("defaultTemplates/moments.html"));
 					String momentTemplate = readResourceToString(new ClassPathResource("defaultTemplates/moment.html"));
-					String archiveTemplate = readResourceToString(
-							new ClassPathResource("defaultTemplates/archive.html"));
 					String navTemplate = readResourceToString(new ClassPathResource("defaultTemplates/nav.html"));
 					String errorContent = readResourceToString(new ClassPathResource("defaultTemplates/error.html"));
 					String errorPageErrorContent = readResourceToString(
@@ -410,7 +408,6 @@ public class TemplateService
 							false);
 					SystemTemplate moments = new SystemTemplate(null, "/moments", momentsTemplate, true, false);
 					SystemTemplate moment = new SystemTemplate(null, "/moments/{id}", momentTemplate, true, false);
-					SystemTemplate archive = new SystemTemplate(null, "/archive", archiveTemplate, true, false);
 
 					SystemTemplate nav = new SystemTemplate("nav", null, navTemplate, true, false);
 					SystemTemplate error = new SystemTemplate(ALL_ERROR_TEMPLATE_NAME, null, errorContent, false, true);
@@ -419,8 +416,8 @@ public class TemplateService
 					SystemTemplate unlock = new SystemTemplate("unlock", null, unlockContent, false, true);
 					SystemTemplate markdownRender = new SystemTemplate("markdown_render", null, markdownRenderContent,
 							false, true);
-					List<SystemTemplate> defaultTemplates = List.of(index, article, moments, moment, archive, nav,
-							error, errorPageError, unlock, markdownRender);
+					List<SystemTemplate> defaultTemplates = List.of(index, article, moments, moment, nav, error,
+							errorPageError, unlock, markdownRender);
 					defaultTemplates.forEach(t -> {
 						t.setEnable(true);
 						t.setAllowComment(false);

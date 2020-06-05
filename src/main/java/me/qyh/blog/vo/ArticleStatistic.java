@@ -1,8 +1,9 @@
 package me.qyh.blog.vo;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+
+import me.qyh.blog.entity.Article.ArticleStatus;
 
 public class ArticleStatistic {
 
@@ -12,9 +13,10 @@ public class ArticleStatistic {
 	private long hits;
 	private long comments;
 
-	private List<ArticleCategoryStatistic> categoryStatistics = new ArrayList<>();
-	private List<ArticleStatusStatistic> statusStatistics = new ArrayList<>();
-	private List<ArticleTagStatistic> tagStatistics = new ArrayList<>();
+	private List<ArticleCategoryStatistic> categoryStatistics;
+	private List<ArticleStatusStatistic> statusStatistics;
+	private List<ArticleTagStatistic> tagStatistics;
+	private List<ArticleArchiveStatistic> archiveStatistics;
 
 	public List<ArticleCategoryStatistic> getCategoryStatistics() {
 		return categoryStatistics;
@@ -80,4 +82,24 @@ public class ArticleStatistic {
 		this.tagStatistics = tagStatistics;
 	}
 
+	public List<ArticleArchiveStatistic> getArchiveStatistics() {
+		return archiveStatistics;
+	}
+
+	public void setArchiveStatistics(List<ArticleArchiveStatistic> archiveStatistics) {
+		this.archiveStatistics = archiveStatistics;
+	}
+
+	public Integer getCategoryCount() {
+		return categoryStatistics == null ? null : categoryStatistics.size();
+	}
+
+	public int getTagCount() {
+		return tagStatistics == null ? null : tagStatistics.size();
+	}
+
+	public int getArticleCount() {
+		return this.statusStatistics.stream().filter(s -> s.getStatus() == ArticleStatus.PUBLISHED)
+				.mapToInt(ArticleStatusStatistic::getCount).sum();
+	}
 }

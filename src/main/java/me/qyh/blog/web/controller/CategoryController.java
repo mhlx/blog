@@ -6,7 +6,6 @@ import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +18,7 @@ import me.qyh.blog.entity.Category;
 import me.qyh.blog.exception.ResourceNotFoundException;
 import me.qyh.blog.security.Authenticated;
 import me.qyh.blog.service.CategoryService;
+import me.qyh.blog.web.template.TemplateDataMapping;
 
 @Authenticated
 @RestController
@@ -34,12 +34,12 @@ public class CategoryController {
 		this.blogProperties = blogProperties;
 	}
 
-	@GetMapping("categories")
+	@TemplateDataMapping("categories")
 	public List<Category> getCategories() {
 		return categoryService.getAllCategories();
 	}
 
-	@GetMapping("categories/{name}")
+	@TemplateDataMapping("categories/{name}")
 	public Category getCategory(@PathVariable("name") String name) {
 		return categoryService.getCategory(name)
 				.orElseThrow(() -> new ResourceNotFoundException("category.notExists", "分类不存在"));

@@ -153,6 +153,8 @@ public class FileService {
 
 			makeFileSecurity(path, update.isPrivate(), update.getPassword());
 
+			setLastModifiedTime(p);
+
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -196,6 +198,7 @@ public class FileService {
 
 			makeFileSecurity(fc.getPath(), fc.isPrivate(), fc.getPassword());
 
+			setLastModifiedTime(file);
 			return getFileInfoDetail(file);
 		} finally {
 			lock.writeLock().unlock();
@@ -230,6 +233,9 @@ public class FileService {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+
+			setLastModifiedTime(dest);
+
 			return getFileInfoDetail(dest);
 		} finally {
 			lock.writeLock().unlock();
@@ -381,6 +387,7 @@ public class FileService {
 			}
 
 			Path dest = doCopy(p, dir);
+			setLastModifiedTime(dest);
 
 			return getFileInfoDetail(dest);
 		} finally {
@@ -1199,6 +1206,21 @@ public class FileService {
 		} else {
 			if (!StringUtils.isNullOrBlank(password)) {
 				this.sm.makePathSecurity(path, password);
+			}
+		}
+	}
+
+	/**
+	 * @since 9.0
+	 */
+	private void setLastModifiedTime(Path f) {
+		List<Path> paths = betweenPaths(this.root, f);
+		paths.add(f);
+		FileTime now = FileTime.fromMillis(System.currentTimeMillis());
+		for (Path p : paths) {
+			try {
+				Files.setLastModifiedTime(p, now);
+			} catch (IOException e) {
 			}
 		}
 	}

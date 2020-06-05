@@ -18,6 +18,7 @@ public class BlogExpressionObjectFactory implements IExpressionObjectFactory {
 	private static final String URL_EXPRESSION_OBJECT_NAME = "urls";
 	private static final String FORMATS_EXPRESSION_OBJECT_NAME = "formats";
 	private static final String M2H_EXPRESSION_OBJECT_NAME = "m2h";
+	private static final String AUTH_EXPRESSION_OBJECT_NAME = "auth";
 
 	private final MessageSource messageSource;
 	private final Markdown2Html markdown2Html;
@@ -32,7 +33,7 @@ public class BlogExpressionObjectFactory implements IExpressionObjectFactory {
 	public Set<String> getAllExpressionObjectNames() {
 		return Set.of(TIMES_EXPRESSION_OBJECT_NAME, MESSAGER_EXPRESSION_OBJECT_NAME, JSOUP_EXPRESSION_OBJECT_NAME,
 				PAGING_EXPRESSION_OBJECT_NAME, URL_EXPRESSION_OBJECT_NAME, FORMATS_EXPRESSION_OBJECT_NAME,
-				M2H_EXPRESSION_OBJECT_NAME);
+				M2H_EXPRESSION_OBJECT_NAME, AUTH_EXPRESSION_OBJECT_NAME);
 	}
 
 	@Override
@@ -58,6 +59,9 @@ public class BlogExpressionObjectFactory implements IExpressionObjectFactory {
 		}
 		if (M2H_EXPRESSION_OBJECT_NAME.equals(expressionObjectName)) {
 			return new M2h(markdown2Html);
+		}
+		if (AUTH_EXPRESSION_OBJECT_NAME.equals(expressionObjectName)) {
+			return new Auth();
 		}
 		return null;
 	}

@@ -10,6 +10,19 @@ public class ArticleArchiveQueryParam extends PageQueryParam {
 	private LocalDate begin;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate end;
+	private String category;
+
+	public ArticleArchiveQueryParam() {
+		super();
+	}
+
+	public ArticleArchiveQueryParam(ArticleArchiveQueryParam param) {
+		super(param);
+		this.queryPrivate = param.queryPrivate;
+		this.begin = param.begin;
+		this.end = param.end;
+		this.category = param.category;
+	}
 
 	public boolean isQueryPrivate() {
 		return queryPrivate;
@@ -34,4 +47,13 @@ public class ArticleArchiveQueryParam extends PageQueryParam {
 	public void setEnd(LocalDate end) {
 		this.end = end;
 	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
 }

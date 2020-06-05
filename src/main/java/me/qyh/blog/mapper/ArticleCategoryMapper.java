@@ -18,6 +18,6 @@ public interface ArticleCategoryMapper {
 
 	boolean isArticleExists(int categoryId);
 
-	List<ArticleCategoryStatistic> selectCount(boolean queryPrivate);
+	List<ArticleCategoryStatistic> selectStatistic(boolean queryPrivate);
 
 }

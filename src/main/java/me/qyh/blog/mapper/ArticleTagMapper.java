@@ -17,7 +17,7 @@ public interface ArticleTagMapper {
 
 	void insert(ArticleTag articleTag);
 
-	List<ArticleTagStatistic> selectCount(@Param("queryPrivate") boolean queryPrivate,
+	List<ArticleTagStatistic> selectStatistic(@Param("queryPrivate") boolean queryPrivate,
 			@Param("categoryId") Integer categoryId);
 
 }

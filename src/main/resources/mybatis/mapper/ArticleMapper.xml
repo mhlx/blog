@@ -171,21 +171,11 @@
 		where ba.id = (
 			select t1.id from blog_article t1  
 			left join blog_article_category t2 on t1.id = t2.articleId
-			left join blog_article_tag t3 on t1.id = t3.articleId
 			where t1.status = 0
 			and t1.pubDate <![CDATA[ >= ]]> #{article.pubDate}
 			and t1.id <![CDATA[ <> ]]> #{article.id}
-			<if test="categories != null">
-				and t2.categoryId in
-				<foreach collection="categories" open="(" close=")" item="category">
-					#{category}
-				</foreach>
-			</if>
-			<if test="tags != null">
-				and t3.tagId in
-				<foreach collection="tags" open="(" close=")" item="tag">
-					#{tag}
-				</foreach>
+			<if test="categoryId != null">
+				and t2.categoryId = #{categoryId}
 			</if>
 			<if test="!queryPrivate">
 				and t1.isPrivate = false
@@ -199,21 +189,11 @@
 		where ba.id = (
 			select t1.id from blog_article t1  
 			left join blog_article_category t2 on t1.id = t2.articleId
-			left join blog_article_tag t3 on t1.id = t3.articleId
 			where t1.status = 0
 			and t1.pubDate <![CDATA[ <= ]]> #{article.pubDate}
 			and t1.id <![CDATA[ <> ]]> #{article.id}
-			<if test="categories != null">
-				and t2.categoryId in
-				<foreach collection="categories" open="(" close=")" item="category">
-					#{category}
-				</foreach>
-			</if>
-			<if test="tags != null">
-				and t3.tagId in
-				<foreach collection="tags" open="(" close=")" item="tag">
-					#{tag}
-				</foreach>
+			<if test="categoryId != null">
+				and t2.categoryId = #{categoryId}
 			</if>
 			<if test="!queryPrivate">
 				and t1.isPrivate = false
@@ -223,17 +203,23 @@
 	</select>
 	
 	<select id="selectStatusStatistic" resultMap="ArticleStatusStatisticMap">
-		select status,count(id) count from blog_article 
-		<if test="!queryPrivate">
-		where status = 0 and isPrivate = false
-		</if>
+		select status,count(id) count from blog_article  T1
+		<where>
+			<if test="!queryPrivate">
+			status = 0 and isPrivate = false
+			</if>
+			<if test="categoryId != null">
+				AND exists (select 1 from blog_article_category T2 
+				where T1.id = T2.articleId and T2.categoryId = #{categoryId})
+			</if>
+		</where>
 		group by status
 	</select>
 	
 	
 	
 	<select id="selectDaysCount" resultType="int">
-		select count(distinct(substr(pubDate,1,10))) from blog_article
+		select count(distinct(substr(pubDate,1,10))) from blog_article T1
 		where status = 0
 			<if test="!queryPrivate">
 				AND isPrivate = false
@@ -243,13 +229,17 @@
 			</if>
 			<if test="end != null">
 				AND pubDate <![CDATA[ <= ]]> #{end}
+			</if>
+			<if test="categoryId != null">
+				AND exists (select 1 from blog_article_category T2 
+				where T1.id = T2.articleId and T2.categoryId = #{categoryId})
 			</if>
 	</select>
 
 
 
 	<select id="selectDays" resultType="java.time.LocalDate">
-		select substr(pubDate,1,10) as pubDate from blog_article
+		select substr(pubDate,1,10) as pubDate from blog_article T1
 		where status = 0
 			<if test="!queryPrivate">
 				AND isPrivate = false
@@ -259,6 +249,10 @@
 			</if>
 			<if test="end != null">
 				AND pubDate <![CDATA[ <= ]]> #{end}
+			</if>
+			<if test="categoryId != null">
+				AND exists (select 1 from blog_article_category T2 
+				where T1.id = T2.articleId and T2.categoryId = #{categoryId})
 			</if>
 		GROUP BY substr(pubDate,1,10)
 		ORDER BY pubDate DESC
@@ -275,12 +269,35 @@
 		<if test="!queryPrivate">
 			and ba.isPrivate = false
 		</if>
+		<if test="categoryId != null">
+			AND exists (select 1 from blog_article_category T2 
+			where ba.id = T2.articleId and T2.categoryId = #{categoryId})
+		</if>
 		and ba.status = 0
 		) as comments
-		from blog_article where status = 0;
+		from blog_article T1 
+		where status = 0
 		<if test="!queryPrivate">
 			AND isPrivate = false
 		</if>
+		<if test="categoryId != null">
+			AND exists (select 1 from blog_article_category T2 
+			where T1.id = T2.articleId and T2.categoryId = #{categoryId})
+		</if>
+	</select>
+	
+	<select id="selectArchiveStatistic" resultType="ArticleArchiveStatistic">
+		select year(pubDate) as year,month(pubDate) as month,count(*) AS count from blog_article T1
+		where status = 0
+		<if test="!queryPrivate">
+			and isPrivate = false
+		</if>
+		<if test="categoryId != null">
+			AND exists (select 1 from blog_article_category T2 
+			where T1.id = T2.articleId and T2.categoryId = #{categoryId})
+		</if>
+		group by year,month
+		order by year desc,month desc
 	</select>
 	
 	<sql id="fullQuery">

@@ -32,7 +32,7 @@
 	</select>
 	
 	
-	<select id="selectCount" resultMap="ArticleCategoryStatisticMap">
+	<select id="selectStatistic" resultMap="ArticleCategoryStatisticMap">
 		select c.id,c.name,c.createTime,c.modifyTime,count from blog_category c inner join (
 		select categoryId,count(bac.articleId) as count from blog_article_category bac
 		left join blog_article ba on bac.articleId = ba.id

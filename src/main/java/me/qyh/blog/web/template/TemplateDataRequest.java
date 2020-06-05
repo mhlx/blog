@@ -34,6 +34,7 @@ public class TemplateDataRequest extends HttpServletRequestWrapper {
 	private Map<String, String[]> parameterMap;
 	private UriComponents components;
 	private final Map<String, Object> attributes = new HashMap<>();
+	private String path;
 
 	public TemplateDataRequest(HttpServletRequest request) {
 		super(request);
@@ -131,9 +132,14 @@ public class TemplateDataRequest extends HttpServletRequestWrapper {
 		return Collections.enumeration(Set.of("x-requested-with"));
 	}
 
+	public String getPath() {
+		return path;
+	}
+
 	public void reset(Map<String, String[]> parameterMap, String path) {
 		this.parameterMap = Collections.unmodifiableMap(parameterMap);
-		this.components = UriComponentsBuilder.fromUriString('/' + FileUtils.cleanPath(path)).build();
+		this.path = '/' + FileUtils.cleanPath(path);
+		this.components = UriComponentsBuilder.fromUriString(path).build();
 		this.attributes.clear();
 	}
 

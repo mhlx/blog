@@ -45,7 +45,6 @@ public class Comment implements Serializable {
 	private Boolean checking;
 	private Integer replyNum;
 	private Boolean blackIp;
-	private Object target;// module target;
 
 	public Integer getId() {
 		return id;
@@ -173,14 +172,6 @@ public class Comment implements Serializable {
 
 	public void setBlackIp(Boolean blackIp) {
 		this.blackIp = blackIp;
-	}
-
-	public Object getTarget() {
-		return target;
-	}
-
-	public void setTarget(Object target) {
-		this.target = target;
 	}
 
 }

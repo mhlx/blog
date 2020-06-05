@@ -23,7 +23,7 @@ class FileResourceResolver implements ResourceResolver {
 			ResourceResolverChain chain) {
 		String accept = request.getHeader("Accept");
 		boolean supportWEBP = accept != null && accept.contains(WEBP_ACCEPT);
-		return fileService.getProcessedFile(requestPath, supportWEBP).map(ReadablePathSource::new).orElse(null);
+		return fileService.getProcessedFile(requestPath, supportWEBP).map(ReadablePathResource::new).orElse(null);
 	}
 
 	@Override

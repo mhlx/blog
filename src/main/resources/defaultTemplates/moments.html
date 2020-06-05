@@ -1,5 +1,5 @@
-<data path="api/moment/archives" alias="page"
-	th:currentPage="${param.currentPage}" pageSize="10"></data>
+<data path="api/momentArchives" alias="page"
+	th:currentPage="${param.currentPage}" pageSize="20" queryPrivate="true"></data>
 <!doctype html>
 <html>
 <head>
@@ -16,59 +16,87 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="HandheldFriendly" content="True">
 <meta name="MobileOptimized" content="320">
-
-
 <title>动态</title>
 <link rel="stylesheet" th:href="@{/static/fontawesome/css/all.min.css}" />
 <link th:href="@{/static/tabler/dist/assets/css/dashboard.css}"
 	rel="stylesheet" />
+
+<style>
+ul.timeline {
+	list-style-type: none;
+	position: relative;
+}
+
+ul.timeline:before {
+	content: ' ';
+	background: #d4d9df;
+	display: inline-block;
+	position: absolute;
+	left: 29px;
+	width: 2px;
+	height: 100%;
+	z-index: 400;
+}
+
+ul.timeline>li {
+	margin: 20px 0;
+	padding-left: 60px;
+}
+
+ul.timeline>li:before {
+	content: ' ';
+	background: white;
+	display: inline-block;
+	position: absolute;
+	border-radius: 50%;
+	border: 3px solid #22c0e8;
+	left: 20px;
+	width: 20px;
+	height: 20px;
+	z-index: 400;
+}
+</style>
 </head>
+
 <body style="overflow-y: auto">
 	<div class="page">
 		<div class="flex-fill">
-			<div th:replace="nav('moment')"></div>
+			<div th:replace="nav('archive')"></div>
 			<div class="my-3 my-md-5">
 				<div class="container">
-					<div th:each="data : ${page.datas}">
-						<h2 th:text="${#times.format(data.date,'yyyy-MM-dd')}"
-							style="margin-bottom: 0px"></h2>
-						<hr style="margin-top: 1rem; margin-bottom: 1rem">
-						<div class="row row-cards row-deck">
-							<div class="col-sm-4 col-lg-4 col-xl-4"
-								th:each="moment : ${data.moments}">
-								<div class="card" th:data-momentid="${moment.id}"
-									style="cursor: pointer"
-									th:with="parser=${moment.content != null ? #jsoups.parser(#jsoups.body(moment.content)) : null}">
-									<div th:remove="tag"
-										th:with="img=${parser != null ? parser.firstImage : null}">
-										<a href="javascript:void(0)"
-											th:if="${img != null && img.present}"> <img
-											class="card-img-top" th:src="${img.get()}">
-										</a>
-									</div>
-									<div class="card-body d-flex flex-column">
-										<div class="text-muted"
-											th:with="text=${parser != null ? parser.text : null}">
-											<i class="fas fa-lock mr-2" th:if="${moment.hasPassword}"></i>
-											<p th:remove="tag" th:if="${text != null}">[[${text.length()
-												> 50 ? text.substring(0,50)+'...':text}]]</p>
-											<p th:if="${moment.hasPassword && moment.content == null}"
-												th:remove="tag">内容受到密码保护</p>
-										</div>
-										<div class="d-flex align-items-center pt-5 mt-auto">
-											<small class="d-block text-muted">[[${#times.format(moment.time,'HH:mm')}]]</small>
-											<div class="ml-auto text-muted">
-												<small> <span class="badge  mr-1"
+					<div class="row">
+						<div class="col-xl-8">
+							<ul class="timeline">
+								<li th:each="data : ${page.datas}"><time
+										class="badge badge-primary"
+										style="display: inline-block; margin-bottom: 10px">[[${#times.format(data.date,'yyyy-MM-dd')}]]</time>
+									<div class="card card-aside"
+										th:each="moment : ${data.moments}" style="cursor:pointer" th:onclick="'window.location.href=\''+@{${#urls.getUrl(moment)}}+'\''">
+										<a href="#" class="card-aside-column"
+											th:if="${moment.firstImage}"
+											th:style="'background-image: url(\''+${moment.firstImage}+'\')'"></a>
+										<div class="card-body d-flex flex-column">
+											<div style="word-break: break-all">
+                                              <p class="alert alert-warning" th:if="${moment.hasPassword}">
+                                                内容受保护
+                                              </p>
+												<p th:if="${moment.content != null}" th:with="parser=${#jsoups.parser(#jsoups.body(moment.content))}">
+                                              [[${parser.text}]]
+                                              </p>
+                                      		</div>
+											<div class="d-flex align-items-center pt-5 mt-auto">
+												<div>
+                                                  <small class="text-muted mr-2">[[${#times.format(moment.time,'HH:mm')}]]</small>
+                                                   <small class="text-muted"><span class="badge"
 													style="color: inherit"><i
 														class="far fa-comment mr-1"></i>[[${moment.comments}]]<i
 														class="fas fa-fire mr-1 ml-2"></i>[[${moment.hits}]]</span>
-												</small>
+                                                  </small>
+												</div>
 											</div>
 										</div>
-									</div>
-								</div>
-
-							</div>
+									</div></li>
+							</ul>
 						</div>
 					</div>
 					<ul class="pagination pagination-simple  justify-content-center"
@@ -79,9 +107,6 @@
 							class="page-link" th:href="@{/moments?currentPage=}+${i}"
 							th:text="${i}"></a></li>
 					</ul>
-					<input type="hidden" name="currentPage"
-						th:value="${page.currentPage}"> <input type="hidden"
-						name="pageSize" th:value="${page.pageSize}">
 				</div>
 			</div>
 		</div>
@@ -100,14 +125,4 @@
 		th:src="@{/static/tabler/dist/assets/js/vendors/jquery-3.2.1.min.js}"></script>
 	<script
 		th:src="@{/static/tabler/dist/assets/js/vendors/bootstrap.bundle.min.js}"></script>
-	<script
-		th:src="@{/static/tabler/dist/assets/js/vendors/sweetalert2.all.min.js}"></script>
-	<script>
-		var rootPath = '[[@{/}]]';
-		for(const elem of document.querySelectorAll('[data-momentid]')){
-			elem.addEventListener('click',function(){
-				window.location.href = rootPath + 'moments/'+this.dataset.momentid;
-			});
-		}
-	</script>
 </body>

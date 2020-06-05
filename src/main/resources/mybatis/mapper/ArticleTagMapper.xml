@@ -30,7 +30,7 @@
 		delete from blog_article_tag where tagId = #{tagId}
 	</delete>
 
-	<select id="selectCount" resultMap="ArticleTagStatisticMap">
+	<select id="selectStatistic" resultMap="ArticleTagStatisticMap">
 		select t.id,t.name,t.createTime,t.modifyTime,count from blog_tag t
 		inner join (
 		select categoryId,tagId,count(bat.articleId) as count from

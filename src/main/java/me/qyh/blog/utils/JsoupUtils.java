@@ -12,6 +12,9 @@ public class JsoupUtils {
 	}
 
 	public static Optional<String> getFirstImage(String content) {
+		if (StringUtils.isNullOrBlank(content)) {
+			return Optional.empty();
+		}
 		return getFirstImage(Jsoup.parse(content));
 	}
 

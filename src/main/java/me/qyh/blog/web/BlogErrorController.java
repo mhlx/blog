@@ -7,6 +7,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,8 @@ public class BlogErrorController implements ErrorController {
 			return new ModelAndView("redirect:/");
 		}
 		Map<String, Object> map = new HashMap<>();
-		Map<String, Object> errors = errorAttributes.getErrorAttributes(new ServletWebRequest(request), false);
+		Map<String, Object> errors = errorAttributes.getErrorAttributes(new ServletWebRequest(request),
+				ErrorAttributeOptions.defaults());
 		if (!CollectionUtils.isEmpty(errors)) {
 			map.putAll(errors);
 		}
@@ -68,7 +70,8 @@ public class BlogErrorController implements ErrorController {
 		if (!status.isError()) {
 			return new ResponseEntity<>(status);
 		}
-		Map<String, Object> attributes = errorAttributes.getErrorAttributes(new ServletWebRequest(request), false);
+		Map<String, Object> attributes = errorAttributes.getErrorAttributes(new ServletWebRequest(request),
+				ErrorAttributeOptions.defaults());
 		return CollectionUtils.isEmpty(attributes) ? new ResponseEntity<>(status)
 				: new ResponseEntity<>(attributes, status);
 	}

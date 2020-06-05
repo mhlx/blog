@@ -18,10 +18,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.MimeType;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.cors.CorsConfiguration;
@@ -55,7 +55,7 @@ import me.qyh.blog.BlogProperties;
 import me.qyh.blog.service.TemplateService;
 import me.qyh.blog.web.template.PreTemplateHandler;
 import me.qyh.blog.web.template.TemplateHandlerAdapter;
-import me.qyh.blog.web.template.TemplateRequestMappingHandlerAdapter;
+import me.qyh.blog.web.template.TemplateRequestMappingHandler;
 import me.qyh.blog.web.template.TemplateRequestMappingHandlerMapping;
 import me.qyh.blog.web.template.TemplateUtils;
 import me.qyh.blog.web.template.TemplateView;
@@ -89,15 +89,14 @@ public class WebConfig implements WebMvcConfigurer, WebMvcRegistrations {
 	@Bean
 	SpringTemplateEngine templateEngine(ThymeleafProperties properties,
 			ObjectProvider<ITemplateResolver> templateResolvers, ObjectProvider<IDialect> dialects,
-			final ObjectProvider<ICacheManager> cacheManagerProvider,
-			PlatformTransactionManager platformTransactionManager) {
+			final ObjectProvider<ICacheManager> cacheManagerProvider, ApplicationContext applicationContext) {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.setEngineContextFactory(new ThymeleafEngineContextFactory());
 		engine.setEnableSpringELCompiler(properties.isEnableSpringElCompiler());
 		engine.setRenderHiddenMarkersBeforeCheckboxes(properties.isRenderHiddenMarkersBeforeCheckboxes());
 		cacheManagerProvider.ifAvailable(engine::setCacheManager);
 		templateResolvers.orderedStream().forEach(engine::addTemplateResolver);
-		for (IDialect dialect : createDialects(platformTransactionManager)) {
+		for (IDialect dialect : createDialects(applicationContext)) {
 			engine.addDialect(dialect);
 		}
 		dialects.orderedStream().forEach(engine::addDialect);
@@ -157,12 +156,12 @@ public class WebConfig implements WebMvcConfigurer, WebMvcRegistrations {
 
 	@Override
 	public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
-		return TemplateRequestMappingHandlerMapping.getRequestMappingHandlerMapping();
+		return new TemplateRequestMappingHandlerMapping();
 	}
 
 	@Override
 	public RequestMappingHandlerAdapter getRequestMappingHandlerAdapter() {
-		return TemplateRequestMappingHandlerAdapter.getRequestMappingHandlerAdapter();
+		return new TemplateRequestMappingHandler();
 	}
 
 	@Bean
@@ -193,7 +192,7 @@ public class WebConfig implements WebMvcConfigurer, WebMvcRegistrations {
 		return new MimeType(type, parameters).toString();
 	}
 
-	private Set<IDialect> createDialects(final PlatformTransactionManager platformTransactionManager) {
+	private Set<IDialect> createDialects(final ApplicationContext applicationContext) {
 		IDialect preProcessDialect = new IPreProcessorDialect() {
 
 			@Override
@@ -219,7 +218,7 @@ public class WebConfig implements WebMvcConfigurer, WebMvcRegistrations {
 			public Set<IProcessor> getProcessors(String dialectPrefix) {
 				return Set.of(new StatusTagProcessor(dialectPrefix), new RedirectTagProcessor(dialectPrefix),
 						new PasswordTagProcessor(dialectPrefix), new PrivateTagProcessor(dialectPrefix),
-						new DataTagProcessor(dialectPrefix, platformTransactionManager));
+						new DataTagProcessor(dialectPrefix, applicationContext));
 			}
 		};
 		return Set.of(preProcessDialect, dataDialect);

@@ -24,6 +24,7 @@ import me.qyh.blog.vo.MomentArchive;
 import me.qyh.blog.vo.MomentArchiveQueryParam;
 import me.qyh.blog.vo.MomentStatistic;
 import me.qyh.blog.vo.PageResult;
+import me.qyh.blog.web.template.TemplateDataMapping;
 
 @Authenticated
 @RestController
@@ -39,26 +40,26 @@ public class MomentController {
 		this.blogProperties = blogProperties;
 	}
 
-	@GetMapping("moments/{id}")
+	@TemplateDataMapping("moments/{id}")
 	public Moment get(@PathVariable("id") int id) {
 		return momentService.getMoment(id)
 				.orElseThrow(() -> new ResourceNotFoundException("moment.notExists", "动态不存在"));
 	}
 
-	@GetMapping("moment/archives")
+	@TemplateDataMapping("momentArchives")
 	public PageResult<MomentArchive> queryMomentArchives(@Valid MomentArchiveQueryParam param) {
 		param.setQueryPrivate(true);
 		param.setQueryPasswordProtected(true);
 		return momentService.queryMomentArchive(param);
 	}
 
-	@GetMapping("moments/{id}/next")
+	@TemplateDataMapping("moments/{id}/next")
 	public Moment nextMoment(@PathVariable("id") int id) {
 		return momentService.next(id)
 				.orElseThrow(() -> new ResourceNotFoundException("moment.next.notExists", "下一条动态不存在"));
 	}
 
-	@GetMapping("moments/{id}/previous")
+	@TemplateDataMapping("moments/{id}/previous")
 	public Moment prevMoment(@PathVariable("id") int id) {
 		return momentService.prev(id)
 				.orElseThrow(() -> new ResourceNotFoundException("moment.next.notExists", "上一条动态不存在"));
@@ -74,7 +75,7 @@ public class MomentController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@GetMapping("moment/statistic")
+	@TemplateDataMapping("momentStatistic")
 	public MomentStatistic statistic() {
 		return momentService.getMomentStatistic();
 	}

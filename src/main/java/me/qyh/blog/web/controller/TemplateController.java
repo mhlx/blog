@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +27,8 @@ import me.qyh.blog.service.TemplateService.SystemTemplate;
 import me.qyh.blog.utils.FileUtils;
 import me.qyh.blog.vo.PageResult;
 import me.qyh.blog.vo.TemplateQueryParam;
+import me.qyh.blog.web.template.TemplateRequestMappingHandlerMapping;
+import me.qyh.blog.web.template.TemplateRequestMappingHandlerMapping.TemplateDataPattern;
 
 @Authenticated
 @RestController
@@ -54,7 +55,7 @@ public class TemplateController {
 	}
 
 	@GetMapping("previewTemplates")
-	public List<Template> previewTemplates(Model model) {
+	public List<Template> previewTemplates() {
 		return templateService.getPreviewTemplates();
 	}
 
@@ -65,7 +66,7 @@ public class TemplateController {
 	}
 
 	@GetMapping("templates/{id}")
-	public ResponseEntity<Template> getTemplate(@PathVariable("id") int id, Model model) {
+	public ResponseEntity<Template> getTemplate(@PathVariable("id") int id) {
 		return ResponseEntity.of(templateService.getTemplate(id));
 	}
 
@@ -118,6 +119,11 @@ public class TemplateController {
 	@GetMapping("defaultTemplates")
 	public List<SystemTemplate> defaultTemplates() {
 		return templateService.getDefaultTemplates();
+	}
+
+	@GetMapping("templateDataPatterns")
+	public List<TemplateDataPattern> getTemplateDataPatterns() {
+		return TemplateRequestMappingHandlerMapping.getTemplateDataPatterns();
 	}
 
 }

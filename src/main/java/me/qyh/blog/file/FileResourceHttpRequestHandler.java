@@ -28,8 +28,8 @@ class FileResourceHttpRequestHandler extends ResourceHttpRequestHandler {
 	@Override
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
 		MediaType type;
-		if (resource instanceof ReadablePathSource) {
-			type = ((ReadablePathSource) resource).getMediaType().orElse(null);
+		if (resource instanceof ReadablePathResource) {
+			type = ((ReadablePathResource) resource).getMediaType().orElse(null);
 		} else {
 			type = super.getMediaType(request, resource);
 		}

@@ -45,7 +45,6 @@ public class SecurityConfig implements WebMvcConfigurer {
 			@Override
 			public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 					throws Exception {
-
 				if (!BlogContext.isAuthenticated() && (handler instanceof HandlerMethod)) {
 					HandlerMethod hm = (HandlerMethod) handler;
 					Authenticated authenticated = AnnotationUtils.findAnnotation(hm.getMethod(), Authenticated.class);

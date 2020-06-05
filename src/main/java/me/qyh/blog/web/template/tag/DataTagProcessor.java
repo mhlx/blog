@@ -5,10 +5,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.thymeleaf.context.IEngineContext;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.context.IWebContext;
@@ -22,7 +24,7 @@ import me.qyh.blog.exception.LogicException;
 import me.qyh.blog.web.template.ProcessContext;
 import me.qyh.blog.web.template.TemplateDataRequest;
 import me.qyh.blog.web.template.TemplateProcessingWrapException;
-import me.qyh.blog.web.template.TemplateRequestMappingHandlerAdapter;
+import me.qyh.blog.web.template.TemplateRequestMappingHandler;
 
 public class DataTagProcessor extends AbstractElementTagProcessor {
 
@@ -31,14 +33,14 @@ public class DataTagProcessor extends AbstractElementTagProcessor {
 	private static final String ALIAS_ATTR = "alias";
 	private static final String IGNORE_EXCEPTION_ATTR = "ignoreException";
 
-	private static final TemplateRequestMappingHandlerAdapter adapter = TemplateRequestMappingHandlerAdapter
-			.getRequestMappingHandlerAdapter();
-
+	private final TemplateRequestMappingHandler templateRequestMappingHandler;
 	private final PlatformTransactionManager platformTransactionManager;
 
-	public DataTagProcessor(String dialectPrefix, PlatformTransactionManager platformTransactionManager) {
+	public DataTagProcessor(String dialectPrefix, ApplicationContext applicationContext) {
 		super(TemplateMode.HTML, dialectPrefix, TAG_NAME, false, null, false, 1000);
-		this.platformTransactionManager = platformTransactionManager;
+		this.platformTransactionManager = applicationContext.getBean(PlatformTransactionManager.class);
+		this.templateRequestMappingHandler = (TemplateRequestMappingHandler) applicationContext
+				.getBean(RequestMappingHandlerAdapter.class);
 	}
 
 	@Override
@@ -92,7 +94,7 @@ public class DataTagProcessor extends AbstractElementTagProcessor {
 				req.reset(map2, path);
 
 				try {
-					object = adapter.invoke(path, req);
+					object = templateRequestMappingHandler.invoke(req);
 				} catch (LogicException | AuthenticationException e) {
 					if (!ignoreException) {
 						throw e;

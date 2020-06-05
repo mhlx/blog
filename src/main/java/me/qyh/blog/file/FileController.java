@@ -8,10 +8,8 @@ import javax.validation.Valid;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +22,7 @@ import me.qyh.blog.BlogProperties;
 import me.qyh.blog.exception.ResourceNotFoundException;
 import me.qyh.blog.security.Authenticated;
 import me.qyh.blog.utils.FileUtils;
+import me.qyh.blog.web.template.TemplateDataMapping;
 
 @Authenticated
 @RestController
@@ -41,18 +40,18 @@ public class FileController {
 		this.blogProperties = blogProperties;
 	}
 
-	@GetMapping("file")
-	public FileInfoDetail getFile(@Path(message = "非法的路径") @RequestParam("path") String path, Model model) {
+	@TemplateDataMapping("file")
+	public FileInfoDetail getFile(@Path(message = "非法的路径") @RequestParam("path") String path) {
 		return fileService.getFileInfoDetail(path)
 				.orElseThrow(() -> new ResourceNotFoundException("file.notExists", "文件不存在"));
 	}
 
-	@GetMapping("file/statistic")
+	@TemplateDataMapping("fileStatistic")
 	public FileStatistic getFileStatistic() {
 		return fileService.getFileStatistic();
 	}
 
-	@GetMapping("files")
+	@TemplateDataMapping("files")
 	public FilePageResult query(@Valid FileQueryParam param) {
 		return fileService.query(param);
 	}

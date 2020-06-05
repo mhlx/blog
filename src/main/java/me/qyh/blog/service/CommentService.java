@@ -136,16 +136,14 @@ public class CommentService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Comment> getCommentConversation(int id) {
+	public List<Comment> getCommentConversation(int id, CommentModule module) {
+		CommentModuleHandler<?> handler = getRequiredCommentModuleHandler(module.getName());
+		handler.checkBeforeQuery(module);
 		Optional<Comment> opComment = commentMapper.selectById(id);
-		if (opComment.isEmpty()) {
+		if (opComment.isEmpty() || !opComment.get().getModule().equals(module)) {
 			throw new ResourceNotFoundException("comment.notExists", "评论不存在");
 		}
 		Comment comment = opComment.get();
-		CommentModule module = comment.getModule();
-		CommentModuleHandler<?> handler = handlers.stream().filter(h -> h.getModuleName().equals(module.getName()))
-				.findAny().orElseThrow();
-		Object target = handler.checkBeforeQuery(module);
 		List<Comment> parents = Arrays.stream(comment.getParentPath().split("/")).filter(Predicate.not(String::isEmpty))
 				.map(Integer::parseInt).map(pid -> commentMapper.selectById(pid).orElseThrow())
 				.collect(Collectors.toList());
@@ -153,20 +151,18 @@ public class CommentService {
 		List<Comment> children = commentMapper.selectChildren(id, false);
 		parents.addAll(children);
 		parents.sort(Comparator.comparing(Comment::getCreateTime));
-		processCommentsContentAndBaseInfo(parents, target);
+		processCommentsContentAndBaseInfo(parents);
 		return parents;
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<Comment> getComment(int id) {
+	public Optional<Comment> getComment(int id, CommentModule module) {
+		CommentModuleHandler<?> handler = getRequiredCommentModuleHandler(module.getName());
+		handler.checkBeforeQuery(module);
 		Optional<Comment> opComment = commentMapper.selectById(id);
-		if (opComment.isPresent()) {
+		if (opComment.isPresent() && opComment.get().getModule().equals(module)) {
 			Comment comment = opComment.get();
-			CommentModule module = comment.getModule();
-			CommentModuleHandler<?> handler = handlers.stream().filter(h -> h.getModuleName().equals(module.getName()))
-					.findAny().orElseThrow();
-			Object target = handler.checkBeforeQuery(module);
-			processCommentsContentAndBaseInfo(List.of(comment), target);
+			processCommentsContentAndBaseInfo(List.of(comment));
 			return opComment;
 		}
 		return Optional.empty();
@@ -179,7 +175,6 @@ public class CommentService {
 
 	@Transactional(readOnly = true)
 	public PageResult<Comment> queryComments(CommentQueryParam param) {
-		final Object target;
 		final CommentModule module;
 		if (param.getParent() != null) {
 			Optional<Comment> opParent = commentMapper.selectById(param.getParent());
@@ -187,26 +182,15 @@ public class CommentService {
 				throw new ResourceNotFoundException("comment.parent.notExists", "父评论不存在");
 			}
 			module = opParent.get().getModule();
-			Optional<CommentModuleHandler<?>> opHandler = handlers.stream()
-					.filter(h -> h.getModuleName().equals(module.getName())).findAny();
-			if (opHandler.isEmpty()) {
-				return new PageResult<Comment>(param, 0, List.of());
-			}
-			target = opHandler.get().checkBeforeQuery(module);
+			getRequiredCommentModuleHandler(module.getName()).checkBeforeQuery(module);
 		} else {
 			module = param.getModule();
 			if (module == null || module.getId() == null || module.getName() == null) {
 				if (!BlogContext.isAuthenticated()) {
 					throw new AuthenticationException();
 				}
-				target = null;
 			} else {
-				Optional<CommentModuleHandler<?>> opHandler = handlers.stream()
-						.filter(h -> h.getModuleName().equals(module.getName())).findAny();
-				if (opHandler.isEmpty()) {
-					return new PageResult<Comment>(param, 0, List.of());
-				}
-				target = opHandler.get().checkBeforeQuery(module);
+				getRequiredCommentModuleHandler(module.getName()).checkBeforeQuery(module);
 			}
 		}
 
@@ -230,33 +214,14 @@ public class CommentService {
 		}
 
 		List<Comment> datas = commentMapper.selectPage(param);
-		if (target != null) {
-			processCommentsContentAndBaseInfo(datas, target);
-		} else {
-			Map<CommentModule, Object> cache = new HashMap<>();
-			for (Comment comment : datas) {
-				Object r = cache.get(comment.getModule());
-				if (r == null) {
-					Optional<CommentModuleHandler<?>> opHandler = handlers.stream()
-							.filter(h -> h.getModuleName().equals(comment.getModule().getName())).findAny();
-					if (opHandler.isEmpty()) {
-						continue;
-					}
-					r = opHandler.get().checkBeforeQuery(comment.getModule());
-					cache.put(comment.getModule(), r);
-				}
-				processCommentsBaseInfo(List.of(comment), r);
-			}
-			processCommentsContent(datas);
-		}
+		processCommentsContentAndBaseInfo(datas);
 		return new PageResult<>(param, count, datas);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	public SavedComment saveComment(Comment comment) {
 		CommentModule module = comment.getModule();
-		CommentModuleHandler<?> handler = handlers.stream().filter(h -> h.getModuleName().equals(module.getName()))
-				.findAny().orElseThrow(() -> new LogicException("comment.module.notExists", "评论模块不存在"));
+		CommentModuleHandler<?> handler = getRequiredCommentModuleHandler(module.getName());
 		handler.checkBeforeSave(comment, module);
 		String content = comment.getContent();
 		if (contentChecker != null) {
@@ -335,7 +300,7 @@ public class CommentService {
 	/**
 	 * query top n comments
 	 * <p>
-	 * <b>bad performance because of (1+n)*k sql</b>
+	 * <b>bad performance</b>
 	 * </p>
 	 * 
 	 * @param num        条数
@@ -350,29 +315,25 @@ public class CommentService {
 		param.setPageSize(num);
 		param.setChecking(false);
 		param.setQueryAdmin(queryAdmin);
-		Map<CommentModule, Object> cache = new HashMap<>();
+		Map<CommentModule, Boolean> cache = new HashMap<>();
 		while (comments.size() < num) {
 			List<Comment> tops = commentMapper.selectPage(param);
 			for (Comment top : tops) {
-				Object target = cache.get(top.getModule());
-				if (target == null) {
-					Optional<CommentModuleHandler<?>> opCmh = handlers.stream()
-							.filter(h -> h.getModuleName().equals(top.getModule().getName())).findAny();
-					if (opCmh.isPresent()) {
-						try {
-							target = opCmh.get().checkBeforeQuery(top.getModule());
-							Objects.requireNonNull(target);
-						} catch (AuthenticationException | LogicException e) {
-							continue;
-						}
-					} else {
+				Boolean fromCache = cache.get(top.getModule());
+				if (fromCache == null) {
+					try {
+						getCommentModuleHandler(top.getModule().getName())
+								.ifPresent(h -> h.checkBeforeQuery(top.getModule()));
+						cache.put(top.getModule(), Boolean.TRUE);
+					} catch (AuthenticationException | LogicException e) {
+						cache.put(top.getModule(), Boolean.FALSE);
 						continue;
 					}
-					cache.put(top.getModule(), target);
+				} else if (Boolean.FALSE.equals(fromCache)) {
+					continue;
 				}
-				processCommentsBaseInfo(List.of(top), target);
+				processCommentsBaseInfo(List.of(top));
 				comments.add(top);
-				cache.put(top.getModule(), target);
 				if (comments.size() == num) {
 					break;
 				}
@@ -386,7 +347,12 @@ public class CommentService {
 		return comments;
 	}
 
-	private void processCommentsBaseInfo(List<Comment> comments, Object target) {
+	@Transactional(readOnly = true)
+	public Object getModuleTarget(CommentModule module) {
+		return getRequiredCommentModuleHandler(module.getName()).checkBeforeQuery(module);
+	}
+
+	private void processCommentsBaseInfo(List<Comment> comments) {
 		BlogConfig config = null;
 		boolean authenticated = BlogContext.isAuthenticated();
 		Map<String, Boolean> blackIpMap;
@@ -396,11 +362,7 @@ public class CommentService {
 			blackIpMap = null;
 		}
 		for (Comment comment : comments) {
-			comment.setTarget(target);
 			Comment parent = comment.getParent();
-			if (parent != null) {
-				parent.setTarget(target);
-			}
 			if (!authenticated) {
 				comment.setIp(null);
 				comment.setEmail(null);
@@ -436,9 +398,9 @@ public class CommentService {
 
 	}
 
-	private void processCommentsContentAndBaseInfo(List<Comment> comments, Object target) {
+	private void processCommentsContentAndBaseInfo(List<Comment> comments) {
 		processCommentsContent(comments);
-		processCommentsBaseInfo(comments, target);
+		processCommentsBaseInfo(comments);
 	}
 
 	private void processCommentsContent(List<Comment> comments) {
@@ -467,7 +429,7 @@ public class CommentService {
 				return;
 			}
 			List<Comment> comments = List.of(comment);
-			processCommentsContentAndBaseInfo(comments, null);
+			processCommentsContentAndBaseInfo(comments);
 			emailNotify(comments, parent.getEmail());
 		}
 	}
@@ -511,7 +473,7 @@ public class CommentService {
 			return;
 		}
 		comments.sort(Comparator.comparing(Comment::getCreateTime));
-		processCommentsContentAndBaseInfo(comments, null);
+		processCommentsContentAndBaseInfo(comments);
 		emailNotify(comments, null);
 	}
 
@@ -521,6 +483,15 @@ public class CommentService {
 		if (this.mailSes != null && !this.mailSes.isShutdown()) {
 			this.mailSes.shutdownNow();
 		}
+	}
+
+	private CommentModuleHandler<?> getRequiredCommentModuleHandler(String moduleName) {
+		return getCommentModuleHandler(moduleName)
+				.orElseThrow(() -> new ResourceNotFoundException("commentModule.notExists", "评论模块不存在"));
+	}
+
+	private Optional<CommentModuleHandler<?>> getCommentModuleHandler(String moduleName) {
+		return handlers.stream().filter(h -> h.getModuleName().equals(moduleName)).findAny();
 	}
 
 }

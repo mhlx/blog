@@ -27,6 +27,7 @@ import me.qyh.blog.service.CommentService;
 import me.qyh.blog.vo.CommentQueryParam;
 import me.qyh.blog.vo.PageResult;
 import me.qyh.blog.vo.SavedComment;
+import me.qyh.blog.web.template.TemplateDataMapping;
 
 @RestController
 @RequestMapping("api")
@@ -46,14 +47,16 @@ public class CommentController {
 		this.blogProperties = blogProperties;
 	}
 
-	@GetMapping("comments/{id}/conversation")
-	public List<Comment> getCommentConversation(@PathVariable("id") int id) {
-		return commentService.getCommentConversation(id);
+	@TemplateDataMapping("commentModule/{name}/{moduleId}/comments/{id}/conversation")
+	public List<Comment> getCommentConversation(@PathVariable("name") String name,
+			@PathVariable("moduleId") int moduleId, @PathVariable("id") int id) {
+		return commentService.getCommentConversation(id, new CommentModule(name, moduleId));
 	}
 
-	@GetMapping("comments/{id}")
-	public Comment getComment(@PathVariable("id") int id) {
-		return commentService.getComment(id)
+	@TemplateDataMapping("commentModule/{name}/{moduleId}/comments/{id}")
+	public Comment getComment(@PathVariable("name") String name, @PathVariable("moduleId") int moduleId,
+			@PathVariable("id") int id) {
+		return commentService.getComment(id, new CommentModule(name, moduleId))
 				.orElseThrow(() -> new ResourceNotFoundException("comment.notExists", "评论不存在"));
 	}
 
@@ -63,7 +66,7 @@ public class CommentController {
 				.orElseThrow(() -> new ResourceNotFoundException("comment.notExists", "评论不存在"));
 	}
 
-	@GetMapping("commentModule/{name}/{id}/comments")
+	@TemplateDataMapping("commentModule/{name}/{id}/comments")
 	public PageResult<Comment> queryComment(@PathVariable("name") String name, @PathVariable("id") int id,
 			@Valid CommentQueryParam param) {
 		param.setParent(null);
@@ -71,7 +74,7 @@ public class CommentController {
 		return commentService.queryComments(param);
 	}
 
-	@GetMapping("commentModule/{name}/{id}/comments/{parent}/comments")
+	@TemplateDataMapping("commentModule/{name}/{id}/comments/{parent}/comments")
 	public PageResult<Comment> queryComment2(@PathVariable("name") String name, @PathVariable("id") int id,
 			@PathVariable("parent") int parent, @Valid CommentQueryParam param) {
 		param.setParent(parent);
@@ -117,11 +120,17 @@ public class CommentController {
 	@Authenticated
 	@GetMapping("comments")
 	public PageResult<Comment> param(@Valid CommentQueryParam param) {
+		param.setModule(null);
 		return commentService.queryComments(param);
 	}
 
+	@TemplateDataMapping("commentModule/{name}/{id}")
+	public Object getModuleTarget(@PathVariable("name") String name, @PathVariable("id") int id) {
+		return commentService.getModuleTarget(new CommentModule(name, id));
+	}
+
 	@Authenticated
-	@GetMapping("lastComments")
+	@TemplateDataMapping("lastComments")
 	public List<Comment> param(@RequestParam(value = "num", required = false, defaultValue = "5") int num,
 			@RequestParam(value = "queryAdmin", required = false, defaultValue = "false") boolean queryAdmin) {
 		return commentService.getLastComments(num, queryAdmin);

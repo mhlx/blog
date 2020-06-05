@@ -1,8 +1,5 @@
 package me.qyh.blog.web.controller;
 
-import java.util.List;
-import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.qyh.blog.BlogProperties;
@@ -30,11 +26,10 @@ import me.qyh.blog.service.ArticleService;
 import me.qyh.blog.utils.WebUtils;
 import me.qyh.blog.vo.ArticleArchive;
 import me.qyh.blog.vo.ArticleArchiveQueryParam;
-import me.qyh.blog.vo.ArticleCategoryStatistic;
 import me.qyh.blog.vo.ArticleQueryParam;
 import me.qyh.blog.vo.ArticleStatistic;
-import me.qyh.blog.vo.ArticleTagStatistic;
 import me.qyh.blog.vo.PageResult;
+import me.qyh.blog.web.template.TemplateDataMapping;
 
 @RestController
 @RequestMapping("api")
@@ -55,62 +50,76 @@ public class ArticleController {
 		this.blogProperties = blogProperties;
 	}
 
-	@GetMapping("articles/{idOrAlias}")
-	public Article get(@PathVariable("idOrAlias") String idOrAlias) {
-		return articleService.getArticle(idOrAlias)
+	@TemplateDataMapping("categories/{category}/articles/{idOrAlias}")
+	public Article getArticle(@PathVariable("category") String category, @PathVariable("idOrAlias") String idOrAlias) {
+		return articleService.getArticle(idOrAlias, category)
 				.orElseThrow(() -> new ResourceNotFoundException("article.notExists", "文章不存在"));
 	}
 
-	@GetMapping("article/archives")
-	public PageResult<ArticleArchive> queryArticleArchives(@Valid ArticleArchiveQueryParam param) {
+	@TemplateDataMapping("articles/{idOrAlias}")
+	public Article get(@PathVariable("idOrAlias") String idOrAlias) {
+		return getArticle(null, idOrAlias);
+	}
+
+	@TemplateDataMapping("categories/{category}/articleArchives")
+	public PageResult<ArticleArchive> queryArticleArchives(@PathVariable("category") String category,
+			@Valid ArticleArchiveQueryParam param) {
+		param.setCategory(category);
 		return articleService.queryArticleArchives(param);
 	}
 
-	@GetMapping("article/statistic")
+	@TemplateDataMapping("articleArchives")
+	public PageResult<ArticleArchive> queryArticleArchives(@Valid ArticleArchiveQueryParam param) {
+		return queryArticleArchives(null, param);
+	}
+
+	@TemplateDataMapping("articleStatistic")
 	public ArticleStatistic getArticleStatistic() {
-		return articleService.getArticleStatistic();
+		return articleService.getArticleStatistic(null);
 	}
 
-	@GetMapping("article/category/statistics")
-	public List<ArticleCategoryStatistic> getArticleCategoryStatistics() {
-		return articleService.getArticleCategoryStatistic();
+	@TemplateDataMapping("categories/{category}/articleStatistic")
+	public ArticleStatistic getArticleStatistic(@PathVariable("category") String category) {
+		return articleService.getArticleStatistic(category);
 	}
 
-	@GetMapping("article/tag/statistics")
-	public List<ArticleTagStatistic> getArticleTagStatistics() {
-		return articleService.getArticleTagStatistic(null);
-	}
-
-	@GetMapping("article/category/{category}/tag/statistics")
-	public List<ArticleTagStatistic> getArticleTagStatistics(@PathVariable("category") String category) {
-		return articleService.getArticleTagStatistic(category);
-	}
-
-	@GetMapping("articles/{idOrAlias}/next")
-	public Article nextArticle(@PathVariable("idOrAlias") String idOrAlias,
-			@RequestParam(name = "categories", required = false) Set<String> categories,
-			@RequestParam(name = "tags", required = false) Set<String> tags) {
-		return articleService.next(idOrAlias, categories, tags)
+	@TemplateDataMapping("categories/{category}/articles/{idOrAlias}/next")
+	public Article nextArticle(@PathVariable("category") String category, @PathVariable("idOrAlias") String idOrAlias) {
+		return articleService.next(idOrAlias, category)
 				.orElseThrow(() -> new ResourceNotFoundException("article.next.notExists", "下一篇文章不存在"));
 	}
 
-	@GetMapping("articles/{idOrAlias}/previous")
-	public Article prevArticle(@PathVariable("idOrAlias") String idOrAlias,
-			@RequestParam(name = "categories", required = false) Set<String> categories,
-			@RequestParam(name = "tags", required = false) Set<String> tags) {
-		return articleService.prev(idOrAlias, categories, tags)
+	@TemplateDataMapping("articles/{idOrAlias}/next")
+	public Article nextArticle(@PathVariable("idOrAlias") String idOrAlias) {
+		return nextArticle(null, idOrAlias);
+	}
+
+	@TemplateDataMapping("categories/{category}/articles/{idOrAlias}/previous")
+	public Article prevArticle(@PathVariable("category") String category, @PathVariable("idOrAlias") String idOrAlias) {
+		return articleService.prev(idOrAlias, category)
 				.orElseThrow(() -> new ResourceNotFoundException("article.prev.notExists", "上一篇文章不存在"));
 	}
 
-	@GetMapping("articles")
-	public PageResult<Article> query(@Valid ArticleQueryParam param) {
+	@TemplateDataMapping("articles/{idOrAlias}/previous")
+	public Article prevArticle(@PathVariable("idOrAlias") String idOrAlias) {
+		return prevArticle(null, idOrAlias);
+	}
+
+	@TemplateDataMapping("categories/{category}/articles")
+	public PageResult<Article> query(@PathVariable("category") String category, @Valid ArticleQueryParam param) {
 		param.setQueryPrivate(true);
 		param.setQueryPasswordProtected(true);
 		if (param.getStatus() == null) {
 			param.setStatus(ArticleStatus.PUBLISHED);
 		}
 		param.setIgnorePaging(false);
+		param.setCategory(category);
 		return articleService.queryArticle(param);
+	}
+
+	@TemplateDataMapping("articles")
+	public PageResult<Article> query(@Valid ArticleQueryParam param) {
+		return query(null, param);
 	}
 
 	@Authenticated(required = false)

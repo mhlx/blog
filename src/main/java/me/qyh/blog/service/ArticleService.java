@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -59,11 +58,9 @@ import me.qyh.blog.utils.JsoupUtils;
 import me.qyh.blog.utils.StringUtils;
 import me.qyh.blog.vo.ArticleArchive;
 import me.qyh.blog.vo.ArticleArchiveQueryParam;
-import me.qyh.blog.vo.ArticleCategoryStatistic;
 import me.qyh.blog.vo.ArticleQueryParam;
 import me.qyh.blog.vo.ArticleStatistic;
-import me.qyh.blog.vo.ArticleStatusStatistic;
-import me.qyh.blog.vo.ArticleTagStatistic;
+import me.qyh.blog.vo.HandledArticleArchiveQueryParam;
 import me.qyh.blog.vo.HandledArticleQueryParam;
 import me.qyh.blog.vo.PageResult;
 
@@ -235,7 +232,8 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<Article> getArticle(String idOrAlias) {
+	public Optional<Article> getArticle(String idOrAlias, String category) {
+		Integer categoryId = this.getCategoryByName(category).map(Category::getId).orElse(null);
 		Optional<Article> opArticle;
 		try {
 			int id = Integer.parseInt(idOrAlias);
@@ -245,7 +243,9 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		}
 		if (opArticle.isPresent()) {
 			Article article = opArticle.get();
-			if (!BlogContext.isAuthenticated() && !ArticleStatus.PUBLISHED.equals(article.getStatus())) {
+			if ((categoryId != null
+					&& article.getCategories().stream().noneMatch(c -> Objects.equals(c.getId(), categoryId)))
+					|| !ArticleStatus.PUBLISHED.equals(article.getStatus())) {
 				return Optional.empty();
 			}
 			SecurityChecker.check(article);
@@ -268,46 +268,30 @@ public class ArticleService implements CommentModuleHandler<Article> {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ArticleTagStatistic> getArticleTagStatistic(String category) {
-		Integer categoryId = null;
-		if (!StringUtils.isNullOrBlank(category)) {
-			categoryId = categoryMapper.selectByName(category).map(Category::getId).orElse(null);
-			if (categoryId == null) {
-				throw new ResourceNotFoundException("category.notExists", "分类不存在");
-			}
-		}
-		return articleTagMapper.selectCount(BlogContext.isAuthenticated(), categoryId);
-	}
-
-	@Transactional(readOnly = true)
-	public List<ArticleCategoryStatistic> getArticleCategoryStatistic() {
-		return articleCategoryMapper.selectCount(BlogContext.isAuthenticated());
-	}
-
-	@Transactional(readOnly = true)
-	public ArticleStatistic getArticleStatistic() {
+	public ArticleStatistic getArticleStatistic(String category) {
+		Integer categoryId = this.getCategoryByName(category).map(Category::getId).orElse(null);
 		boolean queryPrivate = BlogContext.isAuthenticated();
-		ArticleStatistic stat = articleMapper.selectStatistic(queryPrivate);
-		List<ArticleCategoryStatistic> categoryStatistics = articleCategoryMapper.selectCount(queryPrivate);
-		List<ArticleStatusStatistic> statusStatistics = articleMapper.selectStatusStatistic(queryPrivate);
-		List<ArticleTagStatistic> tagStatistics = articleTagMapper.selectCount(queryPrivate, null);
-		stat.setCategoryStatistics(categoryStatistics);
-		stat.setStatusStatistics(statusStatistics);
-		stat.setTagStatistics(tagStatistics);
+		ArticleStatistic stat = articleMapper.selectStatistic(queryPrivate, categoryId);
+		stat.setStatusStatistics(articleMapper.selectStatusStatistic(queryPrivate, categoryId));
+		stat.setTagStatistics(articleTagMapper.selectStatistic(queryPrivate, categoryId));
+		if (categoryId == null) {
+			stat.setCategoryStatistics(articleCategoryMapper.selectStatistic(queryPrivate));
+		}
+		stat.setArchiveStatistics(articleMapper.selectArchiveStatistic(queryPrivate, categoryId));
 		return stat;
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<Article> prev(String idOrAlias, Set<String> categories, Set<String> tags) {
-		return prevOrNext(idOrAlias, categories, tags, true);
+	public Optional<Article> prev(String idOrAlias, String category) {
+		return prevOrNext(idOrAlias, category, true);
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<Article> next(String idOrAlias, Set<String> categories, Set<String> tags) {
-		return prevOrNext(idOrAlias, categories, tags, false);
+	public Optional<Article> next(String idOrAlias, String category) {
+		return prevOrNext(idOrAlias, category, false);
 	}
 
-	private Optional<Article> prevOrNext(String idOrAlias, Set<String> categories, Set<String> tags, boolean prev) {
+	private Optional<Article> prevOrNext(String idOrAlias, String category, boolean prev) {
 		Optional<Article> opArticle;
 		try {
 			int id = Integer.parseInt(idOrAlias);
@@ -319,33 +303,17 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			throw new ResourceNotFoundException("article.notExists", "文章不存在");
 		}
 
-		Set<Integer> categorySet = null;
-		Set<Integer> tagSet = null;
-
-		if (!CollectionUtils.isEmpty(categories)) {
-			categorySet = categories.stream().map(categoryMapper::selectByName).filter(Optional::isPresent)
-					.map(Optional::get).map(Category::getId).collect(Collectors.toSet());
-			if (categorySet.isEmpty()) {
-				return Optional.empty();
-			}
-		}
-
-		if (!CollectionUtils.isEmpty(tags)) {
-			tagSet = tags.stream().map(tagMapper::selectByName).filter(Optional::isPresent).map(Optional::get)
-					.map(Tag::getId).collect(Collectors.toSet());
-			if (tagSet.isEmpty()) {
-				return Optional.empty();
-			}
-		}
+		Integer categoryId = getCategoryByName(category).map(Category::getId).orElse(null);
 
 		Article article = opArticle.get();
-		if (!ArticleStatus.PUBLISHED.equals(article.getStatus())) {
+		if (!ArticleStatus.PUBLISHED.equals(article.getStatus()) || (categoryId != null
+				&& article.getCategories().stream().noneMatch(c -> Objects.equals(c.getId(), categoryId)))) {
 			return Optional.empty();
 		}
 		SecurityChecker.check(article);
 		boolean queryPrivate = BlogContext.isAuthenticated();
-		Optional<Article> op = prev ? articleMapper.selectPrev(article, categorySet, tagSet, queryPrivate)
-				: articleMapper.selectNext(article, categorySet, tagSet, queryPrivate);
+		Optional<Article> op = prev ? articleMapper.selectPrev(article, categoryId, queryPrivate)
+				: articleMapper.selectNext(article, categoryId, queryPrivate);
 		if (op.isPresent()) {
 			processArticles(List.of(op.get()), queryPrivate);
 			op.get().setContent(null);
@@ -360,14 +328,14 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		if (!StringUtils.isNullOrBlank(queryParam.getCategory())) {
 			categoryId = categoryMapper.selectByName(queryParam.getCategory()).map(Category::getId).orElse(null);
 			if (categoryId == null) {
-				return new PageResult<>(queryParam, 0, List.of());
+				throw new ResourceNotFoundException("category.notExists", "分类不存在");
 			}
 		}
 
 		if (!StringUtils.isNullOrBlank(queryParam.getTag())) {
 			tagId = tagMapper.selectByName(queryParam.getTag()).map(Tag::getId).orElse(null);
 			if (tagId == null) {
-				return new PageResult<>(queryParam, 0, List.of());
+				return new PageResult<Article>(queryParam, 0, List.of());
 			}
 		}
 
@@ -378,7 +346,6 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			param.setQueryPasswordProtected(false);
 			param.setStatus(ArticleStatus.PUBLISHED);
 		}
-
 		String query = param.getQuery();
 		PageResult<Article> articlePage;
 		if (StringUtils.isNullOrBlank(query)) {
@@ -418,8 +385,11 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			param.setQueryPrivate(BlogContext.isAuthenticated());
 		}
 
-		int count = articleMapper.selectDaysCount(param);
-		List<LocalDate> days = articleMapper.selectDays(param);
+		Integer categoryId = this.getCategoryByName(param.getCategory()).map(Category::getId).orElse(null);
+
+		HandledArticleArchiveQueryParam hp = new HandledArticleArchiveQueryParam(param, categoryId);
+		int count = articleMapper.selectDaysCount(hp);
+		List<LocalDate> days = articleMapper.selectDays(hp);
 		int size = days.size();
 		if (size == 0) {
 			return new PageResult<>(param, count, Collections.emptyList());
@@ -443,7 +413,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		aqp.setQueryPrivate(param.isQueryPrivate());
 		aqp.setStatus(ArticleStatus.PUBLISHED);
 		aqp.setIgnorePaging(true);
-		HandledArticleQueryParam haqp = new HandledArticleQueryParam(aqp, null, null);
+		HandledArticleQueryParam haqp = new HandledArticleQueryParam(aqp, categoryId, null);
 
 		List<Article> articles = articleMapper.selectPage(haqp);
 		processArticles(articles, BlogContext.isAuthenticated());
@@ -662,6 +632,17 @@ public class ArticleService implements CommentModuleHandler<Article> {
 				.orElseThrow(() -> new ResourceNotFoundException("article.notExists", "文章不存在"));
 		SecurityChecker.check(article);
 		return article;
+	}
+
+	private Optional<Category> getCategoryByName(String category) {
+		if (!StringUtils.isNullOrBlank(category)) {
+			Optional<Category> op = categoryMapper.selectByName(category);
+			if (op.isEmpty()) {
+				throw new ResourceNotFoundException("category.notExists", "分类不存在");
+			}
+			return op;
+		}
+		return Optional.empty();
 	}
 
 	@Override

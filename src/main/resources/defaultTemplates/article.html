@@ -64,60 +64,34 @@
 				<div class="container">
 					<h2>[[${article.title}]]</h2>
 					<div class="markdown-body mb-4" th:utext="${article.content}"></div>
-					<div class="row row-cards row-deck"
+                  
+					<div class="row"
 						th:if="${prev != null or next != null}">
-						<div class="col-lg-3 col-sm-6" th:if="${prev != null}">
-							<div class="card" style="cursor: pointer">
-								<span class="badge " style="position: absolute; color: #467fcf">上一篇</span>
-								<img class="card-img-top" th:src="@{${prev.featureImage}}"
-									th:if="${prev.featureImage != null}">
-								<div class="card-body d-flex flex-column">
-									<h4>
-										<a
-											th:href="@{/articles/}+${prev.alias == null ? prev.id : prev.alias}">[[${prev.title}]]</a>
-									</h4>
-									<div class="text-muted" th:if="${prev.summary != null}">[[${#jsoups.parser(prev.summary).text}]]</div>
-									<div class="text-muted"
-										th:if="${prev.summary == null and prev.password != null}">内容受到密码保护</div>
-									<div class="d-flex align-items-center pt-5 mt-auto">
-										<div class="ml-auto text-muted">
-											<small> <span class="badge  mr-1"
-												style="color: inherit"><i class="far fa-comment mr-1"></i>[[${prev.comments}]]<i
-													class="fas fa-fire mr-1 ml-2"></i>[[${prev.hits}]]</span>
-											</small>
-										</div>
-									</div>
-								</div>
-							</div>
-
+						<div class="col-lg-6 col-sm-6 my-2" th:if="${prev != null}">
+							<div class="row align-items-center">
+                             
+                              <div class="col">
+                                <div>
+                                  <a th:href="@{/articles/}+${prev.alias == null ? prev.id : prev.alias}" class="text-inherit">上一篇</a>
+                                </div>
+                                <small class="d-block item-except text-sm text-muted h-1x">[[${prev.title}]]</small>
+                              </div>
+                            </div>
 						</div>
 
-						<div class="col-lg-3 col-sm-6" th:if="${next != null}">
-							<div class="card" style="cursor: pointer">
-								<span class="badge " style="position: absolute; color: #467fcf">下一篇</span>
-								<img class="card-img-top" th:src="@{${next.featureImage}}"
-									th:if="${next.featureImage != null}">
-								<div class="card-body d-flex flex-column">
-									<h4>
-										<a
-											th:href="@{/articles/}+${next.alias == null ? next.id : next.alias}">[[${next.title}]]</a>
-									</h4>
-									<div class="text-muted" th:if="${next.summary != null}">[[${#jsoups.parser(next.summary).text}]]</div>
-									<div class="text-muted"
-										th:if="${next.summary == null and next.password != null}">内容受到密码保护</div>
-									<div class="d-flex align-items-center pt-5 mt-auto">
-										<div class="ml-auto text-muted">
-											<small> <span class="badge  mr-1"
-												style="color: inherit"><i class="far fa-comment mr-1"></i>[[${next.comments}]]<i
-													class="fas fa-fire mr-1 ml-2"></i>[[${next.hits}]]</span>
-											</small>
-										</div>
-									</div>
-								</div>
-							</div>
-
+						<div class="col-lg-6 col-sm-6 my-2" th:if="${next != null}">
+							<div class="row align-items-center">
+                             
+                              <div class="col">
+                                <div>
+                                  <a th:href="@{/articles/}+${next.alias == null ? next.id : next.alias}" class="text-inherit">下一篇</a>
+                                </div>
+                                <small class="d-block item-except text-sm text-muted h-1x">[[${next.title}]]</small>
+                              </div>
+                            </div>
 						</div>
 					</div>
+                  
 					<div id="comment-container" class="noborder"></div>
 				</div>
 
@@ -134,6 +108,8 @@
 			</div>
 		</footer>
 	</div>
+  	<script th:src="@{/static/heather/highlight/highlight.pack.js}"></script>
+<script>hljs.initHighlightingOnLoad();</script>
 	<script
 		th:src="@{/static/tabler/dist/assets/js/vendors/jquery-3.2.1.min.js}"></script>
 	<script
@@ -159,7 +135,7 @@
 
 		if (sessionStorage.getItem('article.' + '[[${article.id}]]') == null) {
 			$.ajax({
-				type : "post",
+				type : "patch",
 				url : rootPath + 'api/articles/' + '[[${article.id}]]' + '/hit',
 				complete : function(data) {
 					sessionStorage.setItem('article.' + '[[${article.id}]]',
