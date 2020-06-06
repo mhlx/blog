@@ -77,13 +77,12 @@ public class ArticleIndexer {
 	}
 
 	private final IndexWriter indexWriter;
-	private final Directory directory;
 	private final Map<String, Float> boosts;
-	private SearcherManager searcherManager;
+	private final SearcherManager searcherManager;
 
 	public ArticleIndexer() throws IOException {
 		Analyzer analyzer = createAnalyzer();
-		this.directory = createDirectory();
+		Directory directory = createDirectory();
 		IndexWriter writer;
 		try {
 			writer = new IndexWriter(directory, new IndexWriterConfig(analyzer));
@@ -131,7 +130,7 @@ public class ArticleIndexer {
 		try {
 			query = buildQuery(param);
 		} catch (ParseException e) {
-			return new PageResult<Integer>(param, 0, List.of());
+			return new PageResult<>(param, 0, List.of());
 		}
 
 		IndexSearcher searcher = searcherManager.acquire();
@@ -147,11 +146,10 @@ public class ArticleIndexer {
 				Document doc = searcher.doc(sd.doc);
 				ids.add(Integer.parseInt(doc.get(ID)));
 			}
-			return new PageResult<Integer>(param, (int) totalHits, ids);
+			return new PageResult<>(param, (int) totalHits, ids);
 		} finally {
 			if (searcher != null) {
 				searcherManager.release(searcher);
-				searcher = null;
 			}
 		}
 	}

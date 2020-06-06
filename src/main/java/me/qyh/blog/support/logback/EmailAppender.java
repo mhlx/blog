@@ -26,7 +26,7 @@ public class EmailAppender<E> extends UnsynchronizedAppenderBase<E> {
 
 	private JavaMailSender javaMailSender;
 	private BlogConfigService configService;
-	private ReentrantLock lock = new ReentrantLock();
+	private final ReentrantLock lock = new ReentrantLock();
 	private Path current;
 
 	private Encoder<E> encoder;
@@ -88,7 +88,7 @@ public class EmailAppender<E> extends UnsynchronizedAppenderBase<E> {
 				if (Files.size(current) > maxByte) {
 					sendAsync();
 				}
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 
 			}
 		} finally {

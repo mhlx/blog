@@ -31,11 +31,6 @@ public class TagService {
 		return tagMapper.selectAll();
 	}
 
-	@Transactional(readOnly = true)
-	public Optional<Tag> getTag(int id) {
-		return tagMapper.selectById(id);
-	}
-
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void deleteTag(final int id) {
 		Optional<Tag> opTag = tagMapper.selectById(id);

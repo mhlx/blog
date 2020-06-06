@@ -90,7 +90,7 @@ public class FileController {
 		return ResponseEntity.created(blogProperties.buildUrl("api/file?path=" + detail.getPath())).body(detail);
 	}
 
-	private class MultipartFileReadablePath implements ReadablePath {
+	private static class MultipartFileReadablePath implements ReadablePath {
 		private final MultipartFile multipartFile;
 
 		public MultipartFileReadablePath(MultipartFile multipartFile) {

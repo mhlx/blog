@@ -2,16 +2,8 @@ package me.qyh.blog.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-
-import org.springframework.util.unit.DataSize;
 
 public class FileUtils {
 
@@ -24,43 +16,20 @@ public class FileUtils {
 		super();
 	}
 
-	/**
-	 * 获取文件后缀名
-	 * 
-	 * @param file
-	 * @return
-	 */
 	public static String getFileExtension(File file) {
 		String fileName = file.getName();
 		int dotIndex = fileName.lastIndexOf('.');
 		return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
 	}
 
-	/**
-	 * 获取文件后缀名
-	 * 
-	 * @param fullName
-	 * @return
-	 */
 	public static String getFileExtension(String fullName) {
 		return getFileExtension(new File(fullName));
 	}
 
-	/**
-	 * 获取文件的后缀名
-	 * 
-	 * @param path
-	 * @return
-	 */
 	public static String getFileExtension(Path path) {
 		return getFileExtension(path.toFile());
 	}
 
-	/**
-	 * 删除一个文件，忽略异常
-	 * 
-	 * @param path
-	 */
 	public static void deleteQuietly(Path path) {
 		if (!Files.exists(path)) {
 			return;
@@ -79,16 +48,10 @@ public class FileUtils {
 					return FileVisitResult.CONTINUE;
 				}
 			});
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 		}
 	}
 
-	/**
-	 * 创建一个文件文件夹
-	 * 
-	 * @param path
-	 * @throws IOException
-	 */
 	public static void forceMkdir(Path path) throws IOException {
 		if (path == null) {
 			return;
@@ -107,13 +70,6 @@ public class FileUtils {
 		}
 	}
 
-	/**
-	 * 移动一个文件夹
-	 * 
-	 * @param source
-	 * @param target
-	 * @throws IOException
-	 */
 	public static void move(Path source, Path target) throws IOException {
 		forceMkdir(target.getParent());
 		Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
@@ -130,8 +86,8 @@ public class FileUtils {
 	 * cleanPath(null) = "";
 	 * </p>
 	 * 
-	 * @param path
-	 * @return
+	 * @param path 路径
+	 * @return 新路径
 	 */
 	public static String cleanPath(String path) {
 		if (StringUtils.isNullOrBlank(path)) {
@@ -192,7 +148,7 @@ public class FileUtils {
 	 * </p>
 	 * 
 	 * @param name 包含后缀名的文件名
-	 * @return
+	 * @return 是否合法
 	 */
 	public static boolean maybeValidateFilename(String name) {
 		if (StringUtils.isNullOrBlank(name)) {
@@ -215,23 +171,10 @@ public class FileUtils {
 		return !name.endsWith(" ");
 	}
 
-	/**
-	 * 判断文件是否是某个文件的子文件
-	 * 
-	 * @param dest
-	 * @param parent
-	 * @return 如果是子文件或者两者相同
-	 */
 	public static boolean isSub(Path dest, Path parent) {
 		return dest.equals(parent) || dest.startsWith(parent.normalize());
 	}
 
-	/**
-	 * 获取文件名(不包括后缀)
-	 * 
-	 * @param file
-	 * @return
-	 */
 	public static String getNameWithoutExtension(String fullname) {
 		String fileName = new File(fullname).getName();
 		int dotIndex = fileName.lastIndexOf('.');
@@ -247,11 +190,6 @@ public class FileUtils {
 		return false;
 	}
 
-	/**
-	 * 创建一个文件
-	 * 
-	 * @param path
-	 */
 	public static void createFile(Path path) {
 		synchronized (FileUtils.class) {
 			if (!Files.exists(path)) {
@@ -285,16 +223,6 @@ public class FileUtils {
 		}
 	}
 
-	public static String humanReadableByteCountBin(DataSize dataSize) {
-		return humanReadableByteCountBin(dataSize.toBytes());
-	}
-
-	/**
-	 * {@link https://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java}
-	 * 
-	 * @param bytes
-	 * @return
-	 */
 	public static String humanReadableByteCountBin(long bytes) {
 		long b = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
 		return b < 1024L ? bytes + " B"

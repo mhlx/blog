@@ -86,9 +86,7 @@ public class FileService {
 		this.mediaTool = new MediaTool(fileProperties);
 		this.root = Paths.get(fileProperties.getRootPath());
 		this.thumb = fileProperties.getThumbPath() == null ? null : Paths.get(fileProperties.getThumbPath());
-		if (this.root != null) {
-			FileUtils.forceMkdir(this.root);
-		}
+		FileUtils.forceMkdir(this.root);
 		if (this.thumb != null) {
 			FileUtils.forceMkdir(this.thumb);
 		}
@@ -101,18 +99,9 @@ public class FileService {
 	}
 
 	/**
-	 * 查看文件缩放是否可用
-	 * 
-	 * @return
-	 */
-	public boolean thumbEnable() {
-		return thumb != null;
-	}
-
-	/**
 	 * 获取文件明细
-	 * 
-	 * @return
+	 * @param path 文件路径
+	 * @return 文件明细
 	 */
 	public Optional<FileInfoDetail> getFileInfoDetail(String path) {
 		this.sm.check(FileUtils.cleanPath(path));
@@ -127,9 +116,8 @@ public class FileService {
 
 	/**
 	 * 更新文件
-	 * 
-	 * @param path
-	 * @param update
+	 * @param path 要更新的文件路径
+	 * @param update 更新信息
 	 */
 	public void updateFile(String path, FileUpdate update) {
 		lock.writeLock().lock();
@@ -165,8 +153,8 @@ public class FileService {
 	 * <p>
 	 * <b>如果不是一个文件夹，那么它必须是可编辑的</b>
 	 * </p>
-	 * 
-	 * @param path
+	 * @param  fc 要创建的文件
+	 * @return  创造的文件明细
 	 */
 	public FileInfoDetail createFile(FileCreate fc) {
 		lock.writeLock().lock();
@@ -207,9 +195,10 @@ public class FileService {
 
 	/**
 	 * 保存文件
-	 * 
-	 * @param dir
-	 * @param paths
+	 *
+	 * @param dirPath 文件夹位置
+	 * @param path 要保存的文件
+	 * @return  文件明细
 	 */
 	public FileInfoDetail save(String dirPath, ReadablePath path) {
 		lock.writeLock().lock();
@@ -246,8 +235,8 @@ public class FileService {
 	/**
 	 * 分页查询本地文件
 	 * 
-	 * @param param
-	 * @return
+	 * @param param 查询条件
+	 * @return 分页结果
 	 */
 	public FilePageResult query(FileQueryParam param) {
 		lock.readLock().lock();
@@ -313,9 +302,9 @@ public class FileService {
 	 * <b>某些文件在找到后会进一步处理，例如如果找到的文件为一个视频文件，那它可能会被缩放</b>
 	 * </p>
 	 * 
-	 * @param path
-	 * @param supportWEBP
-	 * @return
+	 * @param path 文件路径
+	 * @param supportWEBP 是否转化为webp
+	 * @return 处理后的文件
 	 */
 	public Optional<ReadablePath> getProcessedFile(String path, boolean supportWEBP) {
 		PathParser pp = new PathParser(path);
@@ -345,15 +334,11 @@ public class FileService {
 			Path compressed = thumb.resolve(root.relativize(file)).resolve(file.getFileName().toString() + ".mp4");
 			if (Files.exists(compressed))
 				return Optional.of(new _ReadablePath(compressed));
-			handleFile(compressed, true, new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						mediaTool.toMP4(fileProperties.getVideoHeight(), -1, file, compressed);
-					} catch (IOException e) {
-						throw new RuntimeException(e.getMessage(), e);
-					}
+			handleFile(compressed, true, () -> {
+				try {
+					mediaTool.toMP4(fileProperties.getVideoHeight(), -1, file, compressed);
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
 				}
 			});
 
@@ -398,7 +383,7 @@ public class FileService {
 	/**
 	 * 统计文件|文件夹 数目以及 文件总大小
 	 * 
-	 * @return
+	 * @return 文件统计
 	 */
 	public FileStatistic getFileStatistic() {
 		lock.readLock().lock();
@@ -411,12 +396,6 @@ public class FileService {
 		}
 	}
 
-	/**
-	 * 创建文件夾，如果创建失败。将会删除已经创建的文件夹
-	 * 
-	 * @param path
-	 * @return 新建的文件夹，不包含本来已经存在的文件夹
-	 */
 	private List<Path> createDirectories(Path dir) {
 		try {
 			List<Path> paths = new ArrayList<>();
@@ -424,7 +403,7 @@ public class FileService {
 				paths.add(dir);
 			}
 			return paths;
-		} catch (RuntimeException x) {
+		} catch (RuntimeException ignored) {
 		}
 
 		SecurityException se = null;
@@ -438,7 +417,7 @@ public class FileService {
 			try {
 				parent.getFileSystem().provider().checkAccess(parent);
 				break;
-			} catch (NoSuchFileException x) {
+			} catch (NoSuchFileException ignored) {
 			} catch (IOException ex) {
 				throw new RuntimeException(ex.getMessage(), ex);
 			}
@@ -469,12 +448,6 @@ public class FileService {
 		return paths;
 	}
 
-	/**
-	 * 创建一个文件夹
-	 * 
-	 * @param dir
-	 * @return 是否创建了一个新的文件夹
-	 */
 	private synchronized boolean createAndCheckIsDirectory(Path dir) {
 		try {
 			Files.createDirectory(dir);
@@ -494,13 +467,6 @@ public class FileService {
 		paths.forEach(FileUtils::deleteQuietly);
 	}
 
-	/**
-	 * 校验路径是否正确
-	 * 
-	 * @param path 如果路径正确，返回格式化过的路径
-	 * @return
-	 * @throws LogicException
-	 */
 	private String validatePath(String path) {
 		if (!StringUtils.isNullOrBlank(path)) {
 			path = FileUtils.cleanPath(path);
@@ -654,17 +620,6 @@ public class FileService {
 		}
 	}
 
-	/**
-	 * 找出两个path之间的路径
-	 * <p>
-	 * 例如，betweenPaths(Paths.get("c:/123"),Paths.get("c:/123/456/789/xxx"))，
-	 * 返回["456","789"]
-	 * </p>
-	 * 
-	 * @param root
-	 * @param dir
-	 * @return
-	 */
 	private List<Path> betweenPaths(Path root, Path dir) {
 		if (root.equals(dir)) {
 			return new ArrayList<>();
@@ -690,7 +645,7 @@ public class FileService {
 		try {
 			FileTime ft = Files.getLastModifiedTime(path);
 			fi.setLastModify(LocalDateTime.ofInstant(ft.toInstant(), ZoneId.systemDefault()));
-		} catch (IOException e) {
+		} catch (IOException ignored) {
 		}
 		if (!fi.isDir()) {
 			fi.setExt(FileUtils.getFileExtension(fi.getName()));
@@ -723,13 +678,6 @@ public class FileService {
 		return fi;
 	}
 
-	/**
-	 * 
-	 * @param root  根目录
-	 * @param param 查询参数
-	 * @return
-	 * @throws IOException
-	 */
 	protected FilePageResult doSearch(Path root, FileQueryParam param) throws IOException {
 		boolean needQuery = !CollectionUtils.isEmpty(param.getExtensions())
 				|| !StringUtils.isNullOrBlank(param.getName());
@@ -925,7 +873,7 @@ public class FileService {
 				long size = FileUtils.size(p);
 				String type = FileUtils.getFileExtension(p).toLowerCase();
 				TypeAdder typeAdder = typeGroupingAdder.computeIfAbsent(type, k -> new TypeAdder());
-				typeAdder.counAdder.add(1);
+				typeAdder.countAdder.add(1);
 				typeAdder.sizeAdder.add(size);
 				lengthAdder.add(size);
 			}
@@ -939,7 +887,7 @@ public class FileService {
 			for (Map.Entry<String, TypeAdder> it : typeGroupingAdder.entrySet()) {
 				TypeAdder typeAdder = it.getValue();
 				typeStatistics.add(new FileTypeStatistic(it.getKey(), typeAdder.sizeAdder.longValue(),
-						typeAdder.counAdder.longValue()));
+						typeAdder.countAdder.longValue()));
 			}
 		}
 		return new FileStatistic(lengthAdder.longValue(), dirAdder.longValue(), filesAdder.longValue(), typeStatistics);
@@ -984,9 +932,9 @@ public class FileService {
 					try {
 						VideoInfo vi = mediaTool.readVideo(p);
 						propertiesMap.put("width", vi.getWidth());
-						propertiesMap.put("hegith", vi.getHeight());
+						propertiesMap.put("height", vi.getHeight());
 						propertiesMap.put("duration", vi.getDuration());
-					} catch (IOException e) {
+					} catch (IOException ignored) {
 					}
 				}
 				if (MediaTool.isProcessableImage(ext)) {
@@ -995,7 +943,7 @@ public class FileService {
 						propertiesMap.put("width", ii.getWidth());
 						propertiesMap.put("height", ii.getHeight());
 						propertiesMap.put("type", ii.getType());
-					} catch (IOException e) {
+					} catch (IOException ignored) {
 					}
 				}
 			}
@@ -1004,7 +952,7 @@ public class FileService {
 		return propertiesMap;
 	}
 
-	private final class Pair implements Comparable<Pair> {
+	private static final class Pair implements Comparable<Pair> {
 		private final long t;
 		private final Path f;
 
@@ -1014,13 +962,12 @@ public class FileService {
 		}
 
 		public int compareTo(Pair o) {
-			long u = o.t;
-			return t < u ? 1 : t == u ? 0 : -1;
+			return Long.compare(o.t, t);
 		}
 	}
 
-	private final class TypeAdder {
-		private final LongAdder counAdder = new LongAdder();
+	private static final class TypeAdder {
+		private final LongAdder countAdder = new LongAdder();
 		private final LongAdder sizeAdder = new LongAdder();
 	}
 
@@ -1079,7 +1026,7 @@ public class FileService {
 						throw new LogicException("securityPath.private", "路径:" + k + "已经私有化了", k);
 					}
 				}
-				if (k.startsWith(clean + "/") && (!v.isEmpty() || (v.isEmpty() && password.isEmpty()))) {
+				if (k.startsWith(clean + "/") && (!v.isEmpty() || password.isEmpty())) {
 					securityPaths.remove(k);
 				}
 			});
@@ -1102,17 +1049,13 @@ public class FileService {
 			if (BlogContext.isAuthenticated()) {
 				return false;
 			}
-			return securityPaths.keySet().stream().anyMatch(k -> {
-				return k.equals(path) || path.startsWith(k + "/");
-			});
+			return securityPaths.keySet().stream().anyMatch(k -> k.equals(path) || path.startsWith(k + "/"));
 		}
 
 		private synchronized void save() {
 			FileUtils.createFile(authFile);
 			Properties pros = new Properties();
-			securityPaths.forEach((k, v) -> {
-				pros.put(k, v);
-			});
+			securityPaths.forEach(pros::put);
 			try (OutputStream out = Files.newOutputStream(authFile)) {
 				pros.store(out, null);
 			} catch (IOException e) {
@@ -1127,18 +1070,17 @@ public class FileService {
 	 * <b>如果目标文件是可被处理的视频文件，那么将返回视频的封面的缩略图</b>
 	 * </p>
 	 * 
-	 * @param path   文件路径
+	 * @param file   文件路径
 	 * @param resize 缩略图尺寸信息
-	 * @param toWEBP 是否转化为webp文件
-	 * @return
-	 * @throws IOException
+	 * @param supportWEBP 是否转化为webp文件
+	 * @return 缩放后的文件
 	 */
 	private Optional<ReadablePath> getThumbnail(Path file, Resize resize, boolean supportWEBP) {
 		// valid resize
 		Integer size = resize.getSize();
 		if (!BlogContext.isAuthenticated() && (size == null || (size != fileProperties.getSmallThumbSize()
 				&& size != fileProperties.getMiddleThumbSize() && size != fileProperties.getLargeThumbSize()
-				&& !Arrays.stream(fileProperties.getImageSizes()).anyMatch(allowSize -> allowSize == size))))
+				&& Arrays.stream(fileProperties.getImageSizes()).noneMatch(allowSize -> allowSize == size))))
 			return Optional.empty();
 		String ext = FileUtils.getFileExtension(file);
 		boolean toWEBP = supportWEBP && (MediaTool.isJPEG(ext) || MediaTool.isPNG(ext));
@@ -1159,15 +1101,11 @@ public class FileService {
 					.resolve(FileUtils.getNameWithoutExtension(file.getFileName().toString()) + "@." + MediaTool.PNG);
 
 			if (!Files.exists(poster)) {
-				handleFile(poster, false, new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							mediaTool.getVideoPoster(file, poster);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
+				handleFile(poster, false, () -> {
+					try {
+						mediaTool.getVideoPoster(file, poster);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
 				});
 			}
@@ -1182,17 +1120,12 @@ public class FileService {
 		if (!mediaTool.canHandle(FileUtils.getFileExtension(dest)))
 			return Optional.empty();
 		final Path source = dest;
-		handleFile(dest, false, new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					mediaTool.resizeImage(resize, source, thumbFile, toWEBP);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+		handleFile(dest, false, () -> {
+			try {
+				mediaTool.resizeImage(resize, source, thumbFile);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-
 		});
 
 		return Optional.of(new ThumbnailReadablePath(thumbFile, sourceExt));
@@ -1220,7 +1153,7 @@ public class FileService {
 		for (Path p : paths) {
 			try {
 				Files.setLastModifiedTime(p, now);
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 			}
 		}
 	}
@@ -1257,7 +1190,7 @@ public class FileService {
 			if (this.resize == null || this.resize == INVALID_RESIZE) {
 				return !this.path.equals(this.sourcePath);
 			}
-			return this.resize != null && this.resize.isInvalid();
+			return this.resize.isInvalid();
 		}
 
 		private String getSourcePathByResizePath(String path) {
@@ -1279,7 +1212,7 @@ public class FileService {
 				return null;
 
 			String name = FileUtils.getNameWithoutExtension(path);
-			if (name.indexOf(CONCAT) == -1)
+			if (!name.contains(CONCAT))
 				try {
 					return new Resize(Integer.parseInt(name));
 				} catch (NumberFormatException e) {
@@ -1314,7 +1247,7 @@ public class FileService {
 
 	}
 
-	private final class SecurityPath implements PasswordProtect, PrivateProtect {
+	private static final class SecurityPath implements PasswordProtect, PrivateProtect {
 		private final String path;
 		private final String password;
 
@@ -1384,7 +1317,7 @@ public class FileService {
 
 	}
 
-	private class _ReadablePath implements ReadablePath {
+	private static class _ReadablePath implements ReadablePath {
 		private final Path path;
 
 		public _ReadablePath(Path path) {
@@ -1418,7 +1351,7 @@ public class FileService {
 		}
 	}
 
-	private class ThumbnailReadablePath extends _ReadablePath {
+	private static class ThumbnailReadablePath extends _ReadablePath {
 
 		private final String sourceExt;
 

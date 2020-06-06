@@ -48,13 +48,7 @@ public class Config {
 	@Bean
 	@ConditionalOnMissingBean(HtmlClean.class)
 	public HtmlClean htmlClean() {
-		return new HtmlClean() {
-
-			@Override
-			public String clean(String html) {
-				return Jsoup.clean(html, Whitelist.basicWithImages());
-			}
-		};
+		return html -> Jsoup.clean(html, Whitelist.basicWithImages());
 	}
 
 	@Bean

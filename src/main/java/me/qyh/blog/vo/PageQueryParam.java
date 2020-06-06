@@ -22,11 +22,6 @@ public class PageQueryParam {
 		this.pageSize = param.pageSize;
 	}
 
-	public PageQueryParam(int currentPage, int pageSize) {
-		this.currentPage = currentPage;
-		this.pageSize = pageSize;
-	}
-
 	public final int getOffset() {
 		return getPageSize() * (getCurrentPage() - 1);
 	}

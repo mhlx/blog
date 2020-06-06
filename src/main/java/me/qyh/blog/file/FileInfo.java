@@ -166,7 +166,7 @@ public class FileInfo {
 	/**
 	 * 判斷是否匹配某些后缀
 	 * 
-	 * @param ext
+	 * @param exts
 	 * @return
 	 */
 	public boolean is(String... exts) {

@@ -32,8 +32,6 @@ import me.qyh.blog.exception.BadRequestException;
 
 class BadRequestReader {
 
-	static final Message CAPTCHA_INVALID_MSG = new Message("captcha.invalid", "验证码错误");
-
 	private static final List<Class<?>> classes = List.of(BindException.class, HttpMessageNotReadableException.class,
 			MissingServletRequestParameterException.class, MissingServletRequestPartException.class,
 			TypeMismatchException.class, ServletRequestBindingException.class, InvalidPropertyException.class,
@@ -48,12 +46,6 @@ class BadRequestReader {
 		super();
 	}
 
-	/**
-	 * read bad request error message from exception
-	 * 
-	 * @param ex
-	 * @see BadRequestReader#isBadRequestException(Throwable)
-	 */
 	public static List<MessageSourceResolvable> readErrors(Throwable ex) {
 		List<MessageSourceResolvable> errors = new ArrayList<>();
 		// print error with some ex

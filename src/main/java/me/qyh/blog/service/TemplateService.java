@@ -32,8 +32,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -125,67 +123,57 @@ public class TemplateService
 		this.writeTemplate = new TransactionTemplate(transactionManager);
 		this.writeTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		registerAllDefaultTemplates();
-		this.getDefaultTemplates().stream().filter(t -> {
-			return t.resetAfterRemove && t.getName() != null;
-		}).forEach(t -> fragmentMap.put(t.getName(), t));
+		this.getDefaultTemplates().stream().filter(t -> t.resetAfterRemove && t.getName() != null).forEach(t -> fragmentMap.put(t.getName(), t));
 		registerAllEnabledTemplates();
 	}
 
 	/**
 	 * 分页查询模板
 	 * 
-	 * @param param
-	 * @return
+	 * @param param 分页参数
+	 * @return 分页结果
 	 */
 	public PageResult<Template> queryTemplate(TemplateQueryParam param) {
-		return readOnlyTemplate.execute(new TransactionCallback<PageResult<Template>>() {
-
-			@Override
-			public PageResult<Template> doInTransaction(TransactionStatus status) {
-				int count = templateMapper.selectCount(param);
-				if (count > 0) {
-					List<Template> templates = templateMapper.selectPage(param);
-					return new PageResult<Template>(param, count, templates);
-				}
-				return new PageResult<Template>(param, count, Collections.emptyList());
+		return readOnlyTemplate.execute(status -> {
+			int count = templateMapper.selectCount(param);
+			if (count > 0) {
+				List<Template> templates = templateMapper.selectPage(param);
+				return new PageResult<>(param, count, templates);
 			}
+			return new PageResult<>(param, count, Collections.emptyList());
 		});
 	}
 
 	/**
 	 * 注册一个模板
 	 * 
-	 * @param template
+	 * @param template 模板
 	 */
-	public int registerTemplate(Template template) {
+	public Integer registerTemplate(Template template) {
 		checkReservedPattern(template);
 		long stamp = lock.writeLock();
 		try {
-			return writeTemplate.execute(new TransactionCallback<Integer>() {
+			return writeTemplate.execute(status -> {
+				disableEnable(template);
+				template.setCreateTime(LocalDateTime.now());
+				templateMapper.insert(template);
+				if (template.getEnable()) {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 
-				@Override
-				public Integer doInTransaction(TransactionStatus status) {
-					disableEnable(template);
-					template.setCreateTime(LocalDateTime.now());
-					templateMapper.insert(template);
-					if (template.getEnable()) {
-						TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-
-							@Override
-							public void afterCommit() {
-								if (template.getPattern() != null) {
-									previewUrlPatternMap.remove(template.getPattern());
-									urlPatternMap.put(template.getPattern(), template);
-								} else {
-									templateCache.clearCacheFor(template.getName());
-									previewFragmentMap.remove(template.getName());
-									fragmentMap.put(template.getName(), template);
-								}
+						@Override
+						public void afterCommit() {
+							if (template.getPattern() != null) {
+								previewUrlPatternMap.remove(template.getPattern());
+								urlPatternMap.put(template.getPattern(), template);
+							} else {
+								templateCache.clearCacheFor(template.getName());
+								previewFragmentMap.remove(template.getName());
+								fragmentMap.put(template.getName(), template);
 							}
-						});
-					}
-					return template.getId();
+						}
+					});
 				}
+				return template.getId();
 			});
 		} finally {
 			lock.unlockWrite(stamp);
@@ -195,7 +183,7 @@ public class TemplateService
 	/**
 	 * 更新一个模板
 	 * 
-	 * @param template
+	 * @param template 模板
 	 */
 	public void updateTemplate(Template template) {
 		checkReservedPattern(template);
@@ -243,7 +231,7 @@ public class TemplateService
 	/**
 	 * 注册一个预览模板
 	 * 
-	 * @param template
+	 * @param template 模板
 	 */
 	public int registerPreviewTemplate(Template template) {
 		checkReservedPattern(template);
@@ -267,36 +255,32 @@ public class TemplateService
 	/**
 	 * 获取一个模板，如果模板处于启用状态，并且当前IP是预览IP，那么模板内容会被替换为预览模板内容(如果存在对应名称或者路径的模板)
 	 * 
-	 * @param id
+	 * @param id 模板id
+	 * @return  模板明细
 	 */
 	public Optional<Template> getTemplate(int id) {
-		return readOnlyTemplate.execute(new TransactionCallback<Optional<Template>>() {
-
-			@Override
-			public Optional<Template> doInTransaction(TransactionStatus status) {
-				Optional<Template> opTemplate = templateMapper.selectById(id);
-				if (opTemplate.isPresent() && opTemplate.get().getEnable() && previewIp != null
-						&& previewIp.equals(BlogContext.getIP().orElse(null))) {
-					long stamp = lock.readLock();
-					try {
-						Template template = opTemplate.get();
-						Optional.ofNullable(template.getName() != null ? previewFragmentMap.get(template.getName())
-								: previewUrlPatternMap.get(template.getPattern())).map(Template::getContent)
-								.ifPresent(template::setContent);
-					} finally {
-						lock.unlockRead(stamp);
-					}
+		return readOnlyTemplate.execute(status -> {
+			Optional<Template> opTemplate = templateMapper.selectById(id);
+			if (opTemplate.isPresent() && opTemplate.get().getEnable() && previewIp != null
+					&& previewIp.equals(BlogContext.getIP().orElse(null))) {
+				long stamp = lock.readLock();
+				try {
+					Template template = opTemplate.get();
+					Optional.ofNullable(template.getName() != null ? previewFragmentMap.get(template.getName())
+							: previewUrlPatternMap.get(template.getPattern())).map(Template::getContent)
+							.ifPresent(template::setContent);
+				} finally {
+					lock.unlockRead(stamp);
 				}
-				return opTemplate;
 			}
-
+			return opTemplate;
 		});
 	}
 
 	/**
 	 * 删除一个模板
 	 * 
-	 * @param id
+	 * @param id 模板id
 	 */
 	public void deleteTemplate(int id) {
 		long stamp = lock.writeLock();
@@ -347,7 +331,7 @@ public class TemplateService
 	/**
 	 * 获取所有的预览模板
 	 * 
-	 * @return
+	 * @return 预览模板
 	 */
 	public List<Template> getPreviewTemplates() {
 		long stamp = lock.readLock();
@@ -364,13 +348,13 @@ public class TemplateService
 	/**
 	 * 删除某一个预览模板
 	 * 
-	 * @param id
+	 * @param id 模板id
 	 */
 	public void deletePreviewTemplate(int id) {
 		long stamp = lock.writeLock();
 		try {
-			previewFragmentMap.entrySet().removeIf(e -> e.getValue().getId().intValue() == id);
-			previewUrlPatternMap.entrySet().removeIf(e -> e.getValue().getId().intValue() == id);
+			previewFragmentMap.entrySet().removeIf(e -> e.getValue().getId() == id);
+			previewUrlPatternMap.entrySet().removeIf(e -> e.getValue().getId() == id);
 			if (previewFragmentMap.isEmpty() && previewUrlPatternMap.isEmpty()) {
 				previewIp = null;
 				previewId = 0;
@@ -383,7 +367,7 @@ public class TemplateService
 	/**
 	 * 获取默认模板
 	 * 
-	 * @return
+	 * @return 默认模板
 	 */
 	public List<SystemTemplate> getDefaultTemplates() {
 		if (this.defaultTemplates == null) {
@@ -426,7 +410,7 @@ public class TemplateService
 				}
 			}
 		}
-		return this.defaultTemplates;
+		return List.copyOf(this.defaultTemplates);
 	}
 
 	/**
@@ -526,12 +510,12 @@ public class TemplateService
 
 		long stamp = lock.tryOptimisticRead();
 		try {
-			retryHoldingLock: for (;; stamp = lock.readLock()) {
+			for (;; stamp = lock.readLock()) {
 				if (stamp == 0L)
-					continue retryHoldingLock;
+					continue ;
 				HandlerExecutionChain chain = findChain(lookupPath, request);
 				if (!lock.validate(stamp))
-					continue retryHoldingLock;
+					continue ;
 				return chain;
 			}
 		} finally {
@@ -652,7 +636,7 @@ public class TemplateService
 	public TemplateResolution resolveTemplate(IEngineConfiguration configuration, String ownerTemplate, String template,
 			Map<String, Object> templateResolutionAttributes) {
 
-		Template rootTemplate = null;
+		Template rootTemplate;
 		// find root template in request
 		RequestAttributes ra = RequestContextHolder.currentRequestAttributes();
 		int scope = RequestAttributes.SCOPE_REQUEST;
@@ -668,12 +652,12 @@ public class TemplateService
 		}
 		long stamp = lock.tryOptimisticRead();
 		try {
-			retryHoldingLock: for (;; stamp = lock.readLock()) {
+			for (;; stamp = lock.readLock()) {
 				if (stamp == 0L)
-					continue retryHoldingLock;
+					continue ;
 				Template lookupResult = findFragment(template, previewRequest);
 				if (!lock.validate(stamp))
-					continue retryHoldingLock;
+					continue ;
 				return lookupResult == null ? null
 						: new TemplateResolution(new TemplateResource(new Template(lookupResult)), TemplateMode.HTML,
 								NonCacheableCacheEntryValidity.INSTANCE);
@@ -728,9 +712,7 @@ public class TemplateService
 
 	private void removeFragment(String alias) {
 		fragmentMap.remove(alias);
-		getDefaultTemplates().stream().filter(t -> {
-			return t.resetAfterRemove && alias.equals(t.getName());
-		}).findAny().ifPresent(t -> fragmentMap.put(alias, t));
+		getDefaultTemplates().stream().filter(t -> t.resetAfterRemove && alias.equals(t.getName())).findAny().ifPresent(t -> fragmentMap.put(alias, t));
 	}
 
 	private void registerAllDefaultTemplates() {
@@ -777,14 +759,14 @@ public class TemplateService
 		}
 	}
 
-	public final class SystemTemplate extends Template {
+	public static final class SystemTemplate extends Template {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private boolean regWhenFirstStartup;
-		private boolean resetAfterRemove;
+		private final boolean regWhenFirstStartup;
+		private final boolean resetAfterRemove;
 
 		public SystemTemplate(String name, String pattern, String content, boolean regWhenFirstStartup,
 				boolean resetAfterRemove) {
@@ -795,7 +777,7 @@ public class TemplateService
 
 	}
 
-	public final class TemplateResource implements ITemplateResource {
+	public static final class TemplateResource implements ITemplateResource {
 
 		private final Template template;
 
@@ -897,7 +879,7 @@ public class TemplateService
 		templateCache.clear();
 	}
 
-	private final class TemplateCache implements ICache<TemplateCacheKey, TemplateModel> {
+	private static final class TemplateCache implements ICache<TemplateCacheKey, TemplateModel> {
 
 		private final ConcurrentHashMap<TemplateCacheKey, SoftReference<TemplateModel>> cache = new ConcurrentHashMap<>();
 
@@ -937,10 +919,8 @@ public class TemplateService
 		}
 
 		public void clearCacheFor(String name) {
-			cache.keySet().removeIf(key -> {
-				return key.getTemplate().equals(name)
-						|| (key.getOwnerTemplate() != null && key.getOwnerTemplate().equals(name));
-			});
+			cache.keySet().removeIf(key -> key.getTemplate().equals(name)
+					|| (key.getOwnerTemplate() != null && key.getOwnerTemplate().equals(name)));
 		}
 
 	}

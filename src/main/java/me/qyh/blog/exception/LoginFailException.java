@@ -16,10 +16,6 @@ public class LoginFailException extends RuntimeException {
 		this.error = error;
 	}
 
-	public LoginFailException(String code, String defaultMessage, Object... args) {
-		this(new Message(code, defaultMessage, args));
-	}
-
 	public Message getError() {
 		return error;
 	}

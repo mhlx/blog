@@ -1,6 +1,5 @@
 package me.qyh.blog.web.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ import me.qyh.blog.service.BlogConfigService;
 @RestController
 public class LoginController {
 
-	private List<LoginChain> chains = new ArrayList<>();
+	private final List<LoginChain> chains;
 	private final BlogConfigService configService;
 	private final CaptchaValidator captchaValidator;
 	private final Bucket bucket;

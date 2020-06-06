@@ -11,7 +11,7 @@ public interface CommentModuleHandler<T> {
 
 	/**
 	 * 
-	 * @param module
+	 * @param module 评论模块
 	 * @return the module target that contains required info that can access the
 	 *         module target
 	 * @throws LogicException          logic error that prevent query
@@ -22,8 +22,8 @@ public interface CommentModuleHandler<T> {
 
 	/**
 	 * 
-	 * @param comment
-	 * @param module
+	 * @param comment 评论
+	 * @param module 评论模块
 	 * @throws LogicException          logic error that prevent save
 	 * @throws AuthenticationException authentication fail when try to access module
 	 *                                 target

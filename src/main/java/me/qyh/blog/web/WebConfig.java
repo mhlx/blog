@@ -224,7 +224,7 @@ public class WebConfig implements WebMvcConfigurer, WebMvcRegistrations {
 		return Set.of(preProcessDialect, dataDialect);
 	}
 
-	private final class PreProcessor implements IPreProcessor {
+	private static final class PreProcessor implements IPreProcessor {
 
 		@Override
 		public TemplateMode getTemplateMode() {
@@ -243,7 +243,7 @@ public class WebConfig implements WebMvcConfigurer, WebMvcRegistrations {
 
 	}
 
-	private final class PreviewFilter extends OncePerRequestFilter {
+	private static final class PreviewFilter extends OncePerRequestFilter {
 		private final TemplateService templateService;
 
 		public PreviewFilter(TemplateService templateService) {

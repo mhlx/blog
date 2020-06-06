@@ -189,7 +189,7 @@ public class ArticleValidator implements Validator {
 		try {
 			Integer.parseInt(alias);
 			return false;
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException ignored) {
 		}
 		if (!alias.matches(ALIAS_PATTERN)) {
 			return false;
@@ -199,10 +199,6 @@ public class ArticleValidator implements Validator {
 			return false;
 		}
 		char last = alias.charAt(alias.length() - 1);
-		if (!Character.isLetterOrDigit(last)) {
-			return false;
-		}
-
-		return true;
+		return Character.isLetterOrDigit(last);
 	}
 }

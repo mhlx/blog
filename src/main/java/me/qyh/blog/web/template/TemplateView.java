@@ -75,7 +75,7 @@ public class TemplateView extends ThymeleafView {
 				return;
 			}
 			// let's exception resolver handle it
-			blogHandlerExceptionResolver.resolveTemplateException(request, response, model, (Exception) ex);
+			blogHandlerExceptionResolver.resolveTemplateException(request, response, (Exception) ex);
 		} finally {
 			ProcessContext.getTransactionStatus().ifPresent(platformTransactionManager::commit);
 			ProcessContext.remove();

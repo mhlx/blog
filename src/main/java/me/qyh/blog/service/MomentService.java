@@ -166,9 +166,7 @@ public class MomentService implements CommentModuleHandler<Moment> {
 
 		processMoments(moments);
 
-		Map<LocalDate, List<Moment>> map = moments.stream().collect(Collectors.groupingBy(moment -> {
-			return moment.getTime().toLocalDate();
-		}));
+		Map<LocalDate, List<Moment>> map = moments.stream().collect(Collectors.groupingBy(moment -> moment.getTime().toLocalDate()));
 
 		List<MomentArchive> archives = days.stream().map(d -> new MomentArchive(d, map.get(d)))
 				.collect(Collectors.toList());

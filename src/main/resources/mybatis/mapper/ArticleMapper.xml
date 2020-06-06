@@ -59,16 +59,6 @@
 		where ba.status = 2 and ba.pubDate  <![CDATA[ <= ]]> #{max}
 	</select>
 	
-	<select id="selectByTag" resultMap="ArticleMap">
-		<include refid="fullQuery"></include>
-		inner join (select articleId from blog_article_tag where tagId = #{tagId}) as bat2 on bat2.articleId = ba.id
-	</select>
-
-	<select id="selectByCategory" resultMap="ArticleMap">
-		<include refid="fullQuery"></include>
-		inner join (select articleId from blog_article_category where categoryId = #{categoryId}) as bac2 on bac2.articleId = ba.id
-	</select>
-	
 	<insert id="insert" useGeneratedKeys="true" keyProperty="id"
 		keyColumn="id">
 		insert into
@@ -77,12 +67,12 @@
 	</insert>
 	
 	<select id="selectById" resultMap="ArticleMap">
-		<include refid="fullQuery"></include>
+		<include refid="fullQuery"/>
 		where ba.id = #{id}
 	</select>
 	
 	<select id="selectByIds" resultMap="ArticleMap">
-		<include refid="fullQuery"></include>
+		<include refid="fullQuery"/>
 		where ba.id in 
 		<foreach collection="list" open="(" close=")" separator="," item="id">
 			#{id}
@@ -90,7 +80,7 @@
 	</select>
 	
 	<select id="selectByAlias" resultMap="ArticleMap">
-		<include refid="fullQuery"></include>
+		<include refid="fullQuery"/>
 		where ba.alias = #{alias}
 	</select>
 	

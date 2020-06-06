@@ -31,6 +31,7 @@ public class BlogErrorController implements ErrorController {
 		this.errorAttributes = errorAttributes;
 	}
 
+	@Deprecated
 	@Override
 	public String getErrorPath() {
 		return "/error";

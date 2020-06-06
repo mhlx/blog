@@ -10,12 +10,6 @@ public class StreamUtils {
 		super();
 	}
 
-	/**
-	 * 将InputStream的内容转化为文本 <b>不会关闭流</b>
-	 * 
-	 * @param is
-	 * @return
-	 */
 	public static String toString(InputStream is) throws IOException {
 		return new String(is.readAllBytes(), StandardCharsets.UTF_8);
 	}

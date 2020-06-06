@@ -335,7 +335,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 		if (!StringUtils.isNullOrBlank(queryParam.getTag())) {
 			tagId = tagMapper.selectByName(queryParam.getTag()).map(Tag::getId).orElse(null);
 			if (tagId == null) {
-				return new PageResult<Article>(queryParam, 0, List.of());
+				return new PageResult<>(queryParam, 0, List.of());
 			}
 		}
 
@@ -370,7 +370,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			Map<Integer, Article> sortHelper = articles.stream().collect(Collectors.toMap(Article::getId, a -> a));
 			articles = idPage.getDatas().stream().map(sortHelper::get).filter(Objects::nonNull)
 					.collect(Collectors.toList());
-			articlePage = new PageResult<Article>(param, idPage.getTotalRow(), articles);
+			articlePage = new PageResult<>(param, idPage.getTotalRow(), articles);
 		}
 		processArticles(articlePage.getDatas(), BlogContext.isAuthenticated());
 		for (Article article : articlePage.getDatas()) {
@@ -421,9 +421,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			article.setContent(null);
 		}
 
-		Map<LocalDate, List<Article>> map = articles.stream().collect(Collectors.groupingBy(article -> {
-			return article.getPubDate().toLocalDate();
-		}));
+		Map<LocalDate, List<Article>> map = articles.stream().collect(Collectors.groupingBy(article -> article.getPubDate().toLocalDate()));
 
 		List<ArticleArchive> archives = days.stream().map(d -> new ArticleArchive(d, map.get(d)))
 				.collect(Collectors.toList());
@@ -488,12 +486,10 @@ public class ArticleService implements CommentModuleHandler<Article> {
 				markdownMap.put(-article.getId(), article.getContent());
 			}
 		}
-		if (markdownMap != null) {
-			Map<Integer, String> htmlMap = markdown2Html.toHtmls(markdownMap);
-			for (Article article : articles) {
-				article.setSummary(htmlMap.get(article.getId()));
-				article.setContent(htmlMap.get(-article.getId()));
-			}
+		Map<Integer, String> htmlMap = markdown2Html.toHtmls(markdownMap);
+		for (Article article : articles) {
+			article.setSummary(htmlMap.get(article.getId()));
+			article.setContent(htmlMap.get(-article.getId()));
 		}
 	}
 
@@ -521,9 +517,7 @@ public class ArticleService implements CommentModuleHandler<Article> {
 				continue;
 			}
 			Optional<String> opFirstImage = JsoupUtils.getFirstImage(article.getContent());
-			if (opFirstImage.isPresent()) {
-				article.setFeatureImage(opFirstImage.get());
-			}
+			opFirstImage.ifPresent(article::setFeatureImage);
 		}
 	}
 
@@ -547,37 +541,36 @@ public class ArticleService implements CommentModuleHandler<Article> {
 			}
 			if (start.isAfter(LocalDateTime.now())) {
 				return;
-			} else {
-				LocalDateTime startCopy = LocalDateTime.of(start.toLocalDate(), start.toLocalTime());
-				writeTemplate.executeWithoutResult(status -> {
-					List<Article> schedules = articleMapper.selectScheduled(start);
-					if (schedules.isEmpty()) {
-						return;
-					}
-					for (Article article : schedules) {
-						article.setStatus(ArticleStatus.PUBLISHED);
-						articleMapper.update(article);
-					}
-					makeArticlesIndexable(schedules);
-					start = articleMapper.selectMinimumScheduleDate().orElse(null);
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-
-						@Override
-						public void afterCompletion(int status) {
-							if (status == TransactionSynchronization.STATUS_COMMITTED) {
-								try {
-									articleIndexer.addDocument(schedules.stream().toArray(Article[]::new));
-								} catch (IOException e) {
-									throw new RuntimeException(e.getMessage(), e);
-								}
-							} else {
-								start = startCopy;
-							}
-						}
-
-					});
-				});
 			}
+			LocalDateTime startCopy = LocalDateTime.of(start.toLocalDate(), start.toLocalTime());
+			writeTemplate.executeWithoutResult(status -> {
+				List<Article> schedules = articleMapper.selectScheduled(start);
+				if (schedules.isEmpty()) {
+					return;
+				}
+				for (Article article : schedules) {
+					article.setStatus(ArticleStatus.PUBLISHED);
+					articleMapper.update(article);
+				}
+				makeArticlesIndexable(schedules);
+				start = articleMapper.selectMinimumScheduleDate().orElse(null);
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+
+					@Override
+					public void afterCompletion(int status) {
+						if (status == TransactionSynchronization.STATUS_COMMITTED) {
+							try {
+								articleIndexer.addDocument(schedules.toArray(new Article[0]));
+							} catch (IOException e) {
+								throw new RuntimeException(e.getMessage(), e);
+							}
+						} else {
+							start = startCopy;
+						}
+					}
+
+				});
+			});
 		}
 
 		public void update() {

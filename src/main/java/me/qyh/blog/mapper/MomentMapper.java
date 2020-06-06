@@ -17,47 +17,18 @@ public interface MomentMapper {
 
 	Optional<Moment> selectById(int id);
 
-	/**
-	 * 查询符合条件的动态
-	 * 
-	 * @param param
-	 * @return
-	 */
 	List<Moment> selectPage(MomentQueryParam param);
 
-	/**
-	 * 查询符合条件的动态数目
-	 * 
-	 * @param param
-	 * @return
-	 */
 	int selectCount(MomentQueryParam param);
 
-	/**
-	 * 根据ID删除
-	 * 
-	 * @param id
-	 */
 	void deleteById(int id);
 
 	void insert(Moment moment);
 
 	void update(Moment moment);
 
-	/**
-	 * 分页查询动态归档日期
-	 * 
-	 * @param param
-	 * @return
-	 */
 	List<LocalDate> selectDays(MomentArchiveQueryParam param);
 
-	/**
-	 * 查询动态归档日期数
-	 * 
-	 * @param param
-	 * @return
-	 */
 	int selectDaysCount(MomentArchiveQueryParam param);
 
 	void increaseHits(@Param("id") int id, @Param("hits") int i);

@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 public class WebUtils {
 
-	public static final String AJAX_HEADER = "x-requested-with=XMLHttpRequest";
 	private static final AntPathMatcher apm = new AntPathMatcher();
 
 	private static final String[] SPIDERS = new String[] { "Googlebot", "Baiduspider", "360Spider", "Bingbot", "msnbot",
@@ -26,7 +25,7 @@ public class WebUtils {
 		if (StringUtils.isNullOrBlank(userAgent)) {
 			return false;
 		}
-		return Arrays.stream(SPIDERS).filter(userAgent::contains).findAny().isPresent();
+		return Arrays.stream(SPIDERS).anyMatch(userAgent::contains);
 	}
 
 	public static boolean isAjaxRequest(HttpServletRequest request) {
@@ -42,10 +41,7 @@ public class WebUtils {
 			return true;
 		}
 		String forward = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
-		if (forward != null && forward.startsWith("/api/")) {
-			return true;
-		}
-		return false;
+		return forward != null && forward.startsWith("/api/");
 	}
 
 	public static boolean isAbsoluteWebUrl(String url) {

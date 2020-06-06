@@ -21,9 +21,7 @@ public class SecurityChecker {
 		if (password != null) {
 			String id = p.getResId();
 			Map<String, String> pwdMap = BlogContext.getPasswordMap();
-			if (!Objects.equals(password, pwdMap.get(id))) {
-				return true;
-			}
+			return !Objects.equals(password, pwdMap.get(id));
 		}
 		return false;
 	}

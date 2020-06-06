@@ -73,7 +73,6 @@ public final class BlogContextFilter implements Filter {
 				BlogContext.setPasswordMap(map);
 			} catch (Exception e) {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return;
 			}
 		} else {
 			HttpSession session = request.getSession(false);

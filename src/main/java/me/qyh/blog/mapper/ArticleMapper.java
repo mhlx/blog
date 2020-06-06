@@ -36,10 +36,6 @@ public interface ArticleMapper {
 
 	void update(Article article);
 
-	List<Article> selectByTag(int tagId);
-
-	List<Article> selectByCategory(int categoryId);
-
 	List<Article> selectPublished();
 
 	void deleteById(int id);

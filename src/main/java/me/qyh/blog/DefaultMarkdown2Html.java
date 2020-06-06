@@ -58,10 +58,9 @@ class DefaultMarkdown2Html implements Markdown2Html {
 		private final Parser parser;
 		private final HtmlRenderer renderer;
 
-		private final List<Extension> baseExtensions = List.of(AutolinkExtension.create(), TablesExtension.create(),
-				StrikethroughExtension.create(), HeadingAnchorExtension.create());
-
 		private CommonMarkdown2Html() {
+			List<Extension> baseExtensions = List.of(AutolinkExtension.create(), TablesExtension.create(),
+					StrikethroughExtension.create(), HeadingAnchorExtension.create());
 			parser = Parser.builder().extensions(baseExtensions).build();
 			renderer = HtmlRenderer.builder().extensions(baseExtensions).build();
 		}
@@ -129,7 +128,7 @@ class DefaultMarkdown2Html implements Markdown2Html {
 				JsonNode node = mapper.readTree(json);
 				if (node.get("success").asBoolean()) {
 					JsonNode dataNode = node.get("data");
-					return mapper.convertValue(dataNode, new TypeReference<Map<Integer, String>>() {
+					return mapper.convertValue(dataNode, new TypeReference<>() {
 					});
 				}
 				throw new RuntimeException("fail to convert markdown to html:" + node);

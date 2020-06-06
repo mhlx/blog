@@ -22,7 +22,7 @@ public class Article implements Serializable, PrivateProtect, PasswordProtect {
 	public enum ArticleStatus {
 		PUBLISHED, // 发布的
 		DRAFT, // 草稿
-		SCHEDULED;// 计划发表中
+		SCHEDULED// 计划发表中
 	}
 
 	private Integer id;

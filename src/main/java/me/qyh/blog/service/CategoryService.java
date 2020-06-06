@@ -43,11 +43,6 @@ public class CategoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<Category> getCategory(int id) {
-		return categoryMapper.selectById(id);
-	}
-
-	@Transactional(readOnly = true)
 	public Optional<Category> getCategory(String name) {
 		return categoryMapper.selectByName(name);
 	}

@@ -74,10 +74,7 @@ public class BlogConfigService {
 				|| StringUtils.isNullOrBlank(this.config.getPassword())) {
 			return false;
 		}
-		if (!this.config.getLoginName().equals(name) || !BCrypt.checkpw(password, this.config.getPassword())) {
-			return false;
-		}
-		return true;
+		return this.config.getLoginName().equals(name) && BCrypt.checkpw(password, this.config.getPassword());
 	}
 
 	public User getUser() {

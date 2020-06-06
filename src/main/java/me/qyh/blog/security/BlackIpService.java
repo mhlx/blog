@@ -78,13 +78,13 @@ public class BlackIpService {
 	public Map<String, Boolean> isBlackIps(Set<String> ips) {
 		long stamp = lock.tryOptimisticRead();
 		try {
-			retryHoldingLock: for (;; stamp = lock.readLock()) {
+			for (; ; stamp = lock.readLock()) {
 				if (stamp == 0L)
-					continue retryHoldingLock;
+					continue;
 				Map<String, Boolean> result = ips.stream()
-						.collect(Collectors.toMap(ip -> ip, ip -> this.ips.contains(ip)));
+						.collect(Collectors.toMap(ip -> ip, this.ips::contains));
 				if (!lock.validate(stamp))
-					continue retryHoldingLock;
+					continue;
 				return result;
 			}
 		} finally {
@@ -99,12 +99,12 @@ public class BlackIpService {
 			return false;
 		long stamp = lock.tryOptimisticRead();
 		try {
-			retryHoldingLock: for (;; stamp = lock.readLock()) {
+			for (; ; stamp = lock.readLock()) {
 				if (stamp == 0L)
-					continue retryHoldingLock;
+					continue;
 				boolean contains = ips.contains(ip);
 				if (!lock.validate(stamp))
-					continue retryHoldingLock;
+					continue;
 				return contains;
 			}
 		} finally {
@@ -115,7 +115,7 @@ public class BlackIpService {
 	}
 
 	private void init() {
-		blackIpMapper.selectAll().forEach(ips::add);
+		ips.addAll(blackIpMapper.selectAll());
 	}
 
 }

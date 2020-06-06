@@ -4,10 +4,6 @@ import java.util.Map;
 
 public class FileInfoDetail extends FileInfo {
 
-	public FileInfoDetail() {
-		super();
-	}
-
 	public FileInfoDetail(FileInfo fi) {
 		super(fi);
 	}

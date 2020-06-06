@@ -18,6 +18,7 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.stereotype.Component;
@@ -58,11 +59,11 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 	static {
 		try {
 			clientAbortExceptionClass = Class.forName("org.apache.catalina.connector.ClientAbortException");
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException ignored) {
 		}
 	}
 
-	public BlogHandlerExceptionResolver(ObjectMapper mapper, MultipartProperties multipartProperties) {
+	public BlogHandlerExceptionResolver(MultipartProperties multipartProperties) {
 		resolvers.add(new ResourceNotFoundExceptionResolver());
 		resolvers.add(new LogicExceptionResolver());
 		resolvers.add(new PasswordProtectExceptionResolver());
@@ -107,7 +108,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 			error.append("method:").append(request.getMethod()).append("\n");
 			Enumeration<String> headerNames = request.getHeaderNames();
 			while (headerNames.hasMoreElements()) {
-				String key = (String) headerNames.nextElement();
+				String key = headerNames.nextElement();
 				String value = request.getHeader(key);
 				error.append("header[").append(key).append("]:").append(value).append("\n");
 			}
@@ -117,8 +118,8 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		return null;
 	}
 
-	public void resolveTemplateException(HttpServletRequest request, HttpServletResponse response, Map<String, ?> model,
-			Exception ex) {
+	public void resolveTemplateException(HttpServletRequest request, HttpServletResponse response,
+										 Exception ex) {
 		if (!resolve(request, response, ex)) {
 			// we can not handle this exception
 			// wrap it with TemplateProcessException and resolve it again
@@ -166,7 +167,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		return false;
 	}
 
-	private class PasswordProtectExceptionResolver implements ExceptionResolver {
+	private static class PasswordProtectExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -215,7 +216,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 	}
 
-	private class MultipartExceptionResolver implements ExceptionResolver {
+	private static class MultipartExceptionResolver implements ExceptionResolver {
 
 		private final MultipartProperties multipartProperties;
 
@@ -248,12 +249,12 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 
 		@Override
-		public int getStatus(HttpServletRequest reques, Exception ex) {
+		public int getStatus(HttpServletRequest request, Exception ex) {
 			return HttpServletResponse.SC_BAD_REQUEST;
 		}
 	}
 
-	private class AuthencationExceptionResolver implements ExceptionResolver {
+	private static class AuthencationExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -266,12 +267,12 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 
 		@Override
-		public int getStatus(HttpServletRequest reques, Exception ex) {
+		public int getStatus(HttpServletRequest request, Exception ex) {
 			return HttpServletResponse.SC_UNAUTHORIZED;
 		}
 	}
 
-	private class HttpStatusExceptionResolver implements ExceptionResolver {
+	private static class HttpStatusExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -288,7 +289,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 
 		@Override
-		public int getStatus(HttpServletRequest reques, Exception ex) {
+		public int getStatus(HttpServletRequest request, Exception ex) {
 			return ((HttpStatusException) ex).getStatus().value();
 		}
 
@@ -326,7 +327,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 	}
 
-	private class LogicExceptionResolver implements ExceptionResolver {
+	private static class LogicExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -344,7 +345,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 	}
 
-	private class HttpRequestMethodNotSupportedExceptionResolver implements ExceptionResolver {
+	private static class HttpRequestMethodNotSupportedExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -363,7 +364,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 
 	}
 
-	private class ResourceNotFoundExceptionResolver implements ExceptionResolver {
+	private static class ResourceNotFoundExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -381,7 +382,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 	}
 
-	private class HttpMediaTypeNotSupportedExceptionResolver implements ExceptionResolver {
+	private static class HttpMediaTypeNotSupportedExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -400,7 +401,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 
 	}
 
-	private class BadRequestExceptionResolver implements ExceptionResolver {
+	private static class BadRequestExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -419,7 +420,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 		}
 	}
 
-	private class LoginFailExceptionResolver implements ExceptionResolver {
+	private static class LoginFailExceptionResolver implements ExceptionResolver {
 
 		@Override
 		public boolean match(Exception ex) {
@@ -440,7 +441,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
+	public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
 		return (Map<String, Object>) webRequest.getAttribute(ERROR_ATTRIBUTES, RequestAttributes.SCOPE_REQUEST);
 	}
 
@@ -454,7 +455,7 @@ public class BlogHandlerExceptionResolver implements HandlerExceptionResolver, E
 
 		Map<String, Object> readErrors(HttpServletRequest request, Exception ex);
 
-		int getStatus(HttpServletRequest reques, Exception exception);
+		int getStatus(HttpServletRequest request, Exception exception);
 	}
 
 	private String getStackTrace(Throwable e) throws IOException {

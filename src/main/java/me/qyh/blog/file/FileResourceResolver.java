@@ -21,6 +21,9 @@ class FileResourceResolver implements ResourceResolver {
 	@Override
 	public Resource resolveResource(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
+		if(request == null) {
+			return null;
+		}
 		String accept = request.getHeader("Accept");
 		boolean supportWEBP = accept != null && accept.contains(WEBP_ACCEPT);
 		return fileService.getProcessedFile(requestPath, supportWEBP).map(ReadablePathResource::new).orElse(null);

@@ -23,7 +23,7 @@ public class BlogConfig implements Serializable {
 	public enum CommentCheckStrategy {
 		FIRST_COMMENT, // ip第一次评论，需要审核
 		ALWALYS, //
-		NEVER;
+		NEVER
 	}
 
 	@NotBlank(message = "用户登录名不能为空")

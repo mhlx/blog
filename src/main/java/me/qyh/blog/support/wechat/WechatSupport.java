@@ -122,7 +122,7 @@ public class WechatSupport {
 		}
 	}
 
-	public final class Signature {
+	public static final class Signature {
 		private final String noncestr;
 		private final String appid;
 		private final long timestamp;
@@ -159,7 +159,7 @@ public class WechatSupport {
 		}
 	}
 
-	private final class Token {
+	private static final class Token {
 		private final long time;
 		private final String token;
 
@@ -179,7 +179,7 @@ public class WechatSupport {
 
 	}
 
-	private final class Ticket {
+	private static final class Ticket {
 		private final long time;
 		private final String ticket;
 

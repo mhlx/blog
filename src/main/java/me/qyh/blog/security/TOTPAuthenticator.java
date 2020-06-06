@@ -143,21 +143,18 @@ public class TOTPAuthenticator {
 	}
 
 	private static final class Base32String {
-		// 32 alpha-numeric characters.
-		private String ALPHABET;
-		private char[] DIGITS;
-		private int MASK;
-		private int SHIFT;
-		private HashMap<Character, Integer> CHAR_MAP;
+		private final int MASK;
+		private final int SHIFT;
+		private final HashMap<Character, Integer> CHAR_MAP;
 
 		static final String SEPARATOR = "-";
 
 		public Base32String(String alphabet) {
-			this.ALPHABET = alphabet;
-			DIGITS = ALPHABET.toCharArray();
+			// 32 alpha-numeric characters.
+			char[] DIGITS = alphabet.toCharArray();
 			MASK = DIGITS.length - 1;
 			SHIFT = Integer.numberOfTrailingZeros(DIGITS.length);
-			CHAR_MAP = new HashMap<Character, Integer>();
+			CHAR_MAP = new HashMap<>();
 			for (int i = 0; i < DIGITS.length; i++) {
 				CHAR_MAP.put(DIGITS[i], i);
 			}

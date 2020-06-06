@@ -20,11 +20,6 @@ public class ImageInfo {
 		return height;
 	}
 
-	/**
-	 * 获取图片类型 JPEG|PNG|GIF|WEBP
-	 * 
-	 * @return
-	 */
 	public String getType() {
 		return type;
 	}

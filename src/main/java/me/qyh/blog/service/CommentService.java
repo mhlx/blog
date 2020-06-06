@@ -305,7 +305,7 @@ public class CommentService {
 	 * 
 	 * @param num        条数
 	 * @param queryAdmin 是否查询管理员
-	 * @return
+	 * @return 最近评论
 	 */
 	@Transactional(readOnly = true)
 	public List<Comment> getLastComments(int num, boolean queryAdmin) {

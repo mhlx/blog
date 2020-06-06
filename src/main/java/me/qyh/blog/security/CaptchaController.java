@@ -33,10 +33,10 @@ import me.qyh.blog.exception.ResourceNotFoundException;
 public class CaptchaController implements CaptchaValidator {
 
 	private static final int MAX_SIZE = 1000;
-	private final Map<String, String> captchaMap = Collections.synchronizedMap(new LinkedHashMap<String, String>() {
+	private final Map<String, String> captchaMap = Collections.synchronizedMap(new LinkedHashMap<>() {
 
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 1L;
 

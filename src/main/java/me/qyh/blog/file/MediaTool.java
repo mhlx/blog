@@ -43,8 +43,8 @@ class MediaTool {
 	/**
 	 * 判断是否是JPEG后缀
 	 * 
-	 * @param ext
-	 * @return
+	 * @param ext 文件后缀
+	 * @return 是否是jpeg图片
 	 */
 	public static boolean isJPEG(String ext) {
 		return JPEG.equalsIgnoreCase(ext) || JPG.equalsIgnoreCase(ext);
@@ -53,8 +53,8 @@ class MediaTool {
 	/**
 	 * 判断是否是PNG后缀
 	 * 
-	 * @param ext
-	 * @return
+	 * @param ext 文件后缀
+	 * @return 是否是png图片
 	 */
 	public static boolean isPNG(String ext) {
 		return PNG.equalsIgnoreCase(ext);
@@ -63,8 +63,8 @@ class MediaTool {
 	/**
 	 * 判断是否是GIF后缀
 	 * 
-	 * @param ext
-	 * @return
+	 * @param ext 文件后缀
+	 * @return 是否是gif图片
 	 */
 	public static boolean isGIF(String ext) {
 		return GIF.equalsIgnoreCase(ext);
@@ -73,8 +73,8 @@ class MediaTool {
 	/**
 	 * 判断是否是webp后缀
 	 * 
-	 * @param ext
-	 * @return
+	 * @param ext 文件后缀
+	 * @return 是否是webp文件
 	 */
 	public static boolean isWEBP(String ext) {
 		return WEBP.equalsIgnoreCase(ext);
@@ -83,8 +83,8 @@ class MediaTool {
 	/**
 	 * 判断是否是可被处理的图片文件
 	 * 
-	 * @param ext
-	 * @return
+	 * @param ext 文件后缀
+	 * @return 是否是可处理的图片
 	 */
 	public static boolean isProcessableImage(String ext) {
 		return isJPEG(ext) || isGIF(ext) || isPNG(ext) || isWEBP(ext);
@@ -93,8 +93,8 @@ class MediaTool {
 	/**
 	 * 判断是否是可被处理的视频文件
 	 * 
-	 * @param ext
-	 * @return
+	 * @param ext 文件后缀
+	 * @return 是否是可处理的视频文件
 	 */
 	public static boolean isProcessableVideo(String ext) {
 		return MP4.equalsIgnoreCase(ext) || MOV.equalsIgnoreCase(ext);
@@ -105,8 +105,8 @@ class MediaTool {
 	 * <p>
 	 * <b>仅支持：缩放以及读取图片|视频信息</b>
 	 * </p>
-	 * 
-	 * @return
+	 * @param ext 文件后置
+	 * @return 是否支持处理
 	 */
 	public boolean canHandle(String ext) {
 		if (MP4.equalsIgnoreCase(ext) || MOV.equalsIgnoreCase(ext))
@@ -124,25 +124,25 @@ class MediaTool {
 	 * <b>图片尺寸始终保持缩小或不变</b>
 	 * </p>
 	 * 
-	 * @param resize
-	 * @param src
-	 * @param output
-	 * @throws IOException
+	 * @param resize 缩放信息
+	 * @param src 图片地址
+	 * @param output 缩放图片存放地址
+	 * @throws IOException 缩放失败
 	 */
-	public void resizeImage(Resize resize, Path src, Path output, boolean toWEBP) throws IOException {
+	public void resizeImage(Resize resize, Path src, Path output) throws IOException {
 		ImageInfo info = readImage(src);
 		if (isGIF(info.getType()))
-			resizeWithGifsicle(resize, src, output, toWEBP);
+			resizeWithGifsicle(resize, src, output);
 		else
-			resizeWithGraphicsMagick(resize, src, output, toWEBP);
+			resizeWithGraphicsMagick(resize, src, output);
 	}
 
 	/**
 	 * 读取图片信息
 	 * 
-	 * @param src
+	 * @param src 图片地址
 	 * @return 图片长宽和类型
-	 * @throws IOException
+	 * @throws IOException 读取图片信息失败或者不是一个图片文件
 	 */
 	public ImageInfo readImage(Path src) throws IOException {
 		try {
@@ -177,9 +177,9 @@ class MediaTool {
 	 * <b>目标为PNG格式图片</b>
 	 * </p>
 	 * 
-	 * @param src
-	 * @param output
-	 * @throws IOException
+	 * @param src 视频地址
+	 * @param output 封面图片存放地址
+	 * @throws IOException 获取封面视频失败
 	 */
 	public void getVideoPoster(Path src, Path output) throws IOException {
 		Path temp = Files.createTempFile(null, ".png");
@@ -195,11 +195,11 @@ class MediaTool {
 	}
 
 	/**
-	 * 读取视频信息尺寸已经时长信息
+	 * 读取视频信息尺寸以及时长信息
 	 * 
-	 * @param src
-	 * @return
-	 * @throws IOException
+	 * @param src 目标视频
+	 * @return 视频信息
+	 * @throws IOException 读取视频信息失败或者不是一个视频文件
 	 */
 	public VideoInfo readVideo(Path src) throws IOException {
 		List<String> commands = Arrays.asList(getFfmpegPath("ffprobe"), "-v", "error", "-select_streams", "v:0",
@@ -225,10 +225,11 @@ class MediaTool {
 	/**
 	 * 将视频转化为指定尺寸的mp4
 	 * 
-	 * @param size
-	 * @param src
-	 * @param output
-	 * @throws IOException
+	 * @param height 视频高度
+	 * @param seconds 视频时长(从0开始)
+	 * @param src 原视频文件
+	 * @param output 目标视频文件
+	 * @throws IOException 转化失败
 	 */
 	public void toMP4(int height, int seconds, Path src, Path output) throws IOException {
 		try {
@@ -237,7 +238,7 @@ class MediaTool {
 			String message = e.getMessage().split(System.lineSeparator())[0];
 			if (message.contains("divisible by 2")) {
 				// get width
-				Integer width = Integer
+				int width = Integer
 						.parseInt(message.substring(message.lastIndexOf('(') + 1, message.lastIndexOf('x')));
 				this.toMp4(width + 1, height, seconds, src, output);
 			}
@@ -283,26 +284,9 @@ class MediaTool {
 		return new ImageInfo(Integer.parseInt(sizes[0]), Integer.parseInt(sizes[1]), "GIF");
 	}
 
-	private void resizeWithGifsicle(Resize resize, Path src, Path output, boolean toWEBP) throws IOException {
+	private void resizeWithGifsicle(Resize resize, Path src, Path output) throws IOException {
 		List<String> commands = new ArrayList<>(
 				List.of(getGifsiclePath(), "--no-warnings", "--conserve-memory", "-careful"));
-
-		// if it is webp format
-		// we do not support animated webp
-		// so we try to get first frame of gif and use gm convert it to webp
-		if (toWEBP) {
-			commands.add(src.toString());
-			commands.add("#0");
-			commands.add("-o");
-			Path temp = Files.createTempFile(null, ".png");
-			commands.add(temp.toString());
-			try {
-				execCommands(commands);
-				resizeWithGraphicsMagick(resize, temp, output, true);
-			} finally {
-				FileUtils.deleteQuietly(temp);
-			}
-		}
 
 		if (resize.getSize() != null) {
 			int size = resize.getSize();
@@ -342,7 +326,7 @@ class MediaTool {
 
 	// native support webp
 	// no need to covert
-	private void resizeWithGraphicsMagick(Resize resize, Path src, Path output, boolean toWEBP) throws IOException {
+	private void resizeWithGraphicsMagick(Resize resize, Path src, Path output) throws IOException {
 		List<String> commands = new ArrayList<>();
 		commands.add(getGraphicsMagickPath());
 		commands.add("convert");

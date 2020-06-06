@@ -12,8 +12,7 @@ public class TokenUtil {
 	}
 
 	public static String create() {
-		Token newToken = new Token();
-		token = newToken;
+		token = new Token();
 		return token.token;
 	}
 
@@ -30,7 +29,7 @@ public class TokenUtil {
 	}
 
 	private static final class Token {
-		private String token;
+		private final String token;
 		private long mill;
 
 		public Token() {

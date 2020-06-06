@@ -42,7 +42,6 @@ public class BlogContext {
 	/**
 	 * 获取当前请求的IP
 	 * 
-	 * @return
 	 */
 	public static Optional<String> getIP() {
 		return Optional.ofNullable(IP_LOCAL.get());
