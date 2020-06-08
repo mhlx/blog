@@ -4,8 +4,8 @@
 			<div class="d-flex">
 				<div class="d-flex order-lg-2 ml-auto"></div>
 				<a href="#" class="header-toggler d-lg-none ml-3 ml-lg-0"
-					data-toggle="collapse" data-target="#headerMenuCollapse"> <span
-					class="header-toggler-icon"></span>
+				   data-toggle="collapse" data-target="#headerMenuCollapse"> <span
+						class="header-toggler-icon"></span>
 				</a>
 			</div>
 		</div>
@@ -13,18 +13,26 @@
 	<div class="header collapse d-lg-flex p-0" id="headerMenuCollapse">
 		<div class="container">
 			<div class="row align-items-center">
+				<div class="col-lg-3 ml-auto">
+					<form class="input-icon my-3 my-lg-0" th:action="@{/}">
+						<input type="search" name="query" th:value="${(page == null || page.param == null) ? '' : page.param.query}" class="form-control header-search" placeholder="搜索" tabindex="1">
+						<div class="input-icon-addon">
+							<i class="fe fe-search"></i>
+						</div>
+					</form>
+				</div>
 				<div class="col-lg order-lg-first">
 					<ul class="nav nav-tabs border-0 flex-column flex-lg-row">
-						<li class="nav-item"
-							th:classappend="${active == 'index'} ? 'active' : null"><a
-							th:href="@{/}" class="nav-link "><i class="fe fe-home"></i>
-								主页</a></li>
-						<li class="nav-item"
-							th:classappend="${active == 'moment'} ? 'active' : null"><a
-							th:href="@{/moments}" class="nav-link "><i
+						<li class="nav-item"><a
+								th:href="@{/}" class="nav-link "
+								th:classappend="${active == 'index'} ? 'active' : null"><i class="fe fe-home"></i>
+							主页</a></li>
+						<li class="nav-item"><a
+								th:href="@{/moments}" class="nav-link "
+								th:classappend="${active == 'moment'} ? 'active' : null"><i
 								class="fe fe-book-open"></i> 动态</a></li>
 						<li class="nav-item"><a th:href="@{/console/index.html}"
-							class="nav-link"><i class="fas fa-terminal mr-2"></i> 控制台</a></li>
+												class="nav-link"><i class="fas fa-terminal mr-2"></i> 控制台</a></li>
 					</ul>
 				</div>
 			</div>

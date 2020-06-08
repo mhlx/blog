@@ -53,7 +53,7 @@ class DefaultMarkdown2Html implements Markdown2Html {
 		return delegate.toHtml(markdown);
 	}
 
-	class CommonMarkdown2Html implements Markdown2Html {
+	static class CommonMarkdown2Html implements Markdown2Html {
 
 		private final Parser parser;
 		private final HtmlRenderer renderer;
