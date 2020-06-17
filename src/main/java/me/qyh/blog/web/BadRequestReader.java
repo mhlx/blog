@@ -63,11 +63,9 @@ class BadRequestReader {
 				if (fieldNames != null && !fieldNames.isEmpty()) {
 
 					if (cause instanceof InvalidFormatException) {
-						errors.add(new FieldMessageSourceResolvable(fieldNames,
-								new Message("bind.field.invalidFormat", fieldNames + "数据格式不正确", fieldNames)));
+						errors.add(new FieldMessageSourceResolvable("bind.field.invalidFormat", fieldNames + "数据格式不正确",fieldNames, fieldNames));
 					} else {
-						errors.add(new FieldMessageSourceResolvable(fieldNames,
-								new Message("bind.field.typemismatch", fieldNames + "类型不正确", fieldNames)));
+						errors.add(new FieldMessageSourceResolvable("bind.field.typemismatch", fieldNames + "类型不正确", fieldNames,fieldNames));
 					}
 				}
 			}
@@ -100,19 +98,17 @@ class BadRequestReader {
 			if (e.contains(TypeMismatchException.class)) {
 				if (e instanceof FieldError) {
 					FieldError fe = (FieldError) e;
-					messages.add(new FieldMessageSourceResolvable(fe.getField(),
-							new Message("bind.field.typemismatch", fe.getField() + "类型不正确", fe.getField())));
+					messages.add(new FieldMessageSourceResolvable("bind.field.typemismatch", fe.getField() + "类型不正确", fe.getField(),fe.getField()));
 				}
 			} else if (e.contains(MethodInvocationException.class)) {// method Invocation Exception ??
 				if (e instanceof FieldError) {
 					FieldError fe = (FieldError) e;
-					messages.add(new FieldMessageSourceResolvable(fe.getField(),
-							new Message("bind.field.invalidValue", "值无效", fe.getField())));
+					messages.add(new FieldMessageSourceResolvable("bind.field.invalidValue", "值无效", fe.getField(),fe.getField()));
 				}
 			} else {
 				if (e instanceof FieldError) {
 					FieldError fe = (FieldError) e;
-					messages.add(new FieldMessageSourceResolvable(fe.getField(), e));
+					messages.add(new FieldMessageSourceResolvable(fe.getCode(),fe.getDefaultMessage(),fe.getField(),fe.getArguments()));
 				} else {
 					messages.add(e);
 				}

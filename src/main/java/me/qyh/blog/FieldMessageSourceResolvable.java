@@ -1,40 +1,14 @@
 package me.qyh.blog;
 
-import org.springframework.context.MessageSourceResolvable;
-
-public class FieldMessageSourceResolvable implements MessageSourceResolvable {
+public class FieldMessageSourceResolvable extends Message {
 
 	private final String field;
-	private final MessageSourceResolvable message;
-
-	public FieldMessageSourceResolvable(String field, MessageSourceResolvable message) {
-		super();
+	public FieldMessageSourceResolvable(String code, String defaultMessage, String field, Object... args) {
+		super(code, defaultMessage, args);
 		this.field = field;
-		this.message = message;
 	}
 
-	public String getField() {
-		return field;
+	public String getField(){
+		return this.field;
 	}
-
-	@Override
-	public String[] getCodes() {
-		return this.message.getCodes();
-	}
-
-	@Override
-	public Object[] getArguments() {
-		return this.message.getArguments();
-	}
-
-	@Override
-	public String getDefaultMessage() {
-		return this.message.getDefaultMessage();
-	}
-
-	@Override
-	public String toString() {
-		return "FieldMessageSourceResolvable [field=" + field + ", message=" + message + "]";
-	}
-
 }

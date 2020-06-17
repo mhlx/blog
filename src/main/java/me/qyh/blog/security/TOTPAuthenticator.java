@@ -21,7 +21,7 @@ import me.qyh.blog.BlogProperties;
  */
 @Component
 @ConditionalOnProperty(prefix = "blog.core", name = "totp-enable", havingValue = "true")
-public class TOTPAuthenticator {
+public class TOTPAuthenticator implements  TwoFactorAuthenticator{
 
 	private static final String HMAC_HASH_FUNCTION = "HmacSHA1";
 	private static final long MILL = TimeUnit.SECONDS.toMillis(30);
@@ -45,6 +45,7 @@ public class TOTPAuthenticator {
 	 * @param codeStr 验证码
 	 * @return true 校验通过
 	 */
+	@Override
 	public boolean check(String codeStr) {
 		if (codeStr == null || codeStr.length() != 6) {
 			return false;

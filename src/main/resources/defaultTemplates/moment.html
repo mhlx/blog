@@ -4,157 +4,157 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
-	content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="ie=edge">
-<meta http-equiv="Content-Language" content="en" />
-<meta name="msapplication-TileColor" content="#2d89ef">
-<meta name="theme-color" content="#4188c9">
-<meta name="apple-mobile-web-app-status-bar-style"
-	content="black-translucent" />
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="HandheldFriendly" content="True">
-<meta name="MobileOptimized" content="320">
+	<meta charset="UTF-8">
+	<meta name="viewport"
+		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta http-equiv="Content-Language" content="en" />
+	<meta name="msapplication-TileColor" content="#2d89ef">
+	<meta name="theme-color" content="#4188c9">
+	<meta name="apple-mobile-web-app-status-bar-style"
+		  content="black-translucent" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
 
 
-<title>动态</title>
-<link rel="stylesheet" th:href="@{/static/fontawesome/css/all.min.css}" />
-<link th:href="@{/static/tabler/dist/assets/css/dashboard.css}"
-	rel="stylesheet" />
-<link rel="stylesheet" th:href="@{/static/heather/css/markdown.css}" />
-<style>
-.noborder .card-body {
-	border: none
-}
+	<title>动态</title>
+	<link rel="stylesheet" th:href="@{/static/fontawesome/css/all.min.css}" />
+	<link th:href="@{/static/tabler/dist/assets/css/dashboard.css}"
+		  rel="stylesheet" />
+	<link rel="stylesheet" th:href="@{/static/heather/css/markdown.css}" />
+	<style>
+		.noborder .card-body {
+			border: none
+		}
 
-.noborder, .noborder .card {
-	border: none;
-	background-color: transparent;
-	box-shadow: none;
-	background-color: transparent;
-}
+		.noborder, .noborder .card {
+			border: none;
+			background-color: transparent;
+			box-shadow: none;
+			background-color: transparent;
+		}
 
-.noborder .card-header {
-	border: none
-}
+		.noborder .card-header {
+			border: none
+		}
 
-.noborder .card-body video {
-	max-width: 200px;
-}
+		.noborder .card-body video {
+			max-width: 200px;
+		}
 
-.noborder .card-body video {
-	height: auto;
-	max-width: 100% !important;
-	max-height: 400px !important;
-}
+		.noborder .card-body video {
+			height: auto;
+			max-width: 100% !important;
+			max-height: 400px !important;
+		}
 
-.noborder .card-body img {
-	max-width: 100%;
-	max-height: 400px;
-}
-</style>
+		.noborder .card-body img {
+			max-width: 100%;
+			max-height: 400px;
+		}
+	</style>
 </head>
 <body style="overflow-y: auto">
-	<div class="page">
-		<div class="flex-fill">
-			<div th:replace="nav('moment')"></div>
-			<div class="my-3 my-md-5">
-				<div class="container">
-					<div class="markdown-body my-4" th:utext="${moment.content}"></div>
-                  
-					<div class="row row-cards row-deck"
-						th:if="${prev != null or next != null}">
-						<div class="col-lg-6 col-sm-6 my-2" th:if="${prev != null}" style="cursor:pointer" th:onclick="'window.location.href='+'\''+@{${#urls.getUrl(prev)}+'\''}">
-							<div class="row align-items-center">
-                              <div class="col">
-                                <div>
-                                  <span th:href="@{${#urls.getUrl(prev)}}" class="text-inherit">上一条</span>
-                                </div>
-                                <small class="d-block item-except text-sm text-muted h-1x alert alert-warning" th:if="${prev.hasPassword}">
-                               		内容受保护
-                                </small>
-                                <small class="d-block item-except text-sm text-muted h-1x" th:if="${prev.content != null}">
-                                  	<img style="max-width:64px;max-height:64px;border-radius:3px" th:src="${prev.firstImage}" th:if="${prev.firstImage != null}"/>
-                               		[[${#jsoups.parser(#jsoups.body(prev.content)).text}]]
-                                </small>
-                              </div>
-                            </div>
-						</div>
+<div class="page">
+	<div class="flex-fill">
+		<div th:replace="nav('moment')"></div>
+		<div class="my-3 my-md-5">
+			<div class="container">
+				<div class="markdown-body my-4" id="moment-content" th:utext="${moment.content}"></div>
 
-						<div class="col-lg-6 col-sm-6 my-2" th:if="${next != null}" style="cursor:pointer" th:onclick="'window.location.href='+'\''+@{${#urls.getUrl(next)}+'\''}">
-							<div class="row align-items-center">
-                              <div class="col">
-                                <div>
-                                  <span class="text-inherit">下一条</span>
-                                </div>
-                                <small class="d-block item-except text-sm text-muted h-1x alert alert-warning" th:if="${next.hasPassword}">
-                               		内容受保护
-                                </small>
-                                <small class="d-block item-except text-sm text-muted h-1x" th:if="${next.content != null}">
-                                  	<img style="max-width:64px;max-height:64px;border-radius:3px" th:src="${next.firstImage}" th:if="${next.firstImage != null}"/>
-                               		[[${#jsoups.parser(#jsoups.body(next.content)).text}]]
-                                </small>
-                              </div>
-                            </div>
+				<div class="row row-cards row-deck"
+					 th:if="${prev != null or next != null}">
+					<div class="col-lg-6 col-sm-6 my-2" th:if="${prev != null}" style="cursor:pointer" th:onclick="'window.location.href='+'\''+@{${#urls.getUrl(prev)}+'\''}">
+						<div class="row align-items-center">
+							<div class="col">
+								<div>
+									<span th:href="@{${#urls.getUrl(prev)}}" class="text-inherit">上一条</span>
+								</div>
+								<small class="d-block item-except text-sm text-muted h-1x alert alert-warning" th:if="${prev.hasPassword && !#auth.isAuthenticated()}">
+									内容受保护
+								</small>
+								<small class="d-block item-except text-sm text-muted h-1x" th:if="${prev.content != null}" th:with="text=${#jsoups.parser(#jsoups.body(prev.content)).text}">
+									<img style="max-width:64px;max-height:64px;border-radius:3px" th:src="${prev.firstImage}" th:if="${prev.firstImage != null}"/>
+									<i class="fas fa-lock" th:if="${next.hasPassword && #auth.isAuthenticated()}" style="margin-right:10px"></i>[[${text.length() > 50 ? text.substring(0,50)+'...' : text}]]
+								</small>
+							</div>
 						</div>
 					</div>
-					<div id="comment-container" class="noborder"></div>
-				</div>
 
+					<div class="col-lg-6 col-sm-6 my-2" th:if="${next != null}" style="cursor:pointer" th:onclick="'window.location.href='+'\''+@{${#urls.getUrl(next)}+'\''}">
+						<div class="row align-items-center">
+							<div class="col">
+								<div>
+									<span class="text-inherit">下一条</span>
+								</div>
+								<small class="d-block item-except text-sm text-muted h-1x alert alert-warning" th:if="${next.hasPassword && !#auth.isAuthenticated()}">
+									内容受保护
+								</small>
+								<small class="d-block item-except text-sm text-muted h-1x" th:if="${next.content != null}" th:with="text=${#jsoups.parser(#jsoups.body(next.content)).text}">
+									<img style="max-width:64px;max-height:64px;border-radius:3px" th:src="${next.firstImage}" th:if="${next.firstImage != null}"/>
+									<i class="fas fa-lock" th:if="${next.hasPassword && #auth.isAuthenticated()}" style="margin-right:10px"></i>[[${text.length() > 50 ? text.substring(0,50)+'...' : text}]]
+								</small>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="comment-container" class="noborder"></div>
+			</div>
+
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<div class="row align-items-center flex-row-reverse">
+				<div class="col-auto ml-lg-auto"></div>
+				<div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+					Copyright © [[${#times.format(#times.now(),'yyyy')}]]</div>
 			</div>
 		</div>
-
-		<footer class="footer">
-			<div class="container">
-				<div class="row align-items-center flex-row-reverse">
-					<div class="col-auto ml-lg-auto"></div>
-					<div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
-						Copyright © [[${#times.format(#times.now(),'yyyy')}]]</div>
-				</div>
-			</div>
-		</footer>
-	</div>
-	<script
+	</footer>
+</div>
+<script
 		th:src="@{/static/tabler/dist/assets/js/vendors/jquery-3.2.1.min.js}"></script>
-	<script
+<script
 		th:src="@{/static/tabler/dist/assets/js/vendors/bootstrap.bundle.min.js}"></script>
-	<script
+<script
 		th:src="@{/static/tabler/dist/assets/js/vendors/sweetalert2.all.min.js}"></script>
-	<script>
-		var rootPath = '[[@{/}]]';
-	</script>
-	<script th:src="@{/static/js/comment.js}"></script>
-	<script th:src="@{/static/heather/js/heather_lazy.js}"></script>
-	<script>
-		$.ajax({
-			type : "get",
-			url : rootPath + 'isAuthenticated',
-			success : function(data) {
-				new Comment('moment', '[[${moment.id}]]', {
-					container : 'comment-container',
-					authenticated : data
-				})
-			}
-		});
+<script>
+	var rootPath = '[[@{/}]]';
+</script>
+<script th:src="@{/static/js/comment.js}"></script>
+<script th:src="@{/static/heather/js/heather_lazy.js}"></script>
+<script>
+	$.ajax({
+		type : "get",
+		url : rootPath + 'isAuthenticated',
+		success : function(data) {
+			new Comment('moment', '[[${moment.id}]]', {
+				container : 'comment-container',
+				authenticated : data
+			})
+		}
+	});
 
-		if (sessionStorage.getItem('moment.' + '[[${moment.id}]]') == null) {
-			$
-					.ajax({
-						type : "patch",
-						url : rootPath + 'api/moments/' + '[[${moment.id}]]'
-								+ '/hit',
-						complete : function(data) {
-							sessionStorage.setItem('moment.'
-									+ '[[${moment.id}]]', '1');
-						}
-					});
-		}
-		for(const elem of document.querySelectorAll('[data-momentid]')){
-			elem.addEventListener('click',function(){
-				window.location.href = rootPath + 'moments/'+this.dataset.momentid;
-			});
-		}
-	</script>
+	if (sessionStorage.getItem('moment.' + '[[${moment.id}]]') == null) {
+		$
+				.ajax({
+					type : "patch",
+					url : rootPath + 'api/moments/' + '[[${moment.id}]]'
+							+ '/hit',
+					complete : function(data) {
+						sessionStorage.setItem('moment.'
+								+ '[[${moment.id}]]', '1');
+					}
+				});
+	}
+	for(const elem of document.querySelectorAll('[data-momentid]')){
+		elem.addEventListener('click',function(){
+			window.location.href = rootPath + 'moments/'+this.dataset.momentid;
+		});
+	}
+</script>
 </body>
