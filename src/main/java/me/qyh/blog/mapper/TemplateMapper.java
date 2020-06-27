@@ -1,33 +1,32 @@
 package me.qyh.blog.mapper;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.ibatis.annotations.Mapper;
-
 import me.qyh.blog.entity.Template;
 import me.qyh.blog.vo.TemplateQueryParam;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface TemplateMapper {
 
-	Optional<Template> selectEnabledByName(String name);
+    Optional<Template> selectEnabledByName(String name);
 
-	Optional<Template> selectEnabledByPattern(String pattern);
-	
+    Optional<Template> selectEnabledByPattern(String pattern);
 
-	void insert(Template template);
 
-	void deleteById(int id);
+    void insert(Template template);
 
-	void update(Template template);
+    void deleteById(int id);
 
-	Optional<Template> selectById(int id);
+    void update(Template template);
 
-	List<Template> selectPage(TemplateQueryParam param);
+    Optional<Template> selectById(int id);
 
-	int selectCount(TemplateQueryParam param);
+    List<Template> selectPage(TemplateQueryParam param);
 
-	List<Template> selectEnabled();
+    int selectCount(TemplateQueryParam param);
+
+    List<Template> selectEnabled();
 
 }

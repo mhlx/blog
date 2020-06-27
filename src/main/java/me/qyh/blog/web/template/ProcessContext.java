@@ -1,37 +1,36 @@
 package me.qyh.blog.web.template;
 
-import java.util.Optional;
-
 import org.springframework.transaction.TransactionStatus;
+
+import java.util.Optional;
 
 /**
  * for template process only !!!
- * 
- * @author wwwqyhme
  *
+ * @author wwwqyhme
  */
 public class ProcessContext {
 
-	private static final ThreadLocal<TransactionStatus> transactionStatusLocal = new ThreadLocal<>();
-	private static final ThreadLocal<TemplateDataRequest> dataRequestStatusLocal = new ThreadLocal<>();
+    private static final ThreadLocal<TransactionStatus> transactionStatusLocal = new ThreadLocal<>();
+    private static final ThreadLocal<TemplateDataRequest> dataRequestStatusLocal = new ThreadLocal<>();
 
-	public static void setTransactionStatus(TransactionStatus status) {
-		transactionStatusLocal.set(status);
-	}
+    public static void setTransactionStatus(TransactionStatus status) {
+        transactionStatusLocal.set(status);
+    }
 
-	public static Optional<TransactionStatus> getTransactionStatus() {
-		return Optional.ofNullable(transactionStatusLocal.get());
-	}
+    public static Optional<TransactionStatus> getTransactionStatus() {
+        return Optional.ofNullable(transactionStatusLocal.get());
+    }
 
-	public static void remove() {
-		transactionStatusLocal.remove();
-	}
+    public static void remove() {
+        transactionStatusLocal.remove();
+    }
 
-	public static TemplateDataRequest getTemplateDataRequest() {
-		return dataRequestStatusLocal.get();
-	}
+    public static TemplateDataRequest getTemplateDataRequest() {
+        return dataRequestStatusLocal.get();
+    }
 
-	public static void setTemplateDataRequest(TemplateDataRequest request) {
-		dataRequestStatusLocal.set(request);
-	}
+    public static void setTemplateDataRequest(TemplateDataRequest request) {
+        dataRequestStatusLocal.set(request);
+    }
 }

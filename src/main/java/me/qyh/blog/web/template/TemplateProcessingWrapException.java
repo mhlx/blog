@@ -4,7 +4,7 @@ import org.thymeleaf.exceptions.TemplateProcessingException;
 
 /**
  * blog custom tag handler base exception
- * 
+ *
  * <p>
  * thymeleaf will wrap custom exception as TemplateInputException<br>
  * so it's hard to determine which exception need to handle<br>
@@ -13,22 +13,21 @@ import org.thymeleaf.exceptions.TemplateProcessingException;
  * and use {@link TemplateProcessingWrapException#getCause()} to get our custom
  * exception
  * </p>
- * 
- * @author wwwqyhme
  *
+ * @author wwwqyhme
  */
 public class TemplateProcessingWrapException extends TemplateProcessingException {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	public TemplateProcessingWrapException(Throwable cause) {
-		super(null, cause);
-	}
+    public TemplateProcessingWrapException(Throwable cause) {
+        super(null, cause);
+    }
 
-	public static TemplateProcessingWrapException wrap(Exception th) {
-		return new TemplateProcessingWrapException(th);
-	}
+    public static TemplateProcessingWrapException wrap(Exception th) {
+        return new TemplateProcessingWrapException(th);
+    }
 }

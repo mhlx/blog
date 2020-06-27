@@ -1,8 +1,5 @@
 package me.qyh.blog.web.template;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ReflectionUtils;
@@ -16,61 +13,64 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class TemplateRequestMappingHandler extends RequestMappingHandlerAdapter {
 
-	private static final Method getDataBinderFactoryMethod;
-	private static final Method getModelFactoryMethod;
-	private HandlerMethodArgumentResolverComposite argumentResolvers;
-	private ParameterNameDiscoverer parameterNameDiscoverer;
+    private static final Method getDataBinderFactoryMethod;
+    private static final Method getModelFactoryMethod;
+    private HandlerMethodArgumentResolverComposite argumentResolvers;
+    private ParameterNameDiscoverer parameterNameDiscoverer;
 
-	static {
-		getDataBinderFactoryMethod = ReflectionUtils.findMethod(RequestMappingHandlerAdapter.class,
-				"getDataBinderFactory", HandlerMethod.class);
-		getModelFactoryMethod = ReflectionUtils.findMethod(RequestMappingHandlerAdapter.class, "getModelFactory",
-				HandlerMethod.class, WebDataBinderFactory.class);
-		ReflectionUtils.makeAccessible(getDataBinderFactoryMethod);
-		ReflectionUtils.makeAccessible(getModelFactoryMethod);
-	}
+    static {
+        getDataBinderFactoryMethod = ReflectionUtils.findMethod(RequestMappingHandlerAdapter.class,
+                "getDataBinderFactory", HandlerMethod.class);
+        getModelFactoryMethod = ReflectionUtils.findMethod(RequestMappingHandlerAdapter.class, "getModelFactory",
+                HandlerMethod.class, WebDataBinderFactory.class);
+        ReflectionUtils.makeAccessible(getDataBinderFactoryMethod);
+        ReflectionUtils.makeAccessible(getModelFactoryMethod);
+    }
 
-	public Object invoke(TemplateDataRequest req) throws Exception {
-		HandlerMethod method = TemplateRequestMappingHandlerMapping.getTemplateDataProvider(req);
-		if (method == null) {
-			return null;
-		}
-		ServletWebRequest swr = new ServletWebRequest(req);
-		WebDataBinderFactory dataBinderFactory = (WebDataBinderFactory) getDataBinderFactoryMethod.invoke(this, method);
-		ModelFactory modelFactory = (ModelFactory) getModelFactoryMethod.invoke(this, method, dataBinderFactory);
-		InvocableHandlerMethod invocableMethod = new InvocableHandlerMethod(method);
-		if (this.argumentResolvers != null) {
-			invocableMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
-		}
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(req));
-		modelFactory.initModel(swr, mavContainer, invocableMethod);
-		invocableMethod.setDataBinderFactory(dataBinderFactory);
-		invocableMethod.setParameterNameDiscoverer(parameterNameDiscoverer);
-		Object result = invocableMethod.invokeForRequest(swr, mavContainer);
-		if (result == null) {
-			return null;
-		}
+    public Object invoke(TemplateDataRequest req) throws Exception {
+        HandlerMethod method = TemplateRequestMappingHandlerMapping.getTemplateDataProvider(req);
+        if (method == null) {
+            return null;
+        }
+        ServletWebRequest swr = new ServletWebRequest(req);
+        WebDataBinderFactory dataBinderFactory = (WebDataBinderFactory) getDataBinderFactoryMethod.invoke(this, method);
+        ModelFactory modelFactory = (ModelFactory) getModelFactoryMethod.invoke(this, method, dataBinderFactory);
+        InvocableHandlerMethod invocableMethod = new InvocableHandlerMethod(method);
+        if (this.argumentResolvers != null) {
+            invocableMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
+        }
+        ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+        mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(req));
+        modelFactory.initModel(swr, mavContainer, invocableMethod);
+        invocableMethod.setDataBinderFactory(dataBinderFactory);
+        invocableMethod.setParameterNameDiscoverer(parameterNameDiscoverer);
+        Object result = invocableMethod.invokeForRequest(swr, mavContainer);
+        if (result == null) {
+            return null;
+        }
 
-		if (result instanceof ResponseEntity) {
-			ResponseEntity<?> entity = (ResponseEntity<?>) result;
-			return entity.getBody();
-		}
+        if (result instanceof ResponseEntity) {
+            ResponseEntity<?> entity = (ResponseEntity<?>) result;
+            return entity.getBody();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		Field field = ReflectionUtils.findField(RequestMappingHandlerAdapter.class, "argumentResolvers");
-		ReflectionUtils.makeAccessible(field);
-		argumentResolvers = (HandlerMethodArgumentResolverComposite) ReflectionUtils.getField(field, this);
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        Field field = ReflectionUtils.findField(RequestMappingHandlerAdapter.class, "argumentResolvers");
+        ReflectionUtils.makeAccessible(field);
+        argumentResolvers = (HandlerMethodArgumentResolverComposite) ReflectionUtils.getField(field, this);
 
-		Field field2 = ReflectionUtils.findField(RequestMappingHandlerAdapter.class, "parameterNameDiscoverer");
-		ReflectionUtils.makeAccessible(field2);
-		parameterNameDiscoverer = (ParameterNameDiscoverer) ReflectionUtils.getField(field2, this);
-	}
+        Field field2 = ReflectionUtils.findField(RequestMappingHandlerAdapter.class, "parameterNameDiscoverer");
+        ReflectionUtils.makeAccessible(field2);
+        parameterNameDiscoverer = (ParameterNameDiscoverer) ReflectionUtils.getField(field2, this);
+    }
 }

@@ -2,15 +2,15 @@ package me.qyh.blog.security;
 
 public interface PasswordProtect {
 
-	String getResId();
+    String getResId();
 
-	String getPassword();
+    String getPassword();
 
-	default boolean isHasPassword() {
-		return getPassword() != null;
-	}
+    default boolean isHasPassword() {
+        return getPassword() != null;
+    }
 
-	default void clearProtected() {
+    default void clear() {
 
-	}
+    }
 }

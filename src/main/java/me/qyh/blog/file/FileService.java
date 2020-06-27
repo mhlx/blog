@@ -1,42 +1,5 @@
 package me.qyh.blog.file;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileTime;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.LongAdder;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.springframework.context.annotation.Conditional;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import me.qyh.blog.BlogContext;
 import me.qyh.blog.exception.LogicException;
 import me.qyh.blog.exception.ResourceNotFoundException;
@@ -46,6 +9,29 @@ import me.qyh.blog.security.PrivateProtect;
 import me.qyh.blog.security.SecurityChecker;
 import me.qyh.blog.utils.FileUtils;
 import me.qyh.blog.utils.StringUtils;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 本地文件服务，提供以下功能
@@ -545,58 +531,32 @@ public class FileService {
 
     protected Path doCopy(Path source, Path dest) {
         List<Path> rollBacks = Collections.synchronizedList(createDirectories(dest));
-        if (Files.isRegularFile(source)) {
-            Path copied = dest.resolve(source.getFileName());
-            boolean exists = Files.exists(copied);
-            try {
-                Files.copy(source, copied);
-                return copied;
-            } catch (Exception e) {
-
-                if (!exists) {
-                    FileUtils.deleteQuietly(copied);
-                }
-
-                delete(rollBacks);
-
-                if (e instanceof FileAlreadyExistsException) {
-                    String relative = getRelativePath(this.root, copied);
-                    throw new LogicException("fileService.copy.file.exists", "文件:" + relative + "已经存在", relative);
-                }
-
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
-
-        if (Files.isDirectory(source)) {
-            Path root = dest.resolve(source.getFileName());
-            try {
-                Files.walk(source).filter(Files::isRegularFile).parallel().forEach(path -> {
-                    Path target = root.resolve(source.relativize(path));
-                    boolean exists = Files.exists(target);
-                    try {
-                        rollBacks.addAll(createDirectories(target.getParent()));
-                        Files.copy(path, target);
-                        rollBacks.add(target);
-                    } catch (Exception e) {
-                        if (!exists) {
-                            FileUtils.deleteQuietly(target);
-                        }
-                        delete(rollBacks);
-                        if (e instanceof FileAlreadyExistsException) {
-                            String relative = getRelativePath(this.root, dest);
-                            throw new LogicException("fileService.copy.file.exists", "文件:" + relative + "已经存在",
-                                    relative);
-                        }
-                        throw new RuntimeException(e.getMessage(), e);
+        Path root = dest.resolve(source.getFileName());
+        try {
+            Files.walk(source).filter(Files::isRegularFile).parallel().forEach(path -> {
+                Path target = root.resolve(source.relativize(path));
+                boolean exists = Files.exists(target);
+                try {
+                    rollBacks.addAll(createDirectories(target.getParent()));
+                    Files.copy(path, target);
+                    rollBacks.add(target);
+                } catch (Exception e) {
+                    if (!exists) {
+                        FileUtils.deleteQuietly(target);
                     }
-                });
-                return root;
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
+                    delete(rollBacks);
+                    if (e instanceof FileAlreadyExistsException) {
+                        String relative = getRelativePath(this.root, dest);
+                        throw new LogicException("fileService.copy.file.exists", "文件:" + relative + "已经存在",
+                                relative);
+                    }
+                    throw new RuntimeException(e.getMessage(), e);
+                }
+            });
+            return root;
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
-        throw new RuntimeException("can not copy file : " + source);
     }
 
     protected boolean isEditable(String ext) {

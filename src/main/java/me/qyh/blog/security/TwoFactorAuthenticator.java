@@ -4,5 +4,6 @@ public interface TwoFactorAuthenticator {
 
     boolean check(String code);
 
-    default void afterUsernamePasswordAuthenticated() {}
+    default void afterUsernamePasswordAuthenticated() {
+    }
 }

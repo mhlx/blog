@@ -1,12 +1,11 @@
 package me.qyh.blog;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import me.qyh.blog.security.HtmlClean;
+import me.qyh.blog.service.TemplateService;
+import me.qyh.blog.web.template.expression.BlogExpressionObjectFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,33 +15,16 @@ import org.springframework.context.annotation.Configuration;
 import org.thymeleaf.dialect.IExpressionObjectDialect;
 import org.thymeleaf.expression.IExpressionObjectFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import me.qyh.blog.security.HtmlClean;
-import me.qyh.blog.web.template.expression.BlogExpressionObjectFactory;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Configuration
 public class Config {
 
     @Bean
-    @SuppressWarnings("unchecked")
-    public ObjectMapper objectMapper(final MessageSource messageSource) {
+    public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(Include.NON_NULL);
-        SimpleModule module = new SimpleModule();
-        module.setSerializerModifier(new BeanSerializerModifier() {
-            @Override
-            public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc, JsonSerializer<?> serializer) {
-                if (Message.class.isAssignableFrom(beanDesc.getBeanClass())) {
-                    return new MessageSerializer((JsonSerializer<Object>) serializer, messageSource);
-                }
-                return super.modifySerializer(config, beanDesc, serializer);
-            }
-        });
-        mapper.registerModule(module);
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
         javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
@@ -53,8 +35,8 @@ public class Config {
 
     @Bean
     @ConditionalOnMissingBean(Markdown2Html.class)
-    public Markdown2Html markdown2Html(BlogProperties blogProperties, MessageSource messageSource) {
-        return new DefaultMarkdown2Html(blogProperties, objectMapper(messageSource));
+    public Markdown2Html markdown2Html(BlogProperties blogProperties) {
+        return new DefaultMarkdown2Html(blogProperties, objectMapper());
     }
 
     @Bean
@@ -64,7 +46,8 @@ public class Config {
     }
 
     @Bean
-    public IExpressionObjectDialect blogExpressionObjectDialect(final MessageSource messageSource,
+    public IExpressionObjectDialect blogExpressionObjectDialect(final TemplateService templateService,
+                                                                final MessageSource messageSource,
                                                                 final Markdown2Html markdown2Html) {
         return new IExpressionObjectDialect() {
 
@@ -75,7 +58,7 @@ public class Config {
 
             @Override
             public IExpressionObjectFactory getExpressionObjectFactory() {
-                return new BlogExpressionObjectFactory(messageSource, markdown2Html);
+                return new BlogExpressionObjectFactory(templateService, messageSource, markdown2Html);
             }
         };
     }

@@ -4,7 +4,7 @@ import me.qyh.blog.BlogContext;
 
 class Auth {
 
-	public boolean isAuthenticated() {
-		return BlogContext.isAuthenticated();
-	}
+    public boolean isAuthenticated() {
+        return BlogContext.isAuthenticated();
+    }
 }

@@ -5,18 +5,17 @@ import java.io.InputStream;
 
 /**
  * 用于资源的读取
- * 
- * @author wwwqyhme
  *
+ * @author wwwqyhme
  */
 public interface ReadablePath {
-	InputStream getInputStream() throws IOException;
+    InputStream getInputStream() throws IOException;
 
-	String fileName();
+    String fileName();
 
-	long size();
+    long size();
 
-	long lastModified();
+    long lastModified();
 
-	String getExtension();
+    String getExtension();
 }
